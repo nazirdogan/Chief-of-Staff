@@ -4,7 +4,7 @@ import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { generateConnectToken, getTelegramConnectUrl } from '@/lib/integrations/telegram';
 
-export const POST = withRateLimit(10, '1 m', withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const token = generateConnectToken(req.user.id);
     const url = getTelegramConnectUrl(token);

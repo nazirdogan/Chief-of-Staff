@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import { getCommitment, updateCommitment } from '@/lib/db/queries/commitments';
@@ -8,7 +9,7 @@ import type { CommitmentStatus } from '@/lib/db/types';
 const VALID_ACTIONS = ['resolve', 'snooze', 'dismiss', 'confirm', 'reject'] as const;
 type CommitmentAction = (typeof VALID_ACTIONS)[number];
 
-export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
+export const PATCH = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
   const url = new URL(req.url);
   const segments = url.pathname.split('/');
@@ -95,4 +96,4 @@ export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

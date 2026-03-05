@@ -32,8 +32,7 @@ export async function sendTelegramMessage(
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    console.error('[Telegram] Failed to send message:', error);
+    console.error('[Telegram] Failed to send message: HTTP', response.status);
     return false;
   }
 

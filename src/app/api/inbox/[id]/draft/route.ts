@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import { getInboxItem } from '@/lib/db/queries/inbox';
@@ -8,7 +9,7 @@ import { AI_MODELS } from '@/lib/ai/models';
 import { REPLY_DRAFT_PROMPT } from '@/lib/ai/prompts/reply-draft';
 import { sanitiseContent } from '@/lib/ai/safety/sanitise';
 
-export const POST = withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
   const url = new URL(req.url);
   const segments = url.pathname.split('/');
@@ -141,4 +142,4 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

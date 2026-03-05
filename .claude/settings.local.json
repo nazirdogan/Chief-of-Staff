@@ -11,7 +11,9 @@
       "Bash(npx vitest:*)",
       "Bash(npx tsc:*)",
       "Bash(openssl rand:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ]
   }
 }

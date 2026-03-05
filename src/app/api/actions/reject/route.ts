@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 
-export const POST = withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
     const { pending_action_id, reason } = body as {
@@ -60,4 +61,4 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

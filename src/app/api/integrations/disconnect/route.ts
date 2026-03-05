@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { deleteConnection } from '@/lib/integrations/nango';
 import { createServiceClient } from '@/lib/db/client';
@@ -23,7 +24,7 @@ const DB_TO_NANGO_PROVIDER: Record<string, string> = {
   notion: 'notion',
 };
 
-export const DELETE = withAuth(async (req: AuthenticatedRequest) => {
+export const DELETE = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
     const { provider } = body as { provider: IntegrationProvider };
@@ -52,4 +53,4 @@ export const DELETE = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

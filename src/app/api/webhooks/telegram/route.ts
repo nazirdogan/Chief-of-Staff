@@ -40,7 +40,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       });
     }
   } catch (err) {
-    console.error('[Telegram Webhook] Error handling command:', err);
+    console.error('[Telegram Webhook] Error handling command:', err instanceof Error ? err.message : 'Unknown error');
     await sendTelegramMessage(
       chatId,
       'Something went wrong. Please try again.',

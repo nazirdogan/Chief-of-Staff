@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { getConnectUrl } from '@/lib/integrations/nango';
 import type { IntegrationProvider } from '@/lib/db/types';
@@ -28,7 +29,7 @@ const NANGO_TO_DB_PROVIDER: Record<string, IntegrationProvider> = {
   notion: 'notion',
 };
 
-export const POST = withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
     const { provider } = body as { provider: string };
@@ -50,4 +51,4 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

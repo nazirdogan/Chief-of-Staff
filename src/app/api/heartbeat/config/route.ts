@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import type { HeartbeatConfig } from '@/lib/db/types';
 
-export const GET = withAuth(async (req: AuthenticatedRequest) => {
+export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
   const supabase = createServiceClient();
 
@@ -45,7 +46,7 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));
 
 const ALLOWED_FIELDS = [
   'scan_frequency',
@@ -58,7 +59,7 @@ const ALLOWED_FIELDS = [
   'alert_channel',
 ] as const;
 
-export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
+export const PATCH = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedRequest) => {
   try {
   const body = await req.json();
 
@@ -117,4 +118,4 @@ export const PATCH = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

@@ -11,7 +11,7 @@ const feedbackSchema = z.object({
   feedback: z.union([z.literal(1), z.literal(-1)]),
 });
 
-export const POST = withRateLimit(60, '1 m', withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(60, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
 

@@ -5,7 +5,7 @@ import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import { listContacts } from '@/lib/db/queries/contacts';
 
-export const GET = withRateLimit(30, '1 m', withAuth(async (req: AuthenticatedRequest) => {
+export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const supabase = createServiceClient();
     const url = new URL(req.url);

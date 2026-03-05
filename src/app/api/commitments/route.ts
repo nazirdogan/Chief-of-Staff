@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import { listCommitments, insertCommitment } from '@/lib/db/queries/commitments';
 import { validateCommitmentRecord } from '@/lib/ai/safety/citation-validator';
 import type { CommitmentConfidence, CommitmentStatus } from '@/lib/db/types';
 
-export const GET = withAuth(async (req: AuthenticatedRequest) => {
+export const GET = withAuth(withRateLimit(60, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const supabase = createServiceClient();
     const url = new URL(req.url);
@@ -25,9 +26,9 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));
 
-export const POST = withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
     const {
@@ -74,4 +75,4 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));

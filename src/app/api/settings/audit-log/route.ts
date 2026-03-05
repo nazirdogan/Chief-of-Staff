@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import type { IntegrationAuditLog, IntegrationProvider } from '@/lib/db/types';
 
-export const GET = withAuth(async (req: AuthenticatedRequest) => {
+export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
   const url = new URL(req.url);
   const provider = url.searchParams.get('provider') as IntegrationProvider | null;
@@ -42,4 +43,4 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
   } catch (error) {
     return handleApiError(error);
   }
-});
+}));
