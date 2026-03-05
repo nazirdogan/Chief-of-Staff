@@ -1,0 +1,521 @@
+// Database types matching every table in DATABASE.md
+// These will eventually be replaced by auto-generated types from `supabase gen types`
+
+// ── Enums ──────────────────────────────────────────────────
+
+export type IntegrationProvider =
+  | 'gmail'
+  | 'google_calendar'
+  | 'google_drive'
+  | 'outlook'
+  | 'microsoft_calendar'
+  | 'onedrive'
+  | 'slack'
+  | 'notion'
+  | 'telegram'
+  | 'whatsapp'
+  | 'todoist'
+  | 'linear'
+  | 'hubspot'
+  | 'salesforce';
+
+export type IntegrationStatus = 'connected' | 'disconnected' | 'error' | 'pending';
+
+export type BriefingItemType =
+  | 'email'
+  | 'calendar_event'
+  | 'commitment'
+  | 'relationship_alert'
+  | 'document'
+  | 'task'
+  | 'slack_message';
+
+export type BriefingItemSection =
+  | 'priority_inbox'
+  | 'commitment_queue'
+  | 'at_risk'
+  | 'todays_schedule'
+  | 'decision_queue'
+  | 'quick_wins'
+  | 'people_context';
+
+export type CommitmentStatus = 'open' | 'resolved' | 'snoozed' | 'dismissed' | 'delegated';
+
+export type CommitmentConfidence = 'high' | 'medium' | 'low';
+
+export type PendingActionType =
+  | 'send_email'
+  | 'send_message'
+  | 'create_task'
+  | 'reschedule_meeting'
+  | 'create_calendar_event'
+  | 'update_notion_page';
+
+export type PendingActionStatus =
+  | 'awaiting_confirmation'
+  | 'confirmed'
+  | 'rejected'
+  | 'executed'
+  | 'failed';
+
+export type MessageDeliveryChannel = 'telegram' | 'whatsapp' | 'in_app' | 'sms';
+
+export type HeartbeatFrequency = 'realtime' | 'hourly' | 'daily';
+
+export type DataRegion = 'me-south-1' | 'eu-central-1' | 'us-east-1';
+
+export type SubscriptionTier = 'free' | 'pro' | 'power' | 'team';
+
+// ── Row types ──────────────────────────────────────────────
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  subscription_tier: SubscriptionTier;
+  subscription_ends_at: string | null;
+  timezone: string;
+  data_region: DataRegion;
+  briefing_time: string;
+  primary_channel: MessageDeliveryChannel;
+  telegram_chat_id: string | null;
+  whatsapp_number: string | null;
+  onboarding_completed: boolean;
+  privacy_mode: boolean;
+  two_factor_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OnboardingData {
+  id: string;
+  user_id: string;
+  vip_contacts: string[];
+  active_projects: string[];
+  weekly_priority: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface UserIntegration {
+  id: string;
+  user_id: string;
+  provider: IntegrationProvider;
+  status: IntegrationStatus;
+  nango_connection_id: string;
+  account_email: string | null;
+  account_name: string | null;
+  granted_scopes: string[];
+  last_synced_at: string | null;
+  error_message: string | null;
+  connected_at: string;
+  updated_at: string;
+}
+
+export interface IntegrationAuditLog {
+  id: string;
+  user_id: string;
+  provider: IntegrationProvider;
+  action: string;
+  status_code: number | null;
+  request_size: number | null;
+  response_size: number | null;
+  duration_ms: number | null;
+  ip_address: string | null;
+  created_at: string;
+}
+
+export interface Briefing {
+  id: string;
+  user_id: string;
+  briefing_date: string;
+  generated_at: string;
+  delivered_at: string | null;
+  delivery_channel: MessageDeliveryChannel | null;
+  item_count: number;
+  generation_model: string | null;
+  generation_ms: number | null;
+  meeting_preps: MeetingPrepData[];
+}
+
+export interface MeetingPrepData {
+  event_id: string;
+  event_title: string;
+  summary: string;
+  attendee_context: Array<{
+    name: string;
+    relationship_note: string;
+    source_ref: SourceRef;
+  }>;
+  open_items: Array<{
+    description: string;
+    source_ref: SourceRef;
+  }>;
+  suggested_talking_points: string[];
+  watch_out_for: string | null;
+}
+
+export interface SourceRef {
+  provider: string;
+  message_id: string;
+  url?: string;
+  excerpt: string;
+  sent_at?: string;
+  from_name?: string;
+  thread_id?: string;
+}
+
+export interface BriefingItem {
+  id: string;
+  briefing_id: string;
+  user_id: string;
+  rank: number;
+  section: BriefingItemSection;
+  item_type: BriefingItemType;
+  title: string;
+  summary: string;
+  reasoning: string;
+  source_ref: SourceRef;
+  action_suggestion: string | null;
+  urgency_score: number | null;
+  importance_score: number | null;
+  risk_score: number | null;
+  composite_score: number | null;
+  user_feedback: -1 | 1 | null;
+  feedback_at: string | null;
+  snoozed_until: string | null;
+  actioned_at: string | null;
+  created_at: string;
+}
+
+export interface Commitment {
+  id: string;
+  user_id: string;
+  recipient_email: string;
+  recipient_name: string | null;
+  commitment_text: string;
+  source_quote: string;
+  source_ref: SourceRef;
+  confidence: CommitmentConfidence;
+  confidence_score: number;
+  implied_deadline: string | null;
+  explicit_deadline: boolean;
+  status: CommitmentStatus;
+  resolved_at: string | null;
+  resolved_via_ref: Record<string, unknown> | null;
+  snoozed_until: string | null;
+  delegated_to: string | null;
+  user_confirmed: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Contact {
+  id: string;
+  user_id: string;
+  email: string;
+  name: string | null;
+  organisation: string | null;
+  is_vip: boolean;
+  relationship_score: number | null;
+  first_interaction_at: string | null;
+  last_interaction_at: string | null;
+  last_interaction_channel: string | null;
+  interaction_count_30d: number;
+  avg_response_time_hours: number | null;
+  open_commitments_count: number;
+  context_notes: string | null;
+  context_notes_updated_at: string | null;
+  user_notes: string | null;
+  is_cold: boolean;
+  cold_flagged_at: string | null;
+}
+
+export interface ContactInteraction {
+  id: string;
+  user_id: string;
+  contact_id: string;
+  direction: 'inbound' | 'outbound';
+  channel: string;
+  message_ref: Record<string, unknown>;
+  subject: string | null;
+  interacted_at: string;
+  created_at: string;
+}
+
+export interface PendingAction {
+  id: string;
+  user_id: string;
+  action_type: PendingActionType;
+  status: PendingActionStatus;
+  payload: Record<string, unknown>;
+  source_context: Record<string, unknown> | null;
+  briefing_item_id: string | null;
+  confirmed_at: string | null;
+  rejected_at: string | null;
+  executed_at: string | null;
+  execution_result: Record<string, unknown> | null;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface HeartbeatConfig {
+  id: string;
+  user_id: string;
+  scan_frequency: HeartbeatFrequency;
+  vip_alerts_enabled: boolean;
+  commitment_check_enabled: boolean;
+  relationship_check_enabled: boolean;
+  document_index_enabled: boolean;
+  quiet_hours_start: string;
+  quiet_hours_end: string;
+  alert_channel: MessageDeliveryChannel;
+  custom_rules: unknown[];
+  updated_at: string;
+}
+
+export interface HeartbeatRun {
+  id: string;
+  user_id: string;
+  job_name: string;
+  provider: IntegrationProvider | null;
+  status: 'running' | 'completed' | 'failed';
+  items_processed: number | null;
+  items_found: number | null;
+  duration_ms: number | null;
+  error_message: string | null;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export interface DocumentChunk {
+  id: string;
+  user_id: string;
+  provider: string;
+  source_id: string;
+  chunk_index: number;
+  content_summary: string;
+  embedding: number[];
+  metadata: Record<string, unknown>;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface InboxItem {
+  id: string;
+  user_id: string;
+  provider: IntegrationProvider;
+  external_id: string;
+  thread_id: string | null;
+  from_email: string;
+  from_name: string | null;
+  subject: string | null;
+  ai_summary: string | null;
+  is_read: boolean;
+  is_starred: boolean;
+  is_archived: boolean;
+  needs_reply: boolean;
+  reply_drafted: boolean;
+  urgency_score: number | null;
+  received_at: string;
+  snoozed_until: string | null;
+  actioned_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TelegramSession {
+  id: string;
+  user_id: string;
+  chat_id: string;
+  username: string | null;
+  is_active: boolean;
+  last_message_at: string | null;
+  created_at: string;
+}
+
+export interface UserSession {
+  id: string;
+  user_id: string;
+  session_token: string;
+  device_name: string | null;
+  device_type: string | null;
+  ip_address: string | null;
+  last_active_at: string;
+  revoked_at: string | null;
+  created_at: string;
+}
+
+// ── Supabase Database type (for typed client) ──────────────
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: Profile;
+        Insert: Omit<Profile, 'created_at' | 'updated_at'> & {
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<Profile, 'id'>>;
+      };
+      onboarding_data: {
+        Row: OnboardingData;
+        Insert: Omit<OnboardingData, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<OnboardingData, 'id'>>;
+      };
+      user_integrations: {
+        Row: UserIntegration;
+        Insert: Omit<UserIntegration, 'id' | 'connected_at' | 'updated_at'> & {
+          id?: string;
+          connected_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<UserIntegration, 'id'>>;
+      };
+      integration_audit_log: {
+        Row: IntegrationAuditLog;
+        Insert: Omit<IntegrationAuditLog, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
+      };
+      briefings: {
+        Row: Briefing;
+        Insert: Omit<Briefing, 'id' | 'generated_at' | 'meeting_preps'> & {
+          id?: string;
+          generated_at?: string;
+          meeting_preps?: MeetingPrepData[];
+        };
+        Update: Partial<Omit<Briefing, 'id'>>;
+      };
+      briefing_items: {
+        Row: BriefingItem;
+        Insert: Omit<BriefingItem, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<BriefingItem, 'id'>>;
+      };
+      commitments: {
+        Row: Commitment;
+        Insert: Omit<Commitment, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<Commitment, 'id'>>;
+      };
+      contacts: {
+        Row: Contact;
+        Insert: Omit<Contact, 'id'> & { id?: string };
+        Update: Partial<Omit<Contact, 'id'>>;
+      };
+      contact_interactions: {
+        Row: ContactInteraction;
+        Insert: Omit<ContactInteraction, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
+      };
+      pending_actions: {
+        Row: PendingAction;
+        Insert: Omit<PendingAction, 'id' | 'created_at' | 'expires_at'> & {
+          id?: string;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Update: Partial<Omit<PendingAction, 'id'>>;
+      };
+      heartbeat_config: {
+        Row: HeartbeatConfig;
+        Insert: Omit<HeartbeatConfig, 'id' | 'updated_at'> & {
+          id?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<HeartbeatConfig, 'id'>>;
+      };
+      heartbeat_runs: {
+        Row: HeartbeatRun;
+        Insert: Omit<HeartbeatRun, 'id' | 'started_at'> & {
+          id?: string;
+          started_at?: string;
+        };
+        Update: Partial<Omit<HeartbeatRun, 'id'>>;
+      };
+      document_chunks: {
+        Row: DocumentChunk;
+        Insert: Omit<DocumentChunk, 'id' | 'created_at' | 'expires_at'> & {
+          id?: string;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Update: Partial<Omit<DocumentChunk, 'id'>>;
+      };
+      inbox_items: {
+        Row: InboxItem;
+        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<InboxItem, 'id'>>;
+      };
+      telegram_sessions: {
+        Row: TelegramSession;
+        Insert: Omit<TelegramSession, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<TelegramSession, 'id'>>;
+      };
+      user_sessions: {
+        Row: UserSession;
+        Insert: Omit<UserSession, 'id' | 'created_at' | 'last_active_at'> & {
+          id?: string;
+          created_at?: string;
+          last_active_at?: string;
+        };
+        Update: Partial<Omit<UserSession, 'id'>>;
+      };
+    };
+    Functions: {
+      match_document_chunks: {
+        Args: {
+          query_embedding: number[];
+          match_user_id: string;
+          match_threshold?: number;
+          match_count?: number;
+        };
+        Returns: Array<{
+          id: string;
+          provider: string;
+          source_id: string;
+          content_summary: string;
+          metadata: Record<string, unknown>;
+          similarity: number;
+        }>;
+      };
+    };
+    Enums: {
+      integration_provider: IntegrationProvider;
+      integration_status: IntegrationStatus;
+      briefing_item_type: BriefingItemType;
+      briefing_item_section: BriefingItemSection;
+      commitment_status: CommitmentStatus;
+      commitment_confidence: CommitmentConfidence;
+      pending_action_type: PendingActionType;
+      pending_action_status: PendingActionStatus;
+      message_delivery_channel: MessageDeliveryChannel;
+      heartbeat_frequency: HeartbeatFrequency;
+      data_region: DataRegion;
+      subscription_tier: SubscriptionTier;
+    };
+  };
+}
