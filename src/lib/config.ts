@@ -45,7 +45,7 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z.string().length(64, 'ENCRYPTION_KEY must be a 32-byte hex string (64 characters)'),
 
   // Upstash Redis
-  UPSTASH_REDIS_REST_URL: z.url(),
+  UPSTASH_REDIS_REST_URL: z.string().min(1),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
 
   // Google Maps (Operations Layer)

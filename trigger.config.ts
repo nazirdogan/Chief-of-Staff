@@ -1,7 +1,7 @@
 import { defineConfig } from '@trigger.dev/sdk/v3';
 
 export default defineConfig({
-  project: 'chief-of-staff',
+  project: 'proj_upanayphmuhdpoqizmma',
   maxDuration: 300,
   dirs: ['trigger/heartbeat', 'trigger/briefing', 'trigger/operations'],
 });
