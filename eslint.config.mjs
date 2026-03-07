@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Separate landing page project (has its own eslint config)
+    "my-landing-page/**",
   ]),
 ]);
 

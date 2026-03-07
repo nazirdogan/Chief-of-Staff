@@ -14,7 +14,7 @@ export async function fetchInboxMessages(userId: string, maxResults = 20) {
     userId: 'me',
     maxResults,
     labelIds: ['INBOX'],
-    q: 'is:unread',
+    q: 'is:unread -category:promotions -category:social -category:forums -category:updates',
   });
   return response.data.messages ?? [];
 }
@@ -107,6 +107,95 @@ function extractBody(payload: {
   }
 
   return '';
+}
+
+/**
+ * Fetch emails sent yesterday that have no reply in the thread yet.
+ * Used for "Awaiting Reply" briefing section.
+ */
+export async function fetchSentAwaitingReply(userId: string, maxResults = 15): Promise<ParsedGmailMessage[]> {
+  const gmail = await getGmailClient(userId);
+
+  // Sent yesterday, in threads where we're waiting for a response
+  const response = await gmail.users.messages.list({
+    userId: 'me',
+    maxResults,
+    labelIds: ['SENT'],
+    q: 'newer_than:2d older_than:0d',
+  });
+
+  const messageRefs = response.data.messages ?? [];
+  const awaitingReply: ParsedGmailMessage[] = [];
+
+  for (const ref of messageRefs) {
+    if (!ref.id || !ref.threadId) continue;
+
+    // Check thread — if the last message in the thread is ours, it's awaiting reply
+    const thread = await gmail.users.threads.get({
+      userId: 'me',
+      id: ref.threadId,
+      format: 'metadata',
+      metadataHeaders: ['From'],
+    });
+
+    const messages = thread.data.messages ?? [];
+    if (messages.length === 0) continue;
+
+    const lastMessage = messages[messages.length - 1];
+    // If the last message in thread is from "me", we're awaiting a reply
+    const isFromMe = lastMessage.labelIds?.includes('SENT') ?? false;
+    if (isFromMe && lastMessage.id === ref.id) {
+      const fullMessage = await gmail.users.messages.get({
+        userId: 'me',
+        id: ref.id,
+        format: 'full',
+      });
+      awaitingReply.push(parseGmailMessage(fullMessage.data));
+    }
+  }
+
+  return awaitingReply;
+}
+
+/**
+ * Fetch emails that arrived after working hours (8pm-7am).
+ * Used for "After Hours" briefing section.
+ */
+export async function fetchAfterHoursMessages(userId: string, maxResults = 10): Promise<ParsedGmailMessage[]> {
+  const gmail = await getGmailClient(userId);
+
+  // Get unread primary inbox messages from last 12 hours
+  const response = await gmail.users.messages.list({
+    userId: 'me',
+    maxResults: 30,
+    labelIds: ['INBOX'],
+    q: 'is:unread newer_than:1d -category:promotions -category:social -category:forums -category:updates',
+  });
+
+  const messageRefs = response.data.messages ?? [];
+  const afterHours: ParsedGmailMessage[] = [];
+
+  for (const ref of messageRefs) {
+    if (!ref.id) continue;
+    if (afterHours.length >= maxResults) break;
+
+    const fullMessage = await gmail.users.messages.get({
+      userId: 'me',
+      id: ref.id,
+      format: 'full',
+    });
+
+    const parsed = parseGmailMessage(fullMessage.data);
+    const receivedDate = new Date(parsed.date);
+    const hour = receivedDate.getHours();
+
+    // After hours = 8pm to 7am
+    if (hour >= 20 || hour < 7) {
+      afterHours.push(parsed);
+    }
+  }
+
+  return afterHours;
 }
 
 export function parseGmailMessage(
