@@ -1,9 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import type { Commitment } from '@/lib/db/types';
+
+const c = {
+  surface: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.07)',
+  borderHover: 'rgba(255,255,255,0.14)',
+  brass: '#A89968',
+  brassSubtle: 'rgba(168,153,104,0.15)',
+  text: '#FFFFFF',
+  textSecondary: 'rgba(255,255,255,0.85)',
+  textTertiary: 'rgba(255,255,255,0.55)',
+  textQuaternary: 'rgba(255,255,255,0.35)',
+  green: '#4ADE80',
+  yellow: '#92400E',
+};
 
 interface CommitmentCardProps {
   commitment: Commitment;
@@ -32,64 +45,132 @@ export function CommitmentCard({ commitment, onAction }: CommitmentCardProps) {
   }
 
   return (
-    <Card className={isPossible ? 'border-dashed opacity-80' : ''}>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1">
-            <CardTitle className="text-sm">
-              {commitment.commitment_text}
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              To: {commitment.recipient_name || commitment.recipient_email}
-            </p>
+    <div
+      style={{
+        padding: '14px 16px', borderRadius: 10,
+        border: `1px ${isPossible ? 'dashed' : 'solid'} ${c.border}`,
+        background: c.surface,
+        transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = c.borderHover)}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = c.border as string)}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: c.text, lineHeight: 1.4 }}>
+            {commitment.commitment_text}
           </div>
-          {isPossible && (
-            <span className="shrink-0 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-              Possible
-            </span>
-          )}
-          {commitment.confidence === 'high' && (
-            <span className="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
-              High
-            </span>
-          )}
+          <div style={{ fontSize: 12, color: c.textTertiary, marginTop: 2 }}>
+            To: {commitment.recipient_name || commitment.recipient_email}
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <blockquote className="border-l-2 border-muted-foreground/30 pl-3 text-xs italic text-muted-foreground">
-          &ldquo;{commitment.source_quote}&rdquo;
-        </blockquote>
-        {commitment.implied_deadline && (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Deadline: {new Date(commitment.implied_deadline).toLocaleDateString()}
-          </p>
+        {isPossible && (
+          <span style={{
+            fontSize: 10, padding: '2px 8px', borderRadius: 4, flexShrink: 0,
+            background: `${c.yellow}12`, color: c.yellow, fontWeight: 600,
+          }}>
+            Possible
+          </span>
         )}
-      </CardContent>
-      <CardFooter className="gap-2">
-        <Button
-          size="sm"
+        {commitment.confidence === 'high' && (
+          <span style={{
+            fontSize: 10, padding: '2px 8px', borderRadius: 4, flexShrink: 0,
+            background: `${c.green}12`, color: c.green, fontWeight: 600,
+          }}>
+            High
+          </span>
+        )}
+      </div>
+
+      {/* Source quote */}
+      <div
+        style={{
+          marginTop: 10, paddingLeft: 10,
+          borderLeft: `2px solid ${c.border}`,
+          fontSize: 12, fontStyle: 'italic', color: c.textTertiary,
+          lineHeight: 1.5,
+        }}
+      >
+        &ldquo;{commitment.source_quote}&rdquo;
+      </div>
+
+      {commitment.implied_deadline && (
+        <div style={{ fontSize: 11, color: c.textQuaternary, marginTop: 8 }}>
+          Deadline: {new Date(commitment.implied_deadline).toLocaleDateString()}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+        <ActionButton
+          label="Resolve"
+          loadingLabel="Resolving..."
+          isLoading={loading === 'resolve'}
+          disabled={loading !== null}
           onClick={() => handleAction('resolve')}
+          primary
+        />
+        <ActionButton
+          label="Snooze"
+          loadingLabel="Snoozing..."
+          isLoading={loading === 'snooze'}
           disabled={loading !== null}
-        >
-          {loading === 'resolve' ? 'Resolving...' : 'Resolve'}
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
           onClick={handleSnooze}
+        />
+        <ActionButton
+          label="Dismiss"
+          loadingLabel="Dismissing..."
+          isLoading={loading === 'dismiss'}
           disabled={loading !== null}
-        >
-          {loading === 'snooze' ? 'Snoozing...' : 'Snooze'}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
           onClick={() => handleAction('dismiss')}
-          disabled={loading !== null}
-        >
-          {loading === 'dismiss' ? 'Dismissing...' : 'Dismiss'}
-        </Button>
-      </CardFooter>
-    </Card>
+          ghost
+        />
+      </div>
+    </div>
+  );
+}
+
+function ActionButton({ label, loadingLabel, isLoading, disabled, onClick, primary, ghost }: {
+  label: string; loadingLabel: string; isLoading: boolean; disabled: boolean;
+  onClick: () => void; primary?: boolean; ghost?: boolean;
+}) {
+  const c = {
+    text: '#FFFFFF',
+    border: 'rgba(255,255,255,0.07)',
+    textTertiary: 'rgba(255,255,255,0.55)',
+    brassSubtle: 'rgba(168,153,104,0.15)',
+  };
+
+  let bg = c.brassSubtle;
+  let color = c.text;
+  let border = `1px solid ${c.border}`;
+  if (primary) {
+    bg = '#A89968';
+    color = '#0A0A0B';
+    border = 'none';
+  }
+  if (ghost) {
+    bg = 'transparent';
+    color = c.textTertiary;
+    border = 'none';
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '5px 14px', borderRadius: 6,
+        fontSize: 12, fontWeight: 500,
+        background: bg, color, border,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled && !isLoading ? 0.5 : 1,
+      }}
+    >
+      {isLoading && <Loader2 size={11} className="animate-spin" />}
+      {isLoading ? loadingLabel : label}
+    </button>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { IntegrationConnectStep } from './IntegrationConnectStep';
 import { VIPSetupStep } from './VIPSetupStep';
 import { ProjectSetupStep } from './ProjectSetupStep';
 import { CommitmentCalibrationStep } from './CommitmentCalibrationStep';
@@ -15,7 +16,7 @@ interface VIPContact {
   name: string;
 }
 
-const STEP_LABELS = ['VIP Contacts', 'Projects', 'Calibration', 'Telegram'];
+const STEP_LABELS = ['Connect Apps', 'VIP Contacts', 'Projects', 'Calibration', 'Telegram'];
 
 export function OnboardingFlow() {
   const router = useRouter();
@@ -117,7 +118,7 @@ export function OnboardingFlow() {
 
       if (updateError) throw updateError;
 
-      router.push('/');
+      router.push('/dashboard');
       router.refresh();
     } catch (err) {
       setError(
@@ -131,39 +132,59 @@ export function OnboardingFlow() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+      <Card className="w-full max-w-2xl animate-slide-up">
+        <CardHeader className="space-y-4">
+          <CardTitle className="text-2xl font-bold tracking-tight">
             Welcome to Chief of Staff
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Step {step + 1} of {STEP_LABELS.length}: {STEP_LABELS[step]}
-          </p>
-          <Progress value={progressPercent} className="mt-2" />
+
+          {/* Step indicator dots */}
+          <div className="flex items-center gap-2">
+            {STEP_LABELS.map((label, i) => (
+              <div key={label} className="flex items-center gap-2">
+                <div className="flex flex-col items-center gap-1">
+                  <div
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
+                      i < step
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        : i === step
+                          ? 'bg-foreground text-background shadow-sm'
+                          : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {i < step ? '✓' : i + 1}
+                  </div>
+                  <span className={`text-[10px] font-medium ${i === step ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {label}
+                  </span>
+                </div>
+                {i < STEP_LABELS.length - 1 && (
+                  <div className={`mb-4 h-px w-6 ${i < step ? 'bg-green-300 dark:bg-green-700' : 'bg-muted'}`} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <Progress value={progressPercent} className="h-1" />
         </CardHeader>
         <CardContent>
           {error && (
-            <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
 
           {step === 0 && (
-            <VIPSetupStep
-              initialContacts={vipContacts}
-              onNext={(contacts) => {
-                setVipContacts(contacts);
-                setStep(1);
-              }}
+            <IntegrationConnectStep
+              onNext={() => setStep(1)}
             />
           )}
 
           {step === 1 && (
-            <ProjectSetupStep
-              initialData={{ projects, weeklyPriority }}
-              onNext={(data) => {
-                setProjects(data.projects);
-                setWeeklyPriority(data.weeklyPriority);
+            <VIPSetupStep
+              initialContacts={vipContacts}
+              onNext={(contacts) => {
+                setVipContacts(contacts);
                 setStep(2);
               }}
               onBack={() => setStep(0)}
@@ -171,9 +192,11 @@ export function OnboardingFlow() {
           )}
 
           {step === 2 && (
-            <CommitmentCalibrationStep
-              onNext={(decisions) => {
-                calibrationDecisionsRef.current = decisions;
+            <ProjectSetupStep
+              initialData={{ projects, weeklyPriority }}
+              onNext={(data) => {
+                setProjects(data.projects);
+                setWeeklyPriority(data.weeklyPriority);
                 setStep(3);
               }}
               onBack={() => setStep(1)}
@@ -181,9 +204,19 @@ export function OnboardingFlow() {
           )}
 
           {step === 3 && (
+            <CommitmentCalibrationStep
+              onNext={(decisions) => {
+                calibrationDecisionsRef.current = decisions;
+                setStep(4);
+              }}
+              onBack={() => setStep(2)}
+            />
+          )}
+
+          {step === 4 && (
             <TelegramConnectStep
               onNext={() => handleComplete(calibrationDecisionsRef.current)}
-              onBack={() => setStep(2)}
+              onBack={() => setStep(3)}
               onSkip={() => handleComplete(calibrationDecisionsRef.current)}
             />
           )}

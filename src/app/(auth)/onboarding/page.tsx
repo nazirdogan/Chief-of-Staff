@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
     .single();
 
   if ((profile as { onboarding_completed: boolean } | null)?.onboarding_completed) {
-    redirect('/');
+    redirect('/dashboard');
   }
 
   return <OnboardingFlow />;

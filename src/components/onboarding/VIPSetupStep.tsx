@@ -14,9 +14,10 @@ interface VIPContact {
 interface VIPSetupStepProps {
   initialContacts: VIPContact[];
   onNext: (contacts: VIPContact[]) => void;
+  onBack?: () => void;
 }
 
-export function VIPSetupStep({ initialContacts, onNext }: VIPSetupStepProps) {
+export function VIPSetupStep({ initialContacts, onNext, onBack }: VIPSetupStepProps) {
   const [contacts, setContacts] = useState<VIPContact[]>(
     initialContacts.length > 0 ? initialContacts : [{ email: '', name: '' }]
   );
@@ -100,7 +101,10 @@ export function VIPSetupStep({ initialContacts, onNext }: VIPSetupStepProps) {
         </Button>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        {onBack ? (
+          <Button variant="ghost" onClick={onBack}>Back</Button>
+        ) : <div />}
         <Button onClick={handleNext} disabled={!hasAtLeastOne}>
           Next
         </Button>

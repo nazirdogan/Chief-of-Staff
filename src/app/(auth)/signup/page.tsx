@@ -56,10 +56,10 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md">
+      <div className="w-full max-w-md animate-slide-up">
+        <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Check your email</CardTitle>
+            <CardTitle className="text-2xl font-bold tracking-tight">Check your email</CardTitle>
             <CardDescription>
               We&apos;ve sent a verification link to <strong>{email}</strong>.
               Click the link to verify your account and sign in.
@@ -79,10 +79,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <div className="w-full max-w-md animate-slide-up">
+      <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Chief of Staff</CardTitle>
+          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background lg:hidden">
+            <span className="text-sm font-bold">CS</span>
+          </div>
+          <CardTitle className="text-2xl font-bold tracking-tight">Get started</CardTitle>
           <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSignup}>

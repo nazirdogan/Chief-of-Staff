@@ -51,7 +51,7 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/');
+        router.push('/dashboard');
         router.refresh();
       }
     } catch {
@@ -97,7 +97,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/');
+      router.push('/dashboard');
       router.refresh();
     } catch {
       setError('An unexpected error occurred. Please try again.');
@@ -107,10 +107,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <div className="w-full max-w-md animate-slide-up">
+      <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Chief of Staff</CardTitle>
+          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background lg:hidden">
+            <span className="text-sm font-bold">CS</span>
+          </div>
+          <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
 
@@ -212,3 +215,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

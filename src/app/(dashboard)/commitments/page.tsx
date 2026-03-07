@@ -1,11 +1,23 @@
+'use client';
+
+import { CheckCircle2 } from 'lucide-react';
 import { CommitmentQueue } from '@/components/commitments/CommitmentQueue';
+
+const c = {
+  text: '#FFFFFF',
+  textTertiary: 'rgba(255,255,255,0.55)',
+  brass: '#A89968',
+};
 
 export default function CommitmentsPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Commitments</h1>
-        <p className="text-sm text-muted-foreground">
+    <div style={{ fontFamily: "'Satoshi', sans-serif" }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <CheckCircle2 size={20} color={c.brass} />
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: c.text, margin: 0 }}>Commitments</h1>
+        </div>
+        <p style={{ fontSize: 13, color: c.textTertiary, margin: 0 }}>
           Promises you made in outbound messages. Resolve, snooze, or dismiss.
         </p>
       </div>

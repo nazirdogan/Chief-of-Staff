@@ -2,8 +2,20 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { CheckCircle2 } from 'lucide-react';
 import { CommitmentCard } from './CommitmentCard';
 import type { Commitment } from '@/lib/db/types';
+
+const c = {
+  surface: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.07)',
+  borderHover: 'rgba(255,255,255,0.14)',
+  brass: '#A89968',
+  brassSubtle: 'rgba(168,153,104,0.15)',
+  text: '#FFFFFF',
+  textTertiary: 'rgba(255,255,255,0.55)',
+  textQuaternary: 'rgba(255,255,255,0.35)',
+};
 
 export function CommitmentQueue() {
   const [commitments, setCommitments] = useState<Commitment[]>([]);
@@ -56,11 +68,30 @@ export function CommitmentQueue() {
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading commitments...</p>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="animate-pulse"
+            style={{ height: 80, borderRadius: 10, background: c.brassSubtle, border: `1px solid ${c.border}` }}
+          />
+        ))}
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-sm text-destructive">{error}</p>;
+    return (
+      <div
+        style={{
+          padding: 24, borderRadius: 12, textAlign: 'center',
+          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
+        }}
+      >
+        <p style={{ fontSize: 13, color: '#F87171' }}>{error}</p>
+      </div>
+    );
   }
 
   const highConfidence = commitments.filter((c) => c.confidence === 'high');
@@ -68,9 +99,19 @@ export function CommitmentQueue() {
 
   if (highConfidence.length === 0 && mediumConfidence.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed p-8 text-center">
-        <p className="text-sm font-medium">No open commitments</p>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div style={{
+        padding: 48, textAlign: 'center', borderRadius: 12,
+        border: `1px dashed ${c.borderHover}`, background: c.surface,
+      }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: 12, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
+          background: c.brassSubtle,
+        }}>
+          <CheckCircle2 size={22} color={c.brass} />
+        </div>
+        <p style={{ fontSize: 14, fontWeight: 600, color: c.text }}>No open commitments</p>
+        <p style={{ fontSize: 13, color: c.textTertiary, marginTop: 4, maxWidth: 320, margin: '4px auto 0' }}>
           Commitments are automatically extracted from your sent emails. Connect Gmail or Outlook to get started.
         </p>
       </div>
@@ -78,21 +119,39 @@ export function CommitmentQueue() {
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {highConfidence.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">Commitments</h3>
-          {highConfidence.map((c) => (
-            <CommitmentCard key={c.id} commitment={c} onAction={handleAction} />
-          ))}
+        <div>
+          <p
+            style={{
+              fontSize: 11, fontWeight: 600, color: c.textQuaternary,
+              textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10,
+            }}
+          >
+            Commitments
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {highConfidence.map((c) => (
+              <CommitmentCard key={c.id} commitment={c} onAction={handleAction} />
+            ))}
+          </div>
         </div>
       )}
       {mediumConfidence.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground">Possible</h3>
-          {mediumConfidence.map((c) => (
-            <CommitmentCard key={c.id} commitment={c} onAction={handleAction} />
-          ))}
+        <div>
+          <p
+            style={{
+              fontSize: 11, fontWeight: 600, color: c.textQuaternary,
+              textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10,
+            }}
+          >
+            Possible
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {mediumConfidence.map((c) => (
+              <CommitmentCard key={c.id} commitment={c} onAction={handleAction} />
+            ))}
+          </div>
         </div>
       )}
     </div>
