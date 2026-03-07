@@ -9,7 +9,7 @@ Telegram is the launch channel; WhatsApp will be added when approved.
 
 - **Provider**: Twilio WhatsApp Business API
 - **Application URL**: https://www.twilio.com/whatsapp
-- **Business Name**: Chief of Staff AI
+- **Business Name**: Donna AI
 - **Use Case**: Delivering daily intelligence briefings and enabling quick-action replies
 
 ## Steps to Complete (Manual)

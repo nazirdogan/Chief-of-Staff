@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { MeetingPrep } from '@/lib/ai/agents/meeting-prep';
 import type { SourceRef } from '@/lib/db/types';
+import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
@@ -56,10 +57,10 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
             className="text-[13px] font-semibold tracking-[-0.01em]"
             style={{ color: c.text }}
           >
-            Meeting Prep: {prep.event_title}
+            Meeting Prep: {decodeEntities(prep.event_title)}
           </h3>
           <p className="mt-0.5 text-[12px]" style={{ color: c.textQuaternary }}>
-            {prep.summary}
+            {decodeEntities(prep.summary)}
           </p>
         </div>
         <ChevronDown
@@ -95,7 +96,7 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
                     <span className="font-semibold" style={{ color: c.text }}>
                       {attendee.name}
                     </span>
-                    <span> &mdash; {attendee.relationship_note}</span>
+                    <span> &mdash; {decodeEntities(attendee.relationship_note)}</span>
                     <button
                       onClick={() => onCitationClick(attendee.source_ref, attendee.name)}
                       className="ml-1.5 text-[11px] font-medium transition-colors duration-200"
@@ -123,7 +124,7 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
               <ul className="space-y-2">
                 {prep.open_items.map((item, i) => (
                   <li key={i} className="text-[13px]" style={{ color: c.textSecondary }}>
-                    {item.description}
+                    {decodeEntities(item.description)}
                     <button
                       onClick={() => onCitationClick(item.source_ref, item.description)}
                       className="ml-1.5 text-[11px] font-medium transition-colors duration-200"
@@ -159,7 +160,7 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
                       className="mt-[2px] h-1 w-1 shrink-0 rounded-full"
                       style={{ background: c.brass }}
                     />
-                    {point}
+                    {decodeEntities(point)}
                   </li>
                 ))}
               </ul>
@@ -185,7 +186,7 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
                 className="mt-1 text-[13px] leading-relaxed"
                 style={{ color: c.text }}
               >
-                {prep.watch_out_for}
+                {decodeEntities(prep.watch_out_for)}
               </p>
             </div>
           )}

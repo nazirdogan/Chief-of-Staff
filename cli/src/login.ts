@@ -44,7 +44,7 @@ function questionHidden(prompt: string): Promise<string> {
 
 export async function loginFlow(): Promise<void> {
   const config = loadConfig();
-  console.log(`\n${BOLD}Chief of Staff — Login${RESET}\n`);
+  console.log(`\n${BOLD}Donna — Login${RESET}\n`);
 
   const rl = readline.createInterface({
     input: process.stdin,

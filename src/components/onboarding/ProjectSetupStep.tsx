@@ -55,7 +55,7 @@ export function ProjectSetupStep({
       <div>
         <h2 className="text-lg font-semibold">What are you working on?</h2>
         <p className="text-sm text-muted-foreground">
-          List your active projects so Chief of Staff can prioritise related
+          List your active projects so Donna can prioritise related
           messages and commitments.
         </p>
       </div>

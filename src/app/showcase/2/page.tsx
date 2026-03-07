@@ -134,7 +134,7 @@ export default function ObservatoryLanding() {
               >
                 <Zap size={14} style={{ color: "#D4AF37" }} />
               </div>
-              <span className="text-sm font-semibold tracking-[-0.01em]">Chief of Staff</span>
+              <span className="text-sm font-semibold tracking-[-0.01em]">Donna</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               {["Product", "Features", "Pricing", "Security"].map((item) => (
@@ -219,7 +219,7 @@ export default function ObservatoryLanding() {
                   filter: "drop-shadow(0 0 40px rgba(184,150,12,0.15))",
                 }}
               >
-                Chief of Staff
+                Donna
               </span>
             </h1>
 
@@ -547,7 +547,7 @@ export default function ObservatoryLanding() {
             <div className="flex items-center gap-3">
               <Zap size={14} style={{ color: "rgba(184,150,12,0.5)" }} />
               <span className="text-[13px] font-medium" style={{ color: "rgba(253,253,253,0.25)" }}>
-                Chief of Staff
+                Donna
               </span>
             </div>
             <div className="flex items-center gap-6">

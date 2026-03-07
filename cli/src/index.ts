@@ -18,7 +18,7 @@ const RESET = '\x1b[0m';
 
 function printBanner() {
   console.log(`
-${BOLD}${CYAN}  Chief of Staff${RESET} ${DIM}v${VERSION}${RESET}
+${BOLD}${CYAN}  Donna${RESET} ${DIM}v${VERSION}${RESET}
 ${DIM}  Your AI intelligence layer${RESET}
 `);
 }

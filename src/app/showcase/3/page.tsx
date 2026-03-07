@@ -115,7 +115,7 @@ export default function ConciergeLanding() {
                 >
                   CS
                 </div>
-                <span className="text-sm font-semibold tracking-[-0.01em]">Chief of Staff</span>
+                <span className="text-sm font-semibold tracking-[-0.01em]">Donna</span>
               </div>
               <div className="hidden md:flex items-center">
                 {["Product", "Use Cases", "Pricing", "Docs", "Blog"].map((item) => (
@@ -211,7 +211,7 @@ export default function ConciergeLanding() {
                   transition: "opacity 0.7s ease 0.5s, transform 0.7s ease 0.5s",
                 }}
               >
-                Chief of Staff connects to your email, calendar, messaging, and docs — then
+                Donna connects to your email, calendar, messaging, and docs — then
                 synthesises everything into one actionable morning briefing. No more inbox triage.
                 No more missed commitments.
               </p>
@@ -303,7 +303,7 @@ export default function ConciergeLanding() {
                     not chaos.
                   </h3>
                   <p className="text-base leading-[1.75] mb-8" style={{ color: "rgba(253,253,253,0.35)" }}>
-                    Every morning, Chief of Staff delivers a single, prioritised message to your
+                    Every morning, Donna delivers a single, prioritised message to your
                     Telegram. What&apos;s urgent. What you promised. Who needs a response. What
                     meeting to prep for. Nothing else.
                   </p>
@@ -449,7 +449,7 @@ export default function ConciergeLanding() {
                     again.
                   </h3>
                   <p className="text-base leading-[1.75] mb-8" style={{ color: "rgba(253,253,253,0.35)" }}>
-                    Chief of Staff uses two-pass AI extraction to identify every commitment — ones you
+                    Donna uses two-pass AI extraction to identify every commitment — ones you
                     made, and ones made to you — across all your communication channels. Each commitment
                     is tracked with a source citation and confidence score.
                   </p>
@@ -639,7 +639,7 @@ export default function ConciergeLanding() {
                 most valuable asset.
               </h2>
               <p className="text-lg mb-12" style={{ color: "rgba(253,253,253,0.3)" }}>
-                Stop spending it on triage. Let Chief of Staff handle the noise
+                Stop spending it on triage. Let Donna handle the noise
                 so you can focus on what only you can do.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -696,10 +696,10 @@ export default function ConciergeLanding() {
                 >
                   CS
                 </div>
-                <span className="text-[11px]" style={{ color: "rgba(253,253,253,0.2)" }}>Chief of Staff Inc.</span>
+                <span className="text-[11px]" style={{ color: "rgba(253,253,253,0.2)" }}>Donna Inc.</span>
               </div>
               <p className="text-[11px]" style={{ color: "rgba(253,253,253,0.15)" }}>
-                &copy; 2026 Chief of Staff. All rights reserved.
+                &copy; 2026 Donna. All rights reserved.
               </p>
             </div>
           </div>

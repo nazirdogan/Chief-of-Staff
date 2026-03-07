@@ -264,7 +264,7 @@ export default function SignalLanding() {
                   className="text-[15px] font-bold tracking-[-0.02em]"
                   style={{ color: c.text }}
                 >
-                  Chief of Staff
+                  Donna
                 </span>
               </div>
               <div className="hidden lg:flex items-center gap-1">
@@ -468,7 +468,7 @@ export default function SignalLanding() {
                     "opacity 0.8s ease 0.6s, transform 0.8s ease 0.6s",
                 }}
               >
-                Chief of Staff reads across your entire digital world — email,
+                Donna reads across your entire digital world — email,
                 calendar, messages, documents — and delivers one proactive
                 briefing every morning telling you{" "}
                 <span
@@ -701,7 +701,7 @@ export default function SignalLanding() {
                     className="text-base leading-[1.8] mb-10"
                     style={{ color: c.textTertiary }}
                   >
-                    Every morning at 7am, your Chief of Staff synthesises
+                    Every morning at 7am, your Donna synthesises
                     overnight emails, calendar changes, Slack threads, and
                     document updates into a single prioritised message. Tap to
                     act. Nothing falls through.
@@ -1132,7 +1132,7 @@ export default function SignalLanding() {
                   className="text-base max-w-lg mx-auto"
                   style={{ color: c.textTertiary }}
                 >
-                  Connect once. Chief of Staff reads across all your platforms
+                  Connect once. Donna reads across all your platforms
                   to surface what matters.
                 </p>
               </div>
@@ -1219,7 +1219,7 @@ export default function SignalLanding() {
                   color: c.textSecondary,
                 }}
               >
-                Chief of Staff transformed an hour of my morning
+                Donna transformed an hour of my morning
                 into five minutes. I stopped dropping commitments
                 the first week.
               </blockquote>
@@ -1326,7 +1326,7 @@ export default function SignalLanding() {
                 className="text-lg max-w-xl mx-auto leading-[1.7] mb-14"
                 style={{ color: c.textTertiary }}
               >
-                Stop spending mornings on triage. Let Chief of Staff handle the
+                Stop spending mornings on triage. Let Donna handle the
                 noise so you can focus on what only you can do.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -1411,7 +1411,7 @@ export default function SignalLanding() {
                   >
                     CS
                   </div>
-                  <span className="text-sm font-bold" style={{ color: c.text }}>Chief of Staff</span>
+                  <span className="text-sm font-bold" style={{ color: c.text }}>Donna</span>
                 </div>
                 <p
                   className="text-[12px] leading-relaxed max-w-[200px]"
@@ -1471,7 +1471,7 @@ export default function SignalLanding() {
                 className="text-[11px]"
                 style={{ color: c.textGhost }}
               >
-                &copy; 2026 Chief of Staff Inc. All rights reserved.
+                &copy; 2026 Donna Inc. All rights reserved.
               </p>
               <div className="flex items-center gap-2">
                 <CheckCircle2

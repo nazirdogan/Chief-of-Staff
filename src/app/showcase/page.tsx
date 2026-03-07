@@ -93,7 +93,7 @@ export default function ShowcasePage() {
               </div>
               <div>
                 <h1 className="text-base font-semibold tracking-[-0.02em]" style={{ color: "#FDFDFD" }}>
-                  Chief of Staff
+                  Donna
                 </h1>
                 <p
                   className="text-[11px] uppercase tracking-[0.15em] font-medium mt-0.5"
@@ -245,7 +245,7 @@ export default function ShowcasePage() {
         <footer style={{ borderTop: "1px solid rgba(168,153,104,0.06)" }}>
           <div className="mx-auto max-w-6xl px-8 py-8 flex items-center justify-between">
             <p className="text-[11px]" style={{ color: "#3A3A35" }}>
-              Chief of Staff — Internal Design Review
+              Donna — Internal Design Review
             </p>
             <p className="text-[11px]" style={{ color: "#3A3A35" }}>
               Confidential

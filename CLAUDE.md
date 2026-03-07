@@ -1,7 +1,7 @@
-# Chief of Staff — Claude Code Project Brief
+# Donna — Claude Code Project Brief
 
 ## What This Project Is
-Chief of Staff is an AI-powered personal intelligence app. It reads across a user's entire digital
+Donna is an AI-powered personal intelligence app. It reads across a user's entire digital
 life (email, calendar, messages, documents, tasks) and delivers one proactive daily briefing every
 morning via Telegram (and later WhatsApp) telling the user what matters, what they promised, who
 they've gone cold with, and what to do first. It then helps them act on it.

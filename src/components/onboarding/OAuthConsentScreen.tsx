@@ -37,7 +37,7 @@ export function OAuthConsentScreen({
       <CardHeader>
         <CardTitle>Connect {providerLabel}</CardTitle>
         <CardDescription>
-          Before connecting, here is exactly what Chief of Staff will access and
+          Before connecting, here is exactly what Donna will access and
           how your data is handled.
         </CardDescription>
       </CardHeader>

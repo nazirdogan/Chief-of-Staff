@@ -135,7 +135,7 @@ export function OnboardingFlow() {
       <Card className="w-full max-w-2xl animate-slide-up">
         <CardHeader className="space-y-4">
           <CardTitle className="text-2xl font-bold tracking-tight">
-            Welcome to Chief of Staff
+            Welcome to Donna
           </CardTitle>
 
           {/* Step indicator dots */}

@@ -91,7 +91,7 @@ export default function BetaLandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
           <span className="text-sm font-semibold tracking-wide uppercase">
-            Chief of Staff
+            Donna
           </span>
           <Link href="/login">
             <Button variant="ghost" size="sm">
@@ -136,7 +136,7 @@ export default function BetaLandingPage() {
                 className="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl"
                 style={{ animationDelay: '160ms' }}
               >
-                Chief of Staff reads across your email, calendar, and messages
+                Donna reads across your email, calendar, and messages
                 — then delivers one proactive daily briefing telling you what
                 matters, what you promised, who you&apos;ve gone cold with,
                 and what to do first.
@@ -340,7 +340,7 @@ export default function BetaLandingPage() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <span className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
-              Chief of Staff
+              Donna
             </span>
             <p className="text-xs text-muted-foreground">
               Built for executives who value their time.

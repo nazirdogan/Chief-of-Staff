@@ -9,6 +9,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { InboxItem } from '@/lib/db/types';
+import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
@@ -216,14 +217,14 @@ export default function InboxPage() {
                     fontSize: 13, color: c.textSecondary, marginTop: 2, fontWeight: item.is_read ? 400 : 500,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {item.task_title || item.subject || '(no subject)'}
+                    {decodeEntities(item.task_title || item.subject || '(no subject)')}
                   </div>
                   {item.ai_summary && (
                     <div style={{
                       fontSize: 12, color: c.textTertiary, marginTop: 4,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
-                      {item.ai_summary}
+                      {decodeEntities(item.ai_summary)}
                     </div>
                   )}
                 </div>

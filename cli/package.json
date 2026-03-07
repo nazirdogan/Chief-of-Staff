@@ -1,7 +1,7 @@
 {
   "name": "@chiefofstaff/cli",
   "version": "0.1.0",
-  "description": "Chief of Staff CLI — your AI intelligence layer in the terminal",
+  "description": "Donna CLI — your AI intelligence layer in the terminal",
   "bin": {
     "cos": "./dist/index.js"
   },

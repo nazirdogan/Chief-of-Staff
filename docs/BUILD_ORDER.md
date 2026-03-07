@@ -1,4 +1,4 @@
-# Chief of Staff — Claude Code Build Order
+# Donna — Claude Code Build Order
 
 This is the sequenced build plan for Claude Code sessions. Each session has a
 focused scope, clear inputs, and a definition of done. Do not skip sessions or
@@ -12,8 +12,8 @@ After every session: run `npm run typecheck` and `npm run lint`. Fix all errors 
 ## Session 0 — Project Scaffolding (Do this manually, not via Claude Code)
 
 ```bash
-npx create-next-app@latest chief-of-staff --typescript --tailwind --app --src-dir no --import-alias "@/*"
-cd chief-of-staff
+npx create-next-app@latest donna --typescript --tailwind --app --src-dir no --import-alias "@/*"
+cd donna
 npx shadcn@latest init
 npm install @supabase/supabase-js @supabase/ssr
 npm install @nangohq/node nango
@@ -420,7 +420,7 @@ Write the missing tests (auth bypass, RLS cross-user, prompt injection, citation
 
 ### Starting a Session
 ```
-"I'm building Chief of Staff. Read CLAUDE.md before starting.
+"I'm building Donna. Read CLAUDE.md before starting.
 Then read docs/[RELEVANT_DOC].md for context on what we're building today.
 Today's session: [paste session definition above]."
 ```

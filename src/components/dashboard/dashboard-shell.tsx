@@ -117,7 +117,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               className="text-[14px] font-bold tracking-[-0.02em]"
               style={{ color: t.text }}
             >
-              Chief of Staff
+              Donna
             </span>
           </div>
 
@@ -229,7 +229,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         {/* ── Main content ── */}
         <main className="flex-1 ml-[240px] overflow-y-auto">
-          <div className="mx-auto max-w-[720px] px-8 py-10 animate-fade-in">
+          <div className="mx-auto max-w-[1400px] px-8 py-10 animate-fade-in">
             {children}
           </div>
         </main>

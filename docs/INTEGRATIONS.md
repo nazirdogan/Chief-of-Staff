@@ -1,4 +1,4 @@
-# Chief of Staff — Integrations Setup Guide
+# Donna — Integrations Setup Guide
 
 All OAuth tokens are managed by Nango. This application never stores OAuth tokens directly.
 Each integration section covers: what to set up in the provider's developer console, what
@@ -79,7 +79,7 @@ export async function getConnectUrl(
 
 ### Google Cloud Setup
 1. Go to https://console.cloud.google.com
-2. Create a new project: `chief-of-staff-prod`
+2. Create a new project: `donna-prod`
 3. Enable **Gmail API**
 4. Enable **Google Calendar API** (used by the Google Calendar integration)
 5. Navigate to **APIs & Services > Credentials > Create OAuth 2.0 Client ID**
@@ -103,7 +103,7 @@ GOOGLE_CLIENT_SECRET=
 ### Gmail Push Notifications (Webhooks)
 To receive real-time notifications for new messages (for VIP alerts):
 1. In Google Cloud Console, enable **Cloud Pub/Sub API**
-2. Create a Pub/Sub topic: `chief-of-staff-gmail-push`
+2. Create a Pub/Sub topic: `donna-gmail-push`
 3. Create a subscription pointing to: `https://yourdomain.com/api/webhooks/gmail`
 4. In app, after connecting Gmail, call `gmail.users.watch()` to register the subscription
 
@@ -223,7 +223,7 @@ export async function getTodaysEvents(userId: string) {
 ### Azure App Registration
 1. Go to https://portal.azure.com > **Azure Active Directory > App registrations**
 2. Click **New registration**
-3. Name: `Chief of Staff`
+3. Name: `Donna`
 4. Supported account types: **Accounts in any organizational directory and personal Microsoft accounts**
 5. Redirect URI: `https://api.nango.dev/oauth/callback`
 6. After creation, go to **API permissions > Add permission > Microsoft Graph**
@@ -282,7 +282,7 @@ export async function fetchOutlookInbox(userId: string) {
 
 ### Slack App Setup
 1. Go to https://api.slack.com/apps > **Create New App > From scratch**
-2. App Name: `Chief of Staff`, pick a workspace
+2. App Name: `Donna`, pick a workspace
 3. Navigate to **OAuth & Permissions**
 4. Add **Redirect URLs**: `https://api.nango.dev/oauth/callback`
 5. Add the Bot Token Scopes listed above
@@ -341,7 +341,7 @@ export async function fetchRecentDMs(userId: string) {
 
 ### Notion Integration Setup
 1. Go to https://www.notion.so/my-integrations > **New integration**
-2. Name: `Chief of Staff`
+2. Name: `Donna`
 3. Capabilities: **Read content**, **Update content**, **Read user information including email**
 4. Copy **OAuth Client ID** and **OAuth Client Secret**
 5. Set **Redirect URI**: `https://api.nango.dev/oauth/callback`
@@ -386,8 +386,8 @@ export async function searchNotionPages(userId: string, query: string) {
 ### Bot Setup
 1. Open Telegram and message **@BotFather**
 2. Send `/newbot`
-3. Name: `Chief of Staff`
-4. Username: `ChiefOfStaffAIBot` (or similar available name)
+3. Name: `Donna`
+4. Username: `DonnaAIBot` (or similar available name)
 5. BotFather returns the **Bot Token** — save it immediately
 6. Send `/setprivacy` to BotFather > select your bot > choose **DISABLE** (needed to read group messages if you add group support later)
 7. Send `/setwebhook` — or use the runtime setup below
@@ -490,7 +490,7 @@ export function formatBriefingForTelegram(briefing: DailyBriefing): string {
 
 ### Setup
 1. Go to https://console.anthropic.com > **API Keys** > **Create Key**
-2. Name: `chief-of-staff-prod`
+2. Name: `donna-prod`
 
 ### Environment Variables
 ```
@@ -520,7 +520,7 @@ export type AIModel = typeof AI_MODELS[keyof typeof AI_MODELS];
 
 ### Setup
 1. Go to https://platform.openai.com/api-keys > **Create new secret key**
-2. Name: `chief-of-staff-embeddings`
+2. Name: `donna-embeddings`
 
 ### Environment Variables
 ```
@@ -609,7 +609,7 @@ $$;
 
 ### Setup
 1. Go to https://cloud.trigger.dev > create project
-2. Name: `chief-of-staff`
+2. Name: `donna`
 3. Copy **Project ID** and **Secret Key**
 4. Install CLI: `npm install -g @trigger.dev/cli@latest`
 5. Run `npx trigger.dev@latest init` in project root

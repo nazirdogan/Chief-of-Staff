@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Chief of Staff — Landing Page Showcase",
+  title: "Donna — Landing Page Showcase",
   description: "Browse and preview landing page design options",
 };
 

@@ -1,7 +1,8 @@
 {
-  "name": "chief-of-staff",
+  "name": "donna",
   "version": "0.1.0",
   "private": true,
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,7 +13,11 @@
     "ops:overnight": "npx tsx scripts/operations/run-overnight.ts",
     "ops:sweep": "npx tsx scripts/operations/run-am-sweep.ts",
     "ops:timeblock": "npx tsx scripts/operations/run-time-blocker.ts",
-    "ops:full": "npx tsx scripts/operations/run-full-morning.ts"
+    "ops:full": "npx tsx scripts/operations/run-full-morning.ts",
+    "electron:dev": "tsc -p electron/tsconfig.json && electron dist-electron/main.js",
+    "electron:build": "next build && tsc -p electron/tsconfig.json && electron-builder --mac",
+    "electron:build:arm64": "next build && tsc -p electron/tsconfig.json && electron-builder --mac --arm64",
+    "electron:build:x64": "next build && tsc -p electron/tsconfig.json && electron-builder --mac --x64"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -54,6 +59,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.8.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "shadcn": "^3.8.5",

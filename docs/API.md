@@ -1,4 +1,4 @@
-# Chief of Staff — API Endpoint Contracts
+# Donna — API Endpoint Contracts
 
 All routes are under `/api/`. All protected routes use the `withAuth` middleware.
 All responses follow the standard shape defined below.
@@ -501,7 +501,7 @@ Initiates Telegram connection. Returns a deep link for the user to open in Teleg
 // Response 200
 {
   data: {
-    connect_url: string;    // https://t.me/ChiefOfStaffBot?start=TOKEN
+    connect_url: string;    // https://t.me/DonnaBot?start=TOKEN
     token: string;          // one-time token, expires in 10 minutes
   }
 }

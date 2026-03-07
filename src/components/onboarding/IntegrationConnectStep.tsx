@@ -214,7 +214,7 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
       <div>
         <h2 className="text-lg font-semibold">Connect Your Apps</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Chief of Staff reads across your digital life to deliver your daily
+          Donna reads across your digital life to deliver your daily
           briefing. Connect at least one source to get started — you can add more
           later from Settings.
         </p>

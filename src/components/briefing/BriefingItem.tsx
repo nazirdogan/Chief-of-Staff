@@ -1,8 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Check } from 'lucide-react';
 import type { BriefingItem as BriefingItemType } from '@/lib/db/types';
+import { decodeEntities } from '@/lib/utils/decode-entities';
+
+const ERROR_PATTERNS = [
+  /no .* content provided/i,
+  /failed to (process|fetch|parse)/i,
+  /error (processing|fetching)/i,
+  /could not (retrieve|extract)/i,
+  /unable to (process|parse)/i,
+  /internal (server )?error/i,
+  /unexpected (error|token)/i,
+];
+
+function isErrorSummary(text: string): boolean {
+  return ERROR_PATTERNS.some(p => p.test(text));
+}
+
+function getCitationLabel(provider: string): string {
+  switch (provider) {
+    case 'gmail':
+    case 'outlook':
+    case 'apple_icloud_mail':
+      return 'Open email';
+    case 'slack':
+    case 'microsoft_teams':
+      return 'Open thread';
+    case 'google_calendar':
+    case 'microsoft_calendar':
+    case 'calendly':
+      return 'View event';
+    case 'linear':
+    case 'github':
+    case 'jira':
+    case 'asana':
+    case 'trello':
+    case 'clickup':
+    case 'monday':
+      return 'View task';
+    case 'notion':
+    case 'google_drive':
+    case 'dropbox':
+    case 'onedrive':
+      return 'View document';
+    default:
+      return 'View original';
+  }
+}
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
@@ -31,12 +77,17 @@ interface BriefingItemProps {
 
 export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItemProps) {
   const [feedbackState, setFeedbackState] = useState<1 | -1 | null>(item.user_feedback);
+  const [feedbackConfirm, setFeedbackConfirm] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   async function handleFeedback(feedback: 1 | -1) {
     setFeedbackState(feedback);
+    setFeedbackConfirm(true);
+    setTimeout(() => setFeedbackConfirm(false), 1500);
     await onFeedback(item.id, feedback);
   }
+
+  const summaryIsError = isErrorSummary(item.summary);
 
   const priorityStyle =
     item.rank <= 2
@@ -75,7 +126,7 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
             className="text-[13px] font-semibold leading-snug tracking-[-0.01em]"
             style={{ color: c.text }}
           >
-            {item.title}
+            {decodeEntities(item.title)}
           </h3>
         </div>
         {item.action_suggestion && (
@@ -87,7 +138,7 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
               border: `1px solid rgba(168,153,104,0.25)`,
             }}
           >
-            {item.action_suggestion}
+            {decodeEntities(item.action_suggestion ?? '')}
           </span>
         )}
       </div>
@@ -95,20 +146,10 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
       {/* Summary */}
       <p
         className="mt-2 text-[13px] leading-[1.6]"
-        style={{ color: c.textSecondary }}
+        style={{ color: summaryIsError ? c.textQuaternary : c.textSecondary, fontStyle: summaryIsError ? 'italic' : 'normal' }}
       >
-        {item.summary}
+        {summaryIsError ? 'No new updates for this item.' : decodeEntities(item.summary)}
       </p>
-
-      {/* Reasoning */}
-      {item.reasoning && (
-        <p
-          className="mt-1.5 text-[12px] italic leading-relaxed"
-          style={{ color: c.textQuaternary }}
-        >
-          {item.reasoning}
-        </p>
-      )}
 
       {/* Actions row */}
       <div className="mt-3 flex items-center gap-3">
@@ -119,10 +160,16 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
           onMouseEnter={(e) => { e.currentTarget.style.color = c.text; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = c.brass; }}
         >
-          View source
+          {getCitationLabel(item.source_ref?.provider ?? '')}
         </button>
 
-        <div className="ml-auto flex items-center gap-0.5">
+        <div className="ml-auto flex items-center gap-1">
+          {feedbackConfirm && (
+            <span className="flex items-center gap-1 text-[11px] font-medium animate-fade-in" style={{ color: '#4A8C5A' }}>
+              <Check size={11} />
+              Noted
+            </span>
+          )}
           <button
             className="flex h-7 w-7 items-center justify-center rounded-md transition-all duration-200"
             style={{
@@ -136,7 +183,8 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
             onMouseLeave={(e) => {
               if (feedbackState !== 1) e.currentTarget.style.color = c.textGhost;
             }}
-            aria-label="Thumbs up"
+            title="This summary was accurate and helpful"
+            aria-label="Accurate summary"
           >
             <ThumbsUp size={13} />
           </button>
@@ -153,7 +201,8 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
             onMouseLeave={(e) => {
               if (feedbackState !== -1) e.currentTarget.style.color = c.textGhost;
             }}
-            aria-label="Thumbs down"
+            title="This summary was inaccurate or unhelpful"
+            aria-label="Inaccurate summary"
           >
             <ThumbsDown size={13} />
           </button>

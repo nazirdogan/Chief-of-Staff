@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Commitment } from '@/lib/db/types';
+import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
@@ -59,7 +60,7 @@ export function CommitmentCard({ commitment, onAction }: CommitmentCardProps) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: c.text, lineHeight: 1.4 }}>
-            {commitment.commitment_text}
+            {decodeEntities(commitment.commitment_text)}
           </div>
           <div style={{ fontSize: 12, color: c.textTertiary, marginTop: 2 }}>
             To: {commitment.recipient_name || commitment.recipient_email}
@@ -92,7 +93,7 @@ export function CommitmentCard({ commitment, onAction }: CommitmentCardProps) {
           lineHeight: 1.5,
         }}
       >
-        &ldquo;{commitment.source_quote}&rdquo;
+        &ldquo;{decodeEntities(commitment.source_quote)}&rdquo;
       </div>
 
       {commitment.implied_deadline && (

@@ -83,7 +83,7 @@ export function verifyConnectToken(token: string): { userId: string; timestamp: 
 export function getTelegramConnectUrl(token: string): string {
   // The bot username is derived from the bot token by calling getMe,
   // but for the connect URL we use the configured app URL pattern
-  return `https://t.me/${env.TELEGRAM_BOT_USERNAME ?? 'ChiefOfStaffAIBot'}?start=${token}`;
+  return `https://t.me/${env.TELEGRAM_BOT_USERNAME ?? 'DonnaAIBot'}?start=${token}`;
 }
 
 // ── Briefing formatting ───────────────────────────────────
@@ -225,7 +225,7 @@ async function handleStartCommand(
 
   if (!token) {
     return {
-      reply: 'Welcome to Chief of Staff!\n\n' +
+      reply: 'Welcome to Donna!\n\n' +
         'To connect your account, use the connect link from your dashboard at Settings > Integrations.\n\n' +
         'Once connected, you\'ll receive your daily briefing here.',
     };
@@ -286,7 +286,7 @@ async function handleBriefingCommand(chatId: string): Promise<CommandResult> {
   const userId = await getUserIdFromChatId(chatId);
   if (!userId) {
     return {
-      reply: 'Your Telegram is not connected to a Chief of Staff account.\n' +
+      reply: 'Your Telegram is not connected to a Donna account.\n' +
         'Go to Settings > Integrations to connect.',
     };
   }

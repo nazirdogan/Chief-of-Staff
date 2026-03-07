@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Chief of Staff',
-    short_name: 'Chief of Staff',
+    name: 'Donna',
+    short_name: 'Donna',
     description: 'Your AI-powered personal intelligence layer',
     start_url: '/',
     display: 'standalone',

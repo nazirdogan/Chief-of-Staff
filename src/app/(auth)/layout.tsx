@@ -13,7 +13,7 @@ export default function AuthLayout({
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background text-foreground">
             <span className="text-xs font-bold">CS</span>
           </div>
-          <span className="text-lg font-semibold tracking-tight">Chief of Staff</span>
+          <span className="text-lg font-semibold tracking-tight">Donna</span>
         </div>
 
         <div className="max-w-md space-y-4">

@@ -1,4 +1,4 @@
-# Chief of Staff — AI Agent Pipeline
+# Donna — AI Agent Pipeline
 
 All agent code lives in `lib/ai/agents/`. All prompts live in `lib/ai/prompts/`.
 All agents import models from `lib/ai/models.ts` — never hardcode model strings.

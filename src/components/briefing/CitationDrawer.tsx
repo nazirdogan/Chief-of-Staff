@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { SourceRef } from '@/lib/db/types';
+import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
@@ -54,23 +55,18 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
         onClick={onClose}
       />
 
-      {/* Drawer */}
+      {/* Modal */}
       <div
         ref={drawerRef}
-        className="fixed inset-x-0 bottom-0 z-50 max-h-[70vh] overflow-y-auto rounded-t-2xl p-6 shadow-[0_-8px_40px_rgba(0,0,0,0.3)] animate-drawer-slide-up"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 max-h-[70vh] overflow-y-auto rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.4)] animate-fade-in"
         style={{
-          background: c.surface,
-          borderTop: `1px solid ${c.border}`,
+          background: '#141415',
+          border: `1px solid ${c.border}`,
           fontFamily: "'Satoshi', sans-serif",
         }}
         role="dialog"
         aria-label={`Source citation for ${title}`}
       >
-        {/* Handle */}
-        <div
-          className="mx-auto mb-5 h-1 w-10 rounded-full"
-          style={{ background: c.border }}
-        />
 
         <div className="space-y-4">
           {/* Title row */}
@@ -79,7 +75,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
               className="text-[14px] font-semibold tracking-[-0.01em]"
               style={{ color: c.text }}
             >
-              {title}
+              {decodeEntities(title)}
             </h3>
             <button
               onClick={onClose}
@@ -151,7 +147,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
               color: c.textSecondary,
             }}
           >
-            {sourceRef.excerpt}
+            {decodeEntities(sourceRef.excerpt)}
           </blockquote>
 
           {sourceRef.url && (

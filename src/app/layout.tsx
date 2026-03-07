@@ -15,14 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Chief of Staff",
+  title: "Donna",
   description: "Your AI-powered personal intelligence layer",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Chief of Staff",
+    title: "Donna",
   },
-  applicationName: "Chief of Staff",
+  applicationName: "Donna",
 };
 
 export const viewport: Viewport = {

@@ -126,7 +126,7 @@ export default function PrivateOfficeLanding() {
               >
                 CS
               </div>
-              <span className="text-[15px] font-semibold tracking-[0.01em]" style={{ fontFamily: serif }}>Chief of Staff</span>
+              <span className="text-[15px] font-semibold tracking-[0.01em]" style={{ fontFamily: serif }}>Donna</span>
             </div>
 
             <div className="hidden md:flex items-center gap-1">
@@ -210,7 +210,7 @@ export default function PrivateOfficeLanding() {
                     transition: "opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s",
                   }}
                 >
-                  Chief of Staff reads your email, calendar, messages, and
+                  Donna reads your email, calendar, messages, and
                   documents overnight — then delivers one morning briefing
                   with exactly what matters, what you promised, and what to
                   do first.
@@ -1027,11 +1027,11 @@ export default function PrivateOfficeLanding() {
                   CS
                 </div>
                 <span className="text-[12px]" style={{ color: c.textGhost }}>
-                  Chief of Staff Inc.
+                  Donna Inc.
                 </span>
               </div>
               <p className="text-[11px]" style={{ color: c.textGhost }}>
-                &copy; 2026 Chief of Staff. All rights reserved.
+                &copy; 2026 Donna. All rights reserved.
               </p>
             </div>
           </div>

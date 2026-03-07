@@ -1,6 +1,6 @@
-# Claude Code Build Prompt — "Morning Operations Layer" (Prosser-Style Chief of Staff)
+# Claude Code Build Prompt — "Morning Operations Layer" (Prosser-Style Donna)
 
-> **What this is:** A comprehensive prompt to paste into Claude Code that will build an automated morning operations system inspired by Jim Prosser's Chief of Staff architecture, integrated into your existing Chief of Staff Next.js project. This adds a local CLI-driven orchestration layer with six parallel subagents, overnight automations, task classification, and intelligent time-blocking.
+> **What this is:** A comprehensive prompt to paste into Claude Code that will build an automated morning operations system inspired by Jim Prosser's Donna architecture, integrated into your existing Donna Next.js project. This adds a local CLI-driven orchestration layer with six parallel subagents, overnight automations, task classification, and intelligent time-blocking.
 
 ---
 
@@ -8,7 +8,7 @@
 
 ---
 
-I'm building a "Morning Operations Layer" for my existing Chief of Staff project. Read `CLAUDE.md` before doing anything, then read `docs/AGENTS.md`, `docs/INTEGRATIONS.md`, and `docs/DATABASE.md` for full context on what already exists.
+I'm building a "Morning Operations Layer" for my existing Donna project. Read `CLAUDE.md` before doing anything, then read `docs/AGENTS.md`, `docs/INTEGRATIONS.md`, and `docs/DATABASE.md` for full context on what already exists.
 
 This project is a Next.js app with Supabase, Nango OAuth, Trigger.dev background jobs, Gmail/Calendar/Slack/Outlook integrations, and an AI agent pipeline already built. I now need you to add a powerful new layer on top of it: an automated morning operations system with overnight automations, a task classifier ("AM Sweep"), six parallel subagents, and an intelligent time-blocker. All of this should be operable from the CLI (via Claude Code slash commands or standalone scripts) as well as triggerable from the web dashboard.
 

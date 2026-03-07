@@ -1,4 +1,4 @@
-# Chief of Staff — Database Schema
+# Donna — Database Schema
 
 **Database**: Supabase PostgreSQL  
 **Region**: AWS me-south-1 (Bahrain) — UAE data residency default  

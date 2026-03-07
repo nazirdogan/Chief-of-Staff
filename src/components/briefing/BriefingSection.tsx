@@ -16,6 +16,26 @@ import {
 import type { BriefingItem as BriefingItemType, BriefingItemSection as SectionType } from '@/lib/db/types';
 import { BriefingItem } from './BriefingItem';
 
+const ERROR_PATTERNS = [
+  /no .* content provided/i,
+  /failed to (process|fetch|parse)/i,
+  /error (processing|fetching)/i,
+  /could not (retrieve|extract)/i,
+  /unable to (process|parse)/i,
+  /internal (server )?error/i,
+  /unexpected (error|token)/i,
+];
+
+const SECTION_EMPTY_MESSAGES: Partial<Record<SectionType, string>> = {
+  vip_inbox: 'No new messages from your key contacts.',
+  action_required: 'Nothing requiring your action right now.',
+  awaiting_reply: 'No pending replies to chase.',
+  todays_schedule: 'Your calendar is clear today.',
+  commitment_queue: 'No outstanding commitments.',
+  at_risk: 'All relationships in good standing.',
+  priority_inbox: 'No other messages to review.',
+};
+
 const c = {
   text: '#FFFFFF',
   textTertiary: 'rgba(255,255,255,0.55)',
@@ -93,8 +113,13 @@ export function BriefingSection({ section, items, onFeedback, onCitationClick }:
   const meta = SECTION_META[section];
   const Icon = meta.icon;
 
+  // Check if ALL items in this section have error summaries
+  const allErrored = items.every(item =>
+    ERROR_PATTERNS.some(p => p.test(item.summary))
+  );
+
   return (
-    <section className="space-y-3">
+    <section id={`section-${section}`} className="space-y-3">
       {/* Section header */}
       <div className="flex items-center gap-2.5">
         <div
@@ -109,18 +134,20 @@ export function BriefingSection({ section, items, onFeedback, onCitationClick }:
         >
           {meta.label}
         </h2>
-        <span
-          className="rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums"
-          style={{
-            background: c.brassSubtle,
-            color: c.textQuaternary,
-          }}
-        >
-          {items.length}
-        </span>
+        {!allErrored && (
+          <span
+            className="rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums"
+            style={{
+              background: c.brassSubtle,
+              color: c.textQuaternary,
+            }}
+          >
+            {items.length}
+          </span>
+        )}
       </div>
 
-      {meta.description && (
+      {meta.description && !allErrored && (
         <p
           className="text-[12px] -mt-1 ml-[34px]"
           style={{ color: c.textQuaternary }}
@@ -129,16 +156,25 @@ export function BriefingSection({ section, items, onFeedback, onCitationClick }:
         </p>
       )}
 
-      <div className="space-y-2">
-        {items.map(item => (
-          <BriefingItem
-            key={item.id}
-            item={item}
-            onFeedback={onFeedback}
-            onCitationClick={onCitationClick}
-          />
-        ))}
-      </div>
+      {allErrored ? (
+        <p
+          className="text-[12px] ml-[34px] italic"
+          style={{ color: c.textQuaternary }}
+        >
+          {SECTION_EMPTY_MESSAGES[section] ?? 'No updates for this section.'}
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {items.map(item => (
+            <BriefingItem
+              key={item.id}
+              item={item}
+              onFeedback={onFeedback}
+              onCitationClick={onCitationClick}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

@@ -1,4 +1,4 @@
-# Chief of Staff — Security Architecture
+# Donna — Security Architecture
 
 This document is the security reference for the codebase. Every security mechanism
 described here must be implemented before beta launch. Nothing ships without it.

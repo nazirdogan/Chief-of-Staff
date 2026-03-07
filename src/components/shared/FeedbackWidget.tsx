@@ -94,7 +94,7 @@ export function FeedbackWidget() {
               Send feedback
             </h3>
             <p className="mt-0.5 text-[12px]" style={{ color: c.textQuaternary }}>
-              Help us improve Chief of Staff during beta.
+              Help us improve Donna during beta.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-3">
