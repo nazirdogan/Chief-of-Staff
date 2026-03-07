@@ -82,3 +82,43 @@ export async function getTodaysParsedEvents(
   const events = await getTodaysEvents(userId);
   return events.map(parseCalendarEvent);
 }
+
+export async function getEventsForDateRange(
+  userId: string,
+  timeMin: Date,
+  timeMax: Date
+): Promise<ParsedCalendarEvent[]> {
+  const calendar = await getCalendarClient(userId);
+
+  const response = await calendar.events.list({
+    calendarId: 'primary',
+    timeMin: timeMin.toISOString(),
+    timeMax: timeMax.toISOString(),
+    singleEvents: true,
+    orderBy: 'startTime',
+    maxResults: 50,
+  });
+
+  return (response.data.items ?? []).map(parseCalendarEvent);
+}
+
+export async function createCalendarEvent(
+  userId: string,
+  event: {
+    summary: string;
+    description?: string;
+    location?: string;
+    start: { dateTime: string; timeZone?: string };
+    end: { dateTime: string; timeZone?: string };
+    colorId?: string;
+  }
+): Promise<string> {
+  const calendar = await getCalendarClient(userId);
+
+  const response = await calendar.events.insert({
+    calendarId: 'primary',
+    requestBody: event,
+  });
+
+  return response.data.id ?? '';
+}

@@ -41,7 +41,7 @@ export async function fetchOutlookInbox(userId: string, maxResults = 20) {
     .api('/me/mailFolders/inbox/messages')
     .select('id,subject,from,receivedDateTime,bodyPreview,isRead,conversationId')
     .top(maxResults)
-    .filter('isRead eq false')
+    .filter("isRead eq false and inferenceClassification eq 'focused'")
     .orderby('receivedDateTime DESC')
     .get();
 
@@ -80,6 +80,50 @@ export async function fetchOutlookSentMessages(
     .get();
 
   return (response.value ?? []) as Array<Record<string, unknown>>;
+}
+
+/**
+ * Fetch sent emails from yesterday that haven't received a reply.
+ */
+export async function fetchOutlookSentAwaitingReply(
+  userId: string,
+  maxResults = 15
+): Promise<ParsedOutlookMessage[]> {
+  const client = await getGraphClient(userId);
+  const yesterday = new Date(Date.now() - 86400000).toISOString();
+  const twoDaysAgo = new Date(Date.now() - 2 * 86400000).toISOString();
+
+  // Get sent messages from yesterday
+  const sentResponse = await client
+    .api('/me/mailFolders/sentItems/messages')
+    .select('id,subject,from,toRecipients,receivedDateTime,bodyPreview,conversationId')
+    .top(maxResults)
+    .filter(`receivedDateTime ge ${twoDaysAgo} and receivedDateTime le ${yesterday}`)
+    .orderby('receivedDateTime DESC')
+    .get();
+
+  const sentMessages = (sentResponse.value ?? []) as Array<Record<string, unknown>>;
+  const awaiting: ParsedOutlookMessage[] = [];
+
+  for (const sent of sentMessages) {
+    const conversationId = sent.conversationId as string;
+    if (!conversationId) continue;
+
+    // Check if there's a reply in the inbox for this conversation
+    const replyResponse = await client
+      .api('/me/mailFolders/inbox/messages')
+      .select('id')
+      .top(1)
+      .filter(`conversationId eq '${conversationId}' and receivedDateTime ge ${yesterday}`)
+      .get();
+
+    const replies = (replyResponse.value ?? []) as Array<Record<string, unknown>>;
+    if (replies.length === 0) {
+      awaiting.push(parseOutlookMessage(sent, true));
+    }
+  }
+
+  return awaiting;
 }
 
 export function parseOutlookMessage(

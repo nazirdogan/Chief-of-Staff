@@ -38,15 +38,19 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Unauthenticated users trying to access dashboard routes -> redirect to login
+  // Public routes that don't require authentication
+  const isPublicRoute = pathname === '/' || pathname === '/beta';
+  if (isPublicRoute) return response;
+
   const isDashboardRoute =
-    pathname === '/' ||
+    pathname === '/dashboard' ||
     pathname.startsWith('/inbox') ||
     pathname.startsWith('/calendar') ||
     pathname.startsWith('/commitments') ||
     pathname.startsWith('/people') ||
     pathname.startsWith('/heartbeat') ||
-    pathname.startsWith('/settings');
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/admin');
 
   const isOnboardingRoute = pathname === '/onboarding';
 
@@ -76,7 +80,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 

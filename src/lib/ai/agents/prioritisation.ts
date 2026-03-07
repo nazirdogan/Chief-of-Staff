@@ -3,6 +3,8 @@ import { AI_MODELS } from '@/lib/ai/models';
 import { buildSafeAIContext } from '@/lib/ai/safety/sanitise';
 import type { InboxItem, Commitment, Contact, BriefingItemType, BriefingItemSection, SourceRef } from '@/lib/db/types';
 import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
+import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
+import type { ParsedOutlookMessage } from '@/lib/integrations/outlook';
 
 const anthropic = new Anthropic();
 
@@ -49,6 +51,16 @@ function scoreUrgency(item: BriefingItemCandidate): number {
     score = Math.max(score, 7);
   }
 
+  // VIP inbox items get urgency boost
+  if (item.section === 'vip_inbox') {
+    score = Math.max(score, 8);
+  }
+
+  // Action-required items are inherently urgent
+  if (item.section === 'action_required') {
+    score = Math.max(score, 7);
+  }
+
   return Math.min(10, Math.max(1, score));
 }
 
@@ -66,6 +78,11 @@ function scoreImportance(item: BriefingItemCandidate, ctx: UserContext): number 
     score += 2;
   }
 
+  // VIP items are always important
+  if (item.section === 'vip_inbox') {
+    score = Math.max(score, 9);
+  }
+
   return Math.min(10, Math.max(1, score));
 }
 
@@ -80,11 +97,15 @@ function scoreRisk(item: BriefingItemCandidate): number {
     score += 3;
   }
 
+  // Awaiting reply = risk of dropped ball
+  if (item.section === 'awaiting_reply') {
+    score += 3;
+  }
+
   return Math.min(10, Math.max(1, score));
 }
 
 function scoreEffort(item: BriefingItemCandidate): number {
-  // Quick wins get higher priority — inverted scale (10 = easiest)
   if (item.item_type === 'relationship_alert') return 8;
   if (item.item_type === 'email') return 7;
   if (item.item_type === 'commitment') return 5;
@@ -118,9 +139,9 @@ function extractText(content: Anthropic.ContentBlock[]): string {
   return '';
 }
 
-const REASONING_PROMPT = `You are generating brief ranking explanations for a daily briefing.
+const REASONING_PROMPT = `You are generating brief ranking explanations for a C-Suite executive's daily briefing.
 For each item, write ONE sentence explaining why it was ranked at this position.
-Start with "Ranked #N because..." and reference the specific signal (VIP sender, approaching deadline, at-risk commitment, etc.).
+Start with "Ranked #N because..." and reference the specific signal (VIP sender, approaching deadline, at-risk commitment, awaiting reply, etc.).
 
 Return a JSON array of objects: [{ "rank": 1, "reasoning": "..." }, ...]
 Respond ONLY with JSON.`;
@@ -135,13 +156,14 @@ async function generateReasoning(
   }>,
   ctx: UserContext
 ): Promise<RankedBriefingItem[]> {
-  const topItems = scored.slice(0, 15);
+  const topItems = scored.slice(0, 20);
 
   if (topItems.length === 0) return [];
 
   const itemSummaries = topItems.map(item => ({
     rank: item.rank,
     type: item.item_type,
+    section: item.section,
     title: item.title,
     summary: item.summary,
     urgency: item.urgency_score,
@@ -162,7 +184,7 @@ async function generateReasoning(
   try {
     const response = await anthropic.messages.create({
       model: AI_MODELS.STANDARD,
-      max_tokens: 800,
+      max_tokens: 1000,
       messages: [{ role: 'user', content: context }],
     });
 
@@ -179,7 +201,6 @@ async function generateReasoning(
       reasoning: reasoningMap.get(item.rank) ?? `Ranked #${item.rank} based on composite score of ${item.composite_score.toFixed(1)}`,
     }));
   } catch {
-    // Fallback reasoning if AI fails
     return topItems.map(item => ({
       ...item,
       reasoning: `Ranked #${item.rank} based on composite score of ${item.composite_score.toFixed(1)}`,
@@ -216,10 +237,24 @@ export async function prioritiseItems(
 
 // ── Candidate mapping functions ──
 
-export function mapInboxItemToCandidate(item: InboxItem): BriefingItemCandidate {
+/**
+ * Map an inbox item to the appropriate section based on executive priorities.
+ * VIP senders → vip_inbox, needs_reply → action_required, otherwise → priority_inbox
+ */
+export function mapInboxItemToCandidate(
+  item: InboxItem,
+  vipEmails: string[] = []
+): BriefingItemCandidate {
+  const isVip = vipEmails.includes(item.from_email);
+  const section: BriefingItemSection = isVip
+    ? 'vip_inbox'
+    : item.needs_reply
+      ? 'action_required'
+      : 'priority_inbox';
+
   return {
     item_type: 'email',
-    section: 'priority_inbox',
+    section,
     title: item.subject ?? '(No subject)',
     summary: item.ai_summary ?? '',
     source_ref: {
@@ -293,5 +328,73 @@ export function mapColdContactToCandidate(contact: Contact): BriefingItemCandida
     action_suggestion: 'Send a quick check-in',
     from_email: contact.email,
     raw_urgency: contact.is_vip ? 7 : 5,
+  };
+}
+
+/**
+ * Map a sent message awaiting reply to the awaiting_reply section.
+ */
+export function mapSentAwaitingReplyToCandidate(
+  message: ParsedGmailMessage | ParsedOutlookMessage,
+  provider: 'gmail' | 'outlook'
+): BriefingItemCandidate {
+  const isGmail = provider === 'gmail';
+  const subject = isGmail
+    ? (message as ParsedGmailMessage).subject
+    : (message as ParsedOutlookMessage).subject;
+  const to = isGmail
+    ? (message as ParsedGmailMessage).to
+    : (message as ParsedOutlookMessage).to;
+  const id = isGmail
+    ? (message as ParsedGmailMessage).id
+    : (message as ParsedOutlookMessage).id;
+  const date = isGmail
+    ? (message as ParsedGmailMessage).date
+    : (message as ParsedOutlookMessage).date;
+  const snippet = isGmail
+    ? (message as ParsedGmailMessage).snippet
+    : (message as ParsedOutlookMessage).bodyPreview;
+
+  return {
+    item_type: 'email',
+    section: 'awaiting_reply',
+    title: subject || '(No subject)',
+    summary: `Sent to ${to} — no reply yet`,
+    source_ref: {
+      provider,
+      message_id: id,
+      excerpt: snippet,
+      sent_at: date ? new Date(date).toISOString() : undefined,
+    },
+    action_suggestion: 'Consider following up',
+    raw_urgency: 6,
+  };
+}
+
+/**
+ * Map an after-hours email to the after_hours section.
+ */
+export function mapAfterHoursToCandidate(
+  message: ParsedGmailMessage
+): BriefingItemCandidate {
+  const receivedDate = new Date(message.date);
+  const timeStr = receivedDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+  return {
+    item_type: 'email',
+    section: 'after_hours',
+    title: message.subject || '(No subject)',
+    summary: `From ${message.fromName || message.from} at ${timeStr}`,
+    source_ref: {
+      provider: 'gmail',
+      message_id: message.id,
+      excerpt: message.snippet,
+      sent_at: message.date ? new Date(message.date).toISOString() : undefined,
+      from_name: message.fromName,
+      thread_id: message.threadId,
+    },
+    action_suggestion: 'Review',
+    from_email: message.from,
+    raw_urgency: 5,
   };
 }

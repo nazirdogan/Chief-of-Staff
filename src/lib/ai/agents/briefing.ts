@@ -6,6 +6,8 @@ import {
   mapCommitmentToCandidate,
   mapEventToCandidate,
   mapColdContactToCandidate,
+  mapSentAwaitingReplyToCandidate,
+  mapAfterHoursToCandidate,
 } from './prioritisation';
 import { generateMeetingPrep } from './meeting-prep';
 import type { MeetingPrep } from './meeting-prep';
@@ -23,6 +25,18 @@ export interface GeneratedBriefing extends Briefing {
   items: BriefingItem[];
   meeting_preps: MeetingPrep[];
 }
+
+// Executive briefing section order
+const SECTION_ORDER: BriefingItemSection[] = [
+  'todays_schedule',
+  'commitment_queue',
+  'vip_inbox',
+  'action_required',
+  'awaiting_reply',
+  'after_hours',
+  'at_risk',
+  'priority_inbox',
+];
 
 async function getUserContext(
   supabase: ReturnType<typeof createServiceClient>,
@@ -49,24 +63,60 @@ async function getTodaysCalendarEvents(userId: string): Promise<ParsedCalendarEv
     const gcalEvents = await getTodaysParsedEvents(userId);
     events.push(...gcalEvents);
   } catch {
-    // Google Calendar not connected or error — continue
+    // Google Calendar not connected or error
   }
 
   // Outlook Calendar
   try {
     const { getTodaysOutlookEvents } = await import('@/lib/integrations/outlook');
     const outlookEvents = await getTodaysOutlookEvents(userId);
-    // Map to ParsedCalendarEvent shape (same structure)
-    events.push(...outlookEvents.map(e => ({
-      ...e,
-    })));
+    events.push(...outlookEvents.map(e => ({ ...e })));
   } catch {
-    // Outlook not connected or error — continue
+    // Outlook not connected or error
   }
 
-  // Sort all events by start time
   events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
   return events;
+}
+
+/**
+ * Fetch sent emails awaiting reply from Gmail and Outlook.
+ */
+async function getSentAwaitingReply(userId: string): Promise<BriefingItemCandidate[]> {
+  const candidates: BriefingItemCandidate[] = [];
+
+  // Gmail sent-awaiting-reply
+  try {
+    const { fetchSentAwaitingReply } = await import('@/lib/integrations/gmail');
+    const gmailSent = await fetchSentAwaitingReply(userId);
+    candidates.push(...gmailSent.map(m => mapSentAwaitingReplyToCandidate(m, 'gmail')));
+  } catch {
+    // Gmail not connected or error
+  }
+
+  // Outlook sent-awaiting-reply
+  try {
+    const { fetchOutlookSentAwaitingReply } = await import('@/lib/integrations/outlook');
+    const outlookSent = await fetchOutlookSentAwaitingReply(userId);
+    candidates.push(...outlookSent.map(m => mapSentAwaitingReplyToCandidate(m, 'outlook')));
+  } catch {
+    // Outlook not connected or error
+  }
+
+  return candidates;
+}
+
+/**
+ * Fetch after-hours email arrivals from Gmail.
+ */
+async function getAfterHoursEmails(userId: string): Promise<BriefingItemCandidate[]> {
+  try {
+    const { fetchAfterHoursMessages } = await import('@/lib/integrations/gmail');
+    const messages = await fetchAfterHoursMessages(userId);
+    return messages.map(mapAfterHoursToCandidate);
+  } catch {
+    return [];
+  }
 }
 
 function buildBriefingSections(
@@ -75,21 +125,13 @@ function buildBriefingSections(
   section: BriefingItemSection;
   items: RankedBriefingItem[];
 }> {
-  const sectionOrder: BriefingItemSection[] = [
-    'priority_inbox',
-    'todays_schedule',
-    'commitment_queue',
-    'at_risk',
-    'quick_wins',
-  ];
-
   const grouped: Record<string, RankedBriefingItem[]> = {};
   for (const item of ranked) {
     if (!grouped[item.section]) grouped[item.section] = [];
     grouped[item.section].push(item);
   }
 
-  return sectionOrder
+  return SECTION_ORDER
     .filter(section => grouped[section]?.length)
     .map(section => ({
       section,
@@ -107,6 +149,8 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     commitments,
     todaysEvents,
     coldContacts,
+    sentAwaitingReply,
+    afterHoursEmails,
     userContext,
     profile,
   ] = await Promise.all([
@@ -114,19 +158,29 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     listCommitments(supabase, userId, { status: 'open' }),
     getTodaysCalendarEvents(userId),
     getColdContacts(supabase, userId),
+    getSentAwaitingReply(userId),
+    getAfterHoursEmails(userId),
     getUserContext(supabase, userId),
     getProfile(supabase, userId),
   ]);
 
-  // Build candidate items for all sections
+  // Build candidate items with executive-focused section assignment
   const candidates: BriefingItemCandidate[] = [
-    ...inboxItems.map(mapInboxItemToCandidate),
+    // Inbox items routed to vip_inbox, action_required, or priority_inbox
+    ...inboxItems.map(item => mapInboxItemToCandidate(item, userContext.vipEmails)),
+    // Commitments
     ...commitments.map(mapCommitmentToCandidate),
+    // Calendar events for today
     ...todaysEvents.map(mapEventToCandidate),
+    // Cold contacts at risk
     ...coldContacts.map(mapColdContactToCandidate),
+    // Sent emails awaiting reply
+    ...sentAwaitingReply,
+    // After-hours arrivals
+    ...afterHoursEmails,
   ];
 
-  // Prioritise and rank
+  // Prioritise within each section
   const ranked = await prioritiseItems(candidates, userContext);
 
   // Generate meeting prep for each today's event
@@ -146,7 +200,7 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
   const generationMs = Date.now() - startTime;
   const briefingDate = new Date().toISOString().split('T')[0];
 
-  // Write briefing to database (including meeting preps)
+  // Write briefing to database
   const briefing = await insertBriefing(supabase, {
     user_id: userId,
     briefing_date: briefingDate,

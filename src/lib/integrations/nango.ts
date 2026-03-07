@@ -9,32 +9,61 @@ function getNango(): Nango {
   return nangoClient;
 }
 
-function connectionId(userId: string, provider: string): string {
-  return `${userId}-${provider}`;
-}
-
 export async function getAccessToken(
   userId: string,
   provider: string
 ): Promise<string> {
   const nango = getNango();
-  const connection = await nango.getConnection(
-    provider,
-    connectionId(userId, provider)
-  );
+  // Nango Connect uses end_user.id as the connection lookup
+  const connections = await nango.listConnections({ userId, integrationId: provider });
+  const conn = connections.connections?.[0];
+  if (!conn) throw new Error(`No ${provider} connection found for user`);
+
+  const connection = await nango.getConnection(provider, conn.connection_id);
   return (connection.credentials as { access_token: string }).access_token;
 }
 
-export async function getConnectUrl(
+/**
+ * Creates a Nango Connect session and returns the session token.
+ * The frontend SDK uses this token to open the real OAuth popup.
+ */
+export async function createConnectSession(
   userId: string,
-  provider: string
+  provider: string,
+  scopes?: string[]
 ): Promise<string> {
   const nango = getNango();
-  const sessionToken = await nango.createConnectSession({
+  const session = await nango.createConnectSession({
     end_user: { id: userId },
     allowed_integrations: [provider],
+    ...(scopes && scopes.length > 0 && {
+      integrations_config_defaults: {
+        [provider]: {
+          user_scopes: scopes.join(' '),
+          authorization_params: {
+            scope: scopes.join(' '),
+          },
+        },
+      },
+    }),
   });
-  return `https://connect.nango.dev?session_token=${sessionToken.data.token}`;
+  return session.data.token;
+}
+
+/**
+ * List all connections for a user, optionally filtered by provider.
+ * Used to check if a user has connected a specific provider.
+ */
+export async function listUserConnections(
+  userId: string,
+  provider?: string
+) {
+  const nango = getNango();
+  const result = await nango.listConnections({
+    userId,
+    ...(provider && { integrationId: provider }),
+  });
+  return result.connections ?? [];
 }
 
 export async function deleteConnection(
@@ -42,7 +71,12 @@ export async function deleteConnection(
   provider: string
 ): Promise<void> {
   const nango = getNango();
-  await nango.deleteConnection(provider, connectionId(userId, provider));
+  // Find the connection for this user+provider
+  const connections = await nango.listConnections({ userId, integrationId: provider });
+  const conn = connections.connections?.[0];
+  if (conn) {
+    await nango.deleteConnection(provider, conn.connection_id);
+  }
 }
 
 export async function getConnectionDetails(
@@ -51,11 +85,10 @@ export async function getConnectionDetails(
 ) {
   const nango = getNango();
   try {
-    const connection = await nango.getConnection(
-      provider,
-      connectionId(userId, provider)
-    );
-    return connection;
+    const connections = await nango.listConnections({ userId, integrationId: provider });
+    const conn = connections.connections?.[0];
+    if (!conn) return null;
+    return await nango.getConnection(provider, conn.connection_id);
   } catch {
     return null;
   }

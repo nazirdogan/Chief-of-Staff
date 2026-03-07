@@ -77,6 +77,25 @@ export async function upsertInboxItem(
   return data as InboxItem;
 }
 
+/**
+ * Remove all inbox items for a user+provider so a fresh sync replaces stale data.
+ * Called before re-ingesting to ensure promotional/filtered items don't linger.
+ */
+export async function clearInboxItems(
+  supabase: Client,
+  userId: string,
+  provider: IntegrationProvider
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
+    .from('inbox_items')
+    .delete()
+    .eq('user_id', userId)
+    .eq('provider', provider);
+
+  if (error) throw error;
+}
+
 export async function updateInboxItem(
   supabase: Client,
   userId: string,

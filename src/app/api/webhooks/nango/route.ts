@@ -8,10 +8,48 @@ import type { IntegrationProvider } from '@/lib/db/types';
 const NANGO_TO_DB_PROVIDER: Record<string, IntegrationProvider> = {
   'google-mail': 'gmail',
   'google-calendar': 'google_calendar',
+  'google-drive': 'google_drive',
   microsoft: 'outlook',
+  'microsoft-teams': 'microsoft_teams',
   slack: 'slack',
   notion: 'notion',
+  icloud: 'apple_icloud_mail',
+  calendly: 'calendly',
+  linkedin: 'linkedin',
+  twitter: 'twitter',
+  dropbox: 'dropbox',
+  asana: 'asana',
+  monday: 'monday',
+  jira: 'jira',
+  linear: 'linear',
+  clickup: 'clickup',
+  trello: 'trello',
+  hubspot: 'hubspot',
+  salesforce: 'salesforce',
+  pipedrive: 'pipedrive',
+  github: 'github',
 };
+
+/**
+ * Extract the user ID from a Nango webhook payload.
+ * Nango Connect uses end_user.id; legacy flows use connectionId format "{userId}-{provider}".
+ */
+function extractUserId(payload: Record<string, unknown>): string | null {
+  // Nango Connect: end_user.id is the user ID
+  const endUser = payload.endUser as { id?: string } | undefined;
+  if (endUser?.id) return endUser.id;
+
+  // Legacy: connectionId format "{userId}-{provider}"
+  const connectionId = payload.connectionId as string | undefined;
+  if (connectionId) {
+    const dashIndex = connectionId.indexOf('-');
+    if (dashIndex !== -1) return connectionId.slice(0, dashIndex);
+    // If no dash, the connectionId might be the userId itself (Nango Connect)
+    return connectionId;
+  }
+
+  return null;
+}
 
 // Public route — Nango webhook handler for connection events
 export async function POST(req: NextRequest) {
@@ -24,22 +62,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const payload = JSON.parse(body);
-  const { type, connectionId, providerConfigKey } = payload as {
-    type: string;
-    connectionId: string;
-    providerConfigKey: string;
-  };
+  const payload = JSON.parse(body) as Record<string, unknown>;
+  const type = payload.type as string;
+  const providerConfigKey = payload.providerConfigKey as string;
+  const connectionId = payload.connectionId as string;
 
-  // connectionId format: "{userId}-{provider}"
-  const dashIndex = connectionId.indexOf('-');
-  if (dashIndex === -1) {
-    return NextResponse.json({ error: 'Invalid connection ID format' }, { status: 400 });
+  const userId = extractUserId(payload);
+  if (!userId) {
+    return NextResponse.json({ error: 'Could not determine user ID' }, { status: 400 });
   }
 
-  const userId = connectionId.slice(0, dashIndex);
   const dbProvider = NANGO_TO_DB_PROVIDER[providerConfigKey];
-
   if (!dbProvider) {
     // Unknown provider — acknowledge but don't process
     return NextResponse.json({ received: true });
@@ -49,7 +82,6 @@ export async function POST(req: NextRequest) {
 
   switch (type) {
     case 'auth': {
-      // New connection established
       await upsertIntegration(supabase, userId, dbProvider, {
         status: 'connected',
         nango_connection_id: connectionId,
@@ -58,7 +90,6 @@ export async function POST(req: NextRequest) {
     }
 
     case 'token_refresh': {
-      // Token refreshed — update last_synced_at
       await upsertIntegration(supabase, userId, dbProvider, {
         status: 'connected',
         nango_connection_id: connectionId,
@@ -67,7 +98,6 @@ export async function POST(req: NextRequest) {
     }
 
     case 'token_refresh_error': {
-      // Refresh failed — mark as error
       await updateIntegrationStatus(
         supabase,
         userId,
@@ -79,7 +109,6 @@ export async function POST(req: NextRequest) {
     }
 
     default:
-      // Unknown event type — acknowledge
       break;
   }
 

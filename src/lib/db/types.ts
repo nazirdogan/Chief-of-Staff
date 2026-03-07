@@ -17,7 +17,23 @@ export type IntegrationProvider =
   | 'todoist'
   | 'linear'
   | 'hubspot'
-  | 'salesforce';
+  | 'salesforce'
+  // TIER 1 — added in migration 002
+  | 'apple_icloud_mail'
+  | 'apple_icloud_calendar'
+  | 'calendly'
+  | 'microsoft_teams'
+  | 'linkedin'
+  | 'twitter'
+  // TIER 2 — added in migration 002
+  | 'dropbox'
+  | 'asana'
+  | 'monday'
+  | 'jira'
+  | 'clickup'
+  | 'trello'
+  | 'pipedrive'
+  | 'github';
 
 export type IntegrationStatus = 'connected' | 'disconnected' | 'error' | 'pending';
 
@@ -28,13 +44,20 @@ export type BriefingItemType =
   | 'relationship_alert'
   | 'document'
   | 'task'
-  | 'slack_message';
+  | 'slack_message'
+  | 'dm'
+  | 'calendar_booking'
+  | 'pull_request';
 
 export type BriefingItemSection =
-  | 'priority_inbox'
-  | 'commitment_queue'
-  | 'at_risk'
   | 'todays_schedule'
+  | 'commitment_queue'
+  | 'vip_inbox'
+  | 'action_required'
+  | 'awaiting_reply'
+  | 'after_hours'
+  | 'at_risk'
+  | 'priority_inbox'
   | 'decision_queue'
   | 'quick_wins'
   | 'people_context';
@@ -66,6 +89,28 @@ export type DataRegion = 'me-south-1' | 'eu-central-1' | 'us-east-1';
 
 export type SubscriptionTier = 'free' | 'pro' | 'power' | 'team';
 
+export type WaitlistStatus = 'pending' | 'approved' | 'rejected';
+
+export type FeedbackType = 'bug' | 'feature' | 'general' | 'praise';
+
+export type OperationCategory = 'green' | 'yellow' | 'red' | 'gray';
+
+export type OperationRunType = 'overnight_email' | 'overnight_calendar' | 'am_sweep' | 'time_block';
+
+export type OperationRunStatus = 'running' | 'completed' | 'failed';
+
+export type SubagentType =
+  | 'email_drafter'
+  | 'notes_updater'
+  | 'meeting_scheduler'
+  | 'researcher'
+  | 'task_executor'
+  | 'prep_agent';
+
+export type TimeBlockType = 'task' | 'errand_batch' | 'deep_work' | 'exercise' | 'transit' | 'buffer';
+
+export type TimeBlockStatus = 'proposed' | 'confirmed' | 'completed' | 'skipped';
+
 // ── Row types ──────────────────────────────────────────────
 
 export interface Profile {
@@ -84,6 +129,7 @@ export interface Profile {
   onboarding_completed: boolean;
   privacy_mode: boolean;
   two_factor_enabled: boolean;
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -321,6 +367,84 @@ export interface InboxItem {
   received_at: string;
   snoozed_until: string | null;
   actioned_at: string | null;
+  // Operations layer fields
+  operation_category: OperationCategory | null;
+  operation_context: Record<string, unknown>;
+  estimated_duration_minutes: number | null;
+  task_tags: string[];
+  task_title: string | null;
+  deferred_to: string | null;
+  defer_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OperationRun {
+  id: string;
+  user_id: string;
+  run_type: OperationRunType;
+  status: OperationRunStatus;
+  started_at: string;
+  completed_at: string | null;
+  result: Record<string, unknown>;
+  error: string | null;
+  created_at: string;
+}
+
+export interface SubagentRun {
+  id: string;
+  operation_run_id: string;
+  user_id: string;
+  agent_type: SubagentType;
+  task_ids: string[];
+  status: OperationRunStatus;
+  started_at: string;
+  completed_at: string | null;
+  result: Record<string, unknown>;
+  error: string | null;
+  created_at: string;
+}
+
+export interface TransitEvent {
+  id: string;
+  user_id: string;
+  calendar_event_id: string;
+  origin_location: string | null;
+  destination_location: string | null;
+  drive_duration_seconds: number;
+  departure_time: string;
+  arrival_time: string;
+  google_calendar_event_id: string | null;
+  created_at: string;
+}
+
+export interface TimeBlock {
+  id: string;
+  user_id: string;
+  operation_run_id: string | null;
+  task_id: string | null;
+  title: string;
+  start_time: string;
+  end_time: string;
+  block_type: TimeBlockType;
+  location: string | null;
+  google_calendar_event_id: string | null;
+  status: TimeBlockStatus;
+  created_at: string;
+}
+
+export interface UserOperationsConfig {
+  user_id: string;
+  overnight_enabled: boolean;
+  overnight_run_time: string;
+  home_tasks_after: string;
+  exercise_days: number[];
+  exercise_duration_minutes: number;
+  default_buffer_minutes: number;
+  deep_work_preferred_time: string;
+  errand_batch_enabled: boolean;
+  home_address: string | null;
+  office_address: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -344,6 +468,32 @@ export interface UserSession {
   ip_address: string | null;
   last_active_at: string;
   revoked_at: string | null;
+  created_at: string;
+}
+
+export interface WaitlistEntry {
+  id: string;
+  email: string;
+  full_name: string | null;
+  company: string | null;
+  role: string | null;
+  referral: string | null;
+  status: WaitlistStatus;
+  notes: string | null;
+  approved_at: string | null;
+  approved_by: string | null;
+  created_at: string;
+}
+
+export interface UserFeedback {
+  id: string;
+  user_id: string;
+  type: FeedbackType;
+  message: string;
+  page: string | null;
+  rating: number | null;
+  metadata: Record<string, unknown>;
+  resolved: boolean;
   created_at: string;
 }
 
@@ -460,12 +610,69 @@ export interface Database {
       };
       inbox_items: {
         Row: InboxItem;
-        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at' | 'operation_category' | 'operation_context' | 'estimated_duration_minutes' | 'task_tags' | 'task_title' | 'deferred_to' | 'defer_reason'> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
+          operation_category?: OperationCategory | null;
+          operation_context?: Record<string, unknown>;
+          estimated_duration_minutes?: number | null;
+          task_tags?: string[];
+          task_title?: string | null;
+          deferred_to?: string | null;
+          defer_reason?: string | null;
         };
         Update: Partial<Omit<InboxItem, 'id'>>;
+      };
+      operation_runs: {
+        Row: OperationRun;
+        Insert: Omit<OperationRun, 'id' | 'started_at' | 'created_at'> & {
+          id?: string;
+          started_at?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<OperationRun, 'id'>>;
+      };
+      subagent_runs: {
+        Row: SubagentRun;
+        Insert: Omit<SubagentRun, 'id' | 'started_at' | 'created_at'> & {
+          id?: string;
+          started_at?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<SubagentRun, 'id'>>;
+      };
+      transit_events: {
+        Row: TransitEvent;
+        Insert: Omit<TransitEvent, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<TransitEvent, 'id'>>;
+      };
+      time_blocks: {
+        Row: TimeBlock;
+        Insert: Omit<TimeBlock, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<TimeBlock, 'id'>>;
+      };
+      user_operations_config: {
+        Row: UserOperationsConfig;
+        Insert: Omit<UserOperationsConfig, 'created_at' | 'updated_at'> & {
+          created_at?: string;
+          updated_at?: string;
+          overnight_enabled?: boolean;
+          overnight_run_time?: string;
+          home_tasks_after?: string;
+          exercise_days?: number[];
+          exercise_duration_minutes?: number;
+          default_buffer_minutes?: number;
+          deep_work_preferred_time?: string;
+          errand_batch_enabled?: boolean;
+        };
+        Update: Partial<Omit<UserOperationsConfig, 'user_id'>>;
       };
       telegram_sessions: {
         Row: TelegramSession;
@@ -483,6 +690,22 @@ export interface Database {
           last_active_at?: string;
         };
         Update: Partial<Omit<UserSession, 'id'>>;
+      };
+      waitlist: {
+        Row: WaitlistEntry;
+        Insert: Omit<WaitlistEntry, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<WaitlistEntry, 'id'>>;
+      };
+      user_feedback: {
+        Row: UserFeedback;
+        Insert: Omit<UserFeedback, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<UserFeedback, 'id'>>;
       };
     };
     Functions: {
@@ -516,6 +739,14 @@ export interface Database {
       heartbeat_frequency: HeartbeatFrequency;
       data_region: DataRegion;
       subscription_tier: SubscriptionTier;
+      waitlist_status: WaitlistStatus;
+      feedback_type: FeedbackType;
+      operation_category: OperationCategory;
+      operation_run_type: OperationRunType;
+      operation_run_status: OperationRunStatus;
+      subagent_type: SubagentType;
+      time_block_type: TimeBlockType;
+      time_block_status: TimeBlockStatus;
     };
   };
 }
