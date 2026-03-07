@@ -18,7 +18,22 @@ vi.mock('@supabase/ssr', () => ({
   })),
 }));
 
+// Mock createServiceClient so it doesn't read process.env
+const mockServiceClient = {
+  from: vi.fn(() => ({
+    select: vi.fn(() => ({
+      eq: vi.fn(() => ({
+        single: vi.fn().mockResolvedValue({ data: null }),
+      })),
+    })),
+  })),
+};
+vi.mock('@/lib/db/client', () => ({
+  createServiceClient: vi.fn(() => mockServiceClient),
+}));
+
 import { createServerClient } from '@supabase/ssr';
+import { createServiceClient } from '@/lib/db/client';
 
 function makeRequest(url = 'http://localhost/api/test'): NextRequest {
   return new NextRequest(new URL(url));
@@ -80,6 +95,11 @@ describe('withAuth middleware', () => {
           error: null,
         }),
       },
+    };
+    vi.mocked(createServerClient).mockReturnValue(mockSupabase as never);
+
+    // Mock service client to return profile with 'pro' tier
+    vi.mocked(createServiceClient).mockReturnValue({
       from: vi.fn(() => ({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -89,8 +109,7 @@ describe('withAuth middleware', () => {
           })),
         })),
       })),
-    };
-    vi.mocked(createServerClient).mockReturnValue(mockSupabase as never);
+    } as never);
 
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
     const wrapped = withAuth(handler);
@@ -112,6 +131,11 @@ describe('withAuth middleware', () => {
           error: null,
         }),
       },
+    };
+    vi.mocked(createServerClient).mockReturnValue(mockSupabase as never);
+
+    // Mock service client to return no profile
+    vi.mocked(createServiceClient).mockReturnValue({
       from: vi.fn(() => ({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -119,8 +143,7 @@ describe('withAuth middleware', () => {
           })),
         })),
       })),
-    };
-    vi.mocked(createServerClient).mockReturnValue(mockSupabase as never);
+    } as never);
 
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
     const wrapped = withAuth(handler);
