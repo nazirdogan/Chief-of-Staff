@@ -11,7 +11,21 @@ All agents import models from `lib/ai/models.ts` — never hardcode model string
 Trigger.dev (Heartbeat)
     │
     ├── Ingestion Agents (x1 per provider)
-    │       └── Writes to: inbox_items, document_chunks, contact_interactions
+    │       ├── Writes to: inbox_items, document_chunks, contact_interactions
+    │       └── Feeds: Context Pipeline → context_chunks, context_threads
+    │
+    ├── Context Pipeline (lib/context/pipeline.ts)
+    │       ├── Calls: Context Extractor (Haiku) → entities, topics, sentiment
+    │       ├── Generates: embeddings (text-embedding-3-small)
+    │       └── Writes: context_chunks, context_threads
+    │
+    ├── Working Pattern Analyzer (daily)
+    │       ├── Reads: context_chunks (30-day window)
+    │       └── Writes: working_patterns
+    │
+    ├── Memory Snapshot Generator (daily)
+    │       ├── Reads: context_chunks (today)
+    │       └── Writes: memory_snapshots
     │
     ├── Commitment Extraction Agent
     │       └── Reads: inbox_items (sent/outbound)
@@ -24,7 +38,7 @@ Trigger.dev (Heartbeat)
     └── Briefing Orchestrator (runs daily at briefing_time)
             ├── Reads from all above
             ├── Calls: Prioritisation Agent
-            ├── Calls: Meeting Prep Agent (for each today's event)
+            ├── Calls: Meeting Prep Agent (enriched with context_chunks)
             └── Writes: briefings, briefing_items
 ```
 
@@ -467,6 +481,63 @@ export function shouldFlagCold(contact: Contact): boolean {
   return false;
 }
 ```
+
+---
+
+## 8. Context Extractor Agent
+
+**File**: `lib/ai/agents/context-extractor.ts`
+**Model**: `AI_MODELS.FAST` (Haiku)
+
+Extracts structured context from raw integration content. Called by the context pipeline (`lib/context/pipeline.ts`) for every ingested item.
+
+Extracts:
+- `content_summary` — concise factual summary
+- `entities` — people, organisations, projects, dates, amounts mentioned
+- `sentiment` — positive, negative, neutral, urgent
+- `importance` — critical (VIP/deadline), important (active project), background, noise
+- `topics` — freeform topic tags
+- `projects` — matched against user's active projects from onboarding
+- `people` — merged from input + AI extraction
+
+Also generates:
+- SHA-256 content hash for dedup (skips re-processing unchanged content)
+- OpenAI `text-embedding-3-small` embedding (1536-dim)
+- `expires_at` based on importance (critical=never, important=1yr, background=90d, noise=14d)
+
+---
+
+## 9. Working Pattern Analyzer
+
+**File**: `lib/ai/agents/pattern-analyzer.ts`
+**Model**: `AI_MODELS.STANDARD` (Sonnet) — for AI summary only
+**Trigger**: Daily Trigger.dev job (`trigger/memory/analyze-working-patterns.ts`)
+
+Queries 30 days of context chunks and computes:
+- **Time patterns**: typical start/end times, peak hours
+- **Communication patterns**: avg emails/slack/meetings per day, busiest/quietest day
+- **Focus patterns**: deep work windows, meeting-heavy days, context switch frequency
+- **Project activity**: ranked by weighted chunk count
+- **Top collaborators**: ranked by interaction frequency
+- **AI summary**: working style narrative + recent changes (via Sonnet)
+
+Upserts a single `working_patterns` row per user.
+
+---
+
+## 10. Memory Snapshot Generator
+
+**File**: `lib/ai/agents/memory-snapshot.ts`
+**Model**: `AI_MODELS.STANDARD` (Sonnet) — for narrative generation
+**Trigger**: Daily Trigger.dev job (`trigger/memory/generate-daily-snapshot.ts`)
+
+For each user, generates a daily `memory_snapshots` row containing:
+- Activity counts (emails, slack messages, meetings, tasks, documents, PRs)
+- AI-generated 3-5 sentence day narrative
+- Key decisions, open loops, notable interactions (structured JSONB)
+- Embedding of the narrative for cross-day semantic search
+
+Creates minimal "quiet day" snapshots even when no activity is detected.
 
 ---
 

@@ -111,6 +111,22 @@ export type TimeBlockType = 'task' | 'errand_batch' | 'deep_work' | 'exercise' |
 
 export type TimeBlockStatus = 'proposed' | 'confirmed' | 'completed' | 'skipped';
 
+// Context Memory enums (migration 008)
+export type ContextChunkType =
+  | 'email_thread'
+  | 'calendar_event'
+  | 'document_edit'
+  | 'slack_conversation'
+  | 'task_update'
+  | 'code_activity'
+  | 'crm_activity'
+  | 'file_activity'
+  | 'general_note';
+
+export type ContextImportance = 'critical' | 'important' | 'background' | 'noise';
+
+export type ContextSentiment = 'positive' | 'negative' | 'neutral' | 'urgent';
+
 // ── Row types ──────────────────────────────────────────────
 
 export interface Profile {

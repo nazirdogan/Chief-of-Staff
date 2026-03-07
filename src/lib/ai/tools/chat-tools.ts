@@ -4,7 +4,18 @@ import { getTodaysBriefing, updateBriefingItemFeedback } from '@/lib/db/queries/
 import { listCommitments, getCommitment, updateCommitment } from '@/lib/db/queries/commitments';
 import { listContacts, getContact, getContactByEmail, getContactInteractions } from '@/lib/db/queries/contacts';
 import { listInboxItems, getInboxItem } from '@/lib/db/queries/inbox';
+import {
+  getContextChunksByPeople,
+  getContextChunksByProject,
+  getContextChunksByThread,
+  getWorkingPatterns,
+  getMemorySnapshot,
+  getRecentMemorySnapshots,
+  getContextChunksByUser,
+} from '@/lib/db/queries/context';
+import { queryContext, summarizeContext } from '@/lib/context/query-engine';
 import type { CommitmentStatus, CommitmentConfidence, IntegrationProvider } from '@/lib/db/types';
+import type { ContextChunkType } from '@/lib/context/types';
 
 // Tool definitions for Anthropic tool-use API
 export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
@@ -149,6 +160,90 @@ export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
         limit: { type: 'number', description: 'Max items to return' },
       },
       required: [],
+    },
+  },
+  // ── Context Memory Tools ──────────────────────────────────
+  {
+    name: 'search_memory',
+    description: 'Semantic search across all context memory — emails, messages, meetings, documents, tasks. Use this to find relevant context for any question.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        query: { type: 'string', description: 'Natural language search query' },
+        time_range: { type: 'string', enum: ['today', 'this_week', 'this_month', 'all'], description: 'Time range filter' },
+        provider: { type: 'string', description: 'Filter by provider (gmail, slack, notion, etc.)' },
+        project: { type: 'string', description: 'Filter by project name' },
+        person: { type: 'string', description: 'Filter by person email' },
+        limit: { type: 'number', description: 'Max results (default 20)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'get_working_patterns',
+    description: "Get the user's working patterns — typical hours, communication habits, focus periods, top projects, top collaborators.",
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: 'get_day_summary',
+    description: 'Get a memory snapshot/summary for a specific date. Includes narrative, key decisions, open loops, and notable interactions.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        date: { type: 'string', description: 'ISO date (YYYY-MM-DD). Defaults to today.' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'search_by_person',
+    description: 'Find all context involving a specific person — emails, meetings, messages, tasks they were part of.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        email: { type: 'string', description: 'Person email address' },
+        limit: { type: 'number', description: 'Max results (default 20)' },
+      },
+      required: ['email'],
+    },
+  },
+  {
+    name: 'search_by_project',
+    description: 'Find all context related to a specific project.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        project: { type: 'string', description: 'Project name' },
+        limit: { type: 'number', description: 'Max results (default 20)' },
+      },
+      required: ['project'],
+    },
+  },
+  {
+    name: 'get_thread_context',
+    description: 'Get the full context of a conversation thread — all messages and a summary.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        thread_id: { type: 'string', description: 'Thread ID' },
+      },
+      required: ['thread_id'],
+    },
+  },
+  {
+    name: 'what_happened',
+    description: "Answer 'what happened' questions — summarizes activity over a time range with optional focus area.",
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        time_range: { type: 'string', enum: ['yesterday', 'this_week', 'last_week', 'this_month'], description: 'Time range to summarize' },
+        focus: { type: 'string', enum: ['meetings', 'emails', 'tasks', 'projects', 'people'], description: 'Optional focus area' },
+      },
+      required: ['time_range'],
     },
   },
 ];
@@ -418,6 +513,243 @@ export async function executeChatTool(
         expires_at: a.expires_at,
         created_at: a.created_at,
       })));
+    }
+
+    // ── Context Memory Tool Execution ──────────────────────────
+    case 'search_memory': {
+      const query = input.query as string;
+      const timeRange = input.time_range as string | undefined;
+      const provider = input.provider as string | undefined;
+      const project = input.project as string | undefined;
+      const person = input.person as string | undefined;
+      const limit = (input.limit as number) ?? 20;
+
+      let after: string | undefined;
+      const now = new Date();
+      if (timeRange === 'today') {
+        after = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      } else if (timeRange === 'this_week') {
+        const d = new Date(now);
+        d.setDate(d.getDate() - d.getDay());
+        after = d.toISOString();
+      } else if (timeRange === 'this_month') {
+        after = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      }
+
+      const result = await queryContext({
+        userId,
+        query,
+        filters: {
+          providers: provider ? [provider] : undefined,
+          projects: project ? [project] : undefined,
+          people: person ? [person] : undefined,
+          after,
+        },
+        limit,
+      });
+
+      return JSON.stringify(result.chunks.map((c) => ({
+        provider: c.provider,
+        type: c.chunk_type,
+        title: c.title,
+        summary: c.content_summary,
+        importance: c.importance,
+        topics: c.topics,
+        projects: c.projects,
+        people: c.people,
+        occurred_at: c.occurred_at,
+        similarity: c.similarity,
+        source: c.source_ref,
+      })));
+    }
+
+    case 'get_working_patterns': {
+      const patterns = await getWorkingPatterns(supabase, userId);
+      if (!patterns) return JSON.stringify({ message: 'No working patterns analyzed yet. Patterns are generated daily.' });
+      return JSON.stringify({
+        typical_hours: `${patterns.typical_start_time ?? '?'} – ${patterns.typical_end_time ?? '?'}`,
+        avg_emails_per_day: patterns.avg_emails_per_day,
+        avg_slack_messages_per_day: patterns.avg_slack_messages_per_day,
+        avg_meetings_per_day: patterns.avg_meetings_per_day,
+        busiest_day: patterns.busiest_day_of_week,
+        quietest_day: patterns.quietest_day_of_week,
+        active_projects: patterns.active_projects_ranked,
+        top_collaborators: patterns.top_collaborators,
+        working_style: patterns.working_style_summary,
+        recent_changes: patterns.recent_changes,
+        last_analyzed: patterns.last_analyzed_at,
+      });
+    }
+
+    case 'get_day_summary': {
+      const date = (input.date as string) ?? new Date().toISOString().split('T')[0];
+      const snapshot = await getMemorySnapshot(supabase, userId, date);
+      if (!snapshot) return JSON.stringify({ message: `No summary available for ${date}.` });
+      return JSON.stringify({
+        date: snapshot.snapshot_date,
+        narrative: snapshot.day_narrative,
+        stats: {
+          emails: snapshot.emails_received,
+          slack: snapshot.slack_messages,
+          meetings: snapshot.meetings_attended,
+          tasks: snapshot.tasks_completed,
+          docs: snapshot.documents_edited,
+          prs: snapshot.code_prs_opened,
+        },
+        key_decisions: snapshot.key_decisions,
+        open_loops: snapshot.open_loops,
+        notable_interactions: snapshot.notable_interactions,
+      });
+    }
+
+    case 'search_by_person': {
+      const email = input.email as string;
+      const limit = (input.limit as number) ?? 20;
+      const chunks = await getContextChunksByPeople(supabase, userId, email, limit);
+      return JSON.stringify(chunks.map((c) => ({
+        provider: c.provider,
+        type: c.chunk_type,
+        title: c.title,
+        summary: c.content_summary,
+        importance: c.importance,
+        occurred_at: c.occurred_at,
+        source: c.source_ref,
+      })));
+    }
+
+    case 'search_by_project': {
+      const project = input.project as string;
+      const limit = (input.limit as number) ?? 20;
+      const chunks = await getContextChunksByProject(supabase, userId, project, limit);
+      return JSON.stringify(chunks.map((c) => ({
+        provider: c.provider,
+        type: c.chunk_type,
+        title: c.title,
+        summary: c.content_summary,
+        importance: c.importance,
+        people: c.people,
+        occurred_at: c.occurred_at,
+        source: c.source_ref,
+      })));
+    }
+
+    case 'get_thread_context': {
+      const threadId = input.thread_id as string;
+      const chunks = await getContextChunksByThread(supabase, userId, threadId);
+      if (chunks.length === 0) return JSON.stringify({ message: 'No context found for this thread.' });
+      return JSON.stringify({
+        thread_id: threadId,
+        message_count: chunks.length,
+        participants: [...new Set(chunks.flatMap((c) => c.people))],
+        messages: chunks.map((c) => ({
+          title: c.title,
+          summary: c.content_summary,
+          importance: c.importance,
+          occurred_at: c.occurred_at,
+          source: c.source_ref,
+        })),
+      });
+    }
+
+    case 'what_happened': {
+      const timeRange = input.time_range as string;
+      const focus = input.focus as string | undefined;
+
+      const now = new Date();
+      let after: string;
+      let before: string | undefined;
+
+      switch (timeRange) {
+        case 'yesterday': {
+          const d = new Date(now);
+          d.setDate(d.getDate() - 1);
+          after = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+          before = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).toISOString();
+          break;
+        }
+        case 'this_week': {
+          const d = new Date(now);
+          d.setDate(d.getDate() - d.getDay());
+          after = d.toISOString();
+          break;
+        }
+        case 'last_week': {
+          const d = new Date(now);
+          d.setDate(d.getDate() - d.getDay() - 7);
+          after = d.toISOString();
+          const end = new Date(d);
+          end.setDate(end.getDate() + 7);
+          before = end.toISOString();
+          break;
+        }
+        case 'this_month':
+        default: {
+          after = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+          break;
+        }
+      }
+
+      // Map focus to chunk type filter
+      const chunkTypeMap: Record<string, ContextChunkType> = {
+        meetings: 'calendar_event',
+        emails: 'email_thread',
+        tasks: 'task_update',
+      };
+      const chunkType = focus ? chunkTypeMap[focus] : undefined;
+
+      const chunks = await getContextChunksByUser(supabase, userId, {
+        after,
+        before,
+        chunkType,
+        limit: 50,
+      });
+
+      if (chunks.length === 0) {
+        return JSON.stringify({ message: `No activity found for ${timeRange}.` });
+      }
+
+      // Also check for memory snapshots in the range
+      const snapshots = await getRecentMemorySnapshots(supabase, userId, 14);
+      const relevantSnapshots = snapshots.filter((s) => {
+        const sDate = new Date(s.snapshot_date).getTime();
+        return sDate >= new Date(after).getTime() && (!before || sDate <= new Date(before).getTime());
+      });
+
+      // If we have snapshots, use their narratives
+      if (relevantSnapshots.length > 0) {
+        return JSON.stringify({
+          time_range: timeRange,
+          focus: focus ?? 'all',
+          daily_summaries: relevantSnapshots.map((s) => ({
+            date: s.snapshot_date,
+            narrative: s.day_narrative,
+            stats: {
+              emails: s.emails_received,
+              slack: s.slack_messages,
+              meetings: s.meetings_attended,
+              tasks: s.tasks_completed,
+            },
+            key_decisions: s.key_decisions,
+            open_loops: s.open_loops,
+          })),
+          total_activity_items: chunks.length,
+        });
+      }
+
+      // Fallback: summarize from chunks directly
+      const contextSummary = await summarizeContext({
+        chunks,
+        purpose: `Summarize what happened ${timeRange}${focus ? ` focusing on ${focus}` : ''}`,
+        userId,
+      });
+
+      return JSON.stringify({
+        time_range: timeRange,
+        focus: focus ?? 'all',
+        summary: contextSummary.summary,
+        sources: contextSummary.sources.slice(0, 10),
+        total_activity_items: chunks.length,
+      });
     }
 
     default:

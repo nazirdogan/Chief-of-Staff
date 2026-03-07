@@ -25,11 +25,23 @@ import { fetchPipedriveDeals, fetchPipedriveActivities } from '@/lib/integration
 import { fetchGitHubPRReviews, fetchGitHubMentions } from '@/lib/integrations/github';
 import { upsertInboxItem, clearInboxItems } from '@/lib/db/queries/inbox';
 import { createServiceClient } from '@/lib/db/client';
+import { processContextFromScan } from '@/lib/context/pipeline';
+import type { ContextPipelineInput } from '@/lib/context/types';
 import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
 import type { ParsedOutlookMessage } from '@/lib/integrations/outlook';
 import type { ParsedSlackMessage } from '@/lib/integrations/slack';
 
 const anthropic = new Anthropic();
+
+/** Feed processed items into the context memory pipeline (non-fatal on failure) */
+async function feedContext(userId: string, provider: string, items: ContextPipelineInput[]) {
+  if (items.length === 0) return;
+  try {
+    await processContextFromScan({ userId, provider, items });
+  } catch {
+    // Context enrichment is non-fatal — inbox ingestion still succeeds
+  }
+}
 
 interface IngestionResult {
   summary: string;
@@ -136,6 +148,7 @@ export async function ingestGmailMessages(
   }
 
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const ref of messageRefs) {
     if (!ref.id) continue;
@@ -150,6 +163,8 @@ export async function ingestGmailMessages(
     // Skip promotional content that got through Gmail's category filter
     if (result.is_promotional) continue;
 
+    const receivedAt = parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString();
+
     // Store only metadata + AI summary — raw body discarded
     await upsertInboxItem(supabase, {
       user_id: userId,
@@ -162,12 +177,25 @@ export async function ingestGmailMessages(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
-      received_at: parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString(),
+      received_at: receivedAt,
+    });
+
+    // Collect for context memory pipeline
+    contextItems.push({
+      sourceId: parsed.id,
+      sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
+      title: parsed.subject ?? 'No subject',
+      rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
+      occurredAt: receivedAt,
+      people: [parsed.from].filter(Boolean),
+      threadId: parsed.threadId,
+      chunkType: 'email_thread',
     });
 
     processed++;
   }
 
+  await feedContext(userId, 'gmail', contextItems);
   return { processed, found };
 }
 
@@ -187,6 +215,7 @@ export async function ingestOutlookMessages(
   }
 
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const raw of rawMessages) {
     const messageId = raw.id as string;
@@ -202,6 +231,8 @@ export async function ingestOutlookMessages(
     // Skip promotional content
     if (result.is_promotional) continue;
 
+    const receivedAt = parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString();
+
     // Store only metadata + AI summary — raw body discarded
     await upsertInboxItem(supabase, {
       user_id: userId,
@@ -214,12 +245,24 @@ export async function ingestOutlookMessages(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
-      received_at: parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString(),
+      received_at: receivedAt,
+    });
+
+    contextItems.push({
+      sourceId: parsed.id,
+      sourceRef: { provider: 'outlook', message_id: parsed.id, conversation_id: parsed.conversationId },
+      title: parsed.subject ?? 'No subject',
+      rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.bodyPreview}`,
+      occurredAt: receivedAt,
+      people: [parsed.from].filter(Boolean),
+      threadId: parsed.conversationId,
+      chunkType: 'email_thread',
     });
 
     processed++;
   }
 
+  await feedContext(userId, 'outlook', contextItems);
   return { processed, found };
 }
 
@@ -235,6 +278,7 @@ export async function ingestSlackDMs(
 
   const supabase = createServiceClient();
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const msg of messages) {
     // AI summarisation — sanitiseContent is called inside summariseSlackMessage
@@ -254,9 +298,21 @@ export async function ingestSlackDMs(
       received_at: msg.date,
     });
 
+    contextItems.push({
+      sourceId: msg.id,
+      sourceRef: { provider: 'slack', message_id: msg.id, thread_ts: msg.threadTs },
+      title: `Slack DM from ${msg.fromName}`,
+      rawContent: `From: ${msg.fromName}\n\n${msg.text}`,
+      occurredAt: msg.date,
+      people: [msg.from].filter(Boolean),
+      threadId: msg.threadTs ?? undefined,
+      chunkType: 'slack_conversation',
+    });
+
     processed++;
   }
 
+  await feedContext(userId, 'slack', contextItems);
   return { processed, found };
 }
 
@@ -269,6 +325,7 @@ export async function ingestICloudMessages(
 
   const supabase = createServiceClient();
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const msg of messages) {
     // ALWAYS sanitise before AI — body never stored
@@ -277,6 +334,8 @@ export async function ingestICloudMessages(
       'email',
       `icloud:${msg.id}`
     );
+
+    const receivedAt = msg.date ? new Date(msg.date).toISOString() : new Date().toISOString();
 
     await upsertInboxItem(supabase, {
       user_id: userId,
@@ -288,11 +347,22 @@ export async function ingestICloudMessages(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
-      received_at: msg.date ? new Date(msg.date).toISOString() : new Date().toISOString(),
+      received_at: receivedAt,
+    });
+
+    contextItems.push({
+      sourceId: msg.id,
+      sourceRef: { provider: 'apple_icloud_mail', message_id: msg.id },
+      title: msg.subject ?? 'No subject',
+      rawContent: `From: ${msg.fromName ?? msg.from}\nSubject: ${msg.subject}\n\n${msg.body || msg.snippet}`,
+      occurredAt: receivedAt,
+      people: [msg.from].filter(Boolean),
+      chunkType: 'email_thread',
     });
     processed++;
   }
 
+  await feedContext(userId, 'apple_icloud_mail', contextItems);
   return { processed, found };
 }
 
@@ -306,9 +376,13 @@ export async function ingestCalendlyBookings(
   const supabase = createServiceClient();
   let processed = 0;
 
+  const contextItems: ContextPipelineInput[] = [];
+
   for (const booking of bookings) {
     const content = `Calendly booking: ${booking.name} with ${booking.guestName || 'Guest'} (${booking.guestEmail}). Starts: ${booking.startTime}. Location: ${booking.location || 'TBD'}.`;
     const result = await summariseContent(content, 'calendar_booking', `calendly:${booking.id}`);
+
+    const receivedAt = booking.startTime ? new Date(booking.startTime).toISOString() : new Date().toISOString();
 
     await upsertInboxItem(supabase, {
       user_id: userId,
@@ -320,11 +394,22 @@ export async function ingestCalendlyBookings(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
-      received_at: booking.startTime ? new Date(booking.startTime).toISOString() : new Date().toISOString(),
+      received_at: receivedAt,
+    });
+
+    contextItems.push({
+      sourceId: booking.id,
+      sourceRef: { provider: 'calendly', booking_id: booking.id },
+      title: booking.name,
+      rawContent: content,
+      occurredAt: receivedAt,
+      people: [booking.guestEmail].filter(Boolean),
+      chunkType: 'calendar_event',
     });
     processed++;
   }
 
+  await feedContext(userId, 'calendly', contextItems);
   return { processed, found };
 }
 
@@ -338,8 +423,11 @@ export async function ingestTeamsMessages(
   const supabase = createServiceClient();
   let processed = 0;
 
+  const contextItems: ContextPipelineInput[] = [];
+
   for (const msg of messages) {
     const result = await summariseContent(msg.body, 'teams_message', `teams:${msg.id}`);
+    const title = msg.isDM ? `Teams DM from ${msg.fromName}` : `Teams message in ${msg.channelName}`;
 
     await upsertInboxItem(supabase, {
       user_id: userId,
@@ -347,17 +435,26 @@ export async function ingestTeamsMessages(
       external_id: msg.id,
       from_email: msg.from,
       from_name: msg.fromName,
-      subject: msg.isDM
-        ? `Teams DM from ${msg.fromName}`
-        : `Teams message in ${msg.channelName}`,
+      subject: title,
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: msg.isMention || msg.isDM,
       received_at: msg.date,
     });
+
+    contextItems.push({
+      sourceId: msg.id,
+      sourceRef: { provider: 'microsoft_teams', message_id: msg.id },
+      title,
+      rawContent: `From: ${msg.fromName}\n\n${msg.body}`,
+      occurredAt: msg.date,
+      people: [msg.from].filter(Boolean),
+      chunkType: 'slack_conversation',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'microsoft_teams', contextItems);
   return { processed, found };
 }
 
@@ -370,6 +467,8 @@ export async function ingestLinkedInMessages(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const msg of messages) {
     const result = await summariseContent(msg.body, 'linkedin_message', `linkedin:${msg.id}`);
@@ -387,9 +486,21 @@ export async function ingestLinkedInMessages(
       needs_reply: msg.isUnread,
       received_at: msg.date,
     });
+
+    contextItems.push({
+      sourceId: msg.id,
+      sourceRef: { provider: 'linkedin', message_id: msg.id, conversation_id: msg.conversationId },
+      title: msg.subject ?? `LinkedIn message from ${msg.fromName}`,
+      rawContent: `From: ${msg.fromName}\nSubject: ${msg.subject}\n\n${msg.body}`,
+      occurredAt: msg.date,
+      people: [msg.from].filter(Boolean),
+      threadId: msg.conversationId,
+      chunkType: 'email_thread',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'linkedin', contextItems);
   return { processed, found };
 }
 
@@ -402,6 +513,8 @@ export async function ingestTwitterDMs(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const dm of dms) {
     const result = await summariseContent(dm.body, 'twitter_dm', `twitter:${dm.id}`);
@@ -419,9 +532,21 @@ export async function ingestTwitterDMs(
       needs_reply: true,
       received_at: dm.date,
     });
+
+    contextItems.push({
+      sourceId: dm.id,
+      sourceRef: { provider: 'twitter', message_id: dm.id, conversation_id: dm.conversationId },
+      title: `Twitter/X DM from @${dm.fromUsername}`,
+      rawContent: `From: ${dm.fromName} (@${dm.fromUsername})\n\n${dm.body}`,
+      occurredAt: dm.date,
+      people: [dm.fromUsername].filter(Boolean),
+      threadId: dm.conversationId,
+      chunkType: 'slack_conversation',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'twitter', contextItems);
   return { processed, found };
 }
 
@@ -436,6 +561,8 @@ export async function ingestGoogleDriveDocuments(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const file of files) {
     try {
@@ -455,12 +582,23 @@ export async function ingestGoogleDriveDocuments(
         needs_reply: false,
         received_at: file.modifiedTime,
       });
+
+      contextItems.push({
+        sourceId: file.id,
+        sourceRef: { provider: 'google_drive', file_id: file.id, mime_type: file.mimeType },
+        title: file.name,
+        rawContent: rawText,
+        occurredAt: file.modifiedTime,
+        people: [],
+        chunkType: 'document_edit',
+      });
       processed++;
     } catch {
       // Skip files that fail to export
     }
   }
 
+  await feedContext(userId, 'google_drive', contextItems);
   return { processed, found };
 }
 
@@ -473,6 +611,8 @@ export async function ingestDropboxDocuments(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const file of files) {
     if (file.isFolder) continue;
@@ -492,12 +632,23 @@ export async function ingestDropboxDocuments(
         needs_reply: false,
         received_at: file.modifiedTime,
       });
+
+      contextItems.push({
+        sourceId: file.id,
+        sourceRef: { provider: 'dropbox', file_id: file.id, path: file.path },
+        title: file.name,
+        rawContent: rawText,
+        occurredAt: file.modifiedTime,
+        people: [],
+        chunkType: 'document_edit',
+      });
       processed++;
     } catch {
       // Skip files that fail to download
     }
   }
 
+  await feedContext(userId, 'dropbox', contextItems);
   return { processed, found };
 }
 
@@ -510,6 +661,8 @@ export async function ingestOneDriveDocuments(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const file of files) {
     try {
@@ -528,12 +681,23 @@ export async function ingestOneDriveDocuments(
         needs_reply: false,
         received_at: file.modifiedTime,
       });
+
+      contextItems.push({
+        sourceId: file.id,
+        sourceRef: { provider: 'onedrive', file_id: file.id },
+        title: file.name,
+        rawContent: rawText,
+        occurredAt: file.modifiedTime,
+        people: [],
+        chunkType: 'document_edit',
+      });
       processed++;
     } catch {
       // Skip files that fail to download
     }
   }
 
+  await feedContext(userId, 'onedrive', contextItems);
   return { processed, found };
 }
 
@@ -548,6 +712,8 @@ export async function ingestAsanaTasks(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const task of tasks) {
     const content = `Asana task: ${task.name}. Project: ${task.projectName}. Due: ${task.dueOn ?? 'No due date'}. Notes: ${task.notes.slice(0, 500)}`;
@@ -565,9 +731,20 @@ export async function ingestAsanaTasks(
       needs_reply: false,
       received_at: task.modifiedAt,
     });
+
+    contextItems.push({
+      sourceId: task.id,
+      sourceRef: { provider: 'asana', task_id: task.id, project: task.projectName },
+      title: task.name,
+      rawContent: content,
+      occurredAt: task.modifiedAt,
+      people: [task.assigneeEmail].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'asana', contextItems);
   return { processed, found };
 }
 
@@ -580,6 +757,8 @@ export async function ingestMondayItems(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const item of items) {
     const content = `Monday.com item: ${item.name}. Board: ${item.boardName}. Group: ${item.groupName}. Status: ${item.status}. Due: ${item.dueDate ?? 'No due date'}.`;
@@ -597,9 +776,20 @@ export async function ingestMondayItems(
       needs_reply: false,
       received_at: item.updatedAt,
     });
+
+    contextItems.push({
+      sourceId: item.id,
+      sourceRef: { provider: 'monday', item_id: item.id, board: item.boardName },
+      title: item.name,
+      rawContent: content,
+      occurredAt: item.updatedAt,
+      people: [item.assigneeEmail].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'monday', contextItems);
   return { processed, found };
 }
 
@@ -612,6 +802,8 @@ export async function ingestJiraIssues(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const issue of issues) {
     const content = `Jira issue ${issue.key}: ${issue.summary}. Type: ${issue.issueType}. Priority: ${issue.priority}. Status: ${issue.status}. Project: ${issue.projectName}. Due: ${issue.dueDate ?? 'No due date'}. ${issue.description.slice(0, 300)}`;
@@ -629,9 +821,20 @@ export async function ingestJiraIssues(
       needs_reply: false,
       received_at: issue.updatedAt,
     });
+
+    contextItems.push({
+      sourceId: issue.id,
+      sourceRef: { provider: 'jira', issue_id: issue.id, key: issue.key, project: issue.projectName },
+      title: `[${issue.key}] ${issue.summary}`,
+      rawContent: content,
+      occurredAt: issue.updatedAt,
+      people: [issue.reporterEmail].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'jira', contextItems);
   return { processed, found };
 }
 
@@ -644,6 +847,8 @@ export async function ingestLinearIssues(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const issue of issues) {
     const content = `Linear issue ${issue.identifier}: ${issue.title}. Team: ${issue.teamName}. Project: ${issue.projectName}. Status: ${issue.state}. Priority: ${issue.priorityLabel}. Due: ${issue.dueDate ?? 'No due date'}. ${issue.description.slice(0, 300)}`;
@@ -661,9 +866,20 @@ export async function ingestLinearIssues(
       needs_reply: false,
       received_at: issue.updatedAt,
     });
+
+    contextItems.push({
+      sourceId: issue.id,
+      sourceRef: { provider: 'linear', issue_id: issue.id, identifier: issue.identifier, project: issue.projectName },
+      title: `[${issue.identifier}] ${issue.title}`,
+      rawContent: content,
+      occurredAt: issue.updatedAt,
+      people: [issue.assigneeEmail].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'linear', contextItems);
   return { processed, found };
 }
 
@@ -676,6 +892,8 @@ export async function ingestClickUpTasks(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const task of tasks) {
     const content = `ClickUp task: ${task.name}. Space: ${task.spaceName}. List: ${task.listName}. Status: ${task.status}. Priority: ${task.priority}. Due: ${task.dueDate ?? 'No due date'}. ${task.description.slice(0, 300)}`;
@@ -693,9 +911,20 @@ export async function ingestClickUpTasks(
       needs_reply: false,
       received_at: task.updatedAt,
     });
+
+    contextItems.push({
+      sourceId: task.id,
+      sourceRef: { provider: 'clickup', task_id: task.id, space: task.spaceName },
+      title: task.name,
+      rawContent: content,
+      occurredAt: task.updatedAt,
+      people: [task.assigneeEmail].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'clickup', contextItems);
   return { processed, found };
 }
 
@@ -708,6 +937,8 @@ export async function ingestTrelloCards(
 
   const supabase = createServiceClient();
   let processed = 0;
+
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const card of cards) {
     if (card.closed) continue;
@@ -726,9 +957,20 @@ export async function ingestTrelloCards(
       needs_reply: false,
       received_at: card.lastActivity,
     });
+
+    contextItems.push({
+      sourceId: card.id,
+      sourceRef: { provider: 'trello', card_id: card.id, board: card.boardName },
+      title: card.name,
+      rawContent: content,
+      occurredAt: card.lastActivity,
+      people: [],
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'trello', contextItems);
   return { processed, found };
 }
 
@@ -746,6 +988,7 @@ export async function ingestHubSpotItems(
 
   const supabase = createServiceClient();
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const deal of deals) {
     const content = `HubSpot deal: ${deal.name}. Stage: ${deal.stage}. Amount: ${deal.amount} ${deal.amount ? 'USD' : ''}. Close date: ${deal.closeDate ?? 'No close date'}.`;
@@ -762,6 +1005,16 @@ export async function ingestHubSpotItems(
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
       received_at: deal.lastModified,
+    });
+
+    contextItems.push({
+      sourceId: `deal:${deal.id}`,
+      sourceRef: { provider: 'hubspot', deal_id: deal.id, stage: deal.stage },
+      title: deal.name,
+      rawContent: content,
+      occurredAt: deal.lastModified,
+      people: [],
+      chunkType: 'task_update',
     });
     processed++;
   }
@@ -782,9 +1035,20 @@ export async function ingestHubSpotItems(
       needs_reply: false,
       received_at: task.createdAt,
     });
+
+    contextItems.push({
+      sourceId: `task:${task.id}`,
+      sourceRef: { provider: 'hubspot', task_id: task.id },
+      title: task.subject,
+      rawContent: content,
+      occurredAt: task.createdAt,
+      people: [],
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'hubspot', contextItems);
   return { processed, found };
 }
 
@@ -800,6 +1064,7 @@ export async function ingestSalesforceItems(
 
   const supabase = createServiceClient();
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const opp of opps) {
     const content = `Salesforce opportunity: ${opp.name}. Stage: ${opp.stage}. Amount: ${opp.amount}. Close date: ${opp.closeDate}. Account: ${opp.accountName}. Probability: ${opp.probability}%.`;
@@ -816,6 +1081,16 @@ export async function ingestSalesforceItems(
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
       received_at: opp.lastModified,
+    });
+
+    contextItems.push({
+      sourceId: `opp:${opp.id}`,
+      sourceRef: { provider: 'salesforce', opp_id: opp.id, stage: opp.stage, account: opp.accountName },
+      title: opp.name,
+      rawContent: content,
+      occurredAt: opp.lastModified,
+      people: [],
+      chunkType: 'task_update',
     });
     processed++;
   }
@@ -836,9 +1111,20 @@ export async function ingestSalesforceItems(
       needs_reply: false,
       received_at: task.createdAt,
     });
+
+    contextItems.push({
+      sourceId: `task:${task.id}`,
+      sourceRef: { provider: 'salesforce', task_id: task.id, contact: task.whoName },
+      title: task.subject,
+      rawContent: content,
+      occurredAt: task.createdAt,
+      people: [task.whoName].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'salesforce', contextItems);
   return { processed, found };
 }
 
@@ -854,6 +1140,7 @@ export async function ingestPipedriveItems(
 
   const supabase = createServiceClient();
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const deal of deals) {
     const content = `Pipedrive deal: ${deal.title}. Value: ${deal.value} ${deal.currency}. Status: ${deal.status}. Person: ${deal.personName}. Org: ${deal.orgName}. Expected close: ${deal.expectedCloseDate ?? 'No close date'}.`;
@@ -870,6 +1157,16 @@ export async function ingestPipedriveItems(
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
       received_at: deal.updateTime,
+    });
+
+    contextItems.push({
+      sourceId: `deal:${deal.id}`,
+      sourceRef: { provider: 'pipedrive', deal_id: deal.id, org: deal.orgName },
+      title: deal.title,
+      rawContent: content,
+      occurredAt: deal.updateTime,
+      people: [deal.personEmail].filter(Boolean),
+      chunkType: 'task_update',
     });
     processed++;
   }
@@ -890,9 +1187,20 @@ export async function ingestPipedriveItems(
       needs_reply: false,
       received_at: activity.addTime,
     });
+
+    contextItems.push({
+      sourceId: `activity:${activity.id}`,
+      sourceRef: { provider: 'pipedrive', activity_id: activity.id, deal: activity.dealTitle },
+      title: activity.subject,
+      rawContent: content,
+      occurredAt: activity.addTime,
+      people: [activity.personEmail].filter(Boolean),
+      chunkType: 'task_update',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'pipedrive', contextItems);
   return { processed, found };
 }
 
@@ -910,6 +1218,7 @@ export async function ingestGitHubItems(
 
   const supabase = createServiceClient();
   let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
 
   for (const pr of prs) {
     const content = `GitHub PR review requested: [${pr.repoFullName}#${pr.number}] ${pr.title}. Author: ${pr.authorLogin}. Labels: ${pr.labels.join(', ') || 'none'}. Draft: ${pr.isDraft}. ${pr.body.slice(0, 500)}`;
@@ -926,6 +1235,16 @@ export async function ingestGitHubItems(
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: true,
       received_at: pr.updatedAt,
+    });
+
+    contextItems.push({
+      sourceId: `pr:${pr.id}`,
+      sourceRef: { provider: 'github', pr_id: pr.id, repo: pr.repoFullName, number: pr.number },
+      title: `[${pr.repoFullName}] PR #${pr.number}: ${pr.title}`,
+      rawContent: content,
+      occurredAt: pr.updatedAt,
+      people: [`${pr.authorLogin}@github`],
+      chunkType: 'code_activity',
     });
     processed++;
   }
@@ -946,8 +1265,19 @@ export async function ingestGitHubItems(
       needs_reply: false,
       received_at: mention.createdAt,
     });
+
+    contextItems.push({
+      sourceId: `mention:${mention.id}`,
+      sourceRef: { provider: 'github', mention_id: mention.id, repo: mention.repoFullName },
+      title: `Mentioned in [${mention.repoFullName}]: ${mention.title}`,
+      rawContent: content,
+      occurredAt: mention.createdAt,
+      people: [`${mention.authorLogin}@github`],
+      chunkType: 'code_activity',
+    });
     processed++;
   }
 
+  await feedContext(userId, 'github', contextItems);
   return { processed, found };
 }

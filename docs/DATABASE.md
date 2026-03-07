@@ -643,6 +643,10 @@ SELECT cron.schedule('prune-audit-log', '0 4 1 * *',
 | `inbox_items` | Cached inbox summaries (no raw content) | 30 days |
 | `telegram_sessions` | Telegram bot connections | Account lifetime |
 | `user_sessions` | Active web/app sessions | Until revoked |
+| `context_chunks` | Structured context memory with embeddings | Varies by importance |
+| `working_patterns` | AI-analyzed user work habits | Continuously updated |
+| `context_threads` | Thread groupings for related context | Account lifetime |
+| `memory_snapshots` | Daily AI narrative summaries | Account lifetime |
 
 ---
 
@@ -672,6 +676,37 @@ Adds the Morning Operations Layer tables.
 | `user_operations_config` | Per-user operations preferences | Account lifetime |
 
 All tables have RLS enabled. All policies restrict to `auth.uid() = user_id`.
+
+---
+
+## Migration File: `008_context_memory.sql`
+
+Adds the Context Capture & Deep Memory System tables.
+
+### New enums:
+| Enum | Values |
+|---|---|
+| `context_chunk_type` | `email_thread`, `calendar_event`, `document_edit`, `slack_conversation`, `task_update`, `code_activity`, `crm_activity`, `file_activity`, `general_note` |
+| `context_importance` | `critical`, `important`, `background`, `noise` |
+
+### New tables:
+
+| Table | Purpose | Retention |
+|---|---|---|
+| `context_chunks` | Donna's long-term memory — structured context with embeddings, entities, topics, projects, people | critical=never, important=1yr, background=90d, noise=14d |
+| `working_patterns` | AI-analyzed user habits — time patterns, communication patterns, focus windows, project activity | Continuously updated (single row per user) |
+| `context_threads` | Groups related context chunks by thread (email threads, Slack conversations) | Account lifetime |
+| `memory_snapshots` | Daily AI-generated narrative summaries with activity counts and embeddings | Account lifetime |
+
+### New RPC function:
+| Function | Purpose |
+|---|---|
+| `match_context_chunks` | Vector similarity search over context_chunks with optional type/importance/time filters |
+
+### Key indexes:
+- `context_chunks`: user+time, user+type, user+importance, GIN on topics/projects/people, ivfflat on embeddings (200 lists), thread lookup, expiry cleanup
+- `context_threads`: user+active+last_chunk_at
+- `memory_snapshots`: user+snapshot_date (unique)
 
 ---
 

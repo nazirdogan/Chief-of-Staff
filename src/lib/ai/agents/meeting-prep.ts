@@ -7,6 +7,7 @@ import { semanticSearch } from '@/lib/ai/embeddings';
 import { createServiceClient } from '@/lib/db/client';
 import { listInboxItems } from '@/lib/db/queries/inbox';
 import { listCommitments } from '@/lib/db/queries/commitments';
+import { getContextChunksByPeople } from '@/lib/db/queries/context';
 import type { SourceRef } from '@/lib/db/types';
 
 const anthropic = new Anthropic();
@@ -146,6 +147,35 @@ export async function generateMeetingPrep(
       }),
       source: `commitment:${commitment.id}`,
     });
+  }
+
+  // Context memory enrichment: get recent context involving attendees
+  try {
+    for (const attendee of event.attendees.slice(0, 5)) {
+      const chunks = await getContextChunksByPeople(supabase, userId, attendee.email, 5);
+      for (const chunk of chunks) {
+        const { content: safeContent } = sanitiseContent(
+          chunk.content_summary,
+          `${chunk.provider}:${chunk.source_id}`
+        );
+        contextParts.push({
+          label: 'context_memory',
+          content: JSON.stringify({
+            type: chunk.chunk_type,
+            provider: chunk.provider,
+            title: chunk.title,
+            summary: safeContent,
+            importance: chunk.importance,
+            occurred_at: chunk.occurred_at,
+            people: chunk.people,
+            projects: chunk.projects,
+          }),
+          source: `${chunk.provider}:${chunk.source_id}`,
+        });
+      }
+    }
+  } catch {
+    // Non-fatal: continue without context memory
   }
 
   // Semantic search for relevant documents (Notion pages, etc.)

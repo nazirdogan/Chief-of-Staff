@@ -37,6 +37,8 @@ INTERNAL_ERROR         500 — Unexpected server error
 | `/api/inbox/*` | 60 req/min per user |
 | `/api/integrations/*` | 10 req/min per user |
 | `/api/actions/*` | 30 req/min per user |
+| `/api/context/*` | 30 req/min per user |
+| `/api/meetings/*/context` | 30 req/min per user |
 | `/api/webhooks/*` | 1000 req/min (verified by HMAC) |
 
 ---
@@ -591,6 +593,144 @@ Initiates account deletion. All user data deleted within 24 hours.
 // Response 202
 { data: { deletion_scheduled_at: string; confirmation_email_sent: boolean } }
 ```
+
+---
+
+## Context & Memory Routes
+
+### `GET /api/context/search`
+**Auth required** — Rate limit: 30 req/min
+Semantic search over the user's context memory.
+
+```typescript
+// Query params
+q: string           // Search query (required)
+provider?: string   // Filter by provider
+type?: string       // Filter by chunk_type
+importance?: string // Filter by importance level
+project?: string    // Filter by project name
+person?: string     // Filter by person email/name
+after?: string      // ISO date — only chunks after this date
+before?: string     // ISO date — only chunks before this date
+limit?: number      // Max results (default 20, max 50)
+patterns?: boolean  // Include working patterns (default false)
+snapshot?: boolean  // Include today's memory snapshot (default false)
+
+// Response 200
+{
+  chunks: Array<{
+    id: string;
+    provider: string;
+    chunk_type: string;
+    title: string;
+    content_summary: string;
+    importance: string;
+    topics: string[];
+    projects: string[];
+    people: string[];
+    occurred_at: string;
+    source_ref: object;
+    similarity: number;
+  }>;
+  patterns?: WorkingPatterns;   // if patterns=true
+  snapshot?: MemorySnapshot;    // if snapshot=true
+}
+```
+
+### `GET /api/context/patterns`
+**Auth required** — Rate limit: 30 req/min
+Returns the user's working pattern analysis.
+
+```typescript
+// Response 200
+{
+  patterns: {
+    typical_start_time: string;
+    typical_end_time: string;
+    peak_hours: object[];
+    avg_emails_per_day: number;
+    avg_slack_messages_per_day: number;
+    avg_meetings_per_day: number;
+    deep_work_windows: object[];
+    active_projects_ranked: object[];
+    top_collaborators: object[];
+    working_style_summary: string;
+    recent_changes: string;
+    last_analyzed_at: string;
+  }
+}
+
+// Response 404
+{ error: "No working patterns found", code: "NOT_FOUND" }
+```
+
+### `GET /api/context/snapshot`
+**Auth required** — Rate limit: 30 req/min
+Returns memory snapshots (daily summaries).
+
+```typescript
+// Query params
+date?: string   // ISO date for specific day (default: today)
+days?: number   // Number of recent days to return (max 30)
+
+// Response 200
+{
+  snapshots: Array<{
+    snapshot_date: string;
+    emails_received: number;
+    emails_sent: number;
+    slack_messages: number;
+    meetings_attended: number;
+    tasks_completed: number;
+    documents_edited: number;
+    code_prs_opened: number;
+    day_narrative: string;
+    key_decisions: object[];
+    open_loops: object[];
+    notable_interactions: object[];
+  }>
+}
+```
+
+### `GET /api/meetings/[eventId]/context`
+**Auth required** — Rate limit: 30 req/min
+Returns context memory for a specific calendar event, including related context from attendees and projects.
+
+```typescript
+// Response 200
+{
+  event_id: string;
+  title: string;
+  chunks: Array<{
+    id: string;
+    provider: string;
+    title: string;
+    summary: string;
+    importance: string;
+    entities: object;
+    topics: string[];
+    projects: string[];
+    people: string[];
+    occurred_at: string;
+    source_ref: object;
+  }>;
+  attendees: string[];
+  projects: string[];
+  related_context: Array<{
+    provider: string;
+    type: string;
+    title: string;
+    summary: string;
+    occurred_at: string;
+    similarity: number;
+  }>;
+}
+
+// Response 404
+{ error: "No context found for this meeting", code: "NOT_FOUND" }
+```
+
+---
 
 ### `GET /api/settings/data-export`
 **Auth required**
