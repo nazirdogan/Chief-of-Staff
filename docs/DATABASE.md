@@ -646,6 +646,35 @@ SELECT cron.schedule('prune-audit-log', '0 4 1 * *',
 
 ---
 
+## Migration File: `005_operations_layer.sql`
+
+Adds the Morning Operations Layer tables.
+
+### New columns on `inbox_items`:
+| Column | Type | Purpose |
+|---|---|---|
+| `operation_category` | TEXT (green/yellow/red/gray) | AM Sweep classification |
+| `operation_context` | JSONB | Context package for subagent dispatch |
+| `estimated_duration_minutes` | INTEGER | AI-estimated task duration |
+| `task_tags` | TEXT[] | Tags: home, office, errand, call, deep-work |
+| `task_title` | TEXT | Verb-first task title from email triage |
+| `deferred_to` | DATE | Date task was deferred to (gray items) |
+| `defer_reason` | TEXT | Why the task was deferred |
+
+### New tables:
+
+| Table | Purpose | Retention |
+|---|---|---|
+| `operation_runs` | Tracks each operations pipeline execution | 30 days |
+| `subagent_runs` | Tracks each subagent execution within a run | 30 days |
+| `transit_events` | Drive-time buffer events from overnight calc | 7 days |
+| `time_blocks` | Proposed/confirmed time-blocked schedule | 30 days |
+| `user_operations_config` | Per-user operations preferences | Account lifetime |
+
+All tables have RLS enabled. All policies restrict to `auth.uid() = user_id`.
+
+---
+
 ## Key Design Decisions
 
 1. **Raw email/message bodies are never stored.** Only AI-generated summaries and vector embeddings

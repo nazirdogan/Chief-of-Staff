@@ -635,6 +635,498 @@ export const gmailScan = schedules.task({
 
 ---
 
+## Apple iCloud Mail + Calendar (TIER 1)
+
+**Provider key in Nango**: `icloud`
+**API**: iCloud Mail REST API + CalDAV
+
+| Scope | When Added | Feature |
+|---|---|---|
+| Mail read | Initial connect | Inbox read, briefing |
+| Calendar read | Initial connect | Calendar events |
+
+### Apple Developer Setup
+1. Go to https://developer.apple.com > Certificates, Identifiers & Profiles
+2. Register a new App ID with **Sign In with Apple** capability
+3. Create a **Services ID** for web authentication
+4. Configure redirect URI: `https://api.nango.dev/oauth/callback`
+5. Generate a private key for client secret generation
+
+### Nango Configuration
+Add `icloud` integration in Nango with Apple credentials.
+
+### Runtime Usage
+```typescript
+// lib/integrations/apple-icloud.ts
+import { getAccessToken } from './nango';
+
+export async function getICloudAuthHeader(userId: string): Promise<string> {
+  const accessToken = await getAccessToken(userId, 'icloud');
+  return `Bearer ${accessToken}`;
+}
+
+export async function fetchICloudInboxMessages(userId: string, maxResults = 20);
+export async function fetchICloudCalendarEvents(userId: string, maxResults = 20);
+```
+
+---
+
+## Calendly (TIER 1)
+
+**Provider key in Nango**: `calendly`
+**API**: Calendly API v2
+**Read-only**: We never create or modify Calendly events.
+
+| Scope | When Added | Feature |
+|---|---|---|
+| Default (read) | Initial connect | Fetch upcoming bookings |
+
+### Calendly Setup
+1. Go to https://developer.calendly.com > **My Apps** > **Create App**
+2. Set redirect URI: `https://api.nango.dev/oauth/callback`
+3. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `calendly` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/calendly.ts
+import { getAccessToken } from './nango';
+
+export async function fetchUpcomingBookings(userId: string, maxResults = 20);
+```
+
+---
+
+## Microsoft Teams (TIER 1)
+
+**Provider key in Nango**: `microsoft-teams`
+**API**: Microsoft Graph API v1.0 (Chat & Teams endpoints)
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `Chat.Read` | Initial connect | Read Teams chats and DMs |
+| `ChannelMessage.Read.All` | Initial connect | Read channel messages |
+| `User.Read` | Initial connect | Identify user |
+| `offline_access` | Always | Refresh token |
+
+### Azure App Registration
+Uses the same Azure app as Outlook. Add the Teams-specific scopes above.
+
+### Nango Configuration
+Add `microsoft-teams` integration in Nango with Azure credentials.
+
+### Runtime Usage
+```typescript
+// lib/integrations/microsoft-teams.ts
+import { Client } from '@microsoft/microsoft-graph-client';
+import { getAccessToken } from './nango';
+
+export async function fetchTeamsMessages(userId: string, limit = 20);
+export async function fetchTeamsDMs(userId: string, limit = 20);
+```
+
+---
+
+## LinkedIn Messages (TIER 1)
+
+**Provider key in Nango**: `linkedin`
+**API**: LinkedIn Messaging API v2
+**Read-only**: We never send messages without explicit user confirmation.
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `r_liteprofile` | Initial connect | User identity |
+| `r_emailaddress` | Initial connect | Email matching |
+| `w_member_social` | Initial connect | Messaging access |
+
+### LinkedIn Developer Setup
+1. Go to https://www.linkedin.com/developers > **My Apps** > **Create App**
+2. Request access to **Marketing Developer Platform** (for messaging)
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `linkedin` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/linkedin.ts
+import { getAccessToken } from './nango';
+
+export async function fetchUnreadLinkedInMessages(userId: string, limit = 20);
+```
+
+---
+
+## Twitter / X DMs (TIER 1)
+
+**Provider key in Nango**: `twitter`
+**API**: Twitter API v2
+**Read-only**: We never send tweets or DMs without explicit user confirmation.
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `dm.read` | Initial connect | Read DMs |
+| `users.read` | Initial connect | User identity |
+| `tweet.read` | Initial connect | Required by API |
+| `offline.access` | Always | Refresh token |
+
+### Twitter Developer Setup
+1. Go to https://developer.twitter.com > **Developer Portal** > **Projects & Apps**
+2. Create a project and app with **OAuth 2.0** enabled
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Client ID** and **Client Secret**
+5. Requires **Basic** or higher API tier for DM access
+
+### Nango Configuration
+Add `twitter` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/twitter.ts
+import { getAccessToken } from './nango';
+
+export async function fetchUnreadTwitterDMs(userId: string, limit = 20);
+```
+
+---
+
+## Google Drive (TIER 2)
+
+**Provider key in Nango**: `google-drive`
+**API**: Google Drive API v3
+*(Uses the same Google OAuth client as Gmail)*
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `https://www.googleapis.com/auth/drive.readonly` | Initial connect | Index documents |
+
+### Nango Configuration
+Add `google-drive` in Nango — same Client ID and Secret as Gmail.
+
+### Runtime Usage
+```typescript
+// lib/integrations/google-drive.ts
+import { google } from 'googleapis';
+import { getAccessToken } from './nango';
+
+export async function listRecentDriveDocuments(userId: string, maxResults = 30);
+export async function exportDriveDocumentText(userId: string, fileId: string, mimeType: string);
+```
+
+---
+
+## Dropbox (TIER 2)
+
+**Provider key in Nango**: `dropbox`
+**API**: Dropbox API v2
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `files.content.read` | Initial connect | Read and index files |
+| `files.metadata.read` | Initial connect | List recent files |
+
+### Dropbox Developer Setup
+1. Go to https://www.dropbox.com/developers > **App Console** > **Create App**
+2. Choose **Scoped access** > **Full Dropbox**
+3. Add redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **App key** and **App secret**
+
+### Nango Configuration
+Add `dropbox` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/dropbox.ts
+import { getAccessToken } from './nango';
+
+export async function listRecentDropboxFiles(userId: string, maxResults = 30);
+export async function downloadDropboxFileText(userId: string, path: string);
+```
+
+---
+
+## OneDrive (TIER 2)
+
+**Provider key in Nango**: `microsoft` (shared with Outlook)
+**API**: Microsoft Graph API v1.0
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `Files.Read` | Initial connect | Read and index files |
+
+### Azure App Registration
+Uses the same Azure app as Outlook. Add the `Files.Read` scope.
+
+### Runtime Usage
+```typescript
+// lib/integrations/onedrive.ts
+import { Client } from '@microsoft/microsoft-graph-client';
+import { getAccessToken } from './nango';
+
+export async function listRecentOneDriveFiles(userId: string, maxResults = 30);
+export async function downloadOneDriveFileText(userId: string, fileId: string);
+```
+
+---
+
+## Asana (TIER 2)
+
+**Provider key in Nango**: `asana`
+**API**: Asana REST API v1
+
+### Asana Developer Setup
+1. Go to https://app.asana.com/0/developer-console > **Create New App**
+2. Set redirect URI: `https://api.nango.dev/oauth/callback`
+3. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `asana` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/asana.ts
+import { getAccessToken } from './nango';
+
+export async function fetchAssignedAsanaTasks(userId: string, limit = 50);
+```
+
+---
+
+## Monday.com (TIER 2)
+
+**Provider key in Nango**: `monday`
+**API**: Monday.com GraphQL API
+
+### Monday.com Developer Setup
+1. Go to https://monday.com/developers/apps > **Create App**
+2. Add OAuth scopes: `boards:read`, `workspaces:read`, `users:read`
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `monday` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/monday.ts
+import { getAccessToken } from './nango';
+
+export async function fetchAssignedMondayItems(userId: string, limit = 50);
+```
+
+---
+
+## Jira (TIER 2)
+
+**Provider key in Nango**: `jira`
+**API**: Jira REST API v3 (Atlassian Cloud)
+
+### Atlassian Developer Setup
+1. Go to https://developer.atlassian.com > **Developer Console** > **Create OAuth 2.0 App**
+2. Add scopes: `read:jira-work`, `read:jira-user`
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `jira` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/jira.ts
+import { getAccessToken } from './nango';
+
+export async function fetchAssignedJiraIssues(userId: string, limit = 50);
+```
+
+---
+
+## Linear (TIER 2)
+
+**Provider key in Nango**: `linear`
+**API**: Linear GraphQL API
+
+### Linear Developer Setup
+1. Go to https://linear.app/settings/api > **OAuth Applications** > **Create**
+2. Set redirect URI: `https://api.nango.dev/oauth/callback`
+3. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `linear` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/linear.ts
+import { getAccessToken } from './nango';
+
+export async function fetchAssignedLinearIssues(userId: string, limit = 50);
+```
+
+---
+
+## ClickUp (TIER 2)
+
+**Provider key in Nango**: `clickup`
+**API**: ClickUp API v2
+
+### ClickUp Developer Setup
+1. Go to https://app.clickup.com/settings/integrations > **ClickUp API** > **Create App**
+2. Set redirect URI: `https://api.nango.dev/oauth/callback`
+3. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `clickup` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/clickup.ts
+import { getAccessToken } from './nango';
+
+export async function fetchAssignedClickUpTasks(userId: string, limit = 50);
+```
+
+---
+
+## Trello (TIER 2)
+
+**Provider key in Nango**: `trello`
+**API**: Trello REST API
+
+### Trello Developer Setup
+1. Go to https://trello.com/power-ups/admin > **New Power-Up**
+2. Set redirect URI: `https://api.nango.dev/oauth/callback`
+3. Copy **API Key** and **API Secret**
+
+### Nango Configuration
+Add `trello` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/trello.ts
+import { getAccessToken } from './nango';
+
+export async function fetchAssignedTrelloCards(userId: string, limit = 50);
+```
+
+---
+
+## HubSpot (TIER 2)
+
+**Provider key in Nango**: `hubspot`
+**API**: HubSpot CRM API v3
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `crm.objects.deals.read` | Initial connect | Read deals |
+| `crm.objects.contacts.read` | Initial connect | Read contacts |
+| `crm.objects.owners.read` | Initial connect | Match tasks to user |
+
+### HubSpot Developer Setup
+1. Go to https://developers.hubspot.com > **Manage Apps** > **Create App**
+2. Add the scopes listed above
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `hubspot` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/hubspot.ts
+import { getAccessToken } from './nango';
+
+export async function fetchHubSpotDeals(userId: string, limit = 25);
+export async function fetchHubSpotTasks(userId: string, limit = 25);
+```
+
+---
+
+## Salesforce (TIER 2)
+
+**Provider key in Nango**: `salesforce`
+**API**: Salesforce REST API + SOQL
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `api` | Initial connect | REST API access |
+| `refresh_token` | Always | Offline access |
+
+### Salesforce Developer Setup
+1. Go to Salesforce Setup > **App Manager** > **New Connected App**
+2. Enable OAuth and add the scopes listed above
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Consumer Key** (Client ID) and **Consumer Secret**
+
+### Nango Configuration
+Add `salesforce` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/salesforce.ts
+import { getAccessToken } from './nango';
+
+export async function fetchSalesforceOpportunities(userId: string, limit = 25);
+export async function fetchSalesforceTasks(userId: string, limit = 25);
+```
+
+---
+
+## Pipedrive (TIER 2)
+
+**Provider key in Nango**: `pipedrive`
+**API**: Pipedrive REST API v1
+
+### Pipedrive Developer Setup
+1. Go to https://developers.pipedrive.com > **Developer Hub** > **Create App**
+2. Choose **OAuth** app type
+3. Set redirect URI: `https://api.nango.dev/oauth/callback`
+4. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `pipedrive` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/pipedrive.ts
+import { getAccessToken } from './nango';
+
+export async function fetchPipedriveDeals(userId: string, limit = 25);
+export async function fetchPipedriveActivities(userId: string, limit = 25);
+```
+
+---
+
+## GitHub (TIER 2)
+
+**Provider key in Nango**: `github`
+**API**: GitHub REST API v3
+
+| Scope | When Added | Feature |
+|---|---|---|
+| `repo` | Initial connect | Read PR reviews |
+| `notifications` | Initial connect | Read @mentions |
+
+### GitHub Developer Setup
+1. Go to https://github.com/settings/developers > **OAuth Apps** > **New OAuth App**
+2. Set redirect URI: `https://api.nango.dev/oauth/callback`
+3. Copy **Client ID** and **Client Secret**
+
+### Nango Configuration
+Add `github` integration in Nango.
+
+### Runtime Usage
+```typescript
+// lib/integrations/github.ts
+import { getAccessToken } from './nango';
+
+export async function fetchGitHubPRReviews(userId: string, limit = 20);
+export async function fetchGitHubMentions(userId: string, limit = 20);
+```
+
+---
+
 ## WhatsApp (Twilio — apply in parallel, not needed for launch)
 
 **Provider**: Twilio WhatsApp Business API  
@@ -703,3 +1195,325 @@ NEXT_PUBLIC_SENTRY_DSN=
 # ── Encryption ───────────────────────────────────────────────
 ENCRYPTION_KEY=                    # 32-byte hex string — generated with: openssl rand -hex 32
 ```
+
+---
+
+## TIER 1 Integrations
+
+### Apple iCloud Mail + Calendar
+
+**Nango Provider:** `icloud`
+
+Apple iCloud Mail and Calendar are accessed via Apple's OAuth 2.0 flow (Sign in with Apple / iCloud auth), managed entirely through Nango.
+
+**Setup in Nango:**
+1. Create an Apple Services ID in the Apple Developer portal
+2. Enable "Sign in with Apple" capability
+3. Add the Nango callback URL as a return URL
+4. Configure the `icloud` provider in your Nango dashboard
+
+**Scopes requested:**
+- `mail.read` — Read iCloud Mail inbox
+- `calendar.read` — Read iCloud Calendar events
+
+**What we read:** Unread iCloud Mail messages (metadata + body for AI summarisation only, never stored). Upcoming calendar events for meeting prep.
+
+---
+
+### Calendly
+
+**Nango Provider:** `calendly`
+
+Fetches upcoming scheduled events (bookings) for the authenticated user. Read-only.
+
+**Setup in Nango:**
+1. Create an OAuth app at [developer.calendly.com](https://developer.calendly.com)
+2. Add credentials to Nango as `CALENDLY_CLIENT_ID` / `CALENDLY_CLIENT_SECRET`
+3. Set redirect URI to your Nango callback URL
+
+**Scopes requested:**
+- `default` — Read scheduled events and invitee info
+
+**What we read:** Upcoming active bookings with guest name/email and event type.
+
+---
+
+### Microsoft Teams
+
+**Nango Provider:** `microsoft-teams`
+
+Uses Microsoft Graph API (same Azure AD OAuth as Outlook) to fetch Teams messages and @mentions.
+
+**Setup in Nango:**
+Uses the same Microsoft OAuth app as Outlook. Ensure the following scopes are added in addition to mail/calendar scopes:
+- `Chat.Read` — Read Teams chat messages
+- `ChannelMessage.Read.All` — Read Teams channel messages
+
+**What we read:** Recent Teams DMs and channel messages where the user is mentioned. Message bodies are never stored — only AI summaries.
+
+---
+
+### LinkedIn Messages
+
+**Nango Provider:** `linkedin`
+
+Fetches unread LinkedIn conversation messages via the LinkedIn Messaging API v2.
+
+**Setup in Nango:**
+1. Create a LinkedIn Developer App at [developer.linkedin.com](https://developer.linkedin.com)
+2. Request access to the Sign In with LinkedIn and Messaging APIs
+3. Add credentials as `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET`
+
+**Scopes requested:**
+- `r_liteprofile` — Read basic profile
+- `r_emailaddress` — Read email
+- `w_member_social` — Required by LinkedIn for messaging access
+- `r_messages` — Read messages (requires LinkedIn approval)
+
+**What we read:** Unread conversation threads and their most recent messages. Bodies are never stored — only AI summaries.
+
+---
+
+### Twitter / X DMs
+
+**Nango Provider:** `twitter`
+
+Fetches unread Direct Messages from Twitter/X API v2.
+
+**Setup in Nango:**
+1. Create a Twitter Developer App at [developer.x.com](https://developer.x.com)
+2. Enable OAuth 2.0 with PKCE
+3. Add credentials as `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET`
+
+**Scopes requested:**
+- `dm.read` — Read Direct Messages
+- `tweet.read` — Read tweets (required baseline)
+- `users.read` — Read user profiles
+
+**What we read:** Unread DMs from the last 24 hours. Message bodies are never stored — only AI summaries.
+
+---
+
+## TIER 2 Integrations
+
+### Google Drive
+
+**Nango Provider:** `google-drive`
+
+Uses the same Google OAuth flow as Gmail. No additional app credentials needed — just enable the Drive API scope.
+
+**Additional scopes required:**
+- `https://www.googleapis.com/auth/drive.readonly` — Read Drive files
+
+**What we read:** Recently modified Docs, Presentations, and text files. Files are exported as plain text for AI indexing — raw content is never stored.
+
+---
+
+### Dropbox
+
+**Nango Provider:** `dropbox`
+
+Indexes text-based documents from Dropbox for meeting prep and context retrieval.
+
+**Setup in Nango:**
+1. Create an app at [dropbox.com/developers](https://dropbox.com/developers)
+2. Add credentials as `DROPBOX_CLIENT_ID` / `DROPBOX_CLIENT_SECRET`
+
+**Scopes requested:**
+- `files.content.read` — Read file content
+- `files.metadata.read` — Read file metadata
+
+**What we read:** Recently modified `.txt`, `.md`, `.csv`, and similar text files. Raw content is never stored — only AI-generated summaries.
+
+---
+
+### OneDrive
+
+**Nango Provider:** `microsoft` (same as Outlook)
+
+Uses the same Microsoft OAuth app. Add the following scope:
+- `Files.Read` — Read OneDrive files
+
+**What we read:** Recently modified Office documents and text files. Raw content is never stored — only AI-generated summaries.
+
+---
+
+### Asana
+
+**Nango Provider:** `asana`
+
+Fetches tasks assigned to the authenticated user across all workspaces.
+
+**Setup in Nango:**
+1. Create an OAuth app at [app.asana.com/0/developer-console](https://app.asana.com/0/developer-console)
+2. Add credentials as `ASANA_CLIENT_ID` / `ASANA_CLIENT_SECRET`
+
+**Scopes requested:**
+- `default` — Read tasks, projects, and workspaces
+
+**What we read:** Open (incomplete) tasks assigned to the user, with project and due date context.
+
+---
+
+### Monday.com
+
+**Nango Provider:** `monday`
+
+Fetches board items assigned to the authenticated user via Monday.com's GraphQL API.
+
+**Setup in Nango:**
+1. Create an OAuth app at [monday.com/developers](https://monday.com/developers)
+2. Add credentials as `MONDAY_CLIENT_ID` / `MONDAY_CLIENT_SECRET`
+
+**Scopes requested:**
+- `boards:read` — Read boards and items
+- `users:read` — Read user profile
+
+**What we read:** Items across all accessible boards with status, due date, and assignee context.
+
+---
+
+### Jira
+
+**Nango Provider:** `jira`
+
+Fetches issues assigned to the authenticated user via the Atlassian REST API (Jira Cloud).
+
+**Setup in Nango:**
+1. Create an OAuth 2.0 app at [developer.atlassian.com](https://developer.atlassian.com)
+2. Add credentials as `ATLASSIAN_CLIENT_ID` / `ATLASSIAN_CLIENT_SECRET`
+
+**Scopes requested:**
+- `read:jira-work` — Read issues and projects
+- `read:jira-user` — Read user profile
+- `offline_access` — Refresh tokens
+
+**What we read:** Open (unresolved) issues assigned to the user, with priority, status, and project context.
+
+---
+
+### Linear
+
+**Nango Provider:** `linear`
+
+Fetches issues assigned to the authenticated user via Linear's GraphQL API.
+
+**Setup in Nango:**
+1. Create an OAuth app at [linear.app/settings/api](https://linear.app/settings/api)
+2. Add credentials as `LINEAR_CLIENT_ID` / `LINEAR_CLIENT_SECRET`
+
+**Scopes requested:**
+- `read` — Read issues, teams, and projects
+
+**What we read:** Open issues assigned to the user, with team, project, priority, and due date context.
+
+---
+
+### ClickUp
+
+**Nango Provider:** `clickup`
+
+Fetches tasks assigned to the authenticated user across all ClickUp teams.
+
+**Setup in Nango:**
+1. Create an OAuth app at [app.clickup.com/settings/integrations](https://app.clickup.com/settings/integrations)
+2. Add credentials as `CLICKUP_CLIENT_ID` / `CLICKUP_CLIENT_SECRET`
+
+**Scopes requested:**
+- ClickUp's default OAuth scope (all workspaces the user belongs to)
+
+**What we read:** Open tasks assigned to the user, with space, folder, list, and due date context.
+
+---
+
+### Trello
+
+**Nango Provider:** `trello`
+
+Fetches cards assigned to the authenticated user across all boards.
+
+**Setup in Nango:**
+1. Create a Power-Up at [trello.com/power-ups/admin](https://trello.com/power-ups/admin)
+2. Generate an API key — Nango handles the OAuth token exchange
+
+**Scopes requested:**
+- `read` — Read boards, lists, and cards
+
+**What we read:** Open (non-archived) cards assigned to the user, with board, list, label, and due date context.
+
+---
+
+### HubSpot
+
+**Nango Provider:** `hubspot`
+
+Fetches deals, contacts, and tasks from HubSpot CRM.
+
+**Setup in Nango:**
+1. Create an OAuth app in [HubSpot Developer portal](https://developers.hubspot.com)
+2. Add credentials as `HUBSPOT_CLIENT_ID` / `HUBSPOT_CLIENT_SECRET`
+
+**Scopes requested:**
+- `crm.objects.deals.read` — Read deals
+- `crm.objects.contacts.read` — Read contacts
+- `crm.objects.tasks.read` — Read tasks
+
+**What we read:** Open deals and incomplete tasks. Deal amounts, stages, and close dates surface in your pipeline briefing.
+
+---
+
+### Salesforce
+
+**Nango Provider:** `salesforce`
+
+Fetches opportunities, tasks, and contacts from Salesforce CRM.
+
+**Setup in Nango:**
+1. Create a Connected App in Salesforce Setup → App Manager
+2. Enable OAuth, add Nango callback URL
+3. Add credentials as `SALESFORCE_CLIENT_ID` / `SALESFORCE_CLIENT_SECRET`
+4. Set `SALESFORCE_INSTANCE_URL` to your Salesforce domain (e.g. `https://yourorg.my.salesforce.com`)
+
+**Scopes requested:**
+- `api` — Full API access (read only via SOQL)
+- `refresh_token` — Token refresh
+
+**What we read:** Open opportunities and incomplete tasks assigned to the user.
+
+---
+
+### Pipedrive
+
+**Nango Provider:** `pipedrive`
+
+Fetches open deals and upcoming activities for the authenticated Pipedrive user.
+
+**Setup in Nango:**
+1. Create an OAuth app at [pipedrive.com/developer](https://pipedrive.com/developer)
+2. Add credentials as `PIPEDRIVE_CLIENT_ID` / `PIPEDRIVE_CLIENT_SECRET`
+
+**Scopes requested:**
+- `deals:read` — Read deals
+- `activities:read` — Read activities
+- `contacts:read` — Read contacts
+
+**What we read:** Open deals and pending activities (calls, meetings, emails) with person and organisation context.
+
+---
+
+### GitHub
+
+**Nango Provider:** `github`
+
+Fetches pull requests awaiting review and @mentions for the authenticated GitHub user.
+
+**Setup in Nango:**
+1. Create an OAuth App at [github.com/settings/developers](https://github.com/settings/developers)
+2. Add credentials as `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`
+
+**Scopes requested:**
+- `repo` — Read access to repositories (for PR reviews)
+- `notifications` — Read notification subscriptions
+- `user:email` — Read email for contact matching
+
+**What we read:** PRs where the user is requested as reviewer, and issues/PRs where the user is @mentioned in the last 7 days.

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3a3429"/>
+      <stop offset="100%" stop-color="#2a2419"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Star/compass shape representing intelligence & direction -->
+  <path d="M256 80 L290 210 L400 256 L290 302 L256 432 L222 302 L112 256 L222 210 Z"
+        fill="#c4993c" opacity="0.9"/>
+  <circle cx="256" cy="256" r="40" fill="#f9f7f4"/>
+</svg>
