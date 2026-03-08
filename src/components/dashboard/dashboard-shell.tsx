@@ -22,6 +22,8 @@ import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
 import { OneTapConfirmToast } from '@/components/shared/OneTapConfirmToast';
 import { useOneTapQueue } from '@/hooks/useOneTapQueue';
+import { CatchUpBanner } from '@/components/catch-up/CatchUpBanner';
+import { useCatchUpStore } from '@/stores/catch-up-store';
 
 /* ── Navigation structure ── */
 const navItems = [
@@ -91,6 +93,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const loadConversations = useChatStore((s) => s.loadConversations);
 
   const { current: currentToast, resolve: resolveToast } = useOneTapQueue();
+  const setCatchUpState = useCatchUpStore((s) => s.setState);
+  const setStaleWarnings = useCatchUpStore((s) => s.setStaleWarnings);
 
   const supabase = getSupabaseBrowserClient();
 
@@ -98,6 +102,99 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadConversations();
   }, [loadConversations]);
+
+  // Boot the local worker system (catch-up + scheduler) via API
+  useEffect(() => {
+    let cancelled = false;
+    let pollId: ReturnType<typeof setInterval> | null = null;
+
+    async function boot() {
+      try {
+        // Read app_closed_at from localStorage for gap calculation
+        const APP_CLOSED_KEY = 'donna_app_closed_at';
+        const stored = localStorage.getItem(APP_CLOSED_KEY);
+        const appClosedAt = stored ? parseInt(stored, 10) : undefined;
+
+        // Boot worker server-side
+        const res = await fetch('/api/worker/boot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appClosedAt: isNaN(appClosedAt as number) ? undefined : appClosedAt }),
+        });
+
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (data.state && !cancelled) {
+          setCatchUpState(data.state);
+        }
+
+        // Poll for state updates (fast during catch-up, slow for ongoing health)
+        let pollInterval = 2000;
+        const startPoll = () => {
+          pollId = setInterval(async () => {
+            try {
+              const statusRes = await fetch('/api/worker/status');
+              if (!statusRes.ok || cancelled) return;
+              const statusData = await statusRes.json();
+              if (statusData.state && !cancelled) {
+                setCatchUpState(statusData.state);
+              }
+              if (statusData.staleWarnings && !cancelled) {
+                setStaleWarnings(statusData.staleWarnings);
+              }
+              // Switch to slower polling once catch-up is done
+              if (pollInterval === 2000 && statusData.state?.status !== 'running') {
+                if (pollId) clearInterval(pollId);
+                pollInterval = 30_000;
+                startPoll();
+              }
+            } catch {
+              // Polling failure is non-fatal
+            }
+          }, pollInterval);
+        };
+        startPoll();
+      } catch {
+        // Worker boot failure is non-fatal
+      }
+    }
+    boot();
+
+    // Save close timestamp and stop worker on unmount
+    return () => {
+      cancelled = true;
+      if (pollId) clearInterval(pollId);
+      localStorage.setItem('donna_app_closed_at', String(Date.now()));
+      fetch('/api/worker/stop', { method: 'POST' }).catch(() => {});
+    };
+  }, [setCatchUpState, setStaleWarnings]);
+
+  // Start desktop observer frontend listener (Tauri only)
+  // The Rust backend auto-starts the AX loop, but the JS event listener
+  // must be registered to receive events and flush context to the API.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) return;
+
+    let stopFn: (() => Promise<void>) | null = null;
+
+    async function boot() {
+      try {
+        const { startObserver, stopObserver } = await import('@/lib/desktop-observer/client');
+        const started = await startObserver();
+        if (started) {
+          stopFn = stopObserver;
+          console.log('[DashboardShell] Desktop observer listener started');
+        }
+      } catch {
+        // Desktop observer not available — non-fatal
+      }
+    }
+    boot();
+
+    return () => {
+      stopFn?.().catch(() => {});
+    };
+  }, []);
 
   // Check if a Tier 3 dialog is open — defer toast rendering
   useEffect(() => {
@@ -314,6 +411,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         {/* ── Main content ── */}
         <main className="flex-1 ml-[220px] overflow-y-auto">
           <div className="mx-auto max-w-[1200px] px-8 py-8 animate-fade-in">
+            <CatchUpBanner />
             {children}
           </div>
         </main>

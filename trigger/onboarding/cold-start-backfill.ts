@@ -354,6 +354,22 @@ export const coldStartBackfill = task({
       });
     }
 
+    // Ensure the job is marked completed even if individual phases had partial failures
+    const { data: finalJob } = await db
+      .from('backfill_jobs')
+      .select('status')
+      .eq('id', jobId)
+      .single();
+
+    if (finalJob && finalJob.status !== 'completed' && finalJob.status !== 'failed') {
+      await db.from('backfill_jobs').update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        progress_pct: 100,
+      }).eq('id', jobId);
+      logger.info('Backfill marked as completed (all phases attempted)', { userId, jobId });
+    }
+
     return { success: true, userId, jobId };
   },
 });

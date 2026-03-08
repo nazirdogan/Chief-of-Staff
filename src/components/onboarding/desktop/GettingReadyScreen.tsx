@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface BackfillStatus {
@@ -11,6 +11,15 @@ interface BackfillStatus {
   progressPct: number;
   phaseDetails: Record<string, unknown> | null;
 }
+
+const PHASES = [
+  'email_backfill',
+  'contact_graph',
+  'commitment_extraction',
+  'calendar_backfill',
+  'desktop_processing',
+  'first_briefing',
+] as const;
 
 const PHASE_LABELS: Record<string, { label: string; description: string }> = {
   email_backfill: {
@@ -39,25 +48,47 @@ const PHASE_LABELS: Record<string, { label: string; description: string }> = {
   },
 };
 
+// How long to wait before showing "skip" option (2 minutes)
+const STALL_TIMEOUT_MS = 120_000;
+// How long before auto-completing a stalled job (5 minutes)
+const AUTO_COMPLETE_TIMEOUT_MS = 300_000;
+
 export function GettingReadyScreen() {
   const router = useRouter();
   const [status, setStatus] = useState<BackfillStatus | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [stalled, setStalled] = useState(false);
+  const [triggerFailed, setTriggerFailed] = useState(false);
   const triggeredRef = useRef(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastProgressRef = useRef<{ pct: number; time: number }>({ pct: 0, time: 0 });
+  const startTimeRef = useRef(0);
 
   useEffect(() => {
     requestAnimationFrame(() => setMounted(true));
   }, []);
 
+  const enterDashboard = useCallback(() => {
+    router.push('/dashboard');
+    router.refresh();
+  }, [router]);
+
   // Trigger the backfill on mount
   useEffect(() => {
     if (triggeredRef.current) return;
     triggeredRef.current = true;
+    startTimeRef.current = Date.now();
+    lastProgressRef.current = { pct: 0, time: Date.now() };
 
-    fetch('/api/backfill/trigger', { method: 'POST' }).catch(() => {
-      // Will be caught by status polling
-    });
+    fetch('/api/backfill/trigger', { method: 'POST' })
+      .then(async (res) => {
+        if (!res.ok) {
+          setTriggerFailed(true);
+        }
+      })
+      .catch(() => {
+        setTriggerFailed(true);
+      });
   }, []);
 
   // Poll for status
@@ -66,16 +97,35 @@ export function GettingReadyScreen() {
       try {
         const res = await fetch('/api/backfill/status');
         if (!res.ok) return;
-        const data = await res.json();
+        const data: BackfillStatus = await res.json();
         setStatus(data);
 
+        // Track if progress is actually moving
+        if (data.progressPct > lastProgressRef.current.pct) {
+          lastProgressRef.current = { pct: data.progressPct, time: Date.now() };
+          setStalled(false);
+        }
+
         if (data.status === 'completed') {
-          // Clear interval and redirect
           if (pollRef.current) clearInterval(pollRef.current);
-          setTimeout(() => {
-            router.push('/dashboard');
-            router.refresh();
-          }, 1500);
+          setTimeout(enterDashboard, 1500);
+          return;
+        }
+
+        // Detect stall: no progress for STALL_TIMEOUT_MS
+        const timeSinceLastProgress = Date.now() - lastProgressRef.current.time;
+        if (timeSinceLastProgress > STALL_TIMEOUT_MS && data.status !== 'none') {
+          setStalled(true);
+        }
+
+        // Auto-complete after AUTO_COMPLETE_TIMEOUT_MS — don't leave user hanging forever
+        const totalElapsed = Date.now() - startTimeRef.current;
+        if (totalElapsed > AUTO_COMPLETE_TIMEOUT_MS) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          // Mark as complete server-side so they don't get stuck here again
+          await fetch('/api/backfill/complete', { method: 'POST' }).catch(() => {});
+          enterDashboard();
+          return;
         }
       } catch {
         // Retry on next interval
@@ -83,24 +133,27 @@ export function GettingReadyScreen() {
     }
 
     checkStatus();
-    pollRef.current = setInterval(checkStatus, 2000);
+    pollRef.current = setInterval(checkStatus, 3000);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [router]);
+  }, [router, enterDashboard]);
 
   const phase = status?.currentPhase ?? 'email_backfill';
   const phaseInfo = PHASE_LABELS[phase] ?? PHASE_LABELS.email_backfill;
-  const progress = status?.progressPct ?? 0;
   const isComplete = status?.status === 'completed';
   const isFailed = status?.status === 'failed';
+  const isRunning = status?.status === 'running';
+
+  // Determine which phases are done/current/pending
+  const currentPhaseIdx = PHASES.indexOf(phase as typeof PHASES[number]);
 
   return (
     <div
       className="relative flex min-h-screen items-center justify-center overflow-hidden"
       style={{ background: '#0E1225' }}
     >
-      {/* Ambient glow — larger, softer */}
+      {/* Ambient glow */}
       <div
         className="animate-glow-pulse pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         style={{
@@ -120,7 +173,7 @@ export function GettingReadyScreen() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center text-center px-6">
+      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-[520px] w-full">
         {/* Donna logo mark */}
         <div
           className="transition-all duration-1000"
@@ -137,17 +190,17 @@ export function GettingReadyScreen() {
               style={{
                 background: 'radial-gradient(circle, rgba(232,132,92,0.2) 0%, transparent 70%)',
                 transform: 'scale(4)',
-                animation: 'glow-pulse 3s ease-in-out infinite',
+                animation: isRunning ? 'glow-pulse 3s ease-in-out infinite' : undefined,
               }}
             />
             <div
-              className="relative flex h-24 w-24 items-center justify-center rounded-2xl"
+              className="relative flex h-20 w-20 items-center justify-center rounded-2xl"
               style={{
                 background: 'rgba(232, 132, 92, 0.06)',
                 border: '1px solid rgba(232, 132, 92, 0.12)',
               }}
             >
-              <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
                   fill="none"
@@ -176,12 +229,12 @@ export function GettingReadyScreen() {
           </div>
         </div>
 
-        {/* Main text */}
+        {/* Main heading */}
         <h1
-          className="mt-10 transition-all duration-1000"
+          className="mt-8 transition-all duration-1000"
           style={{
             fontFamily: 'var(--font-display), Georgia, serif',
-            fontSize: '32px',
+            fontSize: '28px',
             fontStyle: 'italic',
             fontWeight: 400,
             color: '#FBF7F4',
@@ -191,12 +244,16 @@ export function GettingReadyScreen() {
             transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
-          {isComplete ? 'Ready for you' : 'Donna is getting ready for work'}
+          {isComplete
+            ? 'Ready for you'
+            : triggerFailed
+              ? 'Setup is taking a moment'
+              : 'Donna is getting ready for work'}
         </h1>
 
         {/* Phase description */}
         <p
-          className="mt-4 max-w-[380px] text-[14px] leading-[1.7] transition-all duration-500"
+          className="mt-3 text-[14px] leading-[1.7] transition-all duration-500"
           style={{
             color: '#9BAFC4',
             opacity: mounted ? 1 : 0,
@@ -207,135 +264,176 @@ export function GettingReadyScreen() {
         >
           {isComplete
             ? 'Your first briefing is ready. Let\u2019s go.'
-            : isFailed
-              ? 'Something went wrong, but don\u2019t worry \u2014 we\u2019ll try again.'
+            : isFailed || triggerFailed
+              ? 'We\u2019ll finish setting up in the background. You can start using Donna now.'
               : phaseInfo.description}
         </p>
 
-        {/* Progress bar */}
-        <div
-          className="mt-10 w-full max-w-[320px] transition-all duration-700"
-          style={{
-            opacity: mounted ? 1 : 0,
-            transitionDelay: '700ms',
-          }}
-        >
-          {/* Phase label */}
-          {!isComplete && !isFailed && (
-            <div className="mb-3 flex items-center justify-between">
-              <span
-                className="text-[11px] font-medium"
-                style={{ fontFamily: 'var(--font-mono)', color: '#E8845C' }}
-              >
-                {phaseInfo.label}
-              </span>
-              <span
-                className="text-[10px]"
-                style={{ fontFamily: 'var(--font-mono)', color: 'rgba(155,175,196,0.4)' }}
-              >
-                {progress}%
-              </span>
-            </div>
-          )}
-
-          {/* Bar */}
+        {/* Phase steps — the main status display */}
+        {!isComplete && !isFailed && !triggerFailed && (
           <div
-            className="h-[3px] w-full overflow-hidden rounded-full"
-            style={{ background: 'rgba(251,247,244,0.04)' }}
+            className="mt-10 w-full transition-all duration-700"
+            style={{
+              opacity: mounted ? 1 : 0,
+              transitionDelay: '700ms',
+            }}
           >
-            <div
-              className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{
-                width: `${isComplete ? 100 : progress}%`,
-                background: isComplete
-                  ? 'linear-gradient(90deg, #52B788, rgba(82, 183, 136, 0.6))'
-                  : isFailed
-                    ? 'linear-gradient(90deg, #D64B2A, rgba(214, 75, 42, 0.6))'
-                    : 'linear-gradient(90deg, #E8845C, rgba(232, 132, 92, 0.4))',
-              }}
-            />
-          </div>
-
-          {/* Phase steps indicator */}
-          {!isComplete && !isFailed && (
-            <div className="mt-6 space-y-2.5">
-              {Object.entries(PHASE_LABELS).map(([key, info]) => {
-                const phases = Object.keys(PHASE_LABELS);
-                const currentIdx = phases.indexOf(phase);
-                const thisIdx = phases.indexOf(key);
-                const isDone = thisIdx < currentIdx;
-                const isCurrent = key === phase;
+            <div className="space-y-1">
+              {PHASES.map((key, idx) => {
+                const info = PHASE_LABELS[key];
+                const isDone = idx < currentPhaseIdx;
+                const isCurrent = key === phase && isRunning;
+                const isPending = idx > currentPhaseIdx;
 
                 return (
                   <div
                     key={key}
-                    className="flex items-center gap-2.5 transition-all duration-300"
-                    style={{ opacity: isDone ? 0.4 : isCurrent ? 1 : 0.2 }}
+                    className="flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-500"
+                    style={{
+                      background: isCurrent
+                        ? 'rgba(232, 132, 92, 0.06)'
+                        : 'transparent',
+                    }}
                   >
-                    <div
-                      className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
-                      style={{
-                        background: isDone
-                          ? 'rgba(82, 183, 136, 0.15)'
-                          : isCurrent
-                            ? 'rgba(232, 132, 92, 0.12)'
-                            : 'rgba(251,247,244,0.03)',
-                      }}
-                    >
+                    {/* Status icon */}
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                       {isDone ? (
-                        <svg width="8" height="8" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6L5 9L10 3" stroke="#52B788" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <circle cx="7" cy="7" r="7" fill="rgba(82, 183, 136, 0.15)" />
+                          <path d="M4 7L6 9.5L10 4.5" stroke="#52B788" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       ) : isCurrent ? (
+                        <div className="relative flex h-5 w-5 items-center justify-center">
+                          <div
+                            className="absolute h-5 w-5 rounded-full"
+                            style={{
+                              border: '2px solid rgba(232, 132, 92, 0.3)',
+                              borderTopColor: '#E8845C',
+                              animation: 'spin 1s linear infinite',
+                            }}
+                          />
+                        </div>
+                      ) : (
                         <div
                           className="h-1.5 w-1.5 rounded-full"
-                          style={{ background: '#E8845C', animation: 'glow-pulse 2s ease-in-out infinite' }}
+                          style={{ background: 'rgba(155, 175, 196, 0.2)' }}
                         />
-                      ) : (
-                        <div className="h-1 w-1 rounded-full" style={{ background: 'rgba(155,175,196,0.2)' }} />
                       )}
                     </div>
+
+                    {/* Label */}
                     <span
-                      className="text-[11px]"
+                      className="text-[13px] font-medium transition-colors duration-300"
                       style={{
-                        fontFamily: 'var(--font-mono)',
-                        color: isCurrent ? 'rgba(251,247,244,0.7)' : isDone ? 'rgba(82,183,136,0.5)' : 'rgba(155,175,196,0.3)',
+                        color: isCurrent
+                          ? 'rgba(251, 247, 244, 0.9)'
+                          : isDone
+                            ? 'rgba(82, 183, 136, 0.6)'
+                            : 'rgba(155, 175, 196, 0.25)',
                       }}
                     >
                       {info.label}
                     </span>
+
+                    {/* Phase detail (e.g. "142 emails") */}
+                    {isDone && status?.phaseDetails && (
+                      <span
+                        className="ml-auto text-[11px]"
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          color: 'rgba(82, 183, 136, 0.35)',
+                        }}
+                      >
+                        {getPhaseDetail(key, status.phaseDetails)}
+                      </span>
+                    )}
+
+                    {/* Spinner label for current */}
+                    {isCurrent && (
+                      <span
+                        className="ml-auto text-[11px]"
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          color: 'rgba(232, 132, 92, 0.5)',
+                        }}
+                      >
+                        {isPending ? '' : 'in progress'}
+                      </span>
+                    )}
                   </div>
                 );
               })}
             </div>
-          )}
-        </div>
-
-        {/* Failed state retry */}
-        {isFailed && (
-          <button
-            onClick={() => {
-              triggeredRef.current = false;
-              setStatus(null);
-              fetch('/api/backfill/trigger', { method: 'POST' }).catch(() => {});
-            }}
-            className="mt-6 rounded-lg px-5 py-2.5 text-[13px] font-medium transition-all duration-300"
-            style={{
-              background: 'linear-gradient(135deg, #E8845C, #D4704A)',
-              color: '#FBF7F4',
-            }}
-          >
-            Try again
-          </button>
+          </div>
         )}
 
-        {/* Complete state CTA */}
+        {/* Stalled state — offer skip */}
+        {stalled && !isComplete && !isFailed && (
+          <div
+            className="mt-6 animate-fade-in"
+          >
+            <p
+              className="mb-3 text-[12px]"
+              style={{ color: 'rgba(155, 175, 196, 0.5)' }}
+            >
+              This is taking longer than expected. You can continue while we finish in the background.
+            </p>
+            <button
+              onClick={enterDashboard}
+              className="rounded-lg px-5 py-2.5 text-[13px] font-medium transition-all duration-300 hover:brightness-110"
+              style={{
+                background: 'rgba(251, 247, 244, 0.08)',
+                color: '#FBF7F4',
+                border: '1px solid rgba(251, 247, 244, 0.1)',
+              }}
+            >
+              Continue to Donna
+            </button>
+          </div>
+        )}
+
+        {/* Failed / trigger failed state */}
+        {(isFailed || triggerFailed) && (
+          <div className="mt-8 flex items-center gap-3">
+            <button
+              onClick={enterDashboard}
+              className="rounded-xl px-6 py-3 text-[14px] font-medium transition-all duration-300 hover:brightness-110"
+              style={{
+                background: 'linear-gradient(135deg, #E8845C, #D4704A)',
+                color: '#FBF7F4',
+                boxShadow: '0 0 24px rgba(232, 132, 92, 0.15)',
+              }}
+            >
+              Enter Donna
+            </button>
+            {isFailed && (
+              <button
+                onClick={() => {
+                  triggeredRef.current = false;
+                  setStatus(null);
+                  setStalled(false);
+                  setTriggerFailed(false);
+                  lastProgressRef.current = { pct: 0, time: Date.now() };
+                  startTimeRef.current = Date.now();
+                  fetch('/api/backfill/trigger', { method: 'POST' }).catch(() => {});
+                }}
+                className="rounded-xl px-6 py-3 text-[14px] font-medium transition-all duration-300"
+                style={{
+                  background: 'rgba(251, 247, 244, 0.06)',
+                  color: 'rgba(251, 247, 244, 0.7)',
+                  border: '1px solid rgba(251, 247, 244, 0.08)',
+                }}
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Complete state */}
         {isComplete && (
           <button
-            onClick={() => {
-              router.push('/dashboard');
-              router.refresh();
-            }}
+            onClick={enterDashboard}
             className="group mt-8 transition-all duration-700"
             style={{ opacity: mounted ? 1 : 0, transitionDelay: '200ms' }}
           >
@@ -356,7 +454,7 @@ export function GettingReadyScreen() {
           </button>
         )}
 
-        {/* Bottom security note */}
+        {/* Bottom note */}
         <p
           className="mt-12 text-[10px] tracking-wide"
           style={{
@@ -366,9 +464,44 @@ export function GettingReadyScreen() {
             letterSpacing: '0.1em',
           }}
         >
-          Processing locally \u2014 your data never leaves your control
+          Processing locally &mdash; your data never leaves your control
         </p>
       </div>
+
+      {/* Spinner keyframe */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
+}
+
+/** Extract a human-readable detail from phase_details for completed phases */
+function getPhaseDetail(phase: string, details: Record<string, unknown>): string {
+  switch (phase) {
+    case 'email_backfill': {
+      const n = details.emails_ingested;
+      return typeof n === 'number' && n > 0 ? `${n} emails` : '';
+    }
+    case 'contact_graph': {
+      const n = details.contacts_upserted;
+      return typeof n === 'number' && n > 0 ? `${n} contacts` : '';
+    }
+    case 'commitment_extraction': {
+      const n = details.commitments_extracted;
+      return typeof n === 'number' && n > 0 ? `${n} found` : '';
+    }
+    case 'calendar_backfill': {
+      const n = details.events_loaded;
+      return typeof n === 'number' && n > 0 ? `${n} events` : '';
+    }
+    case 'desktop_processing': {
+      const n = details.chunks_found;
+      return typeof n === 'number' && n > 0 ? `${n} snapshots` : '';
+    }
+    default:
+      return '';
+  }
 }
