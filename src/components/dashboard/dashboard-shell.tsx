@@ -12,11 +12,17 @@ import {
   Users,
   Activity,
   Zap,
+  MessageCircle,
+  Brain,
+  BarChart3,
   Settings,
   LogOut,
   ShieldCheck,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
+import { CommandPalette } from '@/components/search/CommandPalette';
+import { OneTapConfirmToast } from '@/components/shared/OneTapConfirmToast';
+import { useOneTapQueue } from '@/hooks/useOneTapQueue';
 
 const navItems = [
   { href: '/dashboard', label: 'Briefing', icon: LayoutDashboard },
@@ -26,25 +32,30 @@ const navItems = [
   { href: '/people', label: 'People', icon: Users },
   { href: '/heartbeat', label: 'Heartbeat', icon: Activity },
   { href: '/operations', label: 'Operations', icon: Zap },
+  { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
+  { href: '/memory', label: 'Memory', icon: Brain },
+  { href: '/patterns', label: 'Patterns', icon: BarChart3 },
 ];
 
 const bottomItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-/* Color tokens — dark theme matching landing page */
+/* Donna brand tokens */
 const t = {
-  bg: '#0A0A0B',
-  surface: 'rgba(255,255,255,0.04)',
-  surfaceSubtle: 'rgba(255,255,255,0.02)',
-  border: 'rgba(255,255,255,0.07)',
-  borderHover: 'rgba(255,255,255,0.14)',
-  text: '#FFFFFF',
-  textSecondary: 'rgba(255,255,255,0.85)',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  textQuaternary: 'rgba(255,255,255,0.35)',
-  activeAccent: 'rgba(168,153,104,0.12)',
-  activeBorder: 'rgba(168,153,104,0.25)',
+  bg: '#1B1F3A',
+  deep: '#0E1225',
+  surface: 'rgba(255,255,255,0.05)',
+  surfaceSubtle: 'rgba(255,255,255,0.03)',
+  border: 'rgba(251,247,244,0.08)',
+  borderHover: 'rgba(251,247,244,0.16)',
+  text: '#FBF7F4',
+  textSecondary: 'rgba(251,247,244,0.85)',
+  textTertiary: 'rgba(155,175,196,0.85)',
+  textQuaternary: 'rgba(155,175,196,0.45)',
+  dawn: '#E8845C',
+  activeAccent: 'rgba(232,132,92,0.12)',
+  activeBorder: 'rgba(232,132,92,0.30)',
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -52,8 +63,31 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [cmdkOpen, setCmdkOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { current: currentToast, resolve: resolveToast } = useOneTapQueue();
 
   const supabase = getSupabaseBrowserClient();
+
+  // Check if a Tier 3 dialog is open — defer toast rendering
+  useEffect(() => {
+    const check = setInterval(() => {
+      setDialogOpen(!!document.querySelector('[role=dialog]'));
+    }, 500);
+    return () => clearInterval(check);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdkOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect -- intentional hydration guard
@@ -83,14 +117,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <link
-        href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap"
-        rel="stylesheet"
-      />
       <div
         className="flex min-h-screen"
         style={{
-          fontFamily: "'Satoshi', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           background: t.bg,
           color: t.text,
           opacity: mounted ? 1 : 0,
@@ -101,28 +131,41 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <aside
           className="fixed top-0 left-0 flex h-screen w-[240px] shrink-0 flex-col overflow-y-auto z-30"
           style={{
-            background: t.surface,
+            background: t.deep,
             borderRight: `1px solid ${t.border}`,
           }}
         >
-          {/* Brand */}
+          {/* Brand lockup — The Meridian mark + italic wordmark */}
           <div className="flex h-16 items-center gap-3 px-6">
-            <div
-              className="flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-black tracking-tight"
-              style={{ background: t.text, color: t.bg }}
-            >
-              CS
-            </div>
+            <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+              <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                    fill="none" stroke="#FBF7F4" strokeWidth="4.5" strokeLinejoin="round"/>
+              <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" strokeWidth="3" strokeLinecap="round"/>
+              <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+            </svg>
             <span
-              className="text-[14px] font-bold tracking-[-0.02em]"
-              style={{ color: t.text }}
+              className="text-[18px] tracking-[0.01em]"
+              style={{
+                color: t.text,
+                fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+                fontWeight: 300,
+                fontStyle: 'italic',
+              }}
             >
-              Donna
+              donna
             </span>
           </div>
 
-          {/* Divider */}
-          <div className="mx-5" style={{ height: 1, background: t.border }} />
+          {/* Divider — dawn gradient */}
+          <div
+            className="mx-5"
+            style={{
+              height: 1,
+              background: `linear-gradient(90deg, ${t.dawn}, transparent)`,
+              opacity: 0.3,
+            }}
+          />
 
           {/* Nav */}
           <nav className="flex flex-1 flex-col gap-0.5 px-3 pt-4">
@@ -151,7 +194,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     }
                   }}
                 >
-                  <Icon size={16} style={{ opacity: active ? 1 : 0.55 }} />
+                  <Icon size={16} style={{ opacity: active ? 1 : 0.55, color: active ? t.dawn : undefined }} />
                   {label}
                 </Link>
               );
@@ -160,7 +203,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
           {/* Bottom section */}
           <div className="px-3 pb-4">
-            <div className="mb-2 mx-2" style={{ height: 1, background: t.border }} />
+            <div
+              className="mb-2 mx-2"
+              style={{
+                height: 1,
+                background: t.border,
+              }}
+            />
 
             {bottomItems.map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
@@ -187,7 +236,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     }
                   }}
                 >
-                  <Icon size={16} style={{ opacity: active ? 1 : 0.55 }} />
+                  <Icon size={16} style={{ opacity: active ? 1 : 0.55, color: active ? t.dawn : undefined }} />
                   {label}
                 </Link>
               );
@@ -203,7 +252,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   color: isActive('/admin') ? t.text : t.textTertiary,
                 }}
               >
-                <ShieldCheck size={16} style={{ opacity: isActive('/admin') ? 1 : 0.55 }} />
+                <ShieldCheck size={16} style={{ opacity: isActive('/admin') ? 1 : 0.55, color: isActive('/admin') ? t.dawn : undefined }} />
                 Admin
               </Link>
             )}
@@ -235,6 +284,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </main>
 
         <FeedbackWidget />
+        <CommandPalette open={cmdkOpen} onOpenChange={setCmdkOpen} />
+
+        {/* Tier 2 one-tap confirm toast — hidden when Tier 3 dialog is open */}
+        {currentToast && !dialogOpen && (
+          <OneTapConfirmToast action={currentToast} onResolve={resolveToast} />
+        )}
       </div>
     </>
   );

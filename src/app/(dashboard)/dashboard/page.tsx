@@ -6,6 +6,8 @@ import { BriefingItem as BriefingItemComponent } from '@/components/briefing/Bri
 import { CitationDrawer } from '@/components/briefing/CitationDrawer';
 import { MeetingPrepCard } from '@/components/people/MeetingPrepCard';
 import { LayoutDashboard, CheckCircle2, Loader2, Zap, RefreshCw, Calendar, ShieldAlert, Reply, Eye, Info, ChevronDown, MailCheck, Clock, Coffee, Users } from 'lucide-react';
+import { DayGlanceCard } from '@/components/briefing/DayGlanceCard';
+import { YesterdayRecap } from '@/components/briefing/YesterdayRecap';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 import type { Briefing, BriefingItem, BriefingItemSection, MeetingPrepData, SourceRef } from '@/lib/db/types';
 
@@ -34,29 +36,29 @@ const INTENT_META: Record<IntentSection, { label: string; description: string; i
     label: 'Reply Now',
     description: 'Items requiring your active response',
     icon: MailCheck,
-    accent: '#F87171',
-    accentBg: 'rgba(248,113,113,0.06)',
+    accent: '#D64B2A',
+    accentBg: 'rgba(214,75,42,0.08)',
   },
   follow_up: {
     label: 'Follow Up',
     description: 'Sent messages with no response — consider nudging',
     icon: Reply,
-    accent: '#D97706',
-    accentBg: 'rgba(217,119,6,0.06)',
+    accent: '#F4C896',
+    accentBg: 'rgba(244,200,150,0.08)',
   },
   review: {
     label: 'Review',
     description: 'Decisions, commitments, and items needing acknowledgement',
     icon: Eye,
-    accent: '#60A5FA',
-    accentBg: 'rgba(96,165,250,0.06)',
+    accent: '#4E7DAA',
+    accentBg: 'rgba(78,125,170,0.08)',
   },
   fyi: {
     label: 'FYI',
     description: 'Informational items — no action needed',
     icon: Info,
-    accent: 'rgba(255,255,255,0.55)',
-    accentBg: 'rgba(255,255,255,0.04)',
+    accent: 'rgba(155,175,196,0.7)',
+    accentBg: 'rgba(155,175,196,0.06)',
   },
 };
 
@@ -64,18 +66,23 @@ const INTENT_ORDER: IntentSection[] = ['reply_now', 'follow_up', 'review', 'fyi'
 
 const SECURITY_KEYWORDS_RE = /\b(security|unauthori[sz]ed|login|breach|suspicious|compromised|password|2fa|mfa|phishing|malware|attack)\b/i;
 
-/* Color tokens — dark theme */
+/* Donna brand tokens */
 const c = {
-  surface: 'rgba(255,255,255,0.04)',
-  border: 'rgba(255,255,255,0.07)',
-  borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassMuted: 'rgba(168,153,104,0.15)',
-  text: '#FFFFFF',
-  textSecondary: 'rgba(255,255,255,0.85)',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  textMuted: 'rgba(255,255,255,0.35)',
-  textGhost: 'rgba(255,255,255,0.2)',
+  surface: 'rgba(255,255,255,0.05)',
+  border: 'rgba(251,247,244,0.08)',
+  borderHover: 'rgba(251,247,244,0.16)',
+  dawn: '#E8845C',
+  dawnMuted: 'rgba(232,132,92,0.15)',
+  text: '#FBF7F4',
+  textSecondary: 'rgba(251,247,244,0.85)',
+  textTertiary: 'rgba(155,175,196,0.85)',
+  textMuted: 'rgba(155,175,196,0.55)',
+  textGhost: 'rgba(155,175,196,0.3)',
+  sage: '#52B788',
+  alert: '#D64B2A',
+  dusk: '#4E7DAA',
+  gold: '#F4C896',
+  mist: '#9BAFC4',
 };
 
 export default function BriefingPage() {
@@ -183,8 +190,12 @@ export default function BriefingPage() {
       <div className="space-y-8">
         <div>
           <h1
-            className="text-[26px] font-bold tracking-[-0.03em]"
-            style={{ color: c.text }}
+            className="text-[32px] tracking-[-0.02em]"
+            style={{
+              color: c.text,
+              fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+              fontWeight: 300,
+            }}
           >
             {getGreeting()}
           </h1>
@@ -197,7 +208,7 @@ export default function BriefingPage() {
             <div
               key={i}
               className="h-20 animate-pulse rounded-xl"
-              style={{ background: c.brassMuted, border: `1px solid ${c.border}` }}
+              style={{ background: c.dawnMuted, border: `1px solid ${c.border}` }}
             />
           ))}
         </div>
@@ -210,19 +221,23 @@ export default function BriefingPage() {
     return (
       <div className="space-y-8">
         <h1
-          className="text-[26px] font-bold tracking-[-0.03em]"
-          style={{ color: c.text }}
+          className="text-[32px] tracking-[-0.02em]"
+          style={{
+            color: c.text,
+            fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+            fontWeight: 300,
+          }}
         >
           Daily Briefing
         </h1>
         <div
           className="rounded-xl p-6 text-center"
           style={{
-            background: 'rgba(248,113,113,0.08)',
-            border: '1px solid rgba(248,113,113,0.2)',
+            background: 'rgba(214,75,42,0.08)',
+            border: '1px solid rgba(214,75,42,0.2)',
           }}
         >
-          <p className="text-[13px]" style={{ color: '#F87171' }}>{error}</p>
+          <p className="text-[13px]" style={{ color: c.alert }}>{error}</p>
         </div>
       </div>
     );
@@ -243,8 +258,12 @@ export default function BriefingPage() {
     return (
       <div className="space-y-8">
         <h1
-          className="text-[26px] font-bold tracking-[-0.03em]"
-          style={{ color: c.text }}
+          className="text-[32px] tracking-[-0.02em]"
+          style={{
+            color: c.text,
+            fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+            fontWeight: 300,
+          }}
         >
           {getGreeting()}
         </h1>
@@ -255,7 +274,10 @@ export default function BriefingPage() {
             className="rounded-xl p-5"
             style={{ background: c.surface, border: `1px solid ${c.border}` }}
           >
-            <p className="text-[12px] font-semibold tracking-[0.06em] uppercase mb-3" style={{ color: c.textMuted }}>
+            <p
+              className="text-[12px] font-semibold tracking-[0.06em] uppercase mb-3"
+              style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace" }}
+            >
               Connected Sources
             </p>
             <div className="flex flex-wrap gap-2">
@@ -263,7 +285,7 @@ export default function BriefingPage() {
                 <span
                   key={i.provider}
                   className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-medium"
-                  style={{ background: 'rgba(74,222,128,0.1)', color: '#4ADE80', border: '1px solid rgba(74,222,128,0.2)' }}
+                  style={{ background: 'rgba(82,183,136,0.1)', color: c.sage, border: '1px solid rgba(82,183,136,0.2)' }}
                 >
                   <CheckCircle2 size={11} />
                   {PROVIDER_LABELS[i.provider] ?? i.provider}
@@ -282,9 +304,9 @@ export default function BriefingPage() {
         >
           <div
             className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-            style={{ background: c.brassMuted }}
+            style={{ background: c.dawnMuted }}
           >
-            <LayoutDashboard size={22} style={{ color: c.brass }} />
+            <LayoutDashboard size={22} style={{ color: c.dawn }} />
           </div>
           <p className="text-[14px] font-semibold" style={{ color: c.text }}>
             {hasConnectedIntegrations ? "Today's briefing hasn't been generated yet" : 'No briefing yet'}
@@ -302,10 +324,10 @@ export default function BriefingPage() {
             <button
               onClick={handleGenerateBriefing}
               disabled={generating}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200 hover:shadow-[0_2px_12px_rgba(26,25,23,0.08)]"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
               style={{
-                background: '#A89968',
-                color: '#0A0A0B',
+                background: c.dawn,
+                color: '#FBF7F4',
                 opacity: generating ? 0.7 : 1,
                 cursor: generating ? 'not-allowed' : 'pointer',
                 border: 'none',
@@ -317,10 +339,10 @@ export default function BriefingPage() {
           ) : (
             <a
               href="/settings/integrations"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200 hover:shadow-[0_2px_12px_rgba(26,25,23,0.08)]"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
               style={{
-                background: '#A89968',
-                color: '#0A0A0B',
+                background: c.dawn,
+                color: '#FBF7F4',
               }}
             >
               Connect integrations
@@ -331,9 +353,9 @@ export default function BriefingPage() {
             <div
               className="mx-auto mt-4 max-w-md rounded-lg px-4 py-3 text-[12px] leading-relaxed"
               style={{
-                background: 'rgba(248,113,113,0.08)',
-                border: '1px solid rgba(248,113,113,0.2)',
-                color: '#F87171',
+                background: 'rgba(214,75,42,0.08)',
+                border: '1px solid rgba(214,75,42,0.2)',
+                color: c.alert,
               }}
             >
               {generateError}
@@ -462,12 +484,19 @@ export default function BriefingPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1
-            className="text-[26px] font-bold tracking-[-0.03em]"
-            style={{ color: c.text }}
+            className="text-[32px] tracking-[-0.02em]"
+            style={{
+              color: c.text,
+              fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+              fontWeight: 300,
+            }}
           >
-            {getGreeting()} <span style={{ color: c.textTertiary, fontWeight: 400 }}>— {greetingContext}</span>
+            {getGreeting()} <span style={{ color: c.textTertiary, fontWeight: 300, fontStyle: 'italic' }}>— {greetingContext}</span>
           </h1>
-          <p className="mt-1 text-[13px]" style={{ color: c.textMuted }}>
+          <p
+            className="mt-1 text-[12px]"
+            style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em' }}
+          >
             {dateStr}
           </p>
         </div>
@@ -476,7 +505,7 @@ export default function BriefingPage() {
           disabled={generating}
           className="mt-1 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[12px] font-semibold transition-all duration-200"
           style={{
-            background: generating ? c.brassMuted : c.surface,
+            background: generating ? c.dawnMuted : c.surface,
             color: generating ? c.textMuted : c.textSecondary,
             border: `1px solid ${c.border}`,
             cursor: generating ? 'not-allowed' : 'pointer',
@@ -502,14 +531,20 @@ export default function BriefingPage() {
         <div
           className="-mt-6 rounded-lg px-4 py-3 text-[12px] leading-relaxed"
           style={{
-            background: 'rgba(248,113,113,0.08)',
-            border: '1px solid rgba(248,113,113,0.2)',
-            color: '#F87171',
+            background: 'rgba(214,75,42,0.08)',
+            border: '1px solid rgba(214,75,42,0.2)',
+            color: c.alert,
           }}
         >
           {generateError}
         </div>
       )}
+
+      {/* Day at a Glance */}
+      <DayGlanceCard
+        meetingsToday={scheduleCount}
+        emailsNeedReply={actionCount + vipCount}
+      />
 
       {/* Executive Summary */}
       <div
@@ -521,7 +556,7 @@ export default function BriefingPage() {
       >
         <p
           className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-3"
-          style={{ color: c.textMuted }}
+          style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace" }}
         >
           Executive Summary
         </p>
@@ -544,7 +579,7 @@ export default function BriefingPage() {
         >
           <p
             className="text-[11px] font-semibold tracking-[0.08em] uppercase mb-4"
-            style={{ color: c.textMuted }}
+            style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace" }}
           >
             Today&apos;s Action Plan
           </p>
@@ -563,13 +598,13 @@ export default function BriefingPage() {
                     onClick={() => toggleAction(item.id)}
                     className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-all duration-200 cursor-pointer"
                     style={{
-                      background: checked ? 'rgba(74,222,128,0.12)' : 'transparent',
-                      border: `1.5px solid ${checked ? '#4ADE80' : c.border}`,
+                      background: checked ? 'rgba(82,183,136,0.12)' : 'transparent',
+                      border: `1.5px solid ${checked ? c.sage : c.border}`,
                     }}
                     title={checked ? 'Mark incomplete' : 'Mark complete'}
                   >
                     {checked && (
-                      <CheckCircle2 size={12} style={{ color: '#4ADE80' }} />
+                      <CheckCircle2 size={12} style={{ color: c.sage }} />
                     )}
                   </button>
 
@@ -587,7 +622,7 @@ export default function BriefingPage() {
                   >
                     <span
                       className="font-bold tabular-nums mr-1.5"
-                      style={{ color: checked ? c.textMuted : c.brass }}
+                      style={{ color: checked ? c.textMuted : c.dawn }}
                     >
                       {i + 1}.
                     </span>
@@ -599,9 +634,9 @@ export default function BriefingPage() {
                     onClick={() => toggleAction(item.id)}
                     className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-200"
                     style={{
-                      background: checked ? 'rgba(74,222,128,0.08)' : 'transparent',
-                      color: checked ? '#4ADE80' : c.textMuted,
-                      border: `1px solid ${checked ? 'rgba(74,222,128,0.2)' : c.border}`,
+                      background: checked ? 'rgba(82,183,136,0.08)' : 'transparent',
+                      color: checked ? c.sage : c.textMuted,
+                      border: `1px solid ${checked ? 'rgba(82,183,136,0.2)' : c.border}`,
                     }}
                     onMouseEnter={(e) => {
                       if (!checked) {
@@ -631,27 +666,27 @@ export default function BriefingPage() {
           id="section-urgent"
           className="rounded-xl overflow-hidden"
           style={{
-            background: 'rgba(248,113,113,0.05)',
-            border: '1px solid rgba(248,113,113,0.15)',
-            borderLeft: '3px solid #F87171',
+            background: 'rgba(214,75,42,0.06)',
+            border: '1px solid rgba(214,75,42,0.15)',
+            borderLeft: `3px solid ${c.alert}`,
           }}
         >
           <div className="flex items-center gap-2.5 px-5 pt-4 pb-2">
             <div
               className="flex h-6 w-6 items-center justify-center rounded-md"
-              style={{ background: 'rgba(248,113,113,0.12)' }}
+              style={{ background: 'rgba(214,75,42,0.12)' }}
             >
-              <ShieldAlert size={13} style={{ color: '#F87171' }} />
+              <ShieldAlert size={13} style={{ color: c.alert }} />
             </div>
             <h2
               className="text-[13px] font-semibold tracking-[-0.01em]"
-              style={{ color: '#F87171' }}
+              style={{ color: c.alert, fontFamily: "'Inter', sans-serif" }}
             >
               Urgent
             </h2>
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums"
-              style={{ background: 'rgba(248,113,113,0.12)', color: '#F87171' }}
+              style={{ background: 'rgba(214,75,42,0.12)', color: c.alert }}
             >
               {urgentItems.length}
             </span>
@@ -685,8 +720,8 @@ export default function BriefingPage() {
               label: 'Meetings',
               value: scheduleCount,
               section: 'todays_schedule',
-              accent: '#60A5FA',
-              accentBg: 'rgba(96,165,250,0.08)',
+              accent: c.dusk,
+              accentBg: 'rgba(78,125,170,0.08)',
               icon: Calendar,
               zeroLabel: 'Clear calendar',
             },
@@ -694,24 +729,24 @@ export default function BriefingPage() {
               label: 'Reply Now',
               value: actionCount + vipCount,
               section: 'reply_now',
-              accent: '#F87171',
-              accentBg: 'rgba(248,113,113,0.08)',
+              accent: c.alert,
+              accentBg: 'rgba(214,75,42,0.08)',
               icon: MailCheck,
             },
             {
               label: 'Follow Up',
               value: awaitingCount,
               section: 'follow_up',
-              accent: '#D97706',
-              accentBg: 'rgba(217,119,6,0.08)',
+              accent: c.gold,
+              accentBg: 'rgba(244,200,150,0.08)',
               icon: Reply,
             },
             {
               label: 'Review',
               value: commitmentCount + (grouped['decision_queue']?.length ?? 0) + (grouped['at_risk']?.length ?? 0),
               section: 'review',
-              accent: '#60A5FA',
-              accentBg: 'rgba(96,165,250,0.08)',
+              accent: c.dusk,
+              accentBg: 'rgba(78,125,170,0.08)',
               icon: Eye,
             },
           ];
@@ -770,20 +805,20 @@ export default function BriefingPage() {
         <div className="flex items-center gap-2.5 mb-3">
           <div
             className="flex h-6 w-6 items-center justify-center rounded-md"
-            style={{ background: 'rgba(96,165,250,0.1)' }}
+            style={{ background: 'rgba(78,125,170,0.1)' }}
           >
-            <Calendar size={13} style={{ color: '#60A5FA' }} />
+            <Calendar size={13} style={{ color: c.dusk }} />
           </div>
           <h2
             className="text-[13px] font-semibold tracking-[-0.01em]"
-            style={{ color: c.text }}
+            style={{ color: c.text, fontFamily: "'Inter', sans-serif" }}
           >
             Today&apos;s Schedule
           </h2>
           {scheduleCount > 0 && (
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums"
-              style={{ background: 'rgba(96,165,250,0.1)', color: '#60A5FA' }}
+              style={{ background: 'rgba(78,125,170,0.1)', color: c.dusk }}
             >
               {scheduleCount}
             </span>
@@ -808,13 +843,16 @@ export default function BriefingPage() {
                       style={{
                         background: c.surface,
                         border: `1px solid ${c.border}`,
-                        borderLeft: '2px solid #60A5FA',
+                        borderLeft: `2px solid ${c.dusk}`,
                       }}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           {time && (
-                            <p className="text-[11px] font-medium mb-1" style={{ color: '#60A5FA' }}>
+                            <p
+                              className="text-[11px] font-medium mb-1"
+                              style={{ color: c.dusk, fontFamily: "'JetBrains Mono', monospace" }}
+                            >
                               <Clock size={10} className="inline mr-1" style={{ verticalAlign: 'middle' }} />
                               {time}
                             </p>
@@ -918,7 +956,7 @@ export default function BriefingPage() {
                     </div>
                     <h2
                       className="text-[13px] font-semibold tracking-[-0.01em]"
-                      style={{ color: c.text }}
+                      style={{ color: c.text, fontFamily: "'Inter', sans-serif" }}
                     >
                       {meta.label}
                     </h2>
@@ -986,6 +1024,9 @@ export default function BriefingPage() {
           </div>
         );
       })()}
+
+      {/* Yesterday's Recap */}
+      <YesterdayRecap />
 
       <CitationDrawer
         open={drawerItem !== null}

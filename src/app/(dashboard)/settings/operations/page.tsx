@@ -9,9 +9,9 @@ const c = {
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   border: 'rgba(255,255,255,0.07)',
-  brassMuted: 'rgba(168,153,104,0.15)',
-  brass: '#A89968',
-  green: '#4ADE80',
+  dawnMuted: 'rgba(232,132,92,0.15)',
+  dawn: '#E8845C',
+  green: '#52B788',
   surface: 'rgba(255,255,255,0.04)',
 };
 
@@ -88,7 +88,7 @@ export default function OperationsSettingsPage() {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Settings2 size={20} color={c.brass} />
+          <Settings2 size={20} color={c.dawn} />
           <h1 style={{ fontSize: 22, fontWeight: 700, color: c.text, margin: 0 }}>Operations Settings</h1>
         </div>
         <button
@@ -96,7 +96,7 @@ export default function OperationsSettingsPage() {
           disabled={saving}
           style={{
             display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-            borderRadius: 8, border: 'none', background: c.brass, color: '#0A0A0B',
+            borderRadius: 8, border: 'none', background: c.dawn, color: '#1B1F3A',
             fontSize: 13, fontWeight: 500, cursor: saving ? 'not-allowed' : 'pointer',
           }}
         >
@@ -181,9 +181,9 @@ export default function OperationsSettingsPage() {
                   onClick={() => toggleExerciseDay(i)}
                   style={{
                     width: 40, height: 40, borderRadius: 8, fontSize: 12, fontWeight: 500,
-                    border: `1px solid ${config.exercise_days.includes(i) ? c.brass : c.border}`,
-                    background: config.exercise_days.includes(i) ? `${c.brass}15` : c.surface,
-                    color: config.exercise_days.includes(i) ? c.brass : c.textTertiary,
+                    border: `1px solid ${config.exercise_days.includes(i) ? c.dawn : c.border}`,
+                    background: config.exercise_days.includes(i) ? `${c.dawn}15` : c.surface,
+                    color: config.exercise_days.includes(i) ? c.dawn : c.textTertiary,
                     cursor: 'pointer',
                   }}
                 >
@@ -229,7 +229,7 @@ function ToggleRow({ label, description, checked, onChange }: {
         onClick={() => onChange(!checked)}
         style={{
           width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
-          background: checked ? c.brass : '#D1D5DB', position: 'relative', transition: 'background 0.2s',
+          background: checked ? c.dawn : '#D1D5DB', position: 'relative', transition: 'background 0.2s',
         }}
       >
         <div style={{

@@ -23,18 +23,18 @@ import { DotGlobeHero } from "@/components/ui/globe-hero";
 
 /* ── Dark theme color tokens ── */
 const c = {
-  bg: "#0A0A0B",
-  bgSubtle: "#0F0F11",
+  bg: "#1B1F3A",
+  bgSubtle: "#141833",
   surface: "rgba(255,255,255,0.04)",
   surfaceHover: "rgba(255,255,255,0.07)",
   surfaceRaised: "rgba(255,255,255,0.08)",
   border: "rgba(255,255,255,0.07)",
   borderHover: "rgba(255,255,255,0.14)",
-  borderBrass: "rgba(168,153,104,0.25)",
-  brass: "#A89968",
-  brassLight: "#C4B682",
-  brassMuted: "rgba(168,153,104,0.15)",
-  brassGlow: "rgba(168,153,104,0.06)",
+  borderDawn: "rgba(232,132,92,0.25)",
+  dawn: "#E8845C",
+  dawnLight: "#F09D7A",
+  dawnMuted: "rgba(232,132,92,0.15)",
+  dawnGlow: "rgba(232,132,92,0.06)",
   text: "#FFFFFF",
   textSecondary: "rgba(255,255,255,0.85)",
   textTertiary: "rgba(255,255,255,0.55)",
@@ -149,7 +149,7 @@ export default function SignalLanding() {
     <div
       className="min-h-screen relative overflow-x-hidden"
       style={{
-        fontFamily: "'Satoshi', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         background: c.bg,
         color: c.text,
       }}
@@ -161,7 +161,7 @@ export default function SignalLanding() {
         style={{
           opacity: 0.03,
           backgroundImage:
-            "linear-gradient(rgba(168,153,104,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(168,153,104,0.3) 1px, transparent 1px)",
+            "linear-gradient(rgba(232,132,92,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(232,132,92,0.3) 1px, transparent 1px)",
           backgroundSize: "80px 80px",
         }}
       />
@@ -179,7 +179,7 @@ export default function SignalLanding() {
             width: "1000px",
             height: "800px",
             background:
-              "radial-gradient(ellipse at center, rgba(168,153,104,0.07) 0%, rgba(168,153,104,0.02) 40%, transparent 70%)",
+              "radial-gradient(ellipse at center, rgba(232,132,92,0.07) 0%, rgba(232,132,92,0.02) 40%, transparent 70%)",
           }}
         />
         <div
@@ -190,7 +190,7 @@ export default function SignalLanding() {
             width: "600px",
             height: "600px",
             background:
-              "radial-gradient(circle, rgba(168,153,104,0.03) 0%, transparent 60%)",
+              "radial-gradient(circle, rgba(232,132,92,0.03) 0%, transparent 60%)",
           }}
         />
       </div>
@@ -217,7 +217,7 @@ export default function SignalLanding() {
                     className="h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-black tracking-tight"
                     style={{
                       background: "#FFFFFF",
-                      color: "#0A0A0B",
+                      color: "#1B1F3A",
                     }}
                   >
                     CS
@@ -255,9 +255,9 @@ export default function SignalLanding() {
               </Link>
               <Link
                 href="/signup"
-                className="text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 hover:shadow-[0_2px_12px_rgba(168,153,104,0.25)]"
+                className="text-[13px] font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 hover:shadow-[0_2px_12px_rgba(232,132,92,0.25)]"
                 style={{
-                  background: c.brass,
+                  background: c.dawn,
                   color: c.bg,
                 }}
               >
@@ -284,7 +284,7 @@ export default function SignalLanding() {
             style={{
               width: "1px",
               height: "120px",
-              background: `linear-gradient(180deg, ${c.brassLight} 0%, transparent 100%)`,
+              background: `linear-gradient(180deg, ${c.dawnLight} 0%, transparent 100%)`,
               opacity: mounted ? 0.35 : 0,
               transition: "opacity 1.2s ease 0.5s",
             }}
@@ -295,8 +295,8 @@ export default function SignalLanding() {
               width: "5px",
               height: "5px",
               borderRadius: "50%",
-              background: c.brassLight,
-              boxShadow: "0 0 12px rgba(168,153,104,0.5)",
+              background: c.dawnLight,
+              boxShadow: "0 0 12px rgba(232,132,92,0.5)",
               opacity: mounted ? 0.6 : 0,
               transition: "opacity 1.2s ease 0.6s",
             }}
@@ -317,19 +317,19 @@ export default function SignalLanding() {
                 <div className="relative">
                   <div
                     className="h-1.5 w-1.5 rounded-full"
-                    style={{ background: c.brassLight }}
+                    style={{ background: c.dawnLight }}
                   />
                   <div
                     className="absolute inset-0 h-1.5 w-1.5 rounded-full"
                     style={{
-                      background: c.brassLight,
+                      background: c.dawnLight,
                       animation: "pulse-ring 2s ease-out infinite",
                     }}
                   />
                 </div>
                 <span
                   className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-                  style={{ color: c.brassLight }}
+                  style={{ color: c.dawnLight }}
                 >
                   System Status: Active
                 </span>
@@ -361,7 +361,7 @@ export default function SignalLanding() {
                   Navigate your
                 </span>
                 <br />
-                <span className="relative inline-block" style={{ color: c.brassLight }}>
+                <span className="relative inline-block" style={{ color: c.dawnLight }}>
                   digital life
                   <svg
                     className="absolute -bottom-2 left-0 w-full"
@@ -376,7 +376,7 @@ export default function SignalLanding() {
                   >
                     <path
                       d="M2 7C50 2 120 1 140 4C180 7 230 3 278 5"
-                      stroke={c.brassLight}
+                      stroke={c.dawnLight}
                       strokeWidth="3"
                       strokeLinecap="round"
                     />
@@ -393,7 +393,7 @@ export default function SignalLanding() {
                 style={{
                   maxWidth: "480px",
                   height: "1px",
-                  background: `linear-gradient(90deg, transparent 0%, rgba(168,153,104,0.15) 20%, ${c.brass} 50%, rgba(168,153,104,0.15) 80%, transparent 100%)`,
+                  background: `linear-gradient(90deg, transparent 0%, rgba(232,132,92,0.15) 20%, ${c.dawn} 50%, rgba(232,132,92,0.15) 80%, transparent 100%)`,
                   opacity: mounted ? 0.5 : 0,
                   transition: "opacity 1s ease 0.8s",
                 }}
@@ -421,7 +421,7 @@ export default function SignalLanding() {
                     className="absolute bottom-0 left-0 w-full"
                     style={{
                       height: "6px",
-                      background: "linear-gradient(90deg, rgba(168,153,104,0.25), rgba(168,153,104,0.08))",
+                      background: "linear-gradient(90deg, rgba(232,132,92,0.25), rgba(232,132,92,0.08))",
                       borderRadius: "2px",
                       bottom: "1px",
                     }}
@@ -437,7 +437,7 @@ export default function SignalLanding() {
                     className="absolute bottom-0 left-0 w-full"
                     style={{
                       height: "6px",
-                      background: "linear-gradient(90deg, rgba(168,153,104,0.25), rgba(168,153,104,0.08))",
+                      background: "linear-gradient(90deg, rgba(232,132,92,0.25), rgba(232,132,92,0.08))",
                       borderRadius: "2px",
                       bottom: "1px",
                     }}
@@ -453,7 +453,7 @@ export default function SignalLanding() {
                     className="absolute bottom-0 left-0 w-full"
                     style={{
                       height: "6px",
-                      background: "linear-gradient(90deg, rgba(168,153,104,0.25), rgba(168,153,104,0.08))",
+                      background: "linear-gradient(90deg, rgba(232,132,92,0.25), rgba(232,132,92,0.08))",
                       borderRadius: "2px",
                       bottom: "1px",
                     }}
@@ -476,10 +476,10 @@ export default function SignalLanding() {
                   className="relative inline-flex items-center rounded-xl overflow-hidden border transition-all duration-500"
                   style={{
                     borderColor: emailFocused
-                      ? c.borderBrass
+                      ? c.borderDawn
                       : c.border,
                     boxShadow: emailFocused
-                      ? "0 2px 24px rgba(168,153,104,0.15), inset 0 1px 0 rgba(255,255,255,0.05)"
+                      ? "0 2px 24px rgba(232,132,92,0.15), inset 0 1px 0 rgba(255,255,255,0.05)"
                       : "0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)",
                     background: "rgba(255,255,255,0.05)",
                     backdropFilter: "blur(12px)",
@@ -495,9 +495,9 @@ export default function SignalLanding() {
                   />
                   <Link
                     href="/signup"
-                    className="text-[13px] font-bold px-7 py-4 flex items-center gap-2 shrink-0 transition-all duration-300 hover:shadow-[0_2px_16px_rgba(168,153,104,0.3)]"
+                    className="text-[13px] font-bold px-7 py-4 flex items-center gap-2 shrink-0 transition-all duration-300 hover:shadow-[0_2px_16px_rgba(232,132,92,0.3)]"
                     style={{
-                      background: c.brass,
+                      background: c.dawn,
                       color: c.bg,
                     }}
                   >
@@ -529,7 +529,7 @@ export default function SignalLanding() {
             <div
               className="h-px mb-20"
               style={{
-                background: `linear-gradient(90deg, transparent 0%, ${c.borderBrass} 30%, ${c.brass} 50%, ${c.borderBrass} 70%, transparent 100%)`,
+                background: `linear-gradient(90deg, transparent 0%, ${c.borderDawn} 30%, ${c.dawn} 50%, ${c.borderDawn} 70%, transparent 100%)`,
                 opacity: 0.5,
               }}
             />
@@ -568,7 +568,7 @@ export default function SignalLanding() {
                     <div className="flex items-center justify-center lg:justify-start gap-2.5 mb-3">
                       <stat.icon
                         size={14}
-                        style={{ color: c.brass }}
+                        style={{ color: c.dawn }}
                       />
                       <span
                         className="text-3xl sm:text-4xl font-black tracking-[-0.03em]"
@@ -610,7 +610,7 @@ export default function SignalLanding() {
               width: "900px",
               height: "700px",
               background:
-                "radial-gradient(ellipse at center, rgba(168,153,104,0.06) 0%, transparent 60%)",
+                "radial-gradient(ellipse at center, rgba(232,132,92,0.06) 0%, transparent 60%)",
             }}
           />
 
@@ -621,7 +621,7 @@ export default function SignalLanding() {
                 <Reveal>
                   <p
                     className="text-[11px] font-bold uppercase tracking-[0.3em] mb-6"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     A Glimpse Into Clarity
                   </p>
@@ -648,9 +648,9 @@ export default function SignalLanding() {
                   </p>
                   <div className="flex items-center gap-4">
                     <button
-                      className="flex items-center gap-2.5 text-[13px] font-semibold px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-[0_2px_20px_rgba(168,153,104,0.25)]"
+                      className="flex items-center gap-2.5 text-[13px] font-semibold px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-[0_2px_20px_rgba(232,132,92,0.25)]"
                       style={{
-                        background: c.brass,
+                        background: c.dawn,
                         color: c.bg,
                       }}
                     >
@@ -679,7 +679,7 @@ export default function SignalLanding() {
                     <div
                       className="absolute -inset-4 rounded-3xl pointer-events-none"
                       style={{
-                        background: "radial-gradient(ellipse at center, rgba(168,153,104,0.08) 0%, transparent 70%)",
+                        background: "radial-gradient(ellipse at center, rgba(232,132,92,0.08) 0%, transparent 70%)",
                       }}
                     />
                     {/* Card */}
@@ -705,9 +705,9 @@ export default function SignalLanding() {
                           <div
                             className="h-9 w-9 rounded-full flex items-center justify-center text-[9px] font-black"
                             style={{
-                              background: c.brassMuted,
-                              color: c.brass,
-                              border: `1px solid ${c.borderBrass}`,
+                              background: c.dawnMuted,
+                              color: c.dawn,
+                              border: `1px solid ${c.borderDawn}`,
                             }}
                           >
                             CS
@@ -728,8 +728,8 @@ export default function SignalLanding() {
                           <div
                             className="h-1.5 w-1.5 rounded-full"
                             style={{
-                              background: "#4ADE80",
-                              boxShadow: "0 0 8px rgba(74,222,128,0.5)",
+                              background: "#52B788",
+                              boxShadow: "0 0 8px rgba(82,183,136,0.5)",
                             }}
                           />
                           <span
@@ -747,19 +747,19 @@ export default function SignalLanding() {
                         <div
                           className="rounded-xl p-5 border-l-[3px] relative overflow-hidden"
                           style={{
-                            borderColor: c.brass,
-                            background: c.brassMuted,
+                            borderColor: c.dawn,
+                            background: c.dawnMuted,
                           }}
                         >
                           <div className="flex items-center gap-2.5 mb-2">
                             <Zap
                               size={12}
-                              style={{ color: c.brass }}
-                              fill={c.brass}
+                              style={{ color: c.dawn }}
+                              fill={c.dawn}
                             />
                             <p
                               className="text-[10px] font-black uppercase tracking-[0.15em]"
-                              style={{ color: c.brass }}
+                              style={{ color: c.dawn }}
                             >
                               Critical — Act today
                             </p>
@@ -781,9 +781,9 @@ export default function SignalLanding() {
                             <span
                               className="text-[10px] px-2 py-0.5 rounded"
                               style={{
-                                background: c.brassMuted,
-                                color: c.brass,
-                                border: `1px solid ${c.borderBrass}`,
+                                background: c.dawnMuted,
+                                color: c.dawn,
+                                border: `1px solid ${c.borderDawn}`,
                               }}
                             >
                               Reply draft ready
@@ -880,7 +880,7 @@ export default function SignalLanding() {
                           {["Reply", "Snooze", "Delegate"].map((action) => (
                             <span
                               key={action}
-                              className="text-[10px] font-medium px-3 py-1.5 rounded-md border transition-all hover:border-[rgba(168,153,104,0.3)] hover:bg-[rgba(255,255,255,0.04)] cursor-pointer"
+                              className="text-[10px] font-medium px-3 py-1.5 rounded-md border transition-all hover:border-[rgba(232,132,92,0.3)] hover:bg-[rgba(255,255,255,0.04)] cursor-pointer"
                               style={{
                                 borderColor: c.border,
                                 color: c.textMuted,
@@ -906,8 +906,8 @@ export default function SignalLanding() {
                       >
                         <Play
                           size={20}
-                          fill={c.brass}
-                          style={{ color: c.brass, marginLeft: "2px" }}
+                          fill={c.dawn}
+                          style={{ color: c.dawn, marginLeft: "2px" }}
                         />
                       </div>
                     </div>
@@ -934,7 +934,7 @@ export default function SignalLanding() {
             style={{
               width: "1200px",
               height: "800px",
-              background: "radial-gradient(ellipse at center, rgba(168,153,104,0.04) 0%, transparent 60%)",
+              background: "radial-gradient(ellipse at center, rgba(232,132,92,0.04) 0%, transparent 60%)",
             }}
           />
 
@@ -943,7 +943,7 @@ export default function SignalLanding() {
               <div className="text-center mb-24">
                 <p
                   className="text-[11px] font-bold uppercase tracking-[0.3em] mb-6"
-                  style={{ color: c.brass }}
+                  style={{ color: c.dawn }}
                 >
                   Intelligence Engine
                 </p>
@@ -999,7 +999,7 @@ export default function SignalLanding() {
                     style={{
                       borderColor:
                         hoveredFeature === i
-                          ? c.borderBrass
+                          ? c.borderDawn
                           : c.border,
                       background:
                         hoveredFeature === i
@@ -1007,7 +1007,7 @@ export default function SignalLanding() {
                           : c.surface,
                       boxShadow:
                         hoveredFeature === i
-                          ? "0 8px 40px rgba(0,0,0,0.3), 0 0 60px rgba(168,153,104,0.05), inset 0 1px 0 rgba(255,255,255,0.06)"
+                          ? "0 8px 40px rgba(0,0,0,0.3), 0 0 60px rgba(232,132,92,0.05), inset 0 1px 0 rgba(255,255,255,0.06)"
                           : "inset 0 1px 0 rgba(255,255,255,0.03)",
                     }}
                     onMouseEnter={() => setHoveredFeature(i)}
@@ -1019,11 +1019,11 @@ export default function SignalLanding() {
                         style={{
                           background:
                             hoveredFeature === i
-                              ? c.brassMuted
+                              ? c.dawnMuted
                               : c.surfaceRaised,
                           border: `1px solid ${
                             hoveredFeature === i
-                              ? c.borderBrass
+                              ? c.borderDawn
                               : c.border
                           }`,
                         }}
@@ -1033,7 +1033,7 @@ export default function SignalLanding() {
                           style={{
                             color:
                               hoveredFeature === i
-                                ? c.brass
+                                ? c.dawn
                                 : c.textMuted,
                             transition: "color 0.5s ease",
                           }}
@@ -1066,7 +1066,7 @@ export default function SignalLanding() {
           <div
             className="absolute top-0 left-0 right-0 h-px"
             style={{
-              background: `linear-gradient(90deg, transparent 0%, ${c.borderBrass} 50%, transparent 100%)`,
+              background: `linear-gradient(90deg, transparent 0%, ${c.borderDawn} 50%, transparent 100%)`,
               opacity: 0.6,
             }}
           />
@@ -1076,7 +1076,7 @@ export default function SignalLanding() {
               <div className="text-center mb-20">
                 <p
                   className="text-[11px] font-bold uppercase tracking-[0.3em] mb-5"
-                  style={{ color: c.brass }}
+                  style={{ color: c.dawn }}
                 >
                   Seamless Connections
                 </p>
@@ -1110,7 +1110,7 @@ export default function SignalLanding() {
                 ].map((integration) => (
                   <div
                     key={integration.name}
-                    className="flex items-center gap-3 px-5 py-3.5 rounded-xl border transition-all duration-300 hover:border-[rgba(168,153,104,0.3)] hover:bg-[rgba(255,255,255,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] cursor-default"
+                    className="flex items-center gap-3 px-5 py-3.5 rounded-xl border transition-all duration-300 hover:border-[rgba(232,132,92,0.3)] hover:bg-[rgba(255,255,255,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)] cursor-default"
                     style={{
                       borderColor: c.border,
                       background: c.surface,
@@ -1131,13 +1131,13 @@ export default function SignalLanding() {
                 <div
                   className="flex items-center gap-2 px-5 py-3.5 rounded-xl border"
                   style={{
-                    borderColor: c.borderBrass,
-                    background: c.brassMuted,
+                    borderColor: c.borderDawn,
+                    background: c.dawnMuted,
                   }}
                 >
                   <span
                     className="text-[13px] font-medium"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     +12 more
                   </span>
@@ -1163,7 +1163,7 @@ export default function SignalLanding() {
             style={{
               width: "600px",
               height: "400px",
-              background: "radial-gradient(ellipse at center, rgba(168,153,104,0.05) 0%, transparent 60%)",
+              background: "radial-gradient(ellipse at center, rgba(232,132,92,0.05) 0%, transparent 60%)",
             }}
           />
 
@@ -1193,9 +1193,9 @@ export default function SignalLanding() {
                 <div
                   className="h-12 w-12 rounded-full flex items-center justify-center text-[14px] font-bold"
                   style={{
-                    background: c.brassMuted,
-                    color: c.brass,
-                    border: `1px solid ${c.borderBrass}`,
+                    background: c.dawnMuted,
+                    color: c.dawn,
+                    border: `1px solid ${c.borderDawn}`,
                   }}
                 >
                   EM
@@ -1247,7 +1247,7 @@ export default function SignalLanding() {
           <div
             className="absolute top-0 left-0 right-0 h-px"
             style={{
-              background: `linear-gradient(90deg, transparent 0%, ${c.borderBrass} 50%, transparent 100%)`,
+              background: `linear-gradient(90deg, transparent 0%, ${c.borderDawn} 50%, transparent 100%)`,
               opacity: 0.6,
             }}
           />
@@ -1258,7 +1258,7 @@ export default function SignalLanding() {
               width: "1000px",
               height: "600px",
               background:
-                "radial-gradient(ellipse 60% 50% at 50% 80%, rgba(168,153,104,0.06) 0%, transparent 60%)",
+                "radial-gradient(ellipse 60% 50% at 50% 80%, rgba(232,132,92,0.06) 0%, transparent 60%)",
             }}
           />
           {/* Decorative line from bottom */}
@@ -1267,7 +1267,7 @@ export default function SignalLanding() {
             style={{
               width: "1px",
               height: "80px",
-              background: "linear-gradient(0deg, rgba(168,153,104,0.3) 0%, transparent 100%)",
+              background: "linear-gradient(0deg, rgba(232,132,92,0.3) 0%, transparent 100%)",
             }}
           />
 
@@ -1275,7 +1275,7 @@ export default function SignalLanding() {
             <div className="mx-auto max-w-3xl text-center relative">
               <p
                 className="text-[11px] font-bold uppercase tracking-[0.3em] mb-8"
-                style={{ color: c.brass }}
+                style={{ color: c.dawn }}
               >
                 Begin Your Journey
               </p>
@@ -1286,7 +1286,7 @@ export default function SignalLanding() {
                 <span style={{ color: c.text }}>Your time is your</span>
                 <br />
                 <span style={{ color: c.text }}>most valuable </span>
-                <span style={{ color: c.brass }}>signal.</span>
+                <span style={{ color: c.dawn }}>signal.</span>
               </h2>
               <p
                 className="text-lg max-w-xl mx-auto leading-[1.7] mb-14"
@@ -1298,9 +1298,9 @@ export default function SignalLanding() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/signup"
-                  className="text-[14px] font-bold px-9 py-4 rounded-xl flex items-center gap-2.5 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(168,153,104,0.3)] hover:scale-[1.02]"
+                  className="text-[14px] font-bold px-9 py-4 rounded-xl flex items-center gap-2.5 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(232,132,92,0.3)] hover:scale-[1.02]"
                   style={{
-                    background: c.brass,
+                    background: c.dawn,
                     color: c.bg,
                   }}
                 >
@@ -1341,8 +1341,8 @@ export default function SignalLanding() {
                     <Star
                       key={i}
                       size={12}
-                      fill={c.brass}
-                      style={{ color: c.brass }}
+                      fill={c.dawn}
+                      style={{ color: c.dawn }}
                     />
                   ))}
                 </div>
@@ -1443,7 +1443,7 @@ export default function SignalLanding() {
               <div className="flex items-center gap-2">
                 <CheckCircle2
                   size={12}
-                  style={{ color: c.brass }}
+                  style={{ color: c.dawn }}
                 />
                 <span
                   className="text-[11px]"

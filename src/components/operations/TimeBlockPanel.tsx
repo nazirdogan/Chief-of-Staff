@@ -8,18 +8,18 @@ const c = {
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   border: 'rgba(255,255,255,0.07)',
-  brassSubtle: 'rgba(168,153,104,0.15)',
-  brass: '#A89968',
-  green: '#4ADE80',
-  blue: '#60A5FA',
-  orange: '#D97706',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
+  dawn: '#E8845C',
+  green: '#52B788',
+  blue: '#4E7DAA',
+  orange: '#F4C896',
 };
 
 const BLOCK_COLORS: Record<string, string> = {
-  task: '#A89968',
-  errand_batch: '#D97706',
-  deep_work: '#60A5FA',
-  exercise: '#4ADE80',
+  task: '#E8845C',
+  errand_batch: '#F4C896',
+  deep_work: '#4E7DAA',
+  exercise: '#52B788',
   transit: '#6B7280',
   buffer: '#9CA3AF',
 };
@@ -96,7 +96,7 @@ export function TimeBlockPanel() {
 
   return (
     <div style={{ borderRadius: 12, border: `1px solid ${c.border}`, overflow: 'hidden' }}>
-      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: c.brassSubtle }}>
+      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: c.dawnSubtle }}>
         <div>
           <h3 style={{ fontSize: 15, fontWeight: 600, color: c.text, margin: 0 }}>Time Blocker</h3>
           <p style={{ fontSize: 12, color: c.textTertiary, margin: '2px 0 0' }}>Generate an optimized schedule for today</p>
@@ -107,7 +107,7 @@ export function TimeBlockPanel() {
             disabled={loading}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-              borderRadius: 8, border: 'none', background: c.brass, color: '#fff',
+              borderRadius: 8, border: 'none', background: c.dawn, color: '#fff',
               fontSize: 13, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,
             }}
@@ -119,7 +119,7 @@ export function TimeBlockPanel() {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 20px', background: 'rgba(248,113,113,0.08)', color: '#F87171', fontSize: 13 }}>
+        <div style={{ padding: '12px 20px', background: 'rgba(214,75,42,0.08)', color: '#D64B2A', fontSize: 13 }}>
           {error}
         </div>
       )}
@@ -139,15 +139,15 @@ export function TimeBlockPanel() {
               >
                 <div style={{
                   width: 4, borderRadius: 2, flexShrink: 0,
-                  background: BLOCK_COLORS[block.block_type] ?? c.brass,
+                  background: BLOCK_COLORS[block.block_type] ?? c.dawn,
                 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 13, fontWeight: 500, color: c.text }}>{block.title}</span>
                     <span style={{
                       fontSize: 10, padding: '2px 6px', borderRadius: 4,
-                      background: `${BLOCK_COLORS[block.block_type] ?? c.brass}15`,
-                      color: BLOCK_COLORS[block.block_type] ?? c.brass,
+                      background: `${BLOCK_COLORS[block.block_type] ?? c.dawn}15`,
+                      color: BLOCK_COLORS[block.block_type] ?? c.dawn,
                       fontWeight: 500, textTransform: 'uppercase',
                     }}>
                       {block.block_type.replace('_', ' ')}
@@ -180,7 +180,7 @@ export function TimeBlockPanel() {
                 Doesn&apos;t fit today ({schedule.overflow.length})
               </h4>
               {schedule.overflow.map((task) => (
-                <div key={task.taskId} style={{ padding: '8px 12px', borderRadius: 6, background: 'rgba(168,153,104,0.1)', marginBottom: 4 }}>
+                <div key={task.taskId} style={{ padding: '8px 12px', borderRadius: 6, background: 'rgba(232,132,92,0.1)', marginBottom: 4 }}>
                   <span style={{ fontSize: 12, color: c.text }}>{task.title}</span>
                   <span style={{ fontSize: 11, color: c.textTertiary, marginLeft: 8 }}>
                     → Recommended: {task.recommendedDate}
@@ -198,7 +198,7 @@ export function TimeBlockPanel() {
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 width: '100%', padding: '12px 20px', marginTop: 16,
-                borderRadius: 8, border: 'none', background: c.green, color: '#0A0A0B',
+                borderRadius: 8, border: 'none', background: c.green, color: '#1B1F3A',
                 fontSize: 14, fontWeight: 600, cursor: confirming ? 'not-allowed' : 'pointer',
                 opacity: confirming ? 0.7 : 1,
               }}
@@ -210,7 +210,7 @@ export function TimeBlockPanel() {
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               padding: '12px 20px', marginTop: 16, borderRadius: 8,
-              background: 'rgba(74,222,128,0.1)', color: c.green, fontSize: 14, fontWeight: 500,
+              background: 'rgba(82,183,136,0.1)', color: c.green, fontSize: 14, fontWeight: 500,
             }}>
               Schedule confirmed — events created on your calendar
             </div>

@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Separate landing page project (has its own eslint config)
     "my-landing-page/**",
+    // Tauri build output
+    "src-tauri/**",
   ]),
 ]);
 

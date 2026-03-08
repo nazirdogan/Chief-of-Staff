@@ -7,11 +7,11 @@ import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
-  bg: '#0A0A0B',
+  bg: '#1B1F3A',
   border: 'rgba(255,255,255,0.07)',
-  brass: '#A89968',
-  brassSubtle: 'rgba(168,153,104,0.15)',
-  brassBorder: 'rgba(168,153,104,0.25)',
+  dawn: '#E8845C',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
+  dawnBorder: 'rgba(232,132,92,0.25)',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
@@ -62,7 +62,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
         style={{
           background: '#141415',
           border: `1px solid ${c.border}`,
-          fontFamily: "'Satoshi', sans-serif",
+          fontFamily: "'Inter', sans-serif",
         }}
         role="dialog"
         aria-label={`Source citation for ${title}`}
@@ -82,7 +82,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-200"
               style={{ color: c.textQuaternary }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = c.brassSubtle;
+                e.currentTarget.style.background = c.dawnSubtle;
                 e.currentTarget.style.color = c.text;
               }}
               onMouseLeave={(e) => {
@@ -100,9 +100,9 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
             <span
               className="rounded-md px-2.5 py-1 text-[11px] font-medium capitalize"
               style={{
-                background: c.brassSubtle,
-                color: c.brass,
-                border: `1px solid ${c.brassBorder}`,
+                background: c.dawnSubtle,
+                color: c.dawn,
+                border: `1px solid ${c.dawnBorder}`,
               }}
             >
               {sourceRef.provider.replace('_', ' ')}
@@ -111,7 +111,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
               <span
                 className="rounded-md px-2.5 py-1 text-[11px] font-medium"
                 style={{
-                  background: c.brassSubtle,
+                  background: c.dawnSubtle,
                   color: c.textTertiary,
                   border: `1px solid ${c.border}`,
                 }}
@@ -123,7 +123,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
               <span
                 className="rounded-md px-2.5 py-1 text-[11px] font-medium"
                 style={{
-                  background: c.brassSubtle,
+                  background: c.dawnSubtle,
                   color: c.textTertiary,
                   border: `1px solid ${c.border}`,
                 }}
@@ -143,7 +143,7 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
             className="rounded-xl px-5 py-4 text-[13px] leading-[1.7] italic"
             style={{
               background: c.bg,
-              borderLeft: `2px solid ${c.brass}`,
+              borderLeft: `2px solid ${c.dawn}`,
               color: c.textSecondary,
             }}
           >
@@ -156,9 +156,9 @@ export function CitationDrawer({ open, onClose, sourceRef, title }: CitationDraw
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[12px] font-medium transition-colors duration-200"
-              style={{ color: c.brass }}
+              style={{ color: c.dawn }}
               onMouseEnter={(e) => { e.currentTarget.style.color = c.text; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = c.brass; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = c.dawn; }}
             >
               View original →
             </a>

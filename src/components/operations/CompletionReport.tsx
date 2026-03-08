@@ -8,11 +8,11 @@ const c = {
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   border: 'rgba(255,255,255,0.07)',
-  brassSubtle: 'rgba(168,153,104,0.15)',
-  brass: '#A89968',
-  green: '#4ADE80',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
+  dawn: '#E8845C',
+  green: '#52B788',
   yellow: '#B68D40',
-  red: '#F87171',
+  red: '#D64B2A',
 };
 
 interface ReportSection {
@@ -41,10 +41,10 @@ const SECTION_ICONS: Record<string, typeof CheckCircle2> = {
 
 const SECTION_COLORS: Record<string, string> = {
   check: c.green,
-  email: c.brass,
+  email: c.dawn,
   decision: c.yellow,
-  research: '#60A5FA',
-  calendar: c.brass,
+  research: '#4E7DAA',
+  calendar: c.dawn,
   warning: c.red,
 };
 
@@ -91,7 +91,7 @@ export function CompletionReportPanel({ runId }: { runId?: string }) {
 
   return (
     <div style={{ borderRadius: 12, border: `1px solid ${c.border}`, overflow: 'hidden' }}>
-      <div style={{ padding: '16px 20px', background: c.brassSubtle }}>
+      <div style={{ padding: '16px 20px', background: c.dawnSubtle }}>
         <h3 style={{ fontSize: 15, fontWeight: 600, color: c.text, margin: 0 }}>Completion Report</h3>
         <p style={{ fontSize: 12, color: c.textTertiary, margin: '4px 0 0' }}>{report.summary}</p>
       </div>
@@ -99,7 +99,7 @@ export function CompletionReportPanel({ runId }: { runId?: string }) {
       <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
         {report.sections.map((section, i) => {
           const Icon = SECTION_ICONS[section.emoji] ?? CheckCircle2;
-          const color = SECTION_COLORS[section.emoji] ?? c.brass;
+          const color = SECTION_COLORS[section.emoji] ?? c.dawn;
 
           return (
             <div key={i}>
@@ -123,7 +123,7 @@ export function CompletionReportPanel({ runId }: { runId?: string }) {
                         href={item.actionUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontSize: 11, color: c.brass, marginTop: 4, display: 'inline-block' }}
+                        style={{ fontSize: 11, color: c.dawn, marginTop: 4, display: 'inline-block' }}
                       >
                         Review →
                       </a>

@@ -10,7 +10,7 @@ const landingPages = [
     title: "The Private Office",
     subtitle: "Editorial typography. Warm authority. Asymmetric layout.",
     description:
-      "Typography-led design with deep warm charcoal surfaces, brushed brass accents, and the quiet confidence of an executive environment that doesn't need to prove itself.",
+      "Typography-led design with deep warm charcoal surfaces, brushed dawn accents, and the quiet confidence of an executive environment that doesn't need to prove itself.",
     tags: ["Editorial", "Warm Charcoal", "Typography-led"],
     status: "New direction",
   },
@@ -55,7 +55,7 @@ export default function ShowcasePage() {
     <div
       className="min-h-screen"
       style={{
-        fontFamily: "'Satoshi', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         background: "#121210",
         color: "#FDFDFD",
       }}
@@ -73,7 +73,7 @@ export default function ShowcasePage() {
         {/* Header */}
         <header
           style={{
-            borderBottom: "1px solid rgba(168,153,104,0.08)",
+            borderBottom: "1px solid rgba(232,132,92,0.08)",
             opacity: mounted ? 1 : 0,
             transform: mounted ? "none" : "translateY(-8px)",
             transition: "opacity 0.8s ease, transform 0.8s ease",
@@ -85,8 +85,8 @@ export default function ShowcasePage() {
                 className="h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold"
                 style={{
                   background: "#1C1C19",
-                  border: "1px solid rgba(168,153,104,0.12)",
-                  color: "#A89968",
+                  border: "1px solid rgba(232,132,92,0.12)",
+                  color: "#E8845C",
                 }}
               >
                 CS
@@ -106,9 +106,9 @@ export default function ShowcasePage() {
             <span
               className="text-[11px] font-medium px-3.5 py-1.5 rounded-full"
               style={{
-                border: "1px solid rgba(168,153,104,0.12)",
-                color: "#A89968",
-                background: "rgba(168,153,104,0.04)",
+                border: "1px solid rgba(232,132,92,0.12)",
+                color: "#E8845C",
+                background: "rgba(232,132,92,0.04)",
               }}
             >
               {landingPages.length} concepts
@@ -128,7 +128,7 @@ export default function ShowcasePage() {
           >
             <p
               className="text-[11px] uppercase tracking-[0.25em] font-semibold mb-6"
-              style={{ color: "#A89968" }}
+              style={{ color: "#E8845C" }}
             >
               Internal Review
             </p>
@@ -155,8 +155,8 @@ export default function ShowcasePage() {
                   <div
                     className="group relative rounded-2xl cursor-pointer overflow-hidden"
                     style={{
-                      border: `1px solid ${isHovered ? "rgba(168,153,104,0.15)" : isNew ? "rgba(168,153,104,0.08)" : "rgba(253,253,253,0.03)"}`,
-                      background: isHovered ? "#1A1A17" : isNew ? "rgba(168,153,104,0.02)" : "#161614",
+                      border: `1px solid ${isHovered ? "rgba(232,132,92,0.15)" : isNew ? "rgba(232,132,92,0.08)" : "rgba(253,253,253,0.03)"}`,
+                      background: isHovered ? "#1A1A17" : isNew ? "rgba(232,132,92,0.02)" : "#161614",
                       transition: "border-color 0.4s ease, background 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1)",
                       transform: isHovered ? "translateY(-1px)" : "none",
                       opacity: mounted ? 1 : 0,
@@ -173,7 +173,7 @@ export default function ShowcasePage() {
                           <span
                             className="text-[13px] font-semibold tabular-nums"
                             style={{
-                              color: isHovered ? "#A89968" : "#4A4A44",
+                              color: isHovered ? "#E8845C" : "#4A4A44",
                               transition: "color 0.4s ease",
                             }}
                           >
@@ -182,7 +182,7 @@ export default function ShowcasePage() {
                           <div
                             className="h-px w-8"
                             style={{
-                              background: isHovered ? "rgba(168,153,104,0.25)" : "rgba(253,253,253,0.05)",
+                              background: isHovered ? "rgba(232,132,92,0.25)" : "rgba(253,253,253,0.05)",
                               transition: "background 0.4s ease",
                             }}
                           />
@@ -192,7 +192,7 @@ export default function ShowcasePage() {
                           {isNew && (
                             <span
                               className="text-[9px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded"
-                              style={{ background: "rgba(168,153,104,0.1)", color: "#A89968" }}
+                              style={{ background: "rgba(232,132,92,0.1)", color: "#E8845C" }}
                             >
                               Recommended
                             </span>
@@ -210,8 +210,8 @@ export default function ShowcasePage() {
                               key={tag}
                               className="text-[10px] uppercase tracking-[0.08em] font-medium px-2.5 py-1 rounded"
                               style={{
-                                background: isHovered ? "rgba(168,153,104,0.06)" : "rgba(253,253,253,0.025)",
-                                color: isHovered ? "#A89968" : "#4A4A44",
+                                background: isHovered ? "rgba(232,132,92,0.06)" : "rgba(253,253,253,0.025)",
+                                color: isHovered ? "#E8845C" : "#4A4A44",
                                 transition: "background 0.4s ease, color 0.4s ease",
                               }}
                             >
@@ -223,7 +223,7 @@ export default function ShowcasePage() {
                       <div
                         className="flex items-center gap-2 mt-1 shrink-0"
                         style={{
-                          color: isHovered ? "#A89968" : "#3A3A35",
+                          color: isHovered ? "#E8845C" : "#3A3A35",
                           transform: isHovered ? "translateX(3px)" : "none",
                           transition: "color 0.4s ease, transform 0.4s ease",
                         }}
@@ -242,7 +242,7 @@ export default function ShowcasePage() {
         </main>
 
         {/* Footer */}
-        <footer style={{ borderTop: "1px solid rgba(168,153,104,0.06)" }}>
+        <footer style={{ borderTop: "1px solid rgba(232,132,92,0.06)" }}>
           <div className="mx-auto max-w-6xl px-8 py-8 flex items-center justify-between">
             <p className="text-[11px]" style={{ color: "#3A3A35" }}>
               Donna — Internal Design Review

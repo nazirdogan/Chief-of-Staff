@@ -10,6 +10,67 @@ export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRe
     const supabase = createServiceClient();
     const url = new URL(req.url);
 
+    const filter = url.searchParams.get('filter');
+
+    // Special path: Donna-archived items (Tier 1 auto-archived)
+    if (filter === 'archived_by_donna') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const db = supabase as any;
+
+      // Get audit log entries for Tier 1 archive_email actions
+      const { data: auditRows, error: auditError } = await db
+        .from('audit_log')
+        .select('action_id, outcome, created_at')
+        .eq('user_id', req.user.id)
+        .eq('action_type', 'archive_email')
+        .eq('tier', 1)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (auditError) throw auditError;
+
+      if (!auditRows || auditRows.length === 0) {
+        return NextResponse.json({ items: [], count: 0 });
+      }
+
+      // Get archived inbox items
+      const { data: archivedItems, error: itemsError } = await db
+        .from('inbox_items')
+        .select('*')
+        .eq('user_id', req.user.id)
+        .eq('is_archived', true)
+        .order('received_at', { ascending: false })
+        .limit(100);
+
+      if (itemsError) throw itemsError;
+
+      // Build a map of audit data keyed by action_id
+      const auditMap = new Map<string, { outcome: string; archived_at: string }>();
+      for (const row of auditRows) {
+        auditMap.set(row.action_id, {
+          outcome: row.outcome,
+          archived_at: row.created_at,
+        });
+      }
+
+      // Match items — try matching by item ID in audit action_id,
+      // then fall back to matching all archived items
+      const enrichedItems = (archivedItems ?? []).map((item: Record<string, unknown>) => {
+        const audit = auditMap.get(item.id as string);
+        return {
+          ...item,
+          archived_at: audit?.archived_at ?? item.updated_at,
+          archive_reason: audit?.outcome ?? null,
+        };
+      });
+
+      return NextResponse.json({
+        items: enrichedItems,
+        count: enrichedItems.length,
+      });
+    }
+
+    // Standard inbox query path
     const provider = url.searchParams.get('provider') as IntegrationProvider | null;
     const unreadOnly = url.searchParams.get('unread') === 'true';
     const needsReply = url.searchParams.get('needs_reply') === 'true';

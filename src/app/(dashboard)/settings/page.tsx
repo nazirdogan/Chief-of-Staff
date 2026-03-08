@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plug, Shield, Database } from 'lucide-react';
+import { Plug, Shield, Database, Zap } from 'lucide-react';
 
 const settingsSections = [
   {
@@ -8,6 +8,12 @@ const settingsSections = [
     label: 'Integrations',
     description: 'Connect Gmail, Calendar, Slack, and more.',
     icon: Plug,
+  },
+  {
+    href: '/settings/autonomy',
+    label: 'Autonomy',
+    description: 'Control how independently Donna acts on your behalf.',
+    icon: Zap,
   },
   {
     href: '/settings/security',

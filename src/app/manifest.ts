@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Donna',
     short_name: 'Donna',
-    description: 'Your AI-powered personal intelligence layer',
+    description: 'See everything. Miss nothing.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f9f7f4',
-    theme_color: '#3a3429',
+    background_color: '#1B1F3A',
+    theme_color: '#1B1F3A',
     orientation: 'any',
     categories: ['productivity', 'business'],
     icons: [

@@ -22,8 +22,15 @@ they've gone cold with, and what to do first. It then helps them act on it.
 4. **Never show an AI-generated factual claim without a source citation.** Every claim in a
    briefing, meeting prep brief, or commitment record must include `source_ref` pointing to the
    originating message/document.
-5. **Never execute a write action (send email, create task, reschedule meeting) without explicit
-   user confirmation.** AI proposes; user approves via one-tap confirmation. No autonomous writes.
+5. **Never execute a write action without explicit user authorisation.**
+   Authorisation takes one of three forms:
+   - **Tier 1 (SILENT):** user has pre-authorised this `action_type` in `/settings/autonomy`.
+     Auto-execute silently. Write audit log row. `send_email` is ALWAYS Tier 3 — this cannot
+     be changed in settings.
+   - **Tier 2 (ONE_TAP):** show one-tap toast. 30s timeout = Dismiss.
+   - **Tier 3 (FULL):** full modal with source citation. Always for `send_email`.
+   Tier is assigned by `src/lib/actions/classifier.ts` at action creation time.
+   Audit all Tier 1 executions via the `audit_log` table.
 6. **Never put secrets in code.** All secrets come from environment variables. All env vars are
    documented in `.env.example`. Never hardcode API keys, tokens, or secrets anywhere.
 7. **Every API route must be authenticated.** Use the `withAuth` middleware on every route. Public
@@ -38,7 +45,7 @@ they've gone cold with, and what to do first. It then helps them act on it.
 
 | Layer | Technology | Version / Notes |
 |---|---|---|
-| Framework | Next.js | 14+ with App Router |
+| Framework | Next.js | 16 with App Router |
 | Language | TypeScript | Strict mode enabled |
 | Database | Supabase (PostgreSQL) | Deployed in AWS me-south-1 (Bahrain) |
 | Auth | Supabase Auth | Email + OAuth. 2FA enforced. |

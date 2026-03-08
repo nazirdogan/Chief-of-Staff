@@ -16,10 +16,10 @@ const TYPES: { value: FeedbackType; label: string }[] = [
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
-  bg: '#0A0A0B',
+  bg: '#1B1F3A',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
+  dawn: '#E8845C',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
@@ -66,9 +66,9 @@ export function FeedbackWidget() {
         onClick={() => setOpen(!open)}
         className="fixed bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.3)] transition-all duration-200 hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:scale-105"
         style={{
-          background: '#A89968',
-          color: '#0A0A0B',
-          fontFamily: "'Satoshi', sans-serif",
+          background: '#E8845C',
+          color: '#1B1F3A',
+          fontFamily: "'Inter', sans-serif",
         }}
         aria-label="Send feedback"
       >
@@ -84,7 +84,7 @@ export function FeedbackWidget() {
             style={{
               background: c.surface,
               border: `1px solid ${c.border}`,
-              fontFamily: "'Satoshi', sans-serif",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             <h3
@@ -166,8 +166,8 @@ export function FeedbackWidget() {
                   disabled={submitting}
                   className="rounded-lg px-5 py-2 text-[13px] font-semibold transition-all duration-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.3)] disabled:opacity-50"
                   style={{
-                    background: '#A89968',
-                    color: '#0A0A0B',
+                    background: '#E8845C',
+                    color: '#1B1F3A',
                   }}
                 >
                   {submitting ? 'Sending...' : 'Send'}

@@ -110,8 +110,14 @@ export default function LoginPage() {
     <div className="w-full max-w-md animate-slide-up">
       <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background lg:hidden">
-            <span className="text-sm font-bold">CS</span>
+          <div className="mx-auto mb-2 lg:hidden">
+            <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+              <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                    fill="none" stroke="#FBF7F4" strokeWidth="4.5" strokeLinejoin="round"/>
+              <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" strokeWidth="3" strokeLinecap="round"/>
+              <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+            </svg>
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>

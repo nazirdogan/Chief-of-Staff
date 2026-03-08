@@ -1,6 +1,8 @@
 import { schedules, logger } from '@trigger.dev/sdk/v3';
 import { getTodaysParsedEvents } from '@/lib/integrations/google-calendar';
 import { getTodaysOutlookEvents } from '@/lib/integrations/outlook';
+import { processContextFromScan } from '@/lib/context/pipeline';
+import { calendarAdapter } from '@/lib/context/adapters/calendar-adapter';
 import { createServiceClient } from '@/lib/db/client';
 import type { IntegrationProvider } from '@/lib/db/types';
 
@@ -27,6 +29,23 @@ async function scanCalendarProvider(
 
   try {
     const events = await fetchEvents();
+
+    // Feed events into context memory pipeline (non-fatal on failure)
+    try {
+      const contextItems = calendarAdapter.toContextInput(events);
+      if (contextItems.length > 0) {
+        const contextResult = await processContextFromScan({
+          userId,
+          provider,
+          items: contextItems,
+        });
+        logger.info(`${jobName} context pipeline for user ${userId}`, { ...contextResult });
+      }
+    } catch (ctxErr) {
+      logger.warn(`${jobName} context enrichment failed for user ${userId}`, {
+        error: ctxErr instanceof Error ? ctxErr.message : 'Unknown error',
+      });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any)

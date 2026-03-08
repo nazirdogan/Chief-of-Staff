@@ -72,7 +72,14 @@ export type PendingActionType =
   | 'create_task'
   | 'reschedule_meeting'
   | 'create_calendar_event'
-  | 'update_notion_page';
+  | 'update_notion_page'
+  | 'archive_email';
+
+export enum AutonomyTier {
+  SILENT = 1,
+  ONE_TAP = 2,
+  FULL = 3,
+}
 
 export type PendingActionStatus =
   | 'awaiting_confirmation'
@@ -319,6 +326,40 @@ export interface PendingAction {
   executed_at: string | null;
   execution_result: Record<string, unknown> | null;
   expires_at: string;
+  created_at: string;
+  autonomy_tier: AutonomyTier;
+  auto_executed_at?: string | null;
+}
+
+export interface UserAutonomySettings {
+  id: string;
+  user_id: string;
+  action_type: PendingActionType;
+  tier_1_enabled: boolean;
+  tier_2_enabled: boolean;
+  whitelist_domains?: string[] | null;
+  updated_at: string;
+}
+
+export interface EmailEngagementSignal {
+  id: string;
+  user_id: string;
+  sender_domain: string;
+  open_count: number;
+  click_count: number;
+  reply_count: number;
+  last_engaged_at: string | null;
+  first_seen_at: string;
+  engagement_score: number;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  user_id: string;
+  action_type: string;
+  action_id: string;
+  tier: AutonomyTier;
+  outcome: string;
   created_at: string;
 }
 
@@ -722,6 +763,30 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<UserFeedback, 'id'>>;
+      };
+      user_autonomy_settings: {
+        Row: UserAutonomySettings;
+        Insert: Omit<UserAutonomySettings, 'id' | 'updated_at'> & {
+          id?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<UserAutonomySettings, 'id'>>;
+      };
+      email_engagement_signals: {
+        Row: EmailEngagementSignal;
+        Insert: Omit<EmailEngagementSignal, 'id' | 'first_seen_at'> & {
+          id?: string;
+          first_seen_at?: string;
+        };
+        Update: Partial<Omit<EmailEngagementSignal, 'id'>>;
+      };
+      audit_log: {
+        Row: AuditLogEntry;
+        Insert: Omit<AuditLogEntry, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
       };
     };
     Functions: {

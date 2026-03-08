@@ -41,7 +41,7 @@ const c = {
   textTertiary: 'rgba(255,255,255,0.55)',
   textQuaternary: 'rgba(255,255,255,0.35)',
   border: 'rgba(255,255,255,0.07)',
-  brassSubtle: 'rgba(168,153,104,0.15)',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
 };
 
 const SECTION_META: Record<SectionType, { label: string; description?: string; icon: typeof Inbox }> = {
@@ -124,7 +124,7 @@ export function BriefingSection({ section, items, onFeedback, onCitationClick }:
       <div className="flex items-center gap-2.5">
         <div
           className="flex h-6 w-6 items-center justify-center rounded-md"
-          style={{ background: c.brassSubtle }}
+          style={{ background: c.dawnSubtle }}
         >
           <Icon size={13} style={{ color: c.textTertiary }} />
         </div>
@@ -138,7 +138,7 @@ export function BriefingSection({ section, items, onFeedback, onCitationClick }:
           <span
             className="rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums"
             style={{
-              background: c.brassSubtle,
+              background: c.dawnSubtle,
               color: c.textQuaternary,
             }}
           >

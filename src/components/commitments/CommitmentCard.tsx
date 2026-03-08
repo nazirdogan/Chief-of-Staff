@@ -9,13 +9,13 @@ const c = {
   surface: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassSubtle: 'rgba(168,153,104,0.15)',
+  dawn: '#E8845C',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   textQuaternary: 'rgba(255,255,255,0.35)',
-  green: '#4ADE80',
+  green: '#52B788',
   yellow: '#92400E',
 };
 
@@ -140,15 +140,15 @@ function ActionButton({ label, loadingLabel, isLoading, disabled, onClick, prima
     text: '#FFFFFF',
     border: 'rgba(255,255,255,0.07)',
     textTertiary: 'rgba(255,255,255,0.55)',
-    brassSubtle: 'rgba(168,153,104,0.15)',
+    dawnSubtle: 'rgba(232,132,92,0.15)',
   };
 
-  let bg = c.brassSubtle;
+  let bg = c.dawnSubtle;
   let color = c.text;
   let border = `1px solid ${c.border}`;
   if (primary) {
-    bg = '#A89968';
-    color = '#0A0A0B';
+    bg = '#E8845C';
+    color = '#1B1F3A';
     border = 'none';
   }
   if (ghost) {

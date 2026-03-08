@@ -49,8 +49,8 @@ const c = {
   surfaceRaised: "#F2F2EF",
   border: "rgba(120,110,80,0.1)",
   borderHover: "rgba(120,110,80,0.22)",
-  brass: "#8C7A4A",
-  brassSubtle: "rgba(140,122,74,0.06)",
+  dawn: "#8C7A4A",
+  dawnSubtle: "rgba(140,122,74,0.06)",
   text: "#1A1917",
   textSecondary: "#3D3C37",
   textTertiary: "#6E6D65",
@@ -122,7 +122,7 @@ export default function PrivateOfficeLanding() {
             <div className="flex items-center gap-3.5">
               <div
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-[11px] font-bold"
-                style={{ background: c.surface, border: `1px solid ${c.border}`, color: c.brass }}
+                style={{ background: c.surface, border: `1px solid ${c.border}`, color: c.dawn }}
               >
                 CS
               </div>
@@ -177,11 +177,11 @@ export default function PrivateOfficeLanding() {
                     className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-[11px] font-medium tracking-wide mb-12"
                     style={{
                       border: `1px solid ${c.border}`,
-                      color: c.brass,
-                      background: c.brassSubtle,
+                      color: c.dawn,
+                      background: c.dawnSubtle,
                     }}
                   >
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: c.brass }} />
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: c.dawn }} />
                     Private beta — accepting applications
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export default function PrivateOfficeLanding() {
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2.5">
-                    <div className="h-5 w-5 rounded-full" style={{ background: "rgba(168,153,104,0.08)" }} />
+                    <div className="h-5 w-5 rounded-full" style={{ background: "rgba(232,132,92,0.08)" }} />
                     <div>
                       <div className="h-2 w-20 rounded" style={{ background: "rgba(26,25,23,0.1)" }} />
                       <div className="h-1.5 w-14 rounded mt-1" style={{ background: "rgba(26,25,23,0.05)" }} />
@@ -296,7 +296,7 @@ export default function PrivateOfficeLanding() {
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="h-3 w-3 rounded" style={{ background: "rgba(168,153,104,0.12)" }} />
+                    <div className="h-3 w-3 rounded" style={{ background: "rgba(232,132,92,0.12)" }} />
                     <div className="h-2 w-16 rounded" style={{ background: "rgba(26,25,23,0.08)" }} />
                   </div>
                   <div className="space-y-2">
@@ -374,7 +374,7 @@ export default function PrivateOfficeLanding() {
                     transform: `translate(-50%, -50%) ${mounted ? "scale(1)" : "scale(0.96)"}`,
                     width: 320,
                     background: c.surface,
-                    border: `1px solid rgba(168,153,104,0.12)`,
+                    border: `1px solid rgba(232,132,92,0.12)`,
                     boxShadow: "0 24px 80px rgba(0,0,0,0.08), 0 0 0 1px rgba(120,110,80,0.06)",
                     zIndex: 2,
                     opacity: mounted ? 1 : 0,
@@ -388,7 +388,7 @@ export default function PrivateOfficeLanding() {
                   >
                     <div
                       className="h-7 w-7 rounded-full flex items-center justify-center text-[8px] font-bold"
-                      style={{ background: c.brassSubtle, color: c.brass, border: `1px solid ${c.border}` }}
+                      style={{ background: c.dawnSubtle, color: c.dawn, border: `1px solid ${c.border}` }}
                     >
                       CS
                     </div>
@@ -404,11 +404,11 @@ export default function PrivateOfficeLanding() {
                     <div
                       className="rounded-lg px-4 py-3"
                       style={{
-                        background: "rgba(168,153,104,0.04)",
-                        borderLeft: `2px solid ${c.brass}`,
+                        background: "rgba(232,132,92,0.04)",
+                        borderLeft: `2px solid ${c.dawn}`,
                       }}
                     >
-                      <p className="text-[8px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: c.brass }}>
+                      <p className="text-[8px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: c.dawn }}>
                         Critical
                       </p>
                       <p className="text-[12px] leading-[1.5]" style={{ color: c.textSecondary }}>
@@ -469,13 +469,13 @@ export default function PrivateOfficeLanding() {
                   }}
                 >
                   {/* Top-right email → center */}
-                  <line x1="82%" y1="12%" x2="58%" y2="38%" stroke="#A89968" strokeWidth="0.5" strokeDasharray="3 6" />
+                  <line x1="82%" y1="12%" x2="58%" y2="38%" stroke="#E8845C" strokeWidth="0.5" strokeDasharray="3 6" />
                   {/* Top-left calendar → center */}
-                  <line x1="22%" y1="18%" x2="42%" y2="40%" stroke="#A89968" strokeWidth="0.5" strokeDasharray="3 6" />
+                  <line x1="22%" y1="18%" x2="42%" y2="40%" stroke="#E8845C" strokeWidth="0.5" strokeDasharray="3 6" />
                   {/* Bottom-right slack → center */}
-                  <line x1="78%" y1="85%" x2="58%" y2="62%" stroke="#A89968" strokeWidth="0.5" strokeDasharray="3 6" />
+                  <line x1="78%" y1="85%" x2="58%" y2="62%" stroke="#E8845C" strokeWidth="0.5" strokeDasharray="3 6" />
                   {/* Bottom-left doc → center */}
-                  <line x1="25%" y1="80%" x2="42%" y2="62%" stroke="#A89968" strokeWidth="0.5" strokeDasharray="3 6" />
+                  <line x1="25%" y1="80%" x2="42%" y2="62%" stroke="#E8845C" strokeWidth="0.5" strokeDasharray="3 6" />
                 </svg>
               </div>
             </div>
@@ -493,7 +493,7 @@ export default function PrivateOfficeLanding() {
                 "Zero data selling",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2.5">
-                  <Check size={13} style={{ color: c.brass }} />
+                  <Check size={13} style={{ color: c.dawn }} />
                   <span className="text-[13px]" style={{ color: c.textQuaternary }}>
                     {item}
                   </span>
@@ -511,7 +511,7 @@ export default function PrivateOfficeLanding() {
                 <div>
                   <p
                     className="text-[11px] uppercase tracking-[0.25em] font-semibold"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     What it does
                   </p>
@@ -607,7 +607,7 @@ export default function PrivateOfficeLanding() {
                 <div>
                   <p
                     className="text-[11px] uppercase tracking-[0.25em] font-semibold"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     How it works
                   </p>
@@ -653,7 +653,7 @@ export default function PrivateOfficeLanding() {
                   >
                     <span
                       className="text-[11px] uppercase tracking-[0.2em] font-bold block mb-8"
-                      style={{ color: c.brass }}
+                      style={{ color: c.dawn }}
                     >
                       Step {item.step}
                     </span>
@@ -684,7 +684,7 @@ export default function PrivateOfficeLanding() {
                 <div>
                   <p
                     className="text-[11px] uppercase tracking-[0.25em] font-semibold mb-8"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     Your morning briefing
                   </p>
@@ -706,7 +706,7 @@ export default function PrivateOfficeLanding() {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="h-2 w-2 rounded-full"
-                      style={{ background: c.brass }}
+                      style={{ background: c.dawn }}
                     />
                     <span className="text-[13px]" style={{ color: c.textTertiary }}>
                       Delivered via Telegram at the time you set
@@ -730,7 +730,7 @@ export default function PrivateOfficeLanding() {
                   >
                     <div
                       className="h-9 w-9 rounded-full flex items-center justify-center text-[10px] font-bold"
-                      style={{ background: c.brassSubtle, color: c.brass, border: `1px solid ${c.border}` }}
+                      style={{ background: c.dawnSubtle, color: c.dawn, border: `1px solid ${c.border}` }}
                     >
                       CS
                     </div>
@@ -747,14 +747,14 @@ export default function PrivateOfficeLanding() {
                     <div
                       className="rounded-xl px-5 py-4"
                       style={{
-                        background: "rgba(168,153,104,0.04)",
-                        borderLeft: `2px solid ${c.brass}`,
+                        background: "rgba(232,132,92,0.04)",
+                        borderLeft: `2px solid ${c.dawn}`,
                       }}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <span
                           className="text-[9px] font-bold uppercase tracking-[0.12em]"
-                          style={{ color: c.brass }}
+                          style={{ color: c.dawn }}
                         >
                           Critical
                         </span>
@@ -858,7 +858,7 @@ export default function PrivateOfficeLanding() {
                 <div>
                   <p
                     className="text-[11px] uppercase tracking-[0.25em] font-semibold"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     Pricing
                   </p>
@@ -934,7 +934,7 @@ export default function PrivateOfficeLanding() {
                       "Priority support",
                     ].map((feature) => (
                       <div key={feature} className="flex items-center gap-2.5">
-                        <Check size={12} style={{ color: c.brass }} />
+                        <Check size={12} style={{ color: c.dawn }} />
                         <span className="text-[13px]" style={{ color: c.textTertiary }}>
                           {feature}
                         </span>
@@ -1022,7 +1022,7 @@ export default function PrivateOfficeLanding() {
               <div className="flex items-center gap-3">
                 <div
                   className="h-6 w-6 rounded flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: c.surface, border: `1px solid ${c.border}`, color: c.brass }}
+                  style={{ background: c.surface, border: `1px solid ${c.border}`, color: c.dawn }}
                 >
                   CS
                 </div>

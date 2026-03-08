@@ -32,10 +32,10 @@ const c = {
   surfaceSubtle: "#F7F7F5",
   border: "rgba(120,110,80,0.1)",
   borderHover: "rgba(120,110,80,0.22)",
-  brass: "#8C7A4A",
-  brassLight: "#A89968",
-  brassSubtle: "rgba(140,122,74,0.06)",
-  brassBorder: "rgba(140,122,74,0.12)",
+  dawn: "#8C7A4A",
+  dawnLight: "#E8845C",
+  dawnSubtle: "rgba(140,122,74,0.06)",
+  dawnBorder: "rgba(140,122,74,0.12)",
   text: "#1A1917",
   textSecondary: "#3D3C37",
   textTertiary: "#6E6D65",
@@ -161,7 +161,7 @@ export default function SignalLanding() {
     <div
       className="min-h-screen relative overflow-x-hidden"
       style={{
-        fontFamily: "'Satoshi', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         background: c.bg,
         color: c.text,
       }}
@@ -339,7 +339,7 @@ export default function SignalLanding() {
             style={{
               width: "1px",
               height: "120px",
-              background: `linear-gradient(180deg, ${c.brass} 0%, transparent 100%)`,
+              background: `linear-gradient(180deg, ${c.dawn} 0%, transparent 100%)`,
               opacity: mounted ? 0.2 : 0,
               transition: "opacity 1.2s ease 0.5s",
             }}
@@ -350,7 +350,7 @@ export default function SignalLanding() {
               width: "5px",
               height: "5px",
               borderRadius: "50%",
-              background: c.brass,
+              background: c.dawn,
               boxShadow: `0 0 12px rgba(140,122,74,0.3)`,
               opacity: mounted ? 0.5 : 0,
               transition: "opacity 1.2s ease 0.6s",
@@ -373,20 +373,20 @@ export default function SignalLanding() {
                   <div
                     className="h-1.5 w-1.5 rounded-full"
                     style={{
-                      background: c.brass,
+                      background: c.dawn,
                     }}
                   />
                   <div
                     className="absolute inset-0 h-1.5 w-1.5 rounded-full"
                     style={{
-                      background: c.brass,
+                      background: c.dawn,
                       animation: "pulse-ring 2s ease-out infinite",
                     }}
                   />
                 </div>
                 <span
                   className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-                  style={{ color: c.brass }}
+                  style={{ color: c.dawn }}
                 >
                   System Status: Active
                 </span>
@@ -418,7 +418,7 @@ export default function SignalLanding() {
                   Navigate your
                 </span>
                 <br />
-                <span className="relative inline-block" style={{ color: c.brass }}>
+                <span className="relative inline-block" style={{ color: c.dawn }}>
                   digital life
                   {/* Underline highlight */}
                   <svg
@@ -434,7 +434,7 @@ export default function SignalLanding() {
                   >
                     <path
                       d="M2 7C50 2 120 1 140 4C180 7 230 3 278 5"
-                      stroke={c.brass}
+                      stroke={c.dawn}
                       strokeWidth="3"
                       strokeLinecap="round"
                     />
@@ -452,7 +452,7 @@ export default function SignalLanding() {
                 style={{
                   maxWidth: "480px",
                   height: "1px",
-                  background: `linear-gradient(90deg, transparent 0%, ${c.borderHover} 20%, ${c.brass} 50%, ${c.borderHover} 80%, transparent 100%)`,
+                  background: `linear-gradient(90deg, transparent 0%, ${c.borderHover} 20%, ${c.dawn} 50%, ${c.borderHover} 80%, transparent 100%)`,
                   opacity: mounted ? 0.5 : 0,
                   transition: "opacity 1s ease 0.8s",
                 }}
@@ -588,7 +588,7 @@ export default function SignalLanding() {
             <div
               className="h-px mb-20"
               style={{
-                background: `linear-gradient(90deg, transparent 0%, ${c.brassBorder} 30%, rgba(140,122,74,0.18) 50%, ${c.brassBorder} 70%, transparent 100%)`,
+                background: `linear-gradient(90deg, transparent 0%, ${c.dawnBorder} 30%, rgba(140,122,74,0.18) 50%, ${c.dawnBorder} 70%, transparent 100%)`,
               }}
             />
           </div>
@@ -626,7 +626,7 @@ export default function SignalLanding() {
                     <div className="flex items-center justify-center lg:justify-start gap-2.5 mb-3">
                       <stat.icon
                         size={14}
-                        style={{ color: c.brassLight }}
+                        style={{ color: c.dawnLight }}
                       />
                       <span
                         className="text-3xl sm:text-4xl font-black tracking-[-0.03em]"
@@ -680,7 +680,7 @@ export default function SignalLanding() {
                 <Reveal>
                   <p
                     className="text-[11px] font-bold uppercase tracking-[0.3em] mb-6"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     A Glimpse Into Clarity
                   </p>
@@ -757,9 +757,9 @@ export default function SignalLanding() {
                           <div
                             className="h-9 w-9 rounded-full flex items-center justify-center text-[9px] font-black"
                             style={{
-                              background: c.brassSubtle,
-                              color: c.brass,
-                              border: `1px solid ${c.brassBorder}`,
+                              background: c.dawnSubtle,
+                              color: c.dawn,
+                              border: `1px solid ${c.dawnBorder}`,
                             }}
                           >
                             CS
@@ -780,8 +780,8 @@ export default function SignalLanding() {
                           <div
                             className="h-1.5 w-1.5 rounded-full"
                             style={{
-                              background: "#4ADE80",
-                              boxShadow: "0 0 6px rgba(74,222,128,0.4)",
+                              background: "#52B788",
+                              boxShadow: "0 0 6px rgba(82,183,136,0.4)",
                             }}
                           />
                           <span
@@ -799,19 +799,19 @@ export default function SignalLanding() {
                         <div
                           className="rounded-xl p-5 border-l-[3px] relative overflow-hidden"
                           style={{
-                            borderColor: c.brass,
-                            background: c.brassSubtle,
+                            borderColor: c.dawn,
+                            background: c.dawnSubtle,
                           }}
                         >
                           <div className="flex items-center gap-2.5 mb-2">
                             <Zap
                               size={12}
-                              style={{ color: c.brass }}
-                              fill={c.brass}
+                              style={{ color: c.dawn }}
+                              fill={c.dawn}
                             />
                             <p
                               className="text-[10px] font-black uppercase tracking-[0.15em]"
-                              style={{ color: c.brass }}
+                              style={{ color: c.dawn }}
                             >
                               Critical — Act today
                             </p>
@@ -833,9 +833,9 @@ export default function SignalLanding() {
                             <span
                               className="text-[10px] px-2 py-0.5 rounded"
                               style={{
-                                background: c.brassSubtle,
-                                color: c.brass,
-                                border: `1px solid ${c.brassBorder}`,
+                                background: c.dawnSubtle,
+                                color: c.dawn,
+                                border: `1px solid ${c.dawnBorder}`,
                               }}
                             >
                               Reply draft ready
@@ -958,8 +958,8 @@ export default function SignalLanding() {
                       >
                         <Play
                           size={20}
-                          fill={c.brass}
-                          style={{ color: c.brass, marginLeft: "2px" }}
+                          fill={c.dawn}
+                          style={{ color: c.dawn, marginLeft: "2px" }}
                         />
                       </div>
                     </div>
@@ -986,7 +986,7 @@ export default function SignalLanding() {
               <div className="text-center mb-24">
                 <p
                   className="text-[11px] font-bold uppercase tracking-[0.3em] mb-6"
-                  style={{ color: c.brass }}
+                  style={{ color: c.dawn }}
                 >
                   Intelligence Engine
                 </p>
@@ -1062,11 +1062,11 @@ export default function SignalLanding() {
                         style={{
                           background:
                             hoveredFeature === i
-                              ? c.brassSubtle
+                              ? c.dawnSubtle
                               : c.surfaceRaised,
                           border: `1px solid ${
                             hoveredFeature === i
-                              ? c.brassBorder
+                              ? c.dawnBorder
                               : c.border
                           }`,
                         }}
@@ -1076,7 +1076,7 @@ export default function SignalLanding() {
                           style={{
                             color:
                               hoveredFeature === i
-                                ? c.brass
+                                ? c.dawn
                                 : c.textQuaternary,
                             transition: "color 0.5s ease",
                           }}
@@ -1109,7 +1109,7 @@ export default function SignalLanding() {
           <div
             className="absolute top-0 left-0 right-0 h-px"
             style={{
-              background: `linear-gradient(90deg, transparent 0%, ${c.brassBorder} 50%, transparent 100%)`,
+              background: `linear-gradient(90deg, transparent 0%, ${c.dawnBorder} 50%, transparent 100%)`,
             }}
           />
 
@@ -1118,7 +1118,7 @@ export default function SignalLanding() {
               <div className="text-center mb-20">
                 <p
                   className="text-[11px] font-bold uppercase tracking-[0.3em] mb-5"
-                  style={{ color: c.brass }}
+                  style={{ color: c.dawn }}
                 >
                   Seamless Connections
                 </p>
@@ -1173,13 +1173,13 @@ export default function SignalLanding() {
                 <div
                   className="flex items-center gap-2 px-5 py-3.5 rounded-xl border"
                   style={{
-                    borderColor: c.brassBorder,
-                    background: c.brassSubtle,
+                    borderColor: c.dawnBorder,
+                    background: c.dawnSubtle,
                   }}
                 >
                   <span
                     className="text-[13px] font-medium"
-                    style={{ color: c.brass }}
+                    style={{ color: c.dawn }}
                   >
                     +12 more
                   </span>
@@ -1228,9 +1228,9 @@ export default function SignalLanding() {
                 <div
                   className="h-12 w-12 rounded-full flex items-center justify-center text-[14px] font-bold"
                   style={{
-                    background: c.brassSubtle,
-                    color: c.brass,
-                    border: `1px solid ${c.brassBorder}`,
+                    background: c.dawnSubtle,
+                    color: c.dawn,
+                    border: `1px solid ${c.dawnBorder}`,
                   }}
                 >
                   EM
@@ -1282,7 +1282,7 @@ export default function SignalLanding() {
           <div
             className="absolute top-0 left-0 right-0 h-px"
             style={{
-              background: `linear-gradient(90deg, transparent 0%, ${c.brassBorder} 50%, transparent 100%)`,
+              background: `linear-gradient(90deg, transparent 0%, ${c.dawnBorder} 50%, transparent 100%)`,
             }}
           />
           {/* Subtle warm glow at bottom */}
@@ -1309,7 +1309,7 @@ export default function SignalLanding() {
             <div className="mx-auto max-w-3xl text-center relative">
               <p
                 className="text-[11px] font-bold uppercase tracking-[0.3em] mb-8"
-                style={{ color: c.brass }}
+                style={{ color: c.dawn }}
               >
                 Begin Your Journey
               </p>
@@ -1320,7 +1320,7 @@ export default function SignalLanding() {
                 <span style={{ color: c.text }}>Your time is your</span>
                 <br />
                 <span style={{ color: c.text }}>most valuable </span>
-                <span style={{ color: c.brass }}>signal.</span>
+                <span style={{ color: c.dawn }}>signal.</span>
               </h2>
               <p
                 className="text-lg max-w-xl mx-auto leading-[1.7] mb-14"
@@ -1374,8 +1374,8 @@ export default function SignalLanding() {
                     <Star
                       key={i}
                       size={12}
-                      fill={c.brass}
-                      style={{ color: c.brass }}
+                      fill={c.dawn}
+                      style={{ color: c.dawn }}
                     />
                   ))}
                 </div>
@@ -1476,7 +1476,7 @@ export default function SignalLanding() {
               <div className="flex items-center gap-2">
                 <CheckCircle2
                   size={12}
-                  style={{ color: c.brassLight }}
+                  style={{ color: c.dawnLight }}
                 />
                 <span
                   className="text-[11px]"

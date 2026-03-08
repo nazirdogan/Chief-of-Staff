@@ -8,12 +8,12 @@ import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
   surface: 'rgba(255,255,255,0.04)',
-  bg: '#0A0A0B',
+  bg: '#1B1F3A',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassSubtle: 'rgba(168,153,104,0.15)',
-  brassBorder: 'rgba(168,153,104,0.25)',
+  dawn: '#E8845C',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
+  dawnBorder: 'rgba(232,132,92,0.25)',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
@@ -44,7 +44,7 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
       style={{
         background: c.surface,
         border: `1px solid ${c.border}`,
-        borderLeft: `2px solid ${c.brass}`,
+        borderLeft: `2px solid ${c.dawn}`,
       }}
     >
       {/* Header */}
@@ -100,9 +100,9 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
                     <button
                       onClick={() => onCitationClick(attendee.source_ref, attendee.name)}
                       className="ml-1.5 text-[11px] font-medium transition-colors duration-200"
-                      style={{ color: c.brass }}
+                      style={{ color: c.dawn }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = c.text; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = c.brass; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = c.dawn; }}
                     >
                       [source]
                     </button>
@@ -128,9 +128,9 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
                     <button
                       onClick={() => onCitationClick(item.source_ref, item.description)}
                       className="ml-1.5 text-[11px] font-medium transition-colors duration-200"
-                      style={{ color: c.brass }}
+                      style={{ color: c.dawn }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = c.text; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = c.brass; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = c.dawn; }}
                     >
                       [source]
                     </button>
@@ -158,7 +158,7 @@ export function MeetingPrepCard({ prep, onCitationClick }: MeetingPrepCardProps)
                   >
                     <span
                       className="mt-[2px] h-1 w-1 shrink-0 rounded-full"
-                      style={{ background: c.brass }}
+                      style={{ background: c.dawn }}
                     />
                     {decodeEntities(point)}
                   </li>

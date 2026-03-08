@@ -10,8 +10,8 @@ const c = {
   surface: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassMuted: 'rgba(168,153,104,0.15)',
+  dawn: '#E8845C',
+  dawnMuted: 'rgba(232,132,92,0.15)',
   text: '#FFFFFF',
   textTertiary: 'rgba(255,255,255,0.55)',
   textMuted: 'rgba(255,255,255,0.35)',
@@ -65,11 +65,11 @@ export default function PeoplePage() {
   ];
 
   return (
-    <div style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-          <Users size={20} color={c.brass} />
+          <Users size={20} color={c.dawn} />
           <h1 style={{ fontSize: 22, fontWeight: 700, color: c.text, margin: 0 }}>People</h1>
         </div>
         <p style={{ fontSize: 13, color: c.textTertiary, margin: 0 }}>
@@ -85,9 +85,9 @@ export default function PeoplePage() {
             onClick={() => setFilter(key)}
             style={{
               padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              border: `1px solid ${filter === key ? c.brass : c.border}`,
-              background: filter === key ? `${c.brass}10` : c.surface,
-              color: filter === key ? c.brass : c.textTertiary,
+              border: `1px solid ${filter === key ? c.dawn : c.border}`,
+              background: filter === key ? `${c.dawn}10` : c.surface,
+              color: filter === key ? c.dawn : c.textTertiary,
               cursor: 'pointer',
             }}
           >
@@ -103,7 +103,7 @@ export default function PeoplePage() {
             <div
               key={i}
               className="animate-pulse"
-              style={{ height: 72, borderRadius: 10, background: c.brassMuted, border: `1px solid ${c.border}` }}
+              style={{ height: 72, borderRadius: 10, background: c.dawnMuted, border: `1px solid ${c.border}` }}
             />
           ))}
         </div>
@@ -111,10 +111,10 @@ export default function PeoplePage() {
         <div
           style={{
             padding: 24, borderRadius: 12, textAlign: 'center',
-            background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
+            background: 'rgba(214,75,42,0.08)', border: '1px solid rgba(214,75,42,0.2)',
           }}
         >
-          <p style={{ fontSize: 13, color: '#F87171' }}>{error}</p>
+          <p style={{ fontSize: 13, color: '#D64B2A' }}>{error}</p>
         </div>
       ) : contacts.length === 0 ? (
         <div style={{
@@ -124,9 +124,9 @@ export default function PeoplePage() {
           <div style={{
             width: 48, height: 48, borderRadius: 12, display: 'flex',
             alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
-            background: c.brassMuted,
+            background: c.dawnMuted,
           }}>
-            <Users size={22} color={c.brass} />
+            <Users size={22} color={c.dawn} />
           </div>
           <p style={{ fontSize: 14, fontWeight: 600, color: c.text }}>
             {filter === 'all' ? 'No contacts yet' : filter === 'vip' ? 'No VIP contacts' : 'No cold contacts'}
@@ -143,7 +143,7 @@ export default function PeoplePage() {
               href="/settings/integrations"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16,
-                padding: '8px 20px', borderRadius: 8, background: '#A89968', color: '#0A0A0B',
+                padding: '8px 20px', borderRadius: 8, background: '#E8845C', color: '#1B1F3A',
                 fontSize: 13, fontWeight: 600, textDecoration: 'none',
               }}
             >

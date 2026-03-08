@@ -16,14 +16,14 @@ const c = {
   surface: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassMuted: 'rgba(168,153,104,0.15)',
+  dawn: '#E8845C',
+  dawnMuted: 'rgba(232,132,92,0.15)',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   textMuted: 'rgba(255,255,255,0.35)',
-  blue: '#60A5FA',
-  green: '#4ADE80',
+  blue: '#4E7DAA',
+  green: '#52B788',
 };
 
 interface CalendarEvent {
@@ -122,11 +122,11 @@ export default function CalendarPage() {
   });
 
   return (
-    <div style={{ fontFamily: "'Satoshi', sans-serif" }}>
+    <div style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-          <CalendarIcon size={20} color={c.brass} />
+          <CalendarIcon size={20} color={c.dawn} />
           <h1 style={{ fontSize: 22, fontWeight: 700, color: c.text, margin: 0 }}>Calendar</h1>
         </div>
         <p style={{ fontSize: 13, color: c.textTertiary, margin: 0 }}>
@@ -149,8 +149,8 @@ export default function CalendarPage() {
             <button
               onClick={goToday}
               style={{
-                marginLeft: 8, fontSize: 11, color: c.brass, background: 'none',
-                border: `1px solid ${c.brass}40`, borderRadius: 4, padding: '2px 8px',
+                marginLeft: 8, fontSize: 11, color: c.dawn, background: 'none',
+                border: `1px solid ${c.dawn}40`, borderRadius: 4, padding: '2px 8px',
                 cursor: 'pointer', fontWeight: 500,
               }}
             >
@@ -167,7 +167,7 @@ export default function CalendarPage() {
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[1, 2, 3].map((i) => (
-            <div key={i} style={{ height: 80, borderRadius: 10, background: c.brassMuted, border: `1px solid ${c.border}` }} className="animate-pulse" />
+            <div key={i} style={{ height: 80, borderRadius: 10, background: c.dawnMuted, border: `1px solid ${c.border}` }} className="animate-pulse" />
           ))}
         </div>
       ) : !hasCalendarIntegration && events.length === 0 ? (
@@ -178,9 +178,9 @@ export default function CalendarPage() {
           <div style={{
             width: 48, height: 48, borderRadius: 12, display: 'flex',
             alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
-            background: c.brassMuted,
+            background: c.dawnMuted,
           }}>
-            <CalendarIcon size={22} color={c.brass} />
+            <CalendarIcon size={22} color={c.dawn} />
           </div>
           <p style={{ fontSize: 14, fontWeight: 600, color: c.text }}>Connect your calendar</p>
           <p style={{ fontSize: 13, color: c.textTertiary, marginTop: 4, maxWidth: 320, margin: '4px auto 0' }}>
@@ -190,7 +190,7 @@ export default function CalendarPage() {
             href="/settings/integrations"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16,
-              padding: '8px 20px', borderRadius: 8, background: '#A89968', color: '#0A0A0B',
+              padding: '8px 20px', borderRadius: 8, background: '#E8845C', color: '#1B1F3A',
               fontSize: 13, fontWeight: 600, textDecoration: 'none',
             }}
           >
@@ -213,10 +213,10 @@ export default function CalendarPage() {
           {allDayEvents.length > 0 && (
             <div style={{
               padding: '10px 14px', borderRadius: 10,
-              background: `${c.brass}08`, border: `1px solid ${c.brass}20`,
+              background: `${c.dawn}08`, border: `1px solid ${c.dawn}20`,
               marginBottom: 4,
             }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: c.brass, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: c.dawn, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 All Day
               </span>
               {allDayEvents.map((event) => (

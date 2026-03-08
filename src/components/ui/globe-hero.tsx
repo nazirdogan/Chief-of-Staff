@@ -30,7 +30,7 @@ const Globe: React.FC<{
       <mesh>
         <sphereGeometry args={[radius, 64, 64]} />
         <meshBasicMaterial
-          color="#FAFAF8"
+          color="#9BAFC4"
           transparent
           opacity={0.12}
           wireframe
@@ -59,6 +59,7 @@ const DotGlobeHero = React.forwardRef<
         "relative w-full h-screen overflow-hidden",
         className
       )}
+      style={{ background: '#0E1225' }}
       {...props}
     >
       <div className="relative z-10 flex flex-col items-center justify-center h-full">

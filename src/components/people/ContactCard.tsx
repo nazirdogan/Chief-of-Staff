@@ -6,14 +6,14 @@ const c = {
   surface: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassSubtle: 'rgba(168,153,104,0.15)',
+  dawn: '#E8845C',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   textQuaternary: 'rgba(255,255,255,0.35)',
-  green: '#4ADE80',
-  red: '#F87171',
+  green: '#52B788',
+  red: '#D64B2A',
   purple: '#6B21A8',
 };
 

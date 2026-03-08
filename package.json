@@ -2,7 +2,6 @@
   "name": "donna",
   "version": "0.1.0",
   "private": true,
-  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -14,10 +13,8 @@
     "ops:sweep": "npx tsx scripts/operations/run-am-sweep.ts",
     "ops:timeblock": "npx tsx scripts/operations/run-time-blocker.ts",
     "ops:full": "npx tsx scripts/operations/run-full-morning.ts",
-    "electron:dev": "tsc -p electron/tsconfig.json && electron dist-electron/main.js",
-    "electron:build": "next build && tsc -p electron/tsconfig.json && electron-builder --mac",
-    "electron:build:arm64": "next build && tsc -p electron/tsconfig.json && electron-builder --mac --arm64",
-    "electron:build:x64": "next build && tsc -p electron/tsconfig.json && electron-builder --mac --x64"
+    "tauri:dev": "npx tauri dev",
+    "tauri:build": "npx tauri build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -37,6 +34,7 @@
     "@upstash/redis": "^1.36.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "googleapis": "^171.4.0",
     "lucide-react": "^0.577.0",
@@ -55,12 +53,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",
-    "electron": "^40.8.0",
-    "electron-builder": "^26.8.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "shadcn": "^3.8.5",

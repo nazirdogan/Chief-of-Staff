@@ -10,8 +10,8 @@ const c = {
   surface: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassSubtle: 'rgba(168,153,104,0.15)',
+  dawn: '#E8845C',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
   text: '#FFFFFF',
   textTertiary: 'rgba(255,255,255,0.55)',
   textQuaternary: 'rgba(255,255,255,0.35)',
@@ -74,7 +74,7 @@ export function CommitmentQueue() {
           <div
             key={i}
             className="animate-pulse"
-            style={{ height: 80, borderRadius: 10, background: c.brassSubtle, border: `1px solid ${c.border}` }}
+            style={{ height: 80, borderRadius: 10, background: c.dawnSubtle, border: `1px solid ${c.border}` }}
           />
         ))}
       </div>
@@ -86,10 +86,10 @@ export function CommitmentQueue() {
       <div
         style={{
           padding: 24, borderRadius: 12, textAlign: 'center',
-          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
+          background: 'rgba(214,75,42,0.08)', border: '1px solid rgba(214,75,42,0.2)',
         }}
       >
-        <p style={{ fontSize: 13, color: '#F87171' }}>{error}</p>
+        <p style={{ fontSize: 13, color: '#D64B2A' }}>{error}</p>
       </div>
     );
   }
@@ -106,9 +106,9 @@ export function CommitmentQueue() {
         <div style={{
           width: 48, height: 48, borderRadius: 12, display: 'flex',
           alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
-          background: c.brassSubtle,
+          background: c.dawnSubtle,
         }}>
-          <CheckCircle2 size={22} color={c.brass} />
+          <CheckCircle2 size={22} color={c.dawn} />
         </div>
         <p style={{ fontSize: 14, fontWeight: 600, color: c.text }}>No open commitments</p>
         <p style={{ fontSize: 13, color: c.textTertiary, marginTop: 4, maxWidth: 320, margin: '4px auto 0' }}>

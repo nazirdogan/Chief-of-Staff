@@ -47,7 +47,7 @@ export default function ConciergeLanding() {
     <div
       className="min-h-screen relative"
       style={{
-        fontFamily: "'Satoshi', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         background: "#07070B",
         color: "#FDFDFD",
       }}

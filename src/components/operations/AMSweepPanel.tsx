@@ -8,11 +8,11 @@ const c = {
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   border: 'rgba(255,255,255,0.07)',
-  brassSubtle: 'rgba(168,153,104,0.15)',
-  brass: '#A89968',
-  green: '#4ADE80',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
+  dawn: '#E8845C',
+  green: '#52B788',
   yellow: '#B68D40',
-  red: '#F87171',
+  red: '#D64B2A',
   gray: '#95A5A6',
 };
 
@@ -80,7 +80,7 @@ export function AMSweepPanel() {
   return (
     <div style={{ borderRadius: 12, border: `1px solid ${c.border}`, overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: c.brassSubtle }}>
+      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: c.dawnSubtle }}>
         <div>
           <h3 style={{ fontSize: 15, fontWeight: 600, color: c.text, margin: 0 }}>AM Sweep</h3>
           <p style={{ fontSize: 12, color: c.textTertiary, margin: '2px 0 0' }}>Classify and dispatch today&apos;s tasks</p>
@@ -91,7 +91,7 @@ export function AMSweepPanel() {
             disabled={loading}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
-              borderRadius: 8, border: 'none', background: c.brass, color: '#fff',
+              borderRadius: 8, border: 'none', background: c.dawn, color: '#fff',
               fontSize: 13, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,
             }}
@@ -103,7 +103,7 @@ export function AMSweepPanel() {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 20px', background: 'rgba(248,113,113,0.08)', color: c.red, fontSize: 13 }}>
+        <div style={{ padding: '12px 20px', background: 'rgba(214,75,42,0.08)', color: c.red, fontSize: 13 }}>
           {error}
         </div>
       )}
@@ -133,7 +133,7 @@ export function AMSweepPanel() {
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 width: '100%', padding: '12px 20px', marginTop: 16,
-                borderRadius: 8, border: 'none', background: c.green, color: '#0A0A0B',
+                borderRadius: 8, border: 'none', background: c.green, color: '#1B1F3A',
                 fontSize: 14, fontWeight: 600, cursor: dispatching ? 'not-allowed' : 'pointer',
                 opacity: dispatching ? 0.7 : 1,
               }}
@@ -194,7 +194,7 @@ function TaskSection({ label, color, tasks }: { label: string; color: string; ta
                 {task.tags.map((tag) => (
                   <span key={tag} style={{
                     fontSize: 10, padding: '2px 6px', borderRadius: 4,
-                    background: c.brassSubtle, color: c.textTertiary,
+                    background: c.dawnSubtle, color: c.textTertiary,
                   }}>
                     {tag}
                   </span>

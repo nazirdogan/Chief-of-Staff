@@ -46,7 +46,7 @@ export default function ObservatoryLanding() {
     <div
       className="min-h-screen relative overflow-hidden"
       style={{
-        fontFamily: "'Satoshi', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         background: "#030305",
         color: "#FDFDFD",
       }}

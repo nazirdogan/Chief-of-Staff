@@ -54,19 +54,19 @@ const c = {
   surface: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.07)',
   borderHover: 'rgba(255,255,255,0.14)',
-  brass: '#A89968',
-  brassSubtle: 'rgba(168,153,104,0.15)',
+  dawn: '#E8845C',
+  dawnSubtle: 'rgba(232,132,92,0.15)',
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.85)',
   textTertiary: 'rgba(255,255,255,0.55)',
   textQuaternary: 'rgba(255,255,255,0.35)',
   textGhost: 'rgba(255,255,255,0.2)',
-  critical: '#F87171',
-  criticalBg: 'rgba(248,113,113,0.08)',
-  criticalBorder: 'rgba(248,113,113,0.2)',
-  high: '#A89968',
-  highBg: 'rgba(168,153,104,0.15)',
-  highBorder: 'rgba(168,153,104,0.25)',
+  critical: '#D64B2A',
+  criticalBg: 'rgba(214,75,42,0.08)',
+  criticalBorder: 'rgba(214,75,42,0.2)',
+  high: '#E8845C',
+  highBg: 'rgba(232,132,92,0.15)',
+  highBorder: 'rgba(232,132,92,0.25)',
 };
 
 interface BriefingItemProps {
@@ -94,7 +94,7 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
       ? { borderLeft: `2px solid ${c.critical}`, background: hovered ? c.criticalBg : c.surface }
       : item.rank <= 5
         ? { borderLeft: `2px solid ${c.high}`, background: hovered ? c.highBg : c.surface }
-        : { borderLeft: '2px solid transparent', background: hovered ? c.brassSubtle : c.surface };
+        : { borderLeft: '2px solid transparent', background: hovered ? c.dawnSubtle : c.surface };
 
   return (
     <div
@@ -116,7 +116,7 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
           <span
             className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
             style={{
-              background: c.brassSubtle,
+              background: c.dawnSubtle,
               color: c.textQuaternary,
             }}
           >
@@ -133,9 +133,9 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
           <span
             className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium"
             style={{
-              background: c.brassSubtle,
-              color: c.brass,
-              border: `1px solid rgba(168,153,104,0.25)`,
+              background: c.dawnSubtle,
+              color: c.dawn,
+              border: `1px solid rgba(232,132,92,0.25)`,
             }}
           >
             {decodeEntities(item.action_suggestion ?? '')}
@@ -156,9 +156,9 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
         <button
           onClick={() => onCitationClick(item)}
           className="text-[12px] font-medium transition-colors duration-200"
-          style={{ color: c.brass }}
+          style={{ color: c.dawn }}
           onMouseEnter={(e) => { e.currentTarget.style.color = c.text; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = c.brass; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = c.dawn; }}
         >
           {getCitationLabel(item.source_ref?.provider ?? '')}
         </button>
