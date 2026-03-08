@@ -57,11 +57,11 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="w-full max-w-md animate-slide-up">
+      <div className="w-full max-w-md lg:max-w-lg animate-slide-up">
         <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
-          <CardHeader className="text-center">
+          <CardHeader className="text-center px-8 lg:px-12">
             <CardTitle className="text-2xl font-bold tracking-tight">Check your email</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               We&apos;ve sent a verification link to <strong>{email}</strong>.
               Click the link to verify your account and sign in.
             </CardDescription>
