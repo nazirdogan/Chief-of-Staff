@@ -15,7 +15,6 @@ import {
   LogOut,
   ShieldCheck,
   MessageCircle,
-  Zap,
   Plus,
   Trash2,
   BookOpen,
@@ -28,8 +27,7 @@ import { useOneTapQueue } from '@/hooks/useOneTapQueue';
 /* ── Navigation structure ── */
 const navItems = [
   { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
-  { href: '/operations', label: 'Operations', icon: Zap },
-  { href: '/dashboard', label: 'Briefing', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Today', icon: LayoutDashboard },
   { href: '/inbox', label: 'Inbox', icon: Inbox },
   { href: '/commitments', label: 'Commitments', icon: CheckCircle2 },
   { href: '/calendar', label: 'Calendar', icon: Calendar },

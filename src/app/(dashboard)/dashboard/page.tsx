@@ -6,6 +6,8 @@ import { BriefingItem as BriefingItemComponent } from '@/components/briefing/Bri
 import { CitationDrawer } from '@/components/briefing/CitationDrawer';
 import { MeetingPrepCard } from '@/components/people/MeetingPrepCard';
 import { YesterdayRecap } from '@/components/briefing/YesterdayRecap';
+import { AMSweepPanel } from '@/components/operations/AMSweepPanel';
+import { TimeBlockPanel } from '@/components/operations/TimeBlockPanel';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 import type { Briefing, BriefingItem, BriefingItemSection, MeetingPrepData, SourceRef } from '@/lib/db/types';
 import {
@@ -108,6 +110,7 @@ export default function BriefingPage() {
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [fyiExpanded, setFyiExpanded] = useState(false);
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set());
+  const [opsExpanded, setOpsExpanded] = useState(false);
 
   const fetchBriefing = useCallback(async () => {
     try {
@@ -737,6 +740,51 @@ export default function BriefingPage() {
           )}
         </div>
       )}
+
+      {/* ═══════════════════════════════════════════════════════
+          OPERATIONS — AM Sweep + Time Blocker
+          ═══════════════════════════════════════════════════════ */}
+
+      <div>
+        <button
+          onClick={() => setOpsExpanded(!opsExpanded)}
+          className="flex w-full items-center justify-between rounded-xl px-5 py-3.5 transition-all duration-150"
+          style={{
+            background: c.surfaceElevated,
+            border: `1px solid ${c.border}`,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = c.borderHover; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = c.border; }}
+        >
+          <div className="flex items-center gap-2.5">
+            <Zap size={14} style={{ color: c.dawn }} />
+            <span className="text-[13px] font-semibold" style={{ color: c.text }}>
+              Operations
+            </span>
+            <span
+              className="rounded-md px-2 py-0.5 text-[10px] font-medium"
+              style={{ background: c.dawnMuted, color: c.dawn }}
+            >
+              Sweep & Schedule
+            </span>
+          </div>
+          <ChevronDown
+            size={14}
+            className="transition-transform duration-200"
+            style={{
+              color: c.textMuted,
+              transform: opsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          />
+        </button>
+
+        {opsExpanded && (
+          <div className="mt-3 space-y-4">
+            <AMSweepPanel />
+            <TimeBlockPanel />
+          </div>
+        )}
+      </div>
 
       {/* ═══════════════════════════════════════════════════════
           ZONE 3: INTELLIGENCE FEED

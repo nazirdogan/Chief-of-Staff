@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type { Reflection, ReflectionType } from '@/lib/db/types';
+import { CompletionReportPanel } from '@/components/operations/CompletionReport';
 
 /* Donna brand tokens */
 const c = {
@@ -423,6 +424,9 @@ export default function ReflectionsPage() {
           </p>
         </div>
       )}
+
+      {/* Today's Completion Report */}
+      <CompletionReportPanel />
 
       {/* Reflections list */}
       {!loading && !error && reflections.length > 0 && (
