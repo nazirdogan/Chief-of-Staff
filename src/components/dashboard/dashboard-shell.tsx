@@ -10,35 +10,30 @@ import {
   Calendar,
   CheckCircle2,
   Users,
-  Activity,
-  Zap,
-  MessageCircle,
-  Brain,
-  BarChart3,
   Settings,
   LogOut,
   ShieldCheck,
+  MessageCircle,
+  Zap,
+  ChevronRight,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
 import { OneTapConfirmToast } from '@/components/shared/OneTapConfirmToast';
 import { useOneTapQueue } from '@/hooks/useOneTapQueue';
 
-const navItems = [
+/* ── Navigation structure ── */
+const primaryNav = [
   { href: '/dashboard', label: 'Briefing', icon: LayoutDashboard },
   { href: '/inbox', label: 'Inbox', icon: Inbox },
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/commitments', label: 'Commitments', icon: CheckCircle2 },
+  { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/people', label: 'People', icon: Users },
-  { href: '/heartbeat', label: 'Heartbeat', icon: Activity },
-  { href: '/operations', label: 'Operations', icon: Zap },
-  { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
-  { href: '/memory', label: 'Memory', icon: Brain },
-  { href: '/patterns', label: 'Patterns', icon: BarChart3 },
 ];
 
-const bottomItems = [
-  { href: '/settings', label: 'Settings', icon: Settings },
+const secondaryNav = [
+  { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
+  { href: '/operations', label: 'Operations', icon: Zap },
 ];
 
 /* Donna brand tokens */
@@ -46,7 +41,6 @@ const t = {
   bg: '#1B1F3A',
   deep: '#0E1225',
   surface: 'rgba(255,255,255,0.05)',
-  surfaceSubtle: 'rgba(255,255,255,0.03)',
   border: 'rgba(251,247,244,0.08)',
   borderHover: 'rgba(251,247,244,0.16)',
   text: '#FBF7F4',
@@ -58,6 +52,36 @@ const t = {
   activeBorder: 'rgba(232,132,92,0.30)',
 };
 
+function NavItem({ href, label, icon: Icon, pathname }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string }) {
+  const active = href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-150"
+      style={{
+        background: active ? t.activeAccent : 'transparent',
+        border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
+        color: active ? t.text : t.textTertiary,
+      }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          e.currentTarget.style.color = t.textSecondary;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.color = t.textTertiary;
+        }
+      }}
+    >
+      <Icon size={16} style={{ opacity: active ? 1 : 0.55, color: active ? t.dawn : undefined }} />
+      {label}
+    </Link>
+  );
+}
+
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -65,10 +89,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const { current: currentToast, resolve: resolveToast } = useOneTapQueue();
 
   const supabase = getSupabaseBrowserClient();
+
+  // Auto-expand secondary nav if user is on one of those pages
+  useEffect(() => {
+    if (secondaryNav.some(item => pathname.startsWith(item.href))) {
+      setMoreOpen(true); // eslint-disable-line react-hooks/set-state-in-effect -- sync derived state from pathname
+    }
+  }, [pathname]);
 
   // Check if a Tier 3 dialog is open — defer toast rendering
   useEffect(() => {
@@ -112,9 +144,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.refresh();
   }
 
-  const isActive = (href: string) =>
-    href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
-
   return (
     <>
       <div
@@ -129,15 +158,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       >
         {/* ── Sidebar ── */}
         <aside
-          className="fixed top-0 left-0 flex h-screen w-[240px] shrink-0 flex-col overflow-y-auto z-30"
+          className="fixed top-0 left-0 flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto z-30"
           style={{
             background: t.deep,
             borderRight: `1px solid ${t.border}`,
           }}
         >
-          {/* Brand lockup — The Meridian mark + italic wordmark */}
-          <div className="flex h-16 items-center gap-3 px-6">
-            <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          {/* Brand lockup */}
+          <div className="flex h-14 items-center gap-3 px-5">
+            <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
               <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
                     fill="none" stroke="#FBF7F4" strokeWidth="4.5" strokeLinejoin="round"/>
@@ -145,7 +174,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <circle cx="26" cy="50" r="5" fill="#E8845C"/>
             </svg>
             <span
-              className="text-[18px] tracking-[0.01em]"
+              className="text-[17px] tracking-[0.01em]"
               style={{
                 color: t.text,
                 fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
@@ -159,107 +188,90 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
           {/* Divider — dawn gradient */}
           <div
-            className="mx-5"
+            className="mx-4"
             style={{
               height: 1,
               background: `linear-gradient(90deg, ${t.dawn}, transparent)`,
-              opacity: 0.3,
+              opacity: 0.25,
             }}
           />
 
-          {/* Nav */}
-          <nav className="flex flex-1 flex-col gap-0.5 px-3 pt-4">
-            {navItems.map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className="group flex items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-200"
-                  style={{
-                    background: active ? t.activeAccent : 'transparent',
-                    border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
-                    color: active ? t.text : t.textTertiary,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                      e.currentTarget.style.color = t.textSecondary;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = t.textTertiary;
-                    }
-                  }}
+          {/* Primary nav */}
+          <nav className="flex flex-1 flex-col px-3 pt-3">
+            <div className="space-y-0.5">
+              {primaryNav.map((item) => (
+                <NavItem key={item.href} {...item} pathname={pathname} />
+              ))}
+            </div>
+
+            {/* Secondary nav — collapsible */}
+            <div className="mt-4">
+              <button
+                onClick={() => setMoreOpen(!moreOpen)}
+                className="flex w-full items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold tracking-[0.10em] uppercase transition-colors duration-150"
+                style={{ color: t.textQuaternary }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = t.textTertiary; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = t.textQuaternary; }}
+              >
+                <ChevronRight
+                  size={10}
+                  className="transition-transform duration-200"
+                  style={{ transform: moreOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                />
+                More
+              </button>
+
+              <div
+                className="overflow-hidden transition-all duration-200 ease-in-out"
+                style={{
+                  maxHeight: moreOpen ? '200px' : '0px',
+                  opacity: moreOpen ? 1 : 0,
+                }}
+              >
+                <div className="space-y-0.5 pt-1">
+                  {secondaryNav.map((item) => (
+                    <NavItem key={item.href} {...item} pathname={pathname} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Keyboard shortcut hint */}
+            <div
+              className="mx-2 mb-3 rounded-lg px-3 py-2 text-center"
+              style={{ background: t.surface }}
+            >
+              <p className="text-[11px]" style={{ color: t.textQuaternary }}>
+                <kbd
+                  className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: t.textTertiary }}
                 >
-                  <Icon size={16} style={{ opacity: active ? 1 : 0.55, color: active ? t.dawn : undefined }} />
-                  {label}
-                </Link>
-              );
-            })}
+                  ⌘K
+                </kbd>
+                {' '}to search anything
+              </p>
+            </div>
           </nav>
 
           {/* Bottom section */}
-          <div className="px-3 pb-4">
+          <div className="px-3 pb-3">
             <div
               className="mb-2 mx-2"
-              style={{
-                height: 1,
-                background: t.border,
-              }}
+              style={{ height: 1, background: t.border }}
             />
 
-            {bottomItems.map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-200"
-                  style={{
-                    background: active ? t.activeAccent : 'transparent',
-                    border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
-                    color: active ? t.text : t.textTertiary,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                      e.currentTarget.style.color = t.textSecondary;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = t.textTertiary;
-                    }
-                  }}
-                >
-                  <Icon size={16} style={{ opacity: active ? 1 : 0.55, color: active ? t.dawn : undefined }} />
-                  {label}
-                </Link>
-              );
-            })}
+            <NavItem href="/settings" label="Settings" icon={Settings} pathname={pathname} />
 
             {isAdmin && (
-              <Link
-                href="/admin"
-                className="flex items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-200"
-                style={{
-                  background: isActive('/admin') ? t.activeAccent : 'transparent',
-                  border: `1px solid ${isActive('/admin') ? t.activeBorder : 'transparent'}`,
-                  color: isActive('/admin') ? t.text : t.textTertiary,
-                }}
-              >
-                <ShieldCheck size={16} style={{ opacity: isActive('/admin') ? 1 : 0.55, color: isActive('/admin') ? t.dawn : undefined }} />
-                Admin
-              </Link>
+              <NavItem href="/admin" label="Admin" icon={ShieldCheck} pathname={pathname} />
             )}
 
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-200"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-150"
               style={{ color: t.textQuaternary }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = t.textSecondary;
@@ -277,8 +289,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* ── Main content ── */}
-        <main className="flex-1 ml-[240px] overflow-y-auto">
-          <div className="mx-auto max-w-[1400px] px-8 py-10 animate-fade-in">
+        <main className="flex-1 ml-[220px] overflow-y-auto">
+          <div className="mx-auto max-w-[1200px] px-8 py-8 animate-fade-in">
             {children}
           </div>
         </main>
