@@ -110,6 +110,60 @@ function extractBody(payload: {
 }
 
 /**
+ * Fetch emails within a date range, paginating through results.
+ * Used for cold-start backfill — pulls up to `maxTotal` messages.
+ */
+export async function fetchMessagesByDateRange(
+  userId: string,
+  options: {
+    after: Date;
+    before?: Date;
+    labelIds?: string[];
+    maxTotal?: number;
+    excludePromotional?: boolean;
+  }
+): Promise<Array<{ id: string; threadId: string | null }>> {
+  const gmail = await getGmailClient(userId);
+  const maxTotal = options.maxTotal ?? 500;
+
+  const afterEpoch = Math.floor(options.after.getTime() / 1000);
+  let query = `after:${afterEpoch}`;
+  if (options.before) {
+    const beforeEpoch = Math.floor(options.before.getTime() / 1000);
+    query += ` before:${beforeEpoch}`;
+  }
+  if (options.excludePromotional) {
+    query += ' -category:promotions -category:social -category:forums -category:updates';
+  }
+
+  const allMessages: Array<{ id: string; threadId: string | null }> = [];
+  let pageToken: string | undefined;
+
+  while (allMessages.length < maxTotal) {
+    const batchSize = Math.min(100, maxTotal - allMessages.length);
+    const response = await gmail.users.messages.list({
+      userId: 'me',
+      maxResults: batchSize,
+      labelIds: options.labelIds,
+      q: query,
+      pageToken,
+    });
+
+    const messages = response.data.messages ?? [];
+    for (const msg of messages) {
+      if (msg.id) {
+        allMessages.push({ id: msg.id, threadId: msg.threadId ?? null });
+      }
+    }
+
+    pageToken = response.data.nextPageToken ?? undefined;
+    if (!pageToken || messages.length === 0) break;
+  }
+
+  return allMessages;
+}
+
+/**
  * Fetch emails sent yesterday that have no reply in the thread yet.
  * Used for "Awaiting Reply" briefing section.
  */

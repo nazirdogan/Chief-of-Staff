@@ -215,6 +215,72 @@
   background: rgba(155,175,196,0.4);
 }
 
+/* ─── Onboarding animations ─── */
+
+@keyframes meridian-draw {
+  from { stroke-dashoffset: 50; opacity: 0; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes ring-expand {
+  from { transform: scale(0.5); opacity: 0.6; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes count-tick {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes step-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes check-pop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes typewrite-line {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-step-enter {
+  animation: step-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-check-pop {
+  animation: check-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.onboarding-stagger > * {
+  animation: typewrite-line 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.onboarding-stagger > *:nth-child(1) { animation-delay: 100ms; }
+.onboarding-stagger > *:nth-child(2) { animation-delay: 250ms; }
+.onboarding-stagger > *:nth-child(3) { animation-delay: 400ms; }
+.onboarding-stagger > *:nth-child(4) { animation-delay: 550ms; }
+.onboarding-stagger > *:nth-child(5) { animation-delay: 700ms; }
+.onboarding-stagger > *:nth-child(6) { animation-delay: 850ms; }
+
 /* ─── Priority border colors (used on briefing items) ─── */
 
 .priority-critical {

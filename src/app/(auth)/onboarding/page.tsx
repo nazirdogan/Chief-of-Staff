@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@/lib/db/client';
-import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
+import { OnboardingRouter } from '@/components/onboarding/OnboardingRouter';
 
 export default async function OnboardingPage() {
   const cookieStore = await cookies();
@@ -36,5 +36,5 @@ export default async function OnboardingPage() {
     redirect('/dashboard');
   }
 
-  return <OnboardingFlow />;
+  return <OnboardingRouter />;
 }
