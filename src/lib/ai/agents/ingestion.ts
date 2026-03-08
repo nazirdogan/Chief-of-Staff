@@ -177,6 +177,7 @@ export async function ingestGmailMessages(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
     });
 
@@ -245,6 +246,7 @@ export async function ingestOutlookMessages(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
     });
 
@@ -295,6 +297,7 @@ export async function ingestSlackDMs(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: msg.date,
     });
 
@@ -347,6 +350,7 @@ export async function ingestICloudMessages(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: result.needs_reply,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
     });
 
@@ -394,6 +398,7 @@ export async function ingestCalendlyBookings(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
     });
 
@@ -530,6 +535,7 @@ export async function ingestTwitterDMs(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: true,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: dm.date,
     });
 
@@ -729,6 +735,7 @@ export async function ingestAsanaTasks(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: task.modifiedAt,
     });
 
@@ -774,6 +781,7 @@ export async function ingestMondayItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: item.updatedAt,
     });
 
@@ -819,6 +827,7 @@ export async function ingestJiraIssues(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: issue.updatedAt,
     });
 
@@ -864,6 +873,7 @@ export async function ingestLinearIssues(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: issue.updatedAt,
     });
 
@@ -909,6 +919,7 @@ export async function ingestClickUpTasks(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: task.updatedAt,
     });
 
@@ -955,6 +966,7 @@ export async function ingestTrelloCards(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: card.lastActivity,
     });
 
@@ -1004,6 +1016,7 @@ export async function ingestHubSpotItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: deal.lastModified,
     });
 
@@ -1033,6 +1046,7 @@ export async function ingestHubSpotItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: task.createdAt,
     });
 
@@ -1080,6 +1094,7 @@ export async function ingestSalesforceItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: opp.lastModified,
     });
 
@@ -1109,6 +1124,7 @@ export async function ingestSalesforceItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: task.createdAt,
     });
 
@@ -1156,6 +1172,7 @@ export async function ingestPipedriveItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: deal.updateTime,
     });
 
@@ -1185,6 +1202,7 @@ export async function ingestPipedriveItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: activity.addTime,
     });
 
@@ -1234,6 +1252,7 @@ export async function ingestGitHubItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: true,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: pr.updatedAt,
     });
 
@@ -1263,6 +1282,7 @@ export async function ingestGitHubItems(
       ai_summary: result.summary,
       urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
       needs_reply: false,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: mention.createdAt,
     });
 

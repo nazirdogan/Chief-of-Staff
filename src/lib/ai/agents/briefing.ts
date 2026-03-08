@@ -8,6 +8,7 @@ import {
   mapColdContactToCandidate,
   mapSentAwaitingReplyToCandidate,
   mapAfterHoursToCandidate,
+  mapDesktopObservationToCandidate,
 } from './prioritisation';
 import { generateMeetingPrep } from './meeting-prep';
 import type { MeetingPrep } from './meeting-prep';
@@ -17,7 +18,7 @@ import { listInboxItems } from '@/lib/db/queries/inbox';
 import { listCommitments } from '@/lib/db/queries/commitments';
 import { getProfile, getOnboardingData, getVipContacts, getColdContacts } from '@/lib/db/queries/users';
 import { insertBriefing, insertBriefingItems, updateBriefingDelivery } from '@/lib/db/queries/briefings';
-import { sendTelegramMessage, formatBriefingForTelegram } from '@/lib/integrations/telegram';
+import { getDesktopObserverChunks } from '@/lib/db/queries/context';
 import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
 import type { Briefing, BriefingItem, BriefingItemSection } from '@/lib/db/types';
 
@@ -143,7 +144,11 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
   const startTime = Date.now();
   const supabase = createServiceClient();
 
-  // Fetch all data sources in parallel
+  // Fetch all data sources in parallel — both OAuth integrations AND desktop observer
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+
   const [
     inboxItems,
     commitments,
@@ -151,6 +156,7 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     coldContacts,
     sentAwaitingReply,
     afterHoursEmails,
+    desktopObservations,
     userContext,
     profile,
   ] = await Promise.all([
@@ -160,6 +166,12 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     getColdContacts(supabase, userId),
     getSentAwaitingReply(userId),
     getAfterHoursEmails(userId),
+    // Desktop observer: fetch recent observations (last 24h, communication + important activity)
+    getDesktopObserverChunks(supabase, userId, {
+      after: yesterday.toISOString(),
+      minImportance: 'background',
+      limit: 30,
+    }).catch(() => []),
     getUserContext(supabase, userId),
     getProfile(supabase, userId),
   ]);
@@ -178,6 +190,10 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     ...sentAwaitingReply,
     // After-hours arrivals
     ...afterHoursEmails,
+    // Desktop observer data (WhatsApp, Messages, Slack desktop, etc.)
+    ...desktopObservations.map(chunk =>
+      mapDesktopObservationToCandidate(chunk, userContext.vipEmails)
+    ),
   ];
 
   // Prioritise within each section
@@ -222,6 +238,7 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     reasoning: item.reasoning,
     source_ref: item.source_ref as unknown as Record<string, unknown>,
     action_suggestion: item.action_suggestion,
+    sentiment: item.sentiment ?? null,
     urgency_score: item.urgency_score,
     importance_score: item.importance_score,
     risk_score: item.risk_score,
@@ -229,26 +246,6 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
   }));
 
   const savedItems = await insertBriefingItems(supabase, itemRecords);
-
-  // Deliver via Telegram if configured
-  if (profile?.telegram_chat_id) {
-    const telegramMessage = formatBriefingForTelegram({
-      id: briefing.id,
-      briefing_date: briefingDate,
-      items: allItems.map(item => ({
-        rank: item.rank,
-        title: item.title,
-        summary: item.summary,
-        reasoning: item.reasoning,
-        section: item.section,
-      })),
-    });
-
-    const sent = await sendTelegramMessage(profile.telegram_chat_id, telegramMessage);
-    if (sent) {
-      await updateBriefingDelivery(supabase, briefing.id, 'telegram');
-    }
-  }
 
   return {
     ...briefing,

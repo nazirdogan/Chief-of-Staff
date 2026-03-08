@@ -383,9 +383,13 @@ export default function BriefingPage() {
   );
   const urgentItemIds = new Set(urgentItems.map(i => i.id));
 
+  // Sentiment flags
+  const negativeItems = briefing.items.filter(i => i.sentiment === 'negative');
+
   // Build concise context line for greeting
   const contextParts: string[] = [];
   if (urgentItems.length > 0) contextParts.push(`${urgentItems.length} urgent`);
+  if (negativeItems.length > 0) contextParts.push(`${negativeItems.length} unhappy`);
   if (actionCount + vipCount > 0) contextParts.push(`${actionCount + vipCount} to reply`);
   if (awaitingCount > 0) contextParts.push(`${awaitingCount} awaiting reply`);
   if (scheduleCount > 0) contextParts.push(`${scheduleCount} meeting${scheduleCount > 1 ? 's' : ''}`);

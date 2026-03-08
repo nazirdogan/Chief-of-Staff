@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Briefing, BriefingItem, MeetingPrepData } from '../types';
+import type { Database, Briefing, BriefingItem, MeetingPrepData, MessageSentiment } from '../types';
 
 type Client = SupabaseClient<Database>;
 
@@ -71,6 +71,7 @@ export async function insertBriefingItems(
     reasoning: string;
     source_ref: Record<string, unknown>;
     action_suggestion?: string;
+    sentiment?: MessageSentiment | null;
     urgency_score?: number;
     importance_score?: number;
     risk_score?: number;

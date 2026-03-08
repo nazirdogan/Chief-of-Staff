@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, InboxItem, IntegrationProvider } from '../types';
+import type { Database, InboxItem, IntegrationProvider, MessageSentiment } from '../types';
 
 type Client = SupabaseClient<Database>;
 
@@ -63,6 +63,7 @@ export async function upsertInboxItem(
     ai_summary?: string;
     urgency_score?: number;
     needs_reply?: boolean;
+    sentiment?: MessageSentiment;
     received_at: string;
   }
 ): Promise<InboxItem> {

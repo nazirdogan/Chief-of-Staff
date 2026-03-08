@@ -18,6 +18,7 @@ import {
   Zap,
   Plus,
   Trash2,
+  BookOpen,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
@@ -33,6 +34,7 @@ const navItems = [
   { href: '/commitments', label: 'Commitments', icon: CheckCircle2 },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/people', label: 'People', icon: Users },
+  { href: '/reflections', label: 'Reflections', icon: BookOpen },
 ];
 
 /* Donna brand tokens */

@@ -1,10 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_MODELS } from '@/lib/ai/models';
 import { buildSafeAIContext } from '@/lib/ai/safety/sanitise';
-import type { InboxItem, Commitment, Contact, BriefingItemType, BriefingItemSection, SourceRef } from '@/lib/db/types';
+import type { InboxItem, Commitment, Contact, BriefingItemType, BriefingItemSection, SourceRef, MessageSentiment } from '@/lib/db/types';
 import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
 import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
 import type { ParsedOutlookMessage } from '@/lib/integrations/outlook';
+import type { ContextChunk } from '@/lib/context/types';
 
 const anthropic = new Anthropic();
 
@@ -23,6 +24,7 @@ export interface BriefingItemCandidate {
   action_suggestion?: string;
   from_email?: string;
   raw_urgency?: number;
+  sentiment?: MessageSentiment | null;
 }
 
 export interface RankedBriefingItem extends BriefingItemCandidate {
@@ -60,6 +62,10 @@ function scoreUrgency(item: BriefingItemCandidate): number {
   if (item.section === 'action_required') {
     score = Math.max(score, 7);
   }
+
+  // Negative or urgent sentiment boosts urgency
+  if (item.sentiment === 'urgent') score += 2;
+  if (item.sentiment === 'negative') score += 1;
 
   return Math.min(10, Math.max(1, score));
 }
@@ -101,6 +107,10 @@ function scoreRisk(item: BriefingItemCandidate): number {
   if (item.section === 'awaiting_reply') {
     score += 3;
   }
+
+  // Negative sentiment = risk of relationship damage
+  if (item.sentiment === 'negative') score += 2;
+  if (item.sentiment === 'urgent') score += 1;
 
   return Math.min(10, Math.max(1, score));
 }
@@ -169,6 +179,7 @@ async function generateReasoning(
     urgency: item.urgency_score,
     importance: item.importance_score,
     risk: item.risk_score,
+    sentiment: item.sentiment ?? 'neutral',
     is_vip: item.from_email ? ctx.vipEmails.includes(item.from_email) : false,
   }));
 
@@ -268,6 +279,7 @@ export function mapInboxItemToCandidate(
     action_suggestion: item.needs_reply ? 'Reply needed' : undefined,
     from_email: item.from_email,
     raw_urgency: item.urgency_score ?? undefined,
+    sentiment: item.sentiment,
   };
 }
 
@@ -396,5 +408,54 @@ export function mapAfterHoursToCandidate(
     action_suggestion: 'Review',
     from_email: message.from,
     raw_urgency: 5,
+  };
+}
+
+/**
+ * Map a desktop observer context chunk (WhatsApp, Messages, Slack desktop, etc.)
+ * to a briefing candidate. Communication activity goes to priority_inbox;
+ * high-importance observations go to action_required.
+ */
+export function mapDesktopObservationToCandidate(
+  chunk: ContextChunk,
+  vipEmails: string[] = []
+): BriefingItemCandidate {
+  const sourceRef = chunk.source_ref as Record<string, unknown>;
+  const app = (sourceRef.app as string) ?? 'Desktop';
+  const activityType = (sourceRef.activity_type as string) ?? 'unknown';
+  const capturedAt = (sourceRef.captured_at as string) ?? chunk.occurred_at;
+
+  // Determine if any people in this chunk are VIPs
+  const hasVip = chunk.people.some((p) => vipEmails.includes(p));
+
+  // Section assignment based on importance and VIP status
+  let section: BriefingItemSection = 'priority_inbox';
+  if (hasVip) {
+    section = 'vip_inbox';
+  } else if (chunk.importance === 'critical' || chunk.importance === 'important') {
+    section = 'action_required';
+  }
+
+  // Determine item type based on activity
+  const itemType: BriefingItemType = activityType === 'communicating' ? 'email' : 'email';
+
+  // Build a descriptive title
+  const title = chunk.title ?? `${app} activity`;
+
+  return {
+    item_type: itemType,
+    section,
+    title,
+    summary: chunk.content_summary,
+    source_ref: {
+      provider: 'desktop_observer',
+      message_id: chunk.source_id,
+      excerpt: chunk.content_summary,
+      sent_at: capturedAt,
+      from_name: app,
+    },
+    action_suggestion: activityType === 'communicating' ? 'Review and respond' : 'Review',
+    raw_urgency: chunk.importance === 'critical' ? 9 : chunk.importance === 'important' ? 7 : 5,
+    sentiment: chunk.sentiment as MessageSentiment | null,
   };
 }

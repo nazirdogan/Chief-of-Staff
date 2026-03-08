@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Check } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Check, AlertTriangle, Flame } from 'lucide-react';
 import type { BriefingItem as BriefingItemType } from '@/lib/db/types';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 
@@ -90,11 +90,15 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
   const summaryIsError = isErrorSummary(item.summary);
 
   const priorityStyle =
-    item.rank <= 2
+    item.sentiment === 'negative'
       ? { borderLeft: `2px solid ${c.critical}`, background: hovered ? c.criticalBg : c.surface }
-      : item.rank <= 5
-        ? { borderLeft: `2px solid ${c.high}`, background: hovered ? c.highBg : c.surface }
-        : { borderLeft: '2px solid transparent', background: hovered ? c.dawnSubtle : c.surface };
+      : item.sentiment === 'urgent'
+        ? { borderLeft: `2px solid #F4C896`, background: hovered ? 'rgba(244,200,150,0.06)' : c.surface }
+        : item.rank <= 2
+          ? { borderLeft: `2px solid ${c.critical}`, background: hovered ? c.criticalBg : c.surface }
+          : item.rank <= 5
+            ? { borderLeft: `2px solid ${c.high}`, background: hovered ? c.highBg : c.surface }
+            : { borderLeft: '2px solid transparent', background: hovered ? c.dawnSubtle : c.surface };
 
   return (
     <div
@@ -129,18 +133,46 @@ export function BriefingItem({ item, onFeedback, onCitationClick }: BriefingItem
             {decodeEntities(item.title)}
           </h3>
         </div>
-        {item.action_suggestion && (
-          <span
-            className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium"
-            style={{
-              background: c.dawnSubtle,
-              color: c.dawn,
-              border: `1px solid rgba(232,132,92,0.25)`,
-            }}
-          >
-            {decodeEntities(item.action_suggestion ?? '')}
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-1.5">
+          {item.sentiment === 'negative' && (
+            <span
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.04em]"
+              style={{
+                background: c.criticalBg,
+                color: c.critical,
+                border: `1px solid ${c.criticalBorder}`,
+              }}
+            >
+              <AlertTriangle size={10} />
+              Unhappy
+            </span>
+          )}
+          {item.sentiment === 'urgent' && (
+            <span
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.04em]"
+              style={{
+                background: 'rgba(244,200,150,0.1)',
+                color: '#F4C896',
+                border: '1px solid rgba(244,200,150,0.2)',
+              }}
+            >
+              <Flame size={10} />
+              Urgent
+            </span>
+          )}
+          {item.action_suggestion && (
+            <span
+              className="rounded-md px-2.5 py-1 text-[11px] font-medium"
+              style={{
+                background: c.dawnSubtle,
+                color: c.dawn,
+                border: `1px solid rgba(232,132,92,0.25)`,
+              }}
+            >
+              {decodeEntities(item.action_suggestion ?? '')}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Summary */}
