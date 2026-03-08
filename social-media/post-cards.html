@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>donna — Social Post Cards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --midnight: #1B1F3A;
+      --dawn:     #E8845C;
+      --dusk:     #4E7DAA;
+      --paper:    #FBF7F4;
+      --sage:     #52B788;
+      --gold:     #F4C896;
+      --deep:     #0E1225;
+      --charcoal: #2D3154;
+      --mist:     #9BAFC4;
+      --stone:    #F0EDE9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      font-family: 'Inter', sans-serif;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: rgba(232,132,92,.5);
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    /* ═══════════════════════════════════════
+       CARD 1: LAUNCH ANNOUNCEMENT
+    ═══════════════════════════════════════ */
+    .card-launch {
+      width: 1080px;
+      height: 1080px;
+      background: var(--midnight);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+    }
+    .card-launch::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(232,132,92,.06) 0%, transparent 70%);
+    }
+    .card-launch::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--dawn) 30%, var(--dawn) 70%, transparent);
+      opacity: .6;
+    }
+    .launch-mark {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 48px;
+    }
+    .launch-tagline {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--mist);
+      letter-spacing: .04em;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 52px;
+    }
+    .launch-headline {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 18px;
+      font-weight: 300;
+      color: rgba(155,175,196,.5);
+      text-align: center;
+      letter-spacing: .04em;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 12px;
+    }
+    .launch-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--dawn);
+      letter-spacing: .15em;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ═══════════════════════════════════════
+       CARD 2: MORNING BRIEFING MOCKUP
+    ═══════════════════════════════════════ */
+    .card-briefing {
+      width: 1080px;
+      height: 1080px;
+      background: var(--deep);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 64px;
+    }
+    .card-briefing::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse 80% 50% at 20% 80%, rgba(78,125,170,.04) 0%, transparent 60%);
+    }
+    .briefing-phone-wrap {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 64px;
+      align-items: center;
+    }
+    .briefing-left {
+      flex: 1;
+      max-width: 380px;
+    }
+    .briefing-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 20px;
+    }
+    .briefing-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 52px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    .briefing-body {
+      font-size: 15px;
+      color: var(--mist);
+      line-height: 1.8;
+    }
+    .briefing-phone {
+      width: 300px;
+      flex-shrink: 0;
+    }
+    .phone-frame {
+      background: var(--midnight);
+      border-radius: 36px;
+      padding: 24px 20px;
+      box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(155,175,196,.08);
+    }
+    .phone-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(155,175,196,.08);
+    }
+    .phone-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--dawn);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      font-style: italic;
+    }
+    .phone-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--paper);
+    }
+    .phone-status {
+      font-size: 11px;
+      color: var(--sage);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .msg-bubble {
+      background: var(--charcoal);
+      border-radius: 16px 16px 16px 4px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+    }
+    .msg-timestamp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--dawn);
+      margin-bottom: 8px;
+      letter-spacing: .05em;
+    }
+    .msg-greeting {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--paper);
+      margin-bottom: 10px;
+    }
+    .msg-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--mist);
+      line-height: 1.4;
+    }
+    .msg-arrow { color: var(--dawn); flex-shrink: 0; }
+    .msg-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .msg-btn-p {
+      flex: 1;
+      padding: 8px;
+      background: var(--dawn);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      text-align: center;
+    }
+    .msg-btn-s {
+      flex: 1;
+      padding: 8px;
+      background: rgba(155,175,196,.1);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--mist);
+      text-align: center;
+    }
+
+    /* ═══════════════════════════════════════
+       CARD 3: THE DISTINCTION (NOT A CHATBOT)
+    ═══════════════════════════════════════ */
+    .card-distinction {
+      width: 1080px;
+      height: 1080px;
+      background: var(--paper);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 80px;
+    }
+    .distinction-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-bottom: 32px;
+    }
+    .distinction-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 64px;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--midnight);
+      margin-bottom: 16px;
+    }
+    .distinction-heading em { font-style: italic; color: var(--dawn); }
+    .distinction-rule {
+      height: 1px;
+      background: linear-gradient(90deg, var(--dawn), transparent);
+      opacity: .3;
+      margin: 32px 0;
+    }
+    .distinction-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      flex: 1;
+    }
+    .dist-col {
+      padding: 36px 32px;
+    }
+    .dist-col-bad { background: rgba(27,31,58,.05); }
+    .dist-col-good { background: var(--midnight); }
+    .dist-col-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .label-bad { color: rgba(155,175,196,.6); }
+    .label-good { color: var(--dawn); }
+    .dist-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .dist-item-bad { color: rgba(27,31,58,.5); }
+    .dist-item-good { color: var(--mist); }
+    .dist-icon-bad { color: rgba(27,31,58,.3); flex-shrink: 0; margin-top: 2px; }
+    .dist-icon-good { color: var(--sage); flex-shrink: 0; margin-top: 2px; }
+
+    /* ═══════════════════════════════════════
+       CARD 4: COMMITMENT TRACKING
+    ═══════════════════════════════════════ */
+    .card-commit {
+      width: 1080px;
+      height: 1080px;
+      background: var(--midnight);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 72px;
+    }
+    .commit-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 20px;
+    }
+    .commit-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 54px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+      margin-bottom: 12px;
+      line-height: 1.05;
+    }
+    .commit-sub {
+      font-size: 16px;
+      color: var(--mist);
+      margin-bottom: 40px;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+    .commit-item {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(155,175,196,.08);
+      border-left: 3px solid var(--dawn);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .commit-item:nth-child(2) { border-left-color: var(--gold); }
+    .commit-item:nth-child(3) { border-left-color: #D64B2A; }
+    .commit-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+    .dot-ok { background: var(--dawn); }
+    .dot-warn { background: var(--gold); }
+    .dot-alert { background: #D64B2A; }
+    .commit-text { flex: 1; }
+    .commit-action {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--paper);
+      margin-bottom: 4px;
+    }
+    .commit-source {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.5);
+      letter-spacing: .05em;
+    }
+    .commit-age {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .commit-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .commit-donna {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+    }
+    .commit-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--dawn);
+      letter-spacing: .12em;
+    }
+
+    /* ═══════════════════════════════════════
+       CARD 5: QUOTE CARD
+    ═══════════════════════════════════════ */
+    .card-quote {
+      width: 1080px;
+      height: 1080px;
+      background: var(--deep);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 96px;
+      text-align: center;
+    }
+    .card-quote::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(232,132,92,.04) 0%, transparent 70%);
+    }
+    .quote-ornament {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 120px;
+      font-weight: 300;
+      color: rgba(232,132,92,.12);
+      line-height: 1;
+      position: relative;
+      z-index: 2;
+      margin-bottom: -20px;
+    }
+    .quote-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 44px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+      line-height: 1.25;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 2;
+      max-width: 780px;
+    }
+    .quote-text em { color: var(--dawn); font-style: normal; }
+    .quote-rule {
+      width: 80px;
+      height: 1px;
+      background: var(--dawn);
+      opacity: .4;
+      margin: 0 auto 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .quote-attrib {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--mist);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+      margin-bottom: 48px;
+    }
+    .quote-logo-area {
+      position: relative;
+      z-index: 2;
+    }
+    .quote-logo-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+      font-style: italic;
+      color: rgba(251,247,244,.3);
+    }
+
+    /* ═══════════════════════════════════════
+       CARD 6: LAUNCH DAY
+    ═══════════════════════════════════════ */
+    .card-live {
+      width: 1080px;
+      height: 1080px;
+      background: var(--midnight);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+      text-align: center;
+    }
+    .card-live::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(232,132,92,.08) 0%, transparent 60%);
+    }
+    .card-live::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--dawn) 20%, var(--dawn) 80%, transparent);
+    }
+    .live-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 56px;
+      position: relative;
+      z-index: 2;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--sage);
+      border-radius: 50%;
+    }
+    .live-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--sage);
+    }
+    .live-mark {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 40px;
+    }
+    .live-headline {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 52px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--dawn);
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .live-sub {
+      font-size: 16px;
+      color: var(--mist);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 52px;
+      position: relative;
+      z-index: 2;
+    }
+    .live-cta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      color: var(--dawn);
+      letter-spacing: .2em;
+      position: relative;
+      z-index: 2;
+      border: 1px solid rgba(232,132,92,.3);
+      padding: 14px 32px;
+      border-radius: 4px;
+    }
+
+    /* ═══════════════════════════════════════
+       CARD 7: HEARTBEAT MONITOR
+    ═══════════════════════════════════════ */
+    .card-hb {
+      width: 1080px;
+      height: 1080px;
+      background: var(--charcoal);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 72px;
+    }
+    .hb-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dusk);
+      margin-bottom: 20px;
+    }
+    .hb-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 54px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+      margin-bottom: 12px;
+      line-height: 1.05;
+    }
+    .hb-sub {
+      font-size: 15px;
+      color: var(--mist);
+      margin-bottom: 40px;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+    .hb-row {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(155,175,196,.06);
+      border-radius: 10px;
+      padding: 22px 28px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .hb-pulse {
+      width: 48px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .hb-bar {
+      width: 3px;
+      border-radius: 2px;
+    }
+    .pulse-green .hb-bar { background: var(--sage); }
+    .pulse-amber .hb-bar { background: var(--gold); }
+    .pulse-red .hb-bar { background: #D64B2A; }
+    .hb-info { flex: 1; }
+    .hb-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--paper);
+      margin-bottom: 3px;
+    }
+    .hb-context {
+      font-size: 12px;
+      color: rgba(155,175,196,.65);
+      line-height: 1.4;
+    }
+    .hb-status {
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .hb-last {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .05em;
+      margin-bottom: 4px;
+    }
+    .hb-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+    .badge-ok { background: rgba(82,183,136,.15); color: var(--sage); }
+    .badge-warn { background: rgba(244,200,150,.15); color: var(--gold); }
+    .badge-alert { background: rgba(214,75,42,.15); color: #D64B2A; }
+    .hb-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Page label */
+    .page-break {
+      border: none;
+      border-top: 1px solid rgba(232,132,92,.15);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LABEL -->
+  <div class="section-label">donna — Static Social Post Cards · All 1080×1080px</div>
+
+  <!-- ══ CARD 1: LAUNCH ANNOUNCEMENT ══ -->
+  <div class="section-label">Day 01 · Launch Announcement (LinkedIn / Instagram)</div>
+  <div class="card-launch">
+    <!-- Donna Meridian mark -->
+    <div class="launch-mark">
+      <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="18" fill="rgba(255,255,255,.04)" stroke="rgba(251,247,244,.08)" stroke-width="1"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+              fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+    </div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:96px;font-weight:300;font-style:italic;color:#FBF7F4;line-height:1;position:relative;z-index:2;margin-bottom:24px;letter-spacing:-.02em;">donna</div>
+    <div class="launch-tagline">See everything. Miss nothing.</div>
+    <div class="launch-headline">Your morning intelligence briefing.</div>
+    <div class="launch-url">DONNA.APP — EARLY ACCESS COMING</div>
+  </div>
+
+  <hr class="page-break">
+
+  <!-- ══ CARD 2: MORNING BRIEFING ══ -->
+  <div class="section-label">Day 08 · Morning Briefing Reveal (LinkedIn / Instagram)</div>
+  <div class="card-briefing">
+    <div class="briefing-phone-wrap">
+      <div class="briefing-left">
+        <div class="briefing-eyebrow">Daily Briefing · 07:30</div>
+        <div class="briefing-heading">One message.<br>Everything<br>that matters.</div>
+        <div class="briefing-body">donna reads your email, calendar, Slack, and documents overnight — and arrives every morning with a ranked briefing. No prompting required. No inbox to process.</div>
+      </div>
+      <div class="briefing-phone">
+        <div class="phone-frame">
+          <div class="phone-header">
+            <div class="phone-avatar">D</div>
+            <div>
+              <div class="phone-name">donna</div>
+              <div class="phone-status">● active</div>
+            </div>
+          </div>
+          <div class="msg-bubble">
+            <div class="msg-timestamp">07:30 · TUESDAY</div>
+            <div class="msg-greeting">Good morning. Here's what matters.</div>
+            <div class="msg-item"><span class="msg-arrow">→</span> Reply to Marcus re: Series A deck by today</div>
+            <div class="msg-item"><span class="msg-arrow">→</span> Board meeting at 11am — prep brief ready</div>
+            <div class="msg-item"><span class="msg-arrow">→</span> Sarah hasn't heard back in 8 days</div>
+            <div class="msg-item" style="color:rgba(214,75,42,.8)"><span style="color:#D64B2A">!</span> &nbsp;Overdue: intro to James (promised Tue)</div>
+            <div class="msg-actions">
+              <div class="msg-btn-p">View all</div>
+              <div class="msg-btn-s">Meeting prep</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="page-break">
+
+  <!-- ══ CARD 3: COMMITMENT TRACKING ══ -->
+  <div class="section-label">Day 05 · Commitment Tracking (LinkedIn)</div>
+  <div class="card-commit">
+    <div class="commit-eyebrow">Feature — Commitment Extraction</div>
+    <div class="commit-heading">You said it.<br>She remembered.</div>
+    <div class="commit-sub">Every promise, deadline, and action item detected across your communications — automatically surfaced with a link back to the original message.</div>
+
+    <div class="commit-item">
+      <div class="commit-dot dot-ok"></div>
+      <div class="commit-text">
+        <div class="commit-action">Send the Series A deck to Marcus</div>
+        <div class="commit-source">FROM: EMAIL · "Let's connect on the raise" · Mon 9:14am</div>
+      </div>
+      <div class="commit-age">2 days ago</div>
+    </div>
+    <div class="commit-item">
+      <div class="commit-dot dot-warn"></div>
+      <div class="commit-text">
+        <div class="commit-action">Introduce Sarah to the product team</div>
+        <div class="commit-source">FROM: SLACK · #partnerships · last Wednesday</div>
+      </div>
+      <div class="commit-age">6 days ago</div>
+    </div>
+    <div class="commit-item">
+      <div class="commit-dot dot-alert"></div>
+      <div class="commit-text">
+        <div class="commit-action">Follow up on the contract review with legal</div>
+        <div class="commit-source">FROM: EMAIL · "Re: MSA terms" · 3 weeks ago</div>
+      </div>
+      <div class="commit-age" style="color:#D64B2A;">overdue</div>
+    </div>
+
+    <div style="height:24px;"></div>
+
+    <div class="commit-footer">
+      <div class="commit-donna">donna</div>
+      <div class="commit-url">DONNA.APP</div>
+    </div>
+  </div>
+
+  <hr class="page-break">
+
+  <!-- ══ CARD 4: QUOTE CARD ══ -->
+  <div class="section-label">Day 19 · Aspirational Quote Card (Instagram)</div>
+  <div class="card-quote">
+    <div class="quote-ornament">"</div>
+    <div class="quote-text">She reads everything<br>you don't have time to.<br>Delivers everything<br>you <em>need</em> to know.<br>Acts only when you say so.</div>
+    <div class="quote-rule"></div>
+    <div class="quote-attrib">donna · your morning intelligence layer</div>
+    <div class="quote-logo-area">
+      <svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+              fill="none" stroke="rgba(251,247,244,.25)" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="rgba(232,132,92,.4)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="rgba(232,132,92,.4)"/>
+      </svg>
+    </div>
+  </div>
+
+  <hr class="page-break">
+
+  <!-- ══ CARD 5: LAUNCH DAY ══ -->
+  <div class="section-label">Day 24 · Launch Day — All Platforms</div>
+  <div class="card-live">
+    <div class="live-status">
+      <div class="live-dot"></div>
+      <div class="live-label">Early access is live</div>
+    </div>
+    <div class="live-mark">
+      <svg width="88" height="88" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+              fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+    </div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;font-style:italic;color:#FBF7F4;line-height:1;position:relative;z-index:2;margin-bottom:20px;">donna</div>
+    <div class="live-headline">She's here.</div>
+    <div class="live-sub">One morning briefing. What matters, what you promised, who's gone cold, what to do first. Every day. Before you ask.</div>
+    <div class="live-cta">DONNA.APP</div>
+  </div>
+
+  <hr class="page-break">
+
+  <!-- ══ CARD 6: HEARTBEAT MONITOR ══ -->
+  <div class="section-label">Day 10 · Heartbeat Monitor (LinkedIn)</div>
+  <div class="card-hb">
+    <div class="hb-eyebrow">Feature — Heartbeat Monitor</div>
+    <div class="hb-heading">The relationship that<br>goes cold announces<br>nothing.</div>
+    <div class="hb-sub">donna tracks communication frequency with everyone in your network. She doesn't wait for silence — she notices when the rhythm changes.</div>
+
+    <div class="hb-row">
+      <div class="hb-pulse pulse-green">
+        <div class="hb-bar" style="height:18px;"></div>
+        <div class="hb-bar" style="height:32px;"></div>
+        <div class="hb-bar" style="height:22px;"></div>
+        <div class="hb-bar" style="height:36px;"></div>
+        <div class="hb-bar" style="height:16px;"></div>
+        <div class="hb-bar" style="height:28px;"></div>
+        <div class="hb-bar" style="height:20px;"></div>
+      </div>
+      <div class="hb-info">
+        <div class="hb-name">James Thornton</div>
+        <div class="hb-context">Weekly check-ins consistent · Last discussed Series B timing</div>
+      </div>
+      <div class="hb-status">
+        <div class="hb-last">2 days ago</div>
+        <div class="hb-badge badge-ok">Active</div>
+      </div>
+    </div>
+
+    <div class="hb-row">
+      <div class="hb-pulse pulse-amber">
+        <div class="hb-bar" style="height:28px;"></div>
+        <div class="hb-bar" style="height:16px;"></div>
+        <div class="hb-bar" style="height:10px;"></div>
+        <div class="hb-bar" style="height:8px;"></div>
+        <div class="hb-bar" style="height:6px;"></div>
+        <div class="hb-bar" style="height:5px;"></div>
+        <div class="hb-bar" style="height:4px;"></div>
+      </div>
+      <div class="hb-info">
+        <div class="hb-name">Priya Mehta</div>
+        <div class="hb-context">Frequency dropping · Was monthly, now 6 weeks since last exchange</div>
+      </div>
+      <div class="hb-status">
+        <div class="hb-last">6 weeks ago</div>
+        <div class="hb-badge badge-warn">Cooling</div>
+      </div>
+    </div>
+
+    <div class="hb-row">
+      <div class="hb-pulse pulse-red">
+        <div class="hb-bar" style="height:20px;"></div>
+        <div class="hb-bar" style="height:6px;"></div>
+        <div class="hb-bar" style="height:3px;"></div>
+        <div class="hb-bar" style="height:2px;"></div>
+        <div class="hb-bar" style="height:2px;"></div>
+        <div class="hb-bar" style="height:1px;"></div>
+        <div class="hb-bar" style="height:1px;"></div>
+      </div>
+      <div class="hb-info">
+        <div class="hb-name">David Okafor</div>
+        <div class="hb-context">No contact in 3 months · Had open intro pending from October</div>
+      </div>
+      <div class="hb-status">
+        <div class="hb-last">3 months ago</div>
+        <div class="hb-badge badge-alert">Gone cold</div>
+      </div>
+    </div>
+
+    <div style="height:24px;"></div>
+    <div class="hb-footer">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;font-style:italic;color:#FBF7F4;">donna</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dawn);letter-spacing:.12em;">DONNA.APP</div>
+    </div>
+  </div>
+
+  <hr class="page-break">
+
+  <!-- ══ CARD 7: NOT A CHATBOT ══ -->
+  <div class="section-label">Day 12 · The Distinction — Not a Chatbot (LinkedIn)</div>
+  <div class="card-distinction">
+    <div class="distinction-eyebrow">The difference that matters</div>
+    <div class="distinction-heading"><em>donna</em> is not<br>a chatbot.</div>
+    <div class="distinction-rule"></div>
+    <div class="distinction-grid">
+      <div class="dist-col dist-col-bad">
+        <div class="dist-col-label label-bad">CHATBOT</div>
+        <div class="dist-item dist-item-bad"><span class="dist-icon-bad">—</span>Waits to be asked</div>
+        <div class="dist-item dist-item-bad"><span class="dist-icon-bad">—</span>Forgets context between sessions</div>
+        <div class="dist-item dist-item-bad"><span class="dist-icon-bad">—</span>Only knows what you tell it</div>
+        <div class="dist-item dist-item-bad"><span class="dist-icon-bad">—</span>Reactive, on demand</div>
+        <div class="dist-item dist-item-bad"><span class="dist-icon-bad">—</span>You have to remember to use it</div>
+        <div class="dist-item dist-item-bad"><span class="dist-icon-bad">—</span>One task at a time</div>
+      </div>
+      <div class="dist-col dist-col-good">
+        <div class="dist-col-label label-good">donna</div>
+        <div class="dist-item dist-item-good"><span class="dist-icon-good">→</span>Delivers before you ask</div>
+        <div class="dist-item dist-item-good"><span class="dist-icon-good">→</span>Reads and remembers everything</div>
+        <div class="dist-item dist-item-good"><span class="dist-icon-good">→</span>Reads your email, calendar, Slack, docs</div>
+        <div class="dist-item dist-item-good"><span class="dist-icon-good">→</span>Proactive, overnight, every day</div>
+        <div class="dist-item dist-item-good"><span class="dist-icon-good">→</span>Arrives in your Telegram at 7:30am</div>
+        <div class="dist-item dist-item-good"><span class="dist-icon-good">→</span>Cross-channel synthesis, always</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

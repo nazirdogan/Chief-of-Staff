@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donna — Brand Identity System 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --midnight: #1B1F3A;
+      --dawn:     #E8845C;
+      --dusk:     #4E7DAA;
+      --paper:    #FBF7F4;
+      --sage:     #52B788;
+      --gold:     #F4C896;
+      --deep:     #0E1225;
+      --charcoal: #2D3154;
+      --mist:     #9BAFC4;
+      --stone:    #F0EDE9;
+      --alert:    #D64B2A;
+      --ink:      #1A1A2E;
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--midnight);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: var(--midnight);
+      padding: 96px 80px 72px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 40%;
+      background: radial-gradient(ellipse at 80% 50%, rgba(232,132,92,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--dawn) 25%, var(--dawn) 75%, transparent);
+    }
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 52px;
+    }
+    .hero-lockup {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 12px;
+    }
+    .hero-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 96px;
+      font-weight: 300;
+      letter-spacing: -.02em;
+      line-height: 1;
+      color: var(--paper);
+      font-style: italic;
+    }
+    .hero-tagline-display {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px;
+      font-weight: 300;
+      color: var(--mist);
+      margin-bottom: 52px;
+      letter-spacing: .02em;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 32px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.45);
+      letter-spacing: .1em;
+    }
+    .hero-meta-sep { color: rgba(232,132,92,.4); }
+
+    /* ─── LAYOUT ─── */
+    .section { padding: 80px; border-bottom: 1px solid rgba(27,31,58,.07); }
+    .section-alt { background: var(--stone); }
+    .section-dark { background: var(--midnight); }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 10px;
+    }
+    .eyebrow-light { color: rgba(232,132,92,.7); }
+    .section-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 54px;
+      font-weight: 300;
+      letter-spacing: -.02em;
+      color: var(--midnight);
+      margin-bottom: 52px;
+    }
+    .section-title-light { color: var(--paper); }
+    .section-title em { font-style: italic; color: var(--dawn); }
+
+    .dawn-rule {
+      height: 1px;
+      background: linear-gradient(90deg, var(--dawn), transparent);
+      margin: 52px 0;
+      opacity: .4;
+    }
+
+    /* ─── BRAND OVERVIEW ─── */
+    .overview-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-bottom: 2px;
+    }
+    .ov-card {
+      padding: 44px;
+      background: var(--charcoal);
+      color: var(--paper);
+    }
+    .ov-card:first-child { background: var(--midnight); }
+    .ov-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--dawn);
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    .ov-body { font-size: 15px; color: var(--mist); line-height: 1.8; }
+    .ov-pillars {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+    .ov-pillar {
+      padding: 32px 28px;
+      background: white;
+      border-bottom: 3px solid var(--dawn);
+    }
+    .ov-pillar:nth-child(2) { border-color: var(--dusk); }
+    .ov-pillar:nth-child(3) { border-color: var(--sage); }
+    .ov-pillar:nth-child(4) { border-color: var(--gold); }
+    .pillar-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      margin-bottom: 12px;
+      letter-spacing: .05em;
+    }
+    .pillar-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--midnight);
+      margin-bottom: 8px;
+    }
+    .pillar-desc { font-size: 13px; color: #777; line-height: 1.65; }
+
+    /* ─── LOGO SECTION ─── */
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .logo-cell {
+      padding: 52px 40px;
+      background: white;
+      text-align: center;
+    }
+    .logo-cell.mid { background: var(--stone); }
+    .logo-cell.dark { background: var(--midnight); }
+    .logo-cell-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 32px;
+    }
+    .rec-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      background: var(--dawn);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 2px;
+      margin-bottom: 28px;
+    }
+    .logo-cell-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--midnight);
+      margin-top: 28px;
+      margin-bottom: 7px;
+    }
+    .logo-cell.dark .logo-cell-title { color: var(--paper); }
+    .logo-cell-desc {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+    .logo-cell.dark .logo-cell-desc { color: var(--mist); }
+
+    .wordmark-below {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 30px;
+      font-weight: 300;
+      color: var(--midnight);
+      letter-spacing: .03em;
+      margin-top: 18px;
+    }
+    .wordmark-below-light {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 30px;
+      font-weight: 300;
+      color: var(--paper);
+      letter-spacing: .03em;
+      margin-top: 18px;
+    }
+    .wordmark-caps {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--midnight);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      margin-top: 18px;
+    }
+    .wordmark-caps-light {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--paper);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      margin-top: 18px;
+    }
+
+    /* size variants row */
+    .logo-sizes-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+    .size-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+      min-height: 110px;
+    }
+    .size-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 12px;
+      letter-spacing: .06em;
+    }
+
+    /* ─── COLOR PALETTE ─── */
+    .color-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; }
+    .color-swatch { aspect-ratio: 1; }
+    .color-meta {
+      padding: 18px 16px;
+      border: 1px solid rgba(0,0,0,.06);
+      margin-top: -1px;
+    }
+    .color-name { font-size: 13px; font-weight: 600; color: var(--midnight); margin-bottom: 4px; }
+    .color-hex { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #999; }
+    .color-use { font-size: 11px; color: #bbb; margin-top: 6px; line-height: 1.45; }
+
+    .extended-swatches {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .ext-swatch {
+      text-align: center;
+    }
+    .ext-swatch-block {
+      height: 44px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .ext-swatch-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #999;
+      line-height: 1.5;
+    }
+
+    /* ─── TYPOGRAPHY ─── */
+    .type-block {
+      margin-bottom: 56px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid rgba(0,0,0,.07);
+    }
+    .type-block:last-of-type { border: none; margin-bottom: 0; padding-bottom: 0; }
+    .type-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--dawn);
+      letter-spacing: .1em;
+      margin-bottom: 22px;
+    }
+    .type-sample-display {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 64px;
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      color: var(--midnight);
+    }
+    .type-sample-display em { font-style: italic; color: var(--dawn); }
+    .type-sample-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--midnight);
+      max-width: 560px;
+    }
+    .type-sample-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.75;
+    }
+    .type-use-row {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .type-use-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .06em;
+    }
+    .type-scale { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+    .type-scale-row { display: flex; align-items: baseline; gap: 24px; }
+    .scale-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      min-width: 108px;
+      letter-spacing: .06em;
+    }
+
+    /* ─── TAGLINES ─── */
+    .tagline-hero {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 80px;
+      font-weight: 300;
+      letter-spacing: -.03em;
+      line-height: 1.05;
+      color: var(--midnight);
+      margin-bottom: 18px;
+    }
+    .tagline-hero em { font-style: italic; color: var(--dawn); }
+    .tagline-note { font-size: 14px; color: #999; font-style: italic; margin-bottom: 52px; }
+
+    .tagline-alts { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .tagline-alt {
+      padding: 32px 36px;
+      background: white;
+      border-left: 3px solid var(--dawn);
+    }
+    .tagline-alt:nth-child(2) { border-color: var(--dusk); }
+    .tagline-alt:nth-child(3) { border-color: var(--sage); }
+    .tagline-alt:nth-child(4) { border-color: var(--charcoal); }
+    .alt-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--midnight);
+      margin-bottom: 8px;
+    }
+    .alt-note { font-size: 12px; color: #aaa; font-style: italic; }
+
+    /* ─── BRAND VOICE ─── */
+    .voice-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+    .voice-card { padding: 36px 32px; background: var(--midnight); }
+    .voice-adj {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 38px;
+      font-weight: 300;
+      color: var(--dawn);
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .voice-not {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.45);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .voice-not s { text-decoration: line-through; margin-right: 8px; }
+    .voice-body { font-size: 13px; color: var(--mist); line-height: 1.7; }
+    .voice-examples {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-top: 2px;
+    }
+    .voice-ex {
+      padding: 32px 36px;
+      background: white;
+    }
+    .voice-ex-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .12em;
+      margin-bottom: 16px;
+    }
+    .voice-ex-label.yes { color: var(--sage); }
+    .voice-ex-label.no  { color: var(--alert); }
+    .voice-ex-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.7;
+      font-style: italic;
+    }
+    .voice-ex-text.yes { color: var(--midnight); }
+    .voice-ex-text.no  { color: #ccc; }
+
+    /* ─── MOCKUPS ─── */
+    .mockup-row {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+    .mockup-heading {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 20px;
+    }
+
+    /* App icon grid */
+    .app-icon-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .icon-size-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* Telegram card */
+    .tg-card {
+      background: var(--midnight);
+      border-radius: 22px;
+      padding: 28px 24px;
+      box-shadow: 0 20px 60px rgba(27,31,58,.28);
+    }
+    .tg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .tg-name-wrap { }
+    .tg-bot-name { font-size: 15px; font-weight: 600; color: var(--paper); }
+    .tg-status { font-size: 11px; color: var(--sage); margin-top: 1px; }
+    .tg-bubble {
+      background: var(--charcoal);
+      border-radius: 16px 16px 16px 4px;
+      padding: 18px 20px;
+    }
+    .tg-timestamp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--dawn);
+      margin-bottom: 10px;
+      letter-spacing: .05em;
+    }
+    .tg-greeting {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--paper);
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+    .tg-intro { font-size: 13px; color: var(--mist); margin-bottom: 12px; }
+    .tg-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--mist);
+      line-height: 1.5;
+    }
+    .tg-arrow { color: var(--dawn); flex-shrink: 0; margin-top: 1px; }
+    .tg-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .tg-btn-primary {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--dawn);
+      color: white;
+    }
+    .tg-btn-sec {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(155,175,196,.12);
+      color: var(--mist);
+    }
+
+    /* Business card */
+    .biz-card {
+      background: var(--midnight);
+      border-radius: 14px;
+      padding: 36px 36px;
+      box-shadow: 0 20px 60px rgba(27,31,58,.3);
+      aspect-ratio: 1.75;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .biz-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 44px;
+      font-weight: 300;
+      color: var(--paper);
+      font-style: italic;
+    }
+    .biz-tag {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 14px;
+      color: var(--mist);
+      font-style: italic;
+      margin-top: 4px;
+    }
+    .biz-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .biz-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--dawn);
+      letter-spacing: .06em;
+    }
+    .biz-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.45);
+      text-align: right;
+      line-height: 1.7;
+    }
+
+    /* ─── RATIONALE ─── */
+    .rationale-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .rationale-card {
+      padding: 36px 32px;
+      background: white;
+      border-top: 2px solid var(--dawn);
+    }
+    .rationale-card:nth-child(2) { border-color: var(--dusk); }
+    .rationale-card:nth-child(3) { border-color: var(--sage); }
+    .rationale-card-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--midnight);
+      margin-bottom: 12px;
+    }
+    .rationale-card-body { font-size: 13px; color: #666; line-height: 1.7; }
+
+    /* ─── FOOTER ─── */
+    .brand-footer {
+      background: var(--deep);
+      padding: 48px 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 30px;
+      color: var(--paper);
+      font-style: italic;
+    }
+    .footer-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.38);
+      letter-spacing: .08em;
+      margin-top: 6px;
+    }
+    .footer-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.38);
+      letter-spacing: .1em;
+      text-align: right;
+      line-height: 1.9;
+    }
+  /* ─── INSPIRATION SECTION ─── */
+  .insp-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.7fr;
+    gap: 64px;
+    margin-bottom: 52px;
+    align-items: start;
+  }
+  .pull-quote {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 88px;
+    font-weight: 300;
+    color: var(--paper);
+    font-style: italic;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .pull-quote-attrib {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(155,175,196,.45);
+    letter-spacing: .12em;
+    line-height: 1.8;
+  }
+  .insp-body { font-size: 16px; color: var(--mist); line-height: 1.9; }
+  .insp-body p { margin-bottom: 20px; }
+  .insp-body p:last-child { margin-bottom: 0; }
+  .insp-body strong { color: var(--paper); font-weight: 500; }
+  .insp-body em { color: var(--dawn); font-style: italic; }
+  .trait-map { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .trait-card {
+    padding: 32px 36px;
+    background: rgba(255,255,255,.035);
+    border-left: 2px solid rgba(232,132,92,.3);
+  }
+  .trait-card:nth-child(2) { border-color: rgba(78,125,170,.4); }
+  .trait-card:nth-child(3) { border-color: rgba(82,183,136,.4); }
+  .trait-card:nth-child(4) { border-color: rgba(244,200,150,.4); }
+  .trait-donna {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 15px;
+    color: var(--mist);
+    font-style: italic;
+    margin-bottom: 12px;
+    line-height: 1.65;
+  }
+  .trait-donna span { color: var(--paper); font-style: normal; }
+  .trait-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--dawn);
+    letter-spacing: .12em;
+    margin-bottom: 10px;
+  }
+  .trait-product { font-size: 13px; color: rgba(155,175,196,.7); line-height: 1.65; }
+
+  /* ─── TAGLINE DUAL ─── */
+  .tagline-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-bottom: 52px;
+  }
+  .tagline-primary-card {
+    padding: 48px 44px;
+    background: var(--midnight);
+  }
+  .tagline-primary-card.secondary-primary { background: var(--charcoal); }
+  .tpc-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--dawn);
+    margin-bottom: 24px;
+  }
+  .tpc-text {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 52px;
+    font-weight: 300;
+    letter-spacing: -.02em;
+    line-height: 1.05;
+    color: var(--paper);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .tpc-note { font-size: 13px; color: var(--mist); line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-eyebrow">Brand Identity System &nbsp;·&nbsp; v1.0 &nbsp;·&nbsp; March 2026</div>
+  <div class="hero-lockup">
+    <!-- Hero mark -->
+    <svg width="88" height="88" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+            fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+      <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+    </svg>
+  </div>
+  <div class="hero-name">donna</div>
+  <div class="hero-tagline-display">See everything. Miss nothing.</div>
+  <div class="hero-meta">
+    <span>Primary Brand Identity</span>
+    <span class="hero-meta-sep">—</span>
+    <span>Confidential</span>
+    <span class="hero-meta-sep">—</span>
+    <span>Donna Intelligence Inc.</span>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 00 — THE INSPIRATION
+══════════════════════════════════════════════════════ -->
+<section class="section section-dark">
+  <div class="eyebrow eyebrow-light">00 — The Inspiration</div>
+  <div class="section-title section-title-light">Named after <em>the one person</em><br>Harvey Specter trusted completely.</div>
+
+  <div class="insp-layout">
+    <div>
+      <div class="pull-quote">"I'm Donna."</div>
+      <div class="pull-quote-attrib">— DONNA PAULSEN &nbsp;·&nbsp; SUITS<br>WHEN NO FURTHER EXPLANATION<br>WAS NEEDED</div>
+    </div>
+    <div class="insp-body">
+      <p>Donna Roberta Paulsen is Harvey Specter's executive assistant in <em>Suits</em> — and consistently the most formidable intelligence in the room. She reads the room before anyone has spoken. She knows what Harvey needs before he does. She remembers everything, misses nothing, and handles the things that matter so the people she works for never have to worry about them.</p>
+      <p>She is <strong>not reactive</strong>. She doesn't wait to be asked. She has the intercom always on, an iron memory, and an instinct for what's important that no one at the firm can match. When she became Chief Operating Officer, nobody was surprised. She'd been running the place for years.</p>
+      <p>The show put it best through her own words: <em>"It's what I do. I read, I analyze, I fix."</em> That is a precise description of this product. Not a chatbot. Not a to-do list. An intelligence layer that works while you sleep and arrives with exactly what you need.</p>
+      <p><strong>The name is a promise.</strong> If you know who Donna Paulsen is, you understand this product instantly. If you don't — you will.</p>
+    </div>
+  </div>
+
+  <div class="dawn-rule" style="opacity:.2"></div>
+  <div class="eyebrow eyebrow-light" style="margin-bottom:24px">Donna Paulsen → donna app</div>
+
+  <div class="trait-map">
+    <div class="trait-card">
+      <div class="trait-donna"><span>"I know everything."</span> Donna listens to every conversation through the always-on intercom. Nothing escapes her. She holds every secret at the firm.</div>
+      <div class="trait-arrow">→ &nbsp;DONNA APP</div>
+      <div class="trait-product">Reads your entire digital life overnight — email, calendar, Slack, documents — and surfaces only what matters. The heartbeat monitor never turns off.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-donna"><span>She anticipates Harvey's needs</span> before he voices them. She prepares what he requires before he knows he requires it.</div>
+      <div class="trait-arrow">→ &nbsp;DONNA APP</div>
+      <div class="trait-product">The morning briefing arrives unprompted at 7:30am. You never ask for it. It's already there, ranked, sourced, and ready for action.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-donna"><span>She tracks every commitment, promise, and relationship</span> at the firm — who owes whom what, who hasn't returned a call, what's been left dangerously unsaid.</div>
+      <div class="trait-arrow">→ &nbsp;DONNA APP</div>
+      <div class="trait-product">Commitments extraction, Heartbeat Monitor, and Relationship Intelligence are the product's three core pillars. Nothing falls through the cracks.</div>
+    </div>
+    <div class="trait-card">
+      <div class="trait-donna"><span>"I'm not like every other secretary."</span> She is discreet above all else — she holds Harvey's secrets, Mike's secret, the firm's secrets. Total trust. Zero leakage.</div>
+      <div class="trait-arrow">→ &nbsp;DONNA APP</div>
+      <div class="trait-product">All OAuth tokens vaulted via Nango. AES-256 encryption on sensitive fields. Row-level security on every table. No plaintext tokens. Ever.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 — BRAND FOUNDATION
+══════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="eyebrow">01 — Brand Foundation</div>
+  <div class="section-title">What <em>donna</em> is.</div>
+
+  <div class="overview-cols">
+    <div class="ov-card">
+      <div class="ov-title">The core idea</div>
+      <div class="ov-body">Donna is your personal intelligence layer — a brilliantly discreet chief of staff who reads everything so you don't have to. Every morning, one focused briefing: what matters, what you promised, who's gone quiet, and what to do first. She acts only when you say so. She watches always.</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-title">What she is not</div>
+      <div class="ov-body">Donna is not a chatbot. She's not a to-do app. She doesn't wait to be asked. She is a proactive background intelligence system that surfaces signal from noise — automatically, every single morning, delivered to you before you've had your coffee. The distinction is everything.</div>
+    </div>
+  </div>
+
+  <div class="ov-pillars">
+    <div class="ov-pillar">
+      <div class="pillar-num">01</div>
+      <div class="pillar-title">Proactive</div>
+      <div class="pillar-desc">The briefing arrives without being asked. Donna delivers to you — not the other way around.</div>
+    </div>
+    <div class="ov-pillar">
+      <div class="pillar-num">02</div>
+      <div class="pillar-title">Discreet</div>
+      <div class="pillar-desc">She handles your most sensitive data with absolute care. No noise. No unnecessary pings. One briefing.</div>
+    </div>
+    <div class="ov-pillar">
+      <div class="pillar-num">03</div>
+      <div class="pillar-title">Precise</div>
+      <div class="pillar-desc">No bloat. Every item in the briefing earned its place. Everything important. Nothing else.</div>
+    </div>
+    <div class="ov-pillar">
+      <div class="pillar-num">04</div>
+      <div class="pillar-title">Human</div>
+      <div class="pillar-desc">Donna understands your relationships, your promises, your patterns. She learns what matters to you.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 — LOGO SYSTEM
+══════════════════════════════════════════════════════ -->
+<section class="section section-alt">
+  <div class="eyebrow">02 — Logo System</div>
+  <div class="section-title">The mark.</div>
+
+  <!-- THREE CONCEPTS — LIGHT BACKGROUNDS -->
+  <div class="logo-grid" style="margin-bottom:2px">
+
+    <!-- CONCEPT A: THE MERIDIAN -->
+    <div class="logo-cell">
+      <div class="logo-cell-eyebrow">Concept A</div>
+      <div class="rec-badge">★ Recommended</div>
+      <svg width="116" height="116" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+              fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+      <div class="wordmark-below">donna</div>
+      <div class="logo-cell-title">The Meridian</div>
+      <div class="logo-cell-desc">A D letterform split by a dawn horizon line — the precise moment the morning briefing arrives.</div>
+    </div>
+
+    <!-- CONCEPT B: THE ITALIC -->
+    <div class="logo-cell mid">
+      <div class="logo-cell-eyebrow">Concept B</div>
+      <div style="height:29px"></div><!-- align with rec badge space -->
+      <svg width="210" height="82" viewBox="0 0 240 82" xmlns="http://www.w3.org/2000/svg">
+        <text x="8" y="70"
+              font-family="'Cormorant Garamond', Georgia, serif"
+              font-size="72" font-weight="300"
+              fill="#1B1F3A" font-style="italic">donna</text>
+        <line x1="8" y1="78" x2="232" y2="78" stroke="#E8845C" stroke-width="1.5" opacity=".5"/>
+        <circle cx="37" cy="78" r="3.5" fill="#E8845C"/>
+      </svg>
+      <div style="height:18px"></div>
+      <div class="logo-cell-title">The Italic</div>
+      <div class="logo-cell-desc">Editorial italic wordmark — refined, literary, and immediately personal. No icon needed.</div>
+    </div>
+
+    <!-- CONCEPT C: THE SIGNAL -->
+    <div class="logo-cell">
+      <div class="logo-cell-eyebrow">Concept C</div>
+      <div style="height:29px"></div>
+      <svg width="116" height="116" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+        <!-- Left vertical bar -->
+        <line x1="26" y1="18" x2="26" y2="82" stroke="#FBF7F4" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Outer arc -->
+        <path d="M26 18 C62 18 80 32 80 50 C80 68 62 82 26 82"
+              fill="none" stroke="#FBF7F4" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Middle arc -->
+        <path d="M26 30 C52 30 65 39 65 50 C65 61 52 70 26 70"
+              fill="none" stroke="#FBF7F4" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+        <!-- Inner arc — dawn -->
+        <path d="M26 42 C38 42 52 46 52 50 C52 54 38 58 26 58"
+              fill="none" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="wordmark-caps">DONNA</div>
+      <div class="logo-cell-title">The Signal</div>
+      <div class="logo-cell-desc">Concentric arcs forming a D — intelligence radiating outward. The pulse of your digital life.</div>
+    </div>
+  </div>
+
+  <!-- THREE CONCEPTS — DARK BACKGROUNDS -->
+  <div class="logo-grid" style="margin-bottom:52px">
+    <div class="logo-cell dark">
+      <div class="logo-cell-eyebrow">A — Reversed</div>
+      <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="18" fill="#0E1225"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+              fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+      <div class="wordmark-below-light">donna</div>
+    </div>
+
+    <div class="logo-cell dark">
+      <div class="logo-cell-eyebrow">B — Reversed</div>
+      <svg width="210" height="82" viewBox="0 0 240 82" xmlns="http://www.w3.org/2000/svg">
+        <text x="8" y="70"
+              font-family="'Cormorant Garamond', Georgia, serif"
+              font-size="72" font-weight="300"
+              fill="#FBF7F4" font-style="italic">donna</text>
+        <line x1="8" y1="78" x2="232" y2="78" stroke="#E8845C" stroke-width="1.5" opacity=".5"/>
+        <circle cx="37" cy="78" r="3.5" fill="#E8845C"/>
+      </svg>
+    </div>
+
+    <div class="logo-cell dark">
+      <div class="logo-cell-eyebrow">C — Reversed</div>
+      <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="18" fill="#0E1225"/>
+        <line x1="26" y1="18" x2="26" y2="82" stroke="#FBF7F4" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M26 18 C62 18 80 32 80 50 C80 68 62 82 26 82"
+              fill="none" stroke="#FBF7F4" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M26 30 C52 30 65 39 65 50 C65 61 52 70 26 70"
+              fill="none" stroke="#FBF7F4" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+        <path d="M26 42 C38 42 52 46 52 50 C52 54 38 58 26 58"
+              fill="none" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="wordmark-caps-light">DONNA</div>
+    </div>
+  </div>
+
+  <!-- SIZE VARIANTS — Recommended Mark A -->
+  <div class="eyebrow" style="margin-bottom:20px">Recommended Mark (A) — Icon at scale</div>
+  <div class="logo-sizes-row">
+    <div class="size-cell" style="background:white">
+      <svg width="80" height="80" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+      <div class="size-label">80px — Standard</div>
+    </div>
+    <div class="size-cell" style="background:var(--stone)">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="20" fill="#1B1F3A"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+      <div class="size-label">56px — Compact</div>
+    </div>
+    <div class="size-cell" style="background:var(--midnight)">
+      <svg width="40" height="40" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="22" fill="#0E1225"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+      <div class="size-label" style="color:rgba(155,175,196,.5)">40px — Small</div>
+    </div>
+    <div class="size-cell" style="background:var(--deep)">
+      <svg width="28" height="28" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="22" fill="#1B1F3A"/>
+        <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+        <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+      </svg>
+      <div class="size-label" style="color:rgba(155,175,196,.4)">28px — Minimum</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 — COLOUR PALETTE
+══════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="eyebrow">03 — Colour Palette</div>
+  <div class="section-title">The palette.</div>
+
+  <div class="color-row">
+    <div>
+      <div class="color-swatch" style="background:#1B1F3A"></div>
+      <div class="color-meta">
+        <div class="color-name">Midnight</div>
+        <div class="color-hex">#1B1F3A</div>
+        <div class="color-use">Primary dark. UI backgrounds, text, brand anchor.</div>
+      </div>
+    </div>
+    <div>
+      <div class="color-swatch" style="background:#E8845C"></div>
+      <div class="color-meta">
+        <div class="color-name">Dawn</div>
+        <div class="color-hex">#E8845C</div>
+        <div class="color-use">Primary accent. CTAs, logo mark, morning energy.</div>
+      </div>
+    </div>
+    <div>
+      <div class="color-swatch" style="background:#4E7DAA"></div>
+      <div class="color-meta">
+        <div class="color-name">Dusk</div>
+        <div class="color-hex">#4E7DAA</div>
+        <div class="color-use">Secondary. Links, integration badges, data states.</div>
+      </div>
+    </div>
+    <div>
+      <div class="color-swatch" style="background:#FBF7F4;border:1px solid rgba(0,0,0,.06)"></div>
+      <div class="color-meta">
+        <div class="color-name">Paper</div>
+        <div class="color-hex">#FBF7F4</div>
+        <div class="color-use">Primary light. Warm white — never cold, never pure.</div>
+      </div>
+    </div>
+    <div>
+      <div class="color-swatch" style="background:#52B788"></div>
+      <div class="color-meta">
+        <div class="color-name">Sage</div>
+        <div class="color-hex">#52B788</div>
+        <div class="color-use">Success, resolved commitments, confirmed actions.</div>
+      </div>
+    </div>
+    <div>
+      <div class="color-swatch" style="background:#F4C896"></div>
+      <div class="color-meta">
+        <div class="color-name">Gold</div>
+        <div class="color-hex">#F4C896</div>
+        <div class="color-use">Warm highlight. Priority flags, VIP contacts.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="extended-swatches">
+    <div class="ext-swatch">
+      <div class="ext-swatch-block" style="background:#0E1225"></div>
+      <div class="ext-swatch-label">#0E1225<br>Deep</div>
+    </div>
+    <div class="ext-swatch">
+      <div class="ext-swatch-block" style="background:#2D3154"></div>
+      <div class="ext-swatch-label">#2D3154<br>Charcoal</div>
+    </div>
+    <div class="ext-swatch">
+      <div class="ext-swatch-block" style="background:#9BAFC4"></div>
+      <div class="ext-swatch-label">#9BAFC4<br>Mist</div>
+    </div>
+    <div class="ext-swatch">
+      <div class="ext-swatch-block" style="background:#F0EDE9;border:1px solid rgba(0,0,0,.06)"></div>
+      <div class="ext-swatch-label">#F0EDE9<br>Stone</div>
+    </div>
+    <div class="ext-swatch">
+      <div class="ext-swatch-block" style="background:#D64B2A"></div>
+      <div class="ext-swatch-label">#D64B2A<br>Alert</div>
+    </div>
+    <div class="ext-swatch">
+      <div class="ext-swatch-block" style="background:#1A1A2E"></div>
+      <div class="ext-swatch-label">#1A1A2E<br>Ink</div>
+    </div>
+  </div>
+
+  <!-- Color rationale -->
+  <div class="dawn-rule"></div>
+  <div class="rationale-grid">
+    <div class="rationale-card">
+      <div class="rationale-card-title">Why Midnight?</div>
+      <div class="rationale-card-body">The color of awareness — the quiet, vigilant blue-black of 3am when Donna is reading your inbox so you can sleep. It anchors the brand in reliability, intelligence, and depth. Not a cold navy. Not a sterile black. The color of a confident mind at rest.</div>
+    </div>
+    <div class="rationale-card">
+      <div class="rationale-card-title">Why Dawn?</div>
+      <div class="rationale-card-body">The warm terracotta of 7:30am — the exact moment the briefing arrives. Dawn says: action, warmth, urgency without anxiety. It separates Donna from every cold-blue AI product on the market. It's human. It's the color of the first thing that matters today.</div>
+    </div>
+    <div class="rationale-card">
+      <div class="rationale-card-title">Why Paper?</div>
+      <div class="rationale-card-body">Donna handles serious things seriously. Pure white reads as clinical, digital, throwaway. Paper is warm, considered, permanent — the color of a briefing that was curated for you, not generated at you. It's the off-white of a letter worth reading.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4 — TYPOGRAPHY
+══════════════════════════════════════════════════════ -->
+<section class="section section-alt">
+  <div class="eyebrow">04 — Typography</div>
+  <div class="section-title">The voice in type.</div>
+
+  <div class="type-block">
+    <div class="type-meta">DISPLAY — CORMORANT GARAMOND · Light 300 + Italic</div>
+    <div class="type-sample-display">Your morning,<br><em>already handled.</em></div>
+    <div class="type-use-row">
+      <span class="type-use-tag">Headings</span>
+      <span class="type-use-tag">Briefing titles</span>
+      <span class="type-use-tag">Hero text</span>
+      <span class="type-use-tag">Taglines</span>
+      <span class="type-use-tag">Pull quotes</span>
+    </div>
+  </div>
+
+  <div class="type-block">
+    <div class="type-meta">BODY — INTER · Regular 400 + Medium 500</div>
+    <div class="type-sample-body">Donna reviewed 147 messages, 12 calendar events, and 3 documents overnight. Here is what actually matters today — ranked, sourced, and ready for action. Three things need your attention before 10am.</div>
+    <div class="type-use-row">
+      <span class="type-use-tag">UI text</span>
+      <span class="type-use-tag">Body copy</span>
+      <span class="type-use-tag">Briefing items</span>
+      <span class="type-use-tag">Settings</span>
+      <span class="type-use-tag">Navigation</span>
+    </div>
+  </div>
+
+  <div class="type-block">
+    <div class="type-meta">DATA — JETBRAINS MONO · Regular 400</div>
+    <div class="type-sample-mono">
+      07:32 — Good morning, Naz.<br>
+      3 commitments due &nbsp;·&nbsp; 2 relationships at risk &nbsp;·&nbsp; 1 urgent reply
+    </div>
+    <div class="type-use-row">
+      <span class="type-use-tag">Timestamps</span>
+      <span class="type-use-tag">Stats / counts</span>
+      <span class="type-use-tag">Labels</span>
+      <span class="type-use-tag">Source refs</span>
+      <span class="type-use-tag">Code</span>
+    </div>
+  </div>
+
+  <!-- Type scale -->
+  <div class="eyebrow" style="margin-bottom:24px">Type Scale</div>
+  <div class="type-scale">
+    <div class="type-scale-row">
+      <span class="scale-label">display / 72px</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;line-height:1;color:var(--midnight)">Good morning.</span>
+    </div>
+    <div class="type-scale-row">
+      <span class="scale-label">h1 / 48px</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--midnight)">Today's briefing</span>
+    </div>
+    <div class="type-scale-row">
+      <span class="scale-label">h2 / 32px</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:400;color:var(--midnight)">Commitments due today</span>
+    </div>
+    <div class="type-scale-row">
+      <span class="scale-label">h3 / 20px</span>
+      <span style="font-family:'Inter',sans-serif;font-size:20px;font-weight:600;color:var(--midnight)">Reply to Sarah before noon</span>
+    </div>
+    <div class="type-scale-row">
+      <span class="scale-label">body / 16px</span>
+      <span style="font-family:'Inter',sans-serif;font-size:16px;font-weight:400;color:var(--midnight)">You mentioned this in an email on Monday — flagged as important by Sarah.</span>
+    </div>
+    <div class="type-scale-row">
+      <span class="scale-label">small / 13px</span>
+      <span style="font-family:'Inter',sans-serif;font-size:13px;font-weight:400;color:#777">Gmail · Thread: Q1 review · 2 days ago</span>
+    </div>
+    <div class="type-scale-row">
+      <span class="scale-label">caption / 11px</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#bbb;letter-spacing:.04em">SOURCE · gmail:thread:18f3a9b2c · 2026-03-08T07:32:14Z</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 5 — TAGLINES
+══════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="eyebrow">05 — Tagline</div>
+  <div class="section-title">The promise.</div>
+
+  <!-- Dual primary taglines -->
+  <div class="tagline-dual">
+    <div class="tagline-primary-card">
+      <div class="tpc-label">★ Primary — General Market</div>
+      <div class="tpc-text">See everything.<br>Miss nothing.</div>
+      <div class="tpc-note">The outward-facing tagline. Works for audiences who don't know Suits. Communicates the core product promise with no context required. Use for app store, ads, onboarding, and launch.</div>
+    </div>
+    <div class="tagline-primary-card secondary-primary">
+      <div class="tpc-label">★ Primary — Brand Insiders / Launch Campaign</div>
+      <div class="tpc-text">I'm Donna.</div>
+      <div class="tpc-note">The two most powerful words in the brand arsenal. For anyone who knows Suits, this is the whole pitch. For anyone who doesn't — it still lands. A statement of identity, not a description. Use for launch events, brand film, PR, and earned media.</div>
+    </div>
+  </div>
+
+  <div class="dawn-rule"></div>
+  <div class="eyebrow" style="margin-bottom:24px">Alternate taglines — direct from the character</div>
+
+  <div class="tagline-alts">
+    <div class="tagline-alt">
+      <div class="alt-text">I read. I analyze. I fix.</div>
+      <div class="alt-note">Direct Donna Paulsen quote — perfectly describes the product pipeline. For product marketing and technical audiences.</div>
+    </div>
+    <div class="tagline-alt">
+      <div class="alt-text">I know everything.</div>
+      <div class="alt-note">The bold variant. For awareness campaigns, social, and brand moments that reward the audience.</div>
+    </div>
+    <div class="tagline-alt">
+      <div class="alt-text">Your day, already handled.</div>
+      <div class="alt-note">Warm, approachable. App store description, onboarding, social media</div>
+    </div>
+    <div class="tagline-alt">
+      <div class="alt-text">The briefing you deserve.</div>
+      <div class="alt-note">Premium positioning, B2B, executive and investor audience</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 6 — BRAND VOICE
+══════════════════════════════════════════════════════ -->
+<section class="section section-alt">
+  <div class="eyebrow">06 — Brand Voice</div>
+  <div class="section-title">How she speaks.</div>
+  <p style="font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:400;color:#777;font-style:italic;margin-bottom:52px;max-width:640px;line-height:1.75">Donna Paulsen never needed more than two words to walk into a room. "I'm Donna" did the rest. The app carries the same energy — precise, warm, and never in doubt.</p>
+
+  <div class="voice-grid">
+    <div class="voice-card">
+      <div class="voice-adj">Precise</div>
+      <div class="voice-not"><s>verbose</s><s>vague</s></div>
+      <div class="voice-body">Every word earns its place. Donna says what matters in as few words as possible. She never explains when she can show. She never hedges when she's sure.</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-adj">Warm</div>
+      <div class="voice-not"><s>clinical</s><s>robotic</s></div>
+      <div class="voice-body">She's intelligent but human. "Good morning, Naz" — not "User briefing ready." She knows your name, your patterns, the people in your life who matter.</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-adj">Confident</div>
+      <div class="voice-not"><s>hedging</s><s>uncertain</s></div>
+      <div class="voice-body">She doesn't say "you might want to." She says "this matters" and "here's what to do." Bold without being pushy. Certain without being cold.</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-adj">Discreet</div>
+      <div class="voice-not"><s>intrusive</s><s>noisy</s></div>
+      <div class="voice-body">One briefing. Everything that matters. She doesn't repeat herself or send endless notifications. She arrives once, precisely, and says exactly what you need.</div>
+    </div>
+  </div>
+
+  <div class="voice-examples">
+    <div class="voice-ex">
+      <div class="voice-ex-label yes">✓ &nbsp;Donna says</div>
+      <div class="voice-ex-text yes">"You promised David a proposal by Friday. No draft found. Three days left."</div>
+    </div>
+    <div class="voice-ex">
+      <div class="voice-ex-label no">✗ &nbsp;Not Donna</div>
+      <div class="voice-ex-text no">"It appears that based on our analysis of your communications, there may be an outstanding commitment that you might want to consider addressing at your earliest convenience..."</div>
+    </div>
+    <div class="voice-ex">
+      <div class="voice-ex-label yes">✓ &nbsp;Donna says</div>
+      <div class="voice-ex-text yes">"Good morning. Three things need your attention before 10am. Start with the one that can't wait."</div>
+    </div>
+    <div class="voice-ex">
+      <div class="voice-ex-label no">✗ &nbsp;Not Donna</div>
+      <div class="voice-ex-text no">"Hey! 🎉 You have some exciting new updates waiting! Check them out when you get a chance! Things are looking great today! 😊"</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 7 — APPLIED DESIGN
+══════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="eyebrow">07 — Applied Design</div>
+  <div class="section-title">The brand in use.</div>
+
+  <div class="mockup-row">
+
+    <!-- APP ICON -->
+    <div>
+      <div class="mockup-heading">App Icon</div>
+      <div class="app-icon-wrap">
+        <!-- Full icon -->
+        <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" rx="22" fill="#1B1F3A"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+        </svg>
+        <div class="icon-size-row">
+          <svg width="68" height="68" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#1B1F3A"/>
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+          <svg width="48" height="48" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#1B1F3A"/>
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+          <svg width="32" height="32" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="22" fill="#1B1F3A"/>
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <!-- Logo lockup below icon -->
+        <div style="text-align:center;margin-top:12px">
+          <svg width="180" height="56" viewBox="0 0 200 56" xmlns="http://www.w3.org/2000/svg">
+            <!-- Mark -->
+            <svg x="0" y="4" width="48" height="48" viewBox="0 0 100 100">
+              <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+              <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+              <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+            </svg>
+            <!-- Wordmark -->
+            <text x="60" y="42"
+                  font-family="'Cormorant Garamond', Georgia, serif"
+                  font-size="46" font-weight="300"
+                  fill="#1B1F3A" font-style="italic">donna</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- TELEGRAM MORNING BRIEFING -->
+    <div>
+      <div class="mockup-heading">Morning Briefing · Telegram</div>
+      <div class="tg-card">
+        <div class="tg-header">
+          <svg width="36" height="36" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+          <div class="tg-name-wrap">
+            <div class="tg-bot-name">donna</div>
+            <div class="tg-status">● Active now</div>
+          </div>
+        </div>
+        <div class="tg-bubble">
+          <div class="tg-timestamp">07:30 &nbsp;·&nbsp; Sunday, 8 March 2026</div>
+          <div class="tg-greeting">Good morning, Naz.</div>
+          <div class="tg-intro">Three things need your attention today:</div>
+          <div class="tg-item">
+            <span class="tg-arrow">→</span>
+            <span>Proposal for David is overdue — you promised Friday, no draft found</span>
+          </div>
+          <div class="tg-item">
+            <span class="tg-arrow">→</span>
+            <span>Sarah hasn't replied in 11 days — last thread ended positively</span>
+          </div>
+          <div class="tg-item">
+            <span class="tg-arrow">→</span>
+            <span>Board meeting at 2pm — 4 attendees with no prep context</span>
+          </div>
+          <div class="tg-actions">
+            <div class="tg-btn-primary">Handle now</div>
+            <div class="tg-btn-sec">Full briefing</div>
+          </div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(155,175,196,.12);font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-style:italic;color:rgba(155,175,196,.45)">— I'm Donna.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSINESS CARD -->
+    <div>
+      <div class="mockup-heading">Business Card</div>
+      <div class="biz-card">
+        <div>
+          <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                  fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <div>
+          <div class="biz-name">donna</div>
+          <div class="biz-tag">See everything. Miss nothing.</div>
+        </div>
+        <div class="biz-bottom">
+          <div class="biz-url">donna.ai</div>
+          <div class="biz-sub">Personal Intelligence<br>for the ones who lead.</div>
+        </div>
+      </div>
+
+      <!-- Notification preview -->
+      <div style="margin-top:24px">
+        <div class="mockup-heading">Push Notification</div>
+        <div style="background:#2D3154;border-radius:14px;padding:16px 18px;box-shadow:0 8px 24px rgba(27,31,58,.2)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <svg width="24" height="24" viewBox="0 0 100 100">
+              <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+              <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="5" stroke-linejoin="round"/>
+              <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="26" cy="50" r="6" fill="#E8845C"/>
+            </svg>
+            <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#FBF7F4">donna</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(155,175,196,.5);margin-left:auto">07:30</div>
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:#FBF7F4;margin-bottom:3px">Your morning briefing is ready.</div>
+          <div style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(155,175,196,.7)">3 priorities · 2 commitments due · 1 urgent reply</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════ -->
+<footer class="brand-footer">
+  <div>
+    <div class="footer-name">donna</div>
+    <div class="footer-tag">See everything. Miss nothing.</div>
+  </div>
+  <div class="footer-meta">
+    BRAND IDENTITY SYSTEM &nbsp;·&nbsp; V1.0<br>
+    MARCH 2026 &nbsp;·&nbsp; CONFIDENTIAL<br>
+    FOR INTERNAL USE ONLY
+  </div>
+</footer>
+
+</body>
+</html>

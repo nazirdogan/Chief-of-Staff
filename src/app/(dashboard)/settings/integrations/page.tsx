@@ -9,6 +9,10 @@ import {
   Check,
   AlertCircle,
   X,
+  Monitor,
+  Shield,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import type { IntegrationProvider, UserIntegration } from '@/lib/db/types';
 
@@ -54,55 +58,14 @@ const INTEGRATIONS: IntegrationConfig[] = [
 
 const CATEGORIES = Array.from(new Set(INTEGRATIONS.map((i) => i.category)));
 
-function TelegramTile() {
-  const [connectUrl, setConnectUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [connected, setConnected] = useState(false);
+// Desktop Observer apps captured via macOS accessibility
+const DESKTOP_OBSERVER_APPS = [
+  'WhatsApp', 'Messages', 'Telegram', 'Signal', 'Discord',
+  'Slack (desktop)', 'Teams (desktop)', 'Mail', 'Calendar',
+  'Notion', 'Figma', 'Chrome', 'Safari', 'Arc',
+];
 
-  async function handleConnect() {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/telegram/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-      if (res.ok) {
-        const data = await res.json();
-        setConnectUrl(data.url);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (connectUrl) {
-    return (
-      <div className="flex flex-col items-center gap-2 rounded-lg border p-3 text-center">
-        <BrandIcon provider="telegram" size={24} />
-        <span className="text-xs font-medium">Telegram</span>
-        <a href={connectUrl} target="_blank" rel="noopener noreferrer" className="rounded bg-[#0088cc] px-2 py-1 text-[10px] font-medium text-white hover:bg-[#0077b5]">
-          Open
-        </a>
-        <button onClick={() => { setConnected(true); setConnectUrl(null); }} className="text-[10px] text-muted-foreground underline">
-          Done
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={handleConnect}
-      disabled={loading}
-      className={`group relative flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-colors hover:bg-muted/50 ${connected ? 'border-green-300 bg-green-50/60 dark:border-green-800 dark:bg-green-950/30' : ''}`}
-    >
-      {connected && (
-        <div className="absolute right-1.5 top-1.5">
-          <Check className="h-3 w-3 text-green-600" />
-        </div>
-      )}
-      {loading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <BrandIcon provider="telegram" size={24} />}
-      <span className="text-xs font-medium leading-tight">Telegram</span>
-    </button>
-  );
-}
+type ObserverState = 'unavailable' | 'no_permission' | 'active' | 'inactive';
 
 export default function IntegrationsSettingsPage() {
   const [integrations, setIntegrations] = useState<UserIntegration[]>([]);
@@ -112,6 +75,74 @@ export default function IntegrationsSettingsPage() {
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+
+  // Desktop Observer state
+  const [observerState, setObserverState] = useState<ObserverState>('unavailable');
+  const [observerLoading, setObserverLoading] = useState(false);
+  const [observerStats, setObserverStats] = useState<{ apps_observed: number; context_changes_emitted: number } | null>(null);
+
+  // Check desktop observer availability on mount
+  useEffect(() => {
+    async function checkObserver() {
+      // Only works in Tauri shell
+      if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) {
+        setObserverState('unavailable');
+        return;
+      }
+      try {
+        const { checkAccessibility, getObserverStatus } = await import('@/lib/desktop-observer/client');
+        const hasPermission = await checkAccessibility();
+        if (!hasPermission) {
+          setObserverState('no_permission');
+          return;
+        }
+        const status = await getObserverStatus();
+        if (status) {
+          setObserverStats({ apps_observed: status.apps_observed, context_changes_emitted: status.context_changes_emitted });
+          setObserverState(status.running ? 'active' : 'inactive');
+        } else {
+          setObserverState('inactive');
+        }
+      } catch {
+        setObserverState('unavailable');
+      }
+    }
+    checkObserver();
+  }, []);
+
+  async function handleRequestPermission() {
+    setObserverLoading(true);
+    try {
+      const { requestAccessibility } = await import('@/lib/desktop-observer/client');
+      const granted = await requestAccessibility();
+      if (granted) {
+        setObserverState('inactive');
+      }
+    } catch {
+      // ignore
+    } finally {
+      setObserverLoading(false);
+    }
+  }
+
+  async function handleToggleObserver() {
+    setObserverLoading(true);
+    try {
+      if (observerState === 'active') {
+        const { stopObserver } = await import('@/lib/desktop-observer/client');
+        await stopObserver();
+        setObserverState('inactive');
+      } else {
+        const { startObserver } = await import('@/lib/desktop-observer/client');
+        const started = await startObserver();
+        setObserverState(started ? 'active' : 'inactive');
+      }
+    } catch {
+      // ignore
+    } finally {
+      setObserverLoading(false);
+    }
+  }
 
   const fetchIntegrations = useCallback(async () => {
     try {
@@ -237,20 +268,107 @@ export default function IntegrationsSettingsPage() {
         </div>
       )}
 
+      {/* Desktop Observer Section */}
+      <div className="mt-6 rounded-lg border p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Monitor className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold">Desktop Observer</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Captures activity from apps on your Mac — WhatsApp, Messages, Telegram, and more.
+                Uses macOS Accessibility to read on-screen text. No API needed.
+              </p>
+            </div>
+          </div>
+
+          <div className="ml-4 shrink-0">
+            {observerState === 'unavailable' && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
+                Desktop app required
+              </span>
+            )}
+            {observerState === 'no_permission' && (
+              <button
+                onClick={handleRequestPermission}
+                disabled={observerLoading}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                {observerLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
+                Grant Permission
+              </button>
+            )}
+            {(observerState === 'active' || observerState === 'inactive') && (
+              <button
+                onClick={handleToggleObserver}
+                disabled={observerLoading}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                  observerState === 'active'
+                    ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {observerLoading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : observerState === 'active' ? (
+                  <Eye className="h-3 w-3" />
+                ) : (
+                  <EyeOff className="h-3 w-3" />
+                )}
+                {observerState === 'active' ? 'Observing' : 'Start Observer'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {observerState === 'active' && observerStats && (
+          <div className="mt-3 flex gap-4 text-[10px] text-muted-foreground">
+            <span>{observerStats.apps_observed} apps observed</span>
+            <span>{observerStats.context_changes_emitted} context changes captured</span>
+          </div>
+        )}
+
+        {observerState !== 'unavailable' && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {DESKTOP_OBSERVER_APPS.map((app) => (
+              <span
+                key={app}
+                className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  observerState === 'active'
+                    ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {app}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {observerState === 'no_permission' && (
+          <div className="mt-3 rounded-md bg-amber-50 p-2.5 text-[11px] text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+            <strong>How it works:</strong> Click &quot;Grant Permission&quot; above, then enable Donna in
+            System Settings &rarr; Privacy &amp; Security &rarr; Accessibility. You may need to restart the app.
+          </div>
+        )}
+
+        {observerState === 'unavailable' && (
+          <div className="mt-3 rounded-md bg-muted/50 p-2.5 text-[11px] text-muted-foreground">
+            The Desktop Observer requires the Donna desktop app (macOS). It captures
+            WhatsApp, Messages, and other app activity that can&apos;t be accessed via OAuth APIs.
+          </div>
+        )}
+      </div>
+
+      {/* OAuth Integrations */}
       {loading ? (
         <div className="mt-12 flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : (
         <div className="mt-6 space-y-6">
-          {/* Telegram + Delivery */}
-          <div>
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Delivery</h2>
-            <div className="grid grid-cols-5 gap-2">
-              <TelegramTile />
-            </div>
-          </div>
-
           {CATEGORIES.map((category) => {
             const items = INTEGRATIONS.filter((i) => i.category === category);
             return (

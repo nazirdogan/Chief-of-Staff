@@ -561,7 +561,7 @@ export default function ConciergeLanding() {
                     Start free trial
                   </button>
                   <ul className="space-y-3">
-                    {["All integrations", "Daily briefing via Telegram", "Commitment tracking", "Relationship radar", "Meeting prep briefs"].map((f) => (
+                    {["All integrations", "Daily in-app briefing", "Commitment tracking", "Relationship radar", "Meeting prep briefs"].map((f) => (
                       <li key={f} className="flex items-center gap-2.5">
                         <Check size={12} style={{ color: "#C4A55A" }} />
                         <span className="text-[13px]" style={{ color: "rgba(253,253,253,0.45)" }}>{f}</span>

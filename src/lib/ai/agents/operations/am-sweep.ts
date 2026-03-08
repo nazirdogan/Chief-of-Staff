@@ -7,6 +7,7 @@ import {
 import { getTodaysParsedEvents } from '@/lib/integrations/google-calendar';
 import { createServiceClient } from '@/lib/db/client';
 import { createOperationRun, completeOperationRun, failOperationRun } from '@/lib/db/queries/operations';
+import { getDesktopObserverChunks } from '@/lib/db/queries/context';
 import type { InboxItem, OperationCategory, SubagentType } from '@/lib/db/types';
 
 const anthropic = new Anthropic();
@@ -94,6 +95,25 @@ export async function classifyTasks(userId: string): Promise<ClassifiedTaskSet> 
     const vipContacts = onboardingData?.vip_contacts ?? [];
     const activeProjects = onboardingData?.active_projects ?? [];
 
+    // Fetch recent desktop observer context (last 24h) for enriched classification
+    let desktopContext: string[] = [];
+    try {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const desktopChunks = await getDesktopObserverChunks(supabase, userId, {
+        activityTypes: ['communicating'],
+        after: yesterday.toISOString(),
+        minImportance: 'background',
+        limit: 20,
+      });
+      desktopContext = desktopChunks.map((c) => {
+        const app = (c.source_ref as Record<string, unknown>)?.app ?? 'Desktop';
+        return `[${app}] ${c.title ?? ''}: ${c.content_summary}`;
+      });
+    } catch {
+      // Desktop observer data not available — continue without it
+    }
+
     // Prepare tasks for classification
     const tasksForAI = actionableItems.map((item) => ({
       id: item.id,
@@ -120,6 +140,7 @@ export async function classifyTasks(userId: string): Promise<ClassifiedTaskSet> 
             calendarEvents,
             vipContacts,
             activeProjects,
+            desktopContext,
           }),
         },
       ],

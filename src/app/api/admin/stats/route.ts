@@ -13,14 +13,12 @@ export const GET = withAdmin(async () => {
     usersRes,
     onboardedRes,
     briefingsRes,
-    telegramRes,
     feedbackRes,
   ] = await Promise.all([
     supabase.from('waitlist').select('status', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarding_completed', true),
     supabase.from('briefings').select('id', { count: 'exact', head: true }),
-    supabase.from('telegram_sessions').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('user_feedback').select('id', { count: 'exact', head: true }).eq('resolved', false),
   ]);
 
@@ -37,7 +35,6 @@ export const GET = withAdmin(async () => {
       total_users: usersRes.count ?? 0,
       onboarded_users: onboardedRes.count ?? 0,
       total_briefings: briefingsRes.count ?? 0,
-      active_telegram: telegramRes.count ?? 0,
       open_feedback: feedbackRes.count ?? 0,
     },
   });

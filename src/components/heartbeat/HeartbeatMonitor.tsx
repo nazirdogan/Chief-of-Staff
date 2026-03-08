@@ -137,8 +137,7 @@ export function HeartbeatMonitor() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="in_app">In-app</SelectItem>
-                  <SelectItem value="telegram">Telegram</SelectItem>
-                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp (coming soon)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

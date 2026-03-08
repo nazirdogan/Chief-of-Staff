@@ -1,0 +1,8 @@
+<svg id="svg-a-lockup-standard" viewBox="0 0 310 100" width="100%" height="auto" style="max-width:380px" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+            <!-- D mark (transparent bg, dark stroke) -->
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#1B1F3A" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+            <!-- Wordmark -->
+            <text x="108" y="70" font-family="'Cormorant Garamond', Georgia, serif" font-size="58" font-weight="300" font-style="italic" fill="#1B1F3A">donna</text>
+          </svg>

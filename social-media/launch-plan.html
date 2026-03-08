@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>donna — 30-Day Social Media Launch Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --midnight: #1B1F3A;
+      --dawn:     #E8845C;
+      --dusk:     #4E7DAA;
+      --paper:    #FBF7F4;
+      --sage:     #52B788;
+      --gold:     #F4C896;
+      --deep:     #0E1225;
+      --charcoal: #2D3154;
+      --mist:     #9BAFC4;
+      --stone:    #F0EDE9;
+      --alert:    #D64B2A;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--paper);
+      color: var(--midnight);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--midnight);
+      padding: 72px 80px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--dawn) 30%, var(--dawn) 70%, transparent);
+      opacity: .5;
+    }
+    .header-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 28px;
+    }
+    .header-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 72px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .header-sub {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 24px;
+      font-weight: 300;
+      color: var(--mist);
+      margin-bottom: 40px;
+    }
+    .header-meta {
+      display: flex;
+      gap: 32px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.45);
+      letter-spacing: .1em;
+    }
+    .header-meta-sep { color: rgba(232,132,92,.4); }
+
+    /* ── LAYOUT ── */
+    .section { padding: 64px 80px; border-bottom: 1px solid rgba(27,31,58,.07); }
+    .section-dark { background: var(--midnight); padding: 64px 80px; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .section-alt { background: var(--stone); }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dawn);
+      margin-bottom: 10px;
+    }
+    .eyebrow-light { color: rgba(232,132,92,.7); }
+    .section-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 48px;
+      font-weight: 300;
+      letter-spacing: -.02em;
+      color: var(--midnight);
+      margin-bottom: 40px;
+    }
+    .section-title em { font-style: italic; color: var(--dawn); }
+    .section-title-light { color: var(--paper); }
+
+    /* ── STRATEGY OVERVIEW ── */
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      margin-bottom: 48px;
+    }
+    .phase-card {
+      padding: 32px 28px;
+      background: white;
+    }
+    .phase-card:nth-child(1) { border-top: 3px solid var(--dawn); }
+    .phase-card:nth-child(2) { border-top: 3px solid var(--dusk); }
+    .phase-card:nth-child(3) { border-top: 3px solid var(--sage); }
+    .phase-card:nth-child(4) { border-top: 3px solid var(--gold); }
+    .phase-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      margin-bottom: 10px;
+      letter-spacing: .05em;
+    }
+    .phase-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--midnight);
+      margin-bottom: 6px;
+    }
+    .phase-days {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--dawn);
+      margin-bottom: 12px;
+    }
+    .phase-desc { font-size: 13px; color: #666; line-height: 1.65; }
+
+    /* ── PLATFORM PILLS ── */
+    .platform-row { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+    .platform-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: .05em;
+    }
+    .pill-li { background: rgba(78,125,170,.12); color: var(--dusk); }
+    .pill-tw { background: rgba(27,31,58,.06); color: var(--midnight); }
+    .pill-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
+
+    /* ── POST DAYS ── */
+    .week-header {
+      background: var(--charcoal);
+      padding: 24px 32px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .week-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dawn);
+    }
+    .week-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--paper);
+    }
+    .week-objective {
+      font-size: 12px;
+      color: var(--mist);
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .post-card {
+      background: white;
+      padding: 36px 40px;
+      margin-bottom: 2px;
+      border-left: 3px solid transparent;
+    }
+    .post-card.linkedin { border-left-color: var(--dusk); }
+    .post-card.twitter { border-left-color: var(--midnight); }
+    .post-card.instagram { border-left-color: var(--dawn); }
+    .post-card.multi { border-left-color: var(--sage); }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .day-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .08em;
+    }
+    .platform-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 100px;
+      letter-spacing: .08em;
+    }
+    .tag-li { background: rgba(78,125,170,.1); color: var(--dusk); }
+    .tag-tw { background: rgba(27,31,58,.06); color: var(--midnight); }
+    .tag-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
+    .tag-multi { background: rgba(82,183,136,.1); color: var(--sage); }
+
+    .post-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--midnight);
+      margin-bottom: 8px;
+    }
+    .post-theme {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      margin-bottom: 20px;
+      letter-spacing: .06em;
+    }
+
+    .post-copy {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #333;
+      background: var(--paper);
+      padding: 24px 28px;
+      border-radius: 4px;
+      border: 1px solid rgba(27,31,58,.07);
+      white-space: pre-wrap;
+      font-family: 'Inter', sans-serif;
+    }
+    .post-copy .hook { font-weight: 600; color: var(--midnight); }
+    .post-copy .cta { color: var(--dawn); font-weight: 600; }
+    .post-copy .hashtags { color: var(--dusk); font-size: 13px; }
+
+    .post-visual {
+      margin-top: 16px;
+      padding: 16px 20px;
+      background: rgba(78,125,170,.05);
+      border-radius: 4px;
+      border: 1px solid rgba(78,125,170,.12);
+    }
+    .post-visual-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--dusk);
+      letter-spacing: .12em;
+      margin-bottom: 6px;
+    }
+    .post-visual-desc {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* ── POSTING CADENCE TABLE ── */
+    .cadence-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 2px;
+      margin-bottom: 40px;
+    }
+    .cadence-table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--mist);
+      padding: 10px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(27,31,58,.08);
+    }
+    .cadence-table td {
+      font-size: 13px;
+      color: #444;
+      padding: 14px 16px;
+      background: white;
+    }
+    .cadence-table tr:hover td { background: var(--stone); }
+
+    /* ── VOICE GUIDE ── */
+    .voice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-bottom: 32px;
+    }
+    .voice-card {
+      padding: 28px 32px;
+      background: white;
+    }
+    .voice-do { border-top: 2px solid var(--sage); }
+    .voice-dont { border-top: 2px solid var(--alert); }
+    .voice-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .15em;
+      margin-bottom: 16px;
+    }
+    .voice-label.do { color: var(--sage); }
+    .voice-label.dont { color: var(--alert); }
+    .voice-item {
+      font-size: 13px;
+      color: #444;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(27,31,58,.05);
+      line-height: 1.5;
+    }
+    .voice-item:last-child { border-bottom: none; }
+
+    /* ── KPI SECTION ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .kpi-card {
+      padding: 32px 28px;
+      background: rgba(255,255,255,.04);
+    }
+    .kpi-num {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 48px;
+      font-weight: 300;
+      color: var(--dawn);
+      font-style: italic;
+      margin-bottom: 4px;
+    }
+    .kpi-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .kpi-desc { font-size: 13px; color: rgba(155,175,196,.7); line-height: 1.5; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--deep);
+      padding: 48px 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 28px;
+      color: var(--paper);
+      font-style: italic;
+    }
+    .footer-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.38);
+      letter-spacing: .08em;
+      margin-top: 6px;
+    }
+    .footer-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.38);
+      letter-spacing: .1em;
+      text-align: right;
+      line-height: 1.9;
+    }
+
+    .dawn-rule {
+      height: 1px;
+      background: linear-gradient(90deg, var(--dawn), transparent);
+      margin: 40px 0;
+      opacity: .3;
+    }
+
+    /* Thread indicator */
+    .thread-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .thread-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--dawn);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<div class="header">
+  <div class="header-eyebrow">Social Media Strategy &nbsp;·&nbsp; Launch Campaign &nbsp;·&nbsp; March 2026</div>
+  <div class="header-title">30-Day Launch Plan</div>
+  <div class="header-sub">See everything. Miss nothing.</div>
+  <div class="header-meta">
+    <span>donna Intelligence Inc.</span>
+    <span class="header-meta-sep">—</span>
+    <span>Platforms: LinkedIn · X/Twitter · Instagram</span>
+    <span class="header-meta-sep">—</span>
+    <span>30 Posts · 4 Phases · 1 Launch</span>
+  </div>
+</div>
+
+
+<!-- ══════════════ STRATEGY OVERVIEW ══════════════ -->
+<section class="section">
+  <div class="eyebrow">00 — Strategy</div>
+  <div class="section-title">The four-phase <em>arc.</em></div>
+
+  <p style="font-size:15px; color:#555; max-width:700px; line-height:1.8; margin-bottom:40px;">
+    Donna's launch follows a narrative arc borrowed from the best tech launches — not a product dump, but a story. We build intrigue before we explain. We explain before we sell. We sell by making people feel they'd be foolish to miss out. Every post has one job: pull the next reader one step closer to early access.
+  </p>
+
+  <div class="phase-grid">
+    <div class="phase-card">
+      <div class="phase-num">Phase 01</div>
+      <div class="phase-name">Intrigue</div>
+      <div class="phase-days">Days 1–7</div>
+      <div class="phase-desc">We don't explain the product yet. We establish the pain. Who is Donna? What's broken about your morning? We name the character before we reveal the solution.</div>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">Phase 02</div>
+      <div class="phase-name">Education</div>
+      <div class="phase-days">Days 8–16</div>
+      <div class="phase-desc">Feature-by-feature reveals. We show the briefing, the commitment tracker, the heartbeat monitor. We make people feel what it would be like to have this. Real copy. Real mockups.</div>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">Phase 03</div>
+      <div class="phase-name">Desire</div>
+      <div class="phase-days">Days 17–23</div>
+      <div class="phase-desc">Use cases. Social proof. The "why now" argument. We close the gap between "interesting" and "I need this." We make the ideal user see themselves in every post.</div>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">Phase 04</div>
+      <div class="phase-name">Launch</div>
+      <div class="phase-days">Days 24–30</div>
+      <div class="phase-desc">Early access is live. We drive sign-ups, create urgency, answer objections publicly, and celebrate the community. Every post has one CTA: get early access.</div>
+    </div>
+  </div>
+
+  <div class="dawn-rule"></div>
+
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--midnight);margin-bottom:24px;">Posting cadence</h3>
+  <table class="cadence-table">
+    <thead>
+      <tr>
+        <th>Platform</th>
+        <th>Frequency</th>
+        <th>Format</th>
+        <th>Best Time (Local)</th>
+        <th>Tone</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>LinkedIn</strong></td>
+        <td>4–5× per week</td>
+        <td>Long-form posts (150–300 words) + image</td>
+        <td>Tue–Thu, 8–10am</td>
+        <td>Thoughtful, professional, story-driven</td>
+      </tr>
+      <tr>
+        <td><strong>X / Twitter</strong></td>
+        <td>5–7× per week</td>
+        <td>Threads (3–6 tweets) or single punchy posts</td>
+        <td>Mon–Fri, 9am & 6pm</td>
+        <td>Sharp, opinionated, quotable</td>
+      </tr>
+      <tr>
+        <td><strong>Instagram</strong></td>
+        <td>3–4× per week</td>
+        <td>Static image + caption (shorter)</td>
+        <td>Tue, Thu, Sat, 12pm</td>
+        <td>Visual-first, aesthetic, aspirational</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--midnight);margin-bottom:24px;">Brand voice on social</h3>
+  <div class="voice-grid">
+    <div class="voice-card voice-do">
+      <div class="voice-label do">✓ &nbsp;Donna says</div>
+      <div class="voice-item">"Every morning, one briefing. Everything that matters. Nothing that doesn't."</div>
+      <div class="voice-item">Confident, precise, understated — like someone who's already read the room</div>
+      <div class="voice-item">Short sentences. Active voice. No hedging.</div>
+      <div class="voice-item">Reference the Suits character sparingly — it's an easter egg, not a crutch</div>
+      <div class="voice-item">Name real pains: the missed follow-up, the forgotten promise, the cold relationship</div>
+      <div class="voice-item">Treat the reader as someone already intelligent — just overwhelmed</div>
+    </div>
+    <div class="voice-card voice-dont">
+      <div class="voice-label dont">✗ &nbsp;Donna never says</div>
+      <div class="voice-item">"Game-changing AI solution" — vague, overused, meaningless</div>
+      <div class="voice-item">Robotic AI-speak: "leverage," "synergy," "streamline your workflow"</div>
+      <div class="voice-item">Feature lists without context or emotion</div>
+      <div class="voice-item">"Are you struggling with inbox overload?" — leading questions are weak</div>
+      <div class="voice-item">Overselling: "The only tool you'll ever need" — it sounds desperate</div>
+      <div class="voice-item">Emoji overload or exclamation marks — Donna is composed, not excitable</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ PHASE 1: INTRIGUE ══════════════ -->
+<section class="section section-dark">
+  <div class="eyebrow eyebrow-light">Phase 01 — Intrigue</div>
+  <div class="section-title section-title-light">Days 1–7: <em>Who is she?</em></div>
+  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+    We don't launch with a feature list. We launch with a feeling. The goal this week is to make people feel the pain of their current morning — the scattered inbox, the forgotten promise, the relationship they've let go cold — and then whisper that there's something different coming.
+  </p>
+</section>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 01</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Launch Announcement</div>
+  <div class="post-theme">THEME: Brand introduction / mystery reveal</div>
+  <div class="post-copy"><span class="hook">We built something we've wanted for years.</span>
+
+Not another AI chatbot. Not another to-do app.
+
+Something that reads your entire digital life — email, calendar, messages, documents — overnight. And arrives every morning with one briefing. What matters. What you promised. Who you've gone quiet with. What to do first.
+
+We named it after the only person in any room who always knew exactly what was happening.
+
+She's called donna.
+
+Early access is coming. The waitlist opens next week.
+
+<span class="cta">→ Link in bio if you want to be first.</span>
+
+<span class="hashtags">#donna #AIproductivity #futureofwork #chiefofstaff</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Dark midnight background. Donna logo (The Meridian mark) centred, reversed white/dawn. Single line below: <em>"See everything. Miss nothing."</em> in Cormorant Garamond italic. Bottom: donna.app in JetBrains Mono, dawn colour.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 01</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">Launch Thread</div>
+  <div class="post-theme">THEME: Punchy announcement thread</div>
+  <div class="post-copy"><div class="thread-item"><span class="thread-num">1/5</span><span>We've been quietly building something.<br><br>Not a chatbot. Not a productivity app.<br><br>An intelligence layer that reads your entire digital life while you sleep and arrives with everything you need before your first coffee.<br><br>We named it donna.</span></div>
+<div class="thread-item"><span class="thread-num">2/5</span><span>Here's the problem it solves:<br><br>You open your morning with 84 unread emails, 3 missed Slack threads, a calendar full of back-to-backs, and somewhere buried in Tuesday's inbox — a promise you forgot you made.<br><br>donna reads all of it. You read one briefing.</span></div>
+<div class="thread-item"><span class="thread-num">3/5</span><span>What that briefing tells you:<br>→ What actually matters today<br>→ What you promised and haven't delivered<br>→ Who you've gone cold with (that you shouldn't have)<br>→ What to do first<br><br>Every morning. Unprompted. Before you ask.</span></div>
+<div class="thread-item"><span class="thread-num">4/5</span><span>Why "donna"?<br><br>Named after the only person who ever walked into a room already knowing what everyone in it needed.<br><br>If you know who Donna Paulsen is, you understand this product instantly.</span></div>
+<div class="thread-item"><span class="thread-num">5/5</span><span>Early access opens next week.<br><br>We're keeping the first cohort small — founders, execs, and anyone who's ever missed something important because their inbox got in the way.<br><br>Waitlist → donna.app<br><br>(retweet if you know someone who needs her)</span></div></div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 02</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Pain Post</div>
+  <div class="post-theme">THEME: Name the problem — inbox overwhelm, signal/noise</div>
+  <div class="post-copy"><span class="hook">The average knowledge worker checks their email 15 times a day.</span>
+
+They find something actionable maybe twice.
+
+The rest is noise — newsletters, cc'd threads, scheduling back-and-forth, the reply-all you didn't need to be on.
+
+But buried in that noise is the thing you needed to see. The client who mentioned a concern in passing. The deadline that got pushed without you noticing. The colleague you said "let's catch up" to three weeks ago.
+
+You missed it. Not because you weren't paying attention. Because you're paying attention to everything — which is the same as paying attention to nothing.
+
+This is the problem donna solves. Not by giving you a smarter inbox. By reading the entire thing for you, overnight, and arriving in the morning with only what matters.
+
+One briefing. Every day. No noise.
+
+<span class="hashtags">#productivity #leadership #futureofwork #inbox</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Split image. Left: chaotic inbox screenshot (greyed out, many unread). Right: clean Donna briefing card on dark background with 3 clear priority items. Visual contrast is everything.</div>
+  </div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 03</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Origin Story</div>
+  <div class="post-theme">THEME: Named after Donna Paulsen — brand storytelling</div>
+  <div class="post-copy"><span class="hook">"I'm Donna."</span>
+
+No last name. No title. No further explanation needed.
+
+If you've watched Suits, you know. Donna Paulsen was never just an executive assistant. She was the person who already knew what you needed before you walked through the door. She tracked every commitment, every relationship, every promise made in every room.
+
+She read everything. Missed nothing. And handled what mattered so the people she worked for never had to worry.
+
+We named this product after her.
+
+<span class="cta">donna — your morning intelligence briefing. Link in bio for early access.</span>
+
+<span class="hashtags">#donna #suits #ai #productivity #chiefofstaff</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Dark card, midnight background. Large italic quote in Cormorant Garamond: <em>"I read. I analyse. I fix."</em> Attributed below in JetBrains Mono: "— Donna Paulsen · Suits" Then bottom right: donna logo mark reversed.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 04</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">The Quotable Single</div>
+  <div class="post-theme">THEME: Punchy, shareable opinion</div>
+  <div class="post-copy">Your inbox is not a to-do list. It's a crime scene.
+
+Every important thing that got buried — the missed follow-up, the forgotten commitment, the relationship that went cold — left a trace. You just didn't have time to find it.
+
+donna reads the crime scene. You get the debrief.
+
+donna.app — waitlist now open</div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 05</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Commitment Problem</div>
+  <div class="post-theme">THEME: Tease the commitment tracking feature</div>
+  <div class="post-copy"><span class="hook">You make promises in meetings you don't mean to forget.</span>
+
+"I'll send that over by Friday."
+"Let me intro you to someone."
+"Circle back to me on that."
+
+You meant every one of them. But Friday came. The intro didn't happen. You never circled back.
+
+It's not a character flaw. It's a systems problem. The place you made the promise (email, Slack, a call) is completely disconnected from anywhere you track your commitments.
+
+One of donna's core features is commitment extraction. Every promise, deadline, and action item detected across your communications — automatically surfaced in your morning briefing, with the source message attached.
+
+You said it. She remembered it.
+
+You don't have to.
+
+Early access → donna.app
+
+<span class="hashtags">#accountability #productivity #executiveleadership #commitments</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Dark background. Three commitment cards in donna's UI style: "→ Send deck to Marcus by Friday [from: email, 3 days ago]" / "→ Intro Sarah to the team [from: Slack, 1 week ago]" / "→ Follow up on contract review [from: email, 5 days ago]" Dawn accent colour. Source citations visible.</div>
+  </div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 06</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Morning Ritual</div>
+  <div class="post-theme">THEME: Aspirational — what mornings feel like with Donna</div>
+  <div class="post-copy"><span class="hook">Imagine opening your morning and already knowing.</span>
+
+No scrolling. No scanning. No "let me check my calendar really quick" that turns into 40 minutes lost.
+
+Just one clean briefing. What matters today. What you owe people. What's about to go wrong if you don't act. And the one thing to do first.
+
+That's donna. Every morning. Before you ask for it.
+
+<span class="cta">Early access → donna.app</span>
+<span class="hashtags">#morningroutine #deepwork #ai #productivity</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Soft, warm aesthetic. A phone on a morning desk (coffee, natural light) showing a Telegram message from donna. The message reads: "Good morning. 3 things need your attention today." Clean, minimal. Dawn colour accent on phone screen.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 07</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">The Weekly Closer</div>
+  <div class="post-theme">THEME: Recap + waitlist push heading into week 2</div>
+  <div class="post-copy">A week ago we announced donna.
+
+Here's what we've heard from the waitlist so far:
+
+"Finally — a morning briefing that's actually proactive."
+"I've been waiting for something that tracks my commitments automatically."
+"The Suits reference got me immediately."
+
+Early access opens in 7 days. Limited spots.
+
+donna.app → join the waitlist
+
+(what's the one thing you most want from your morning? reply below — we read every one)</div>
+</div>
+
+
+<!-- ══════════════ PHASE 2: EDUCATION ══════════════ -->
+<section class="section section-dark">
+  <div class="eyebrow eyebrow-light">Phase 02 — Education</div>
+  <div class="section-title section-title-light">Days 8–16: <em>What does she do?</em></div>
+  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+    Now we show the product. Feature by feature, but always through the lens of feeling — not spec sheets. Every post this week has a mockup or visual that makes people feel what it's like to use Donna. We're educating and building desire simultaneously.
+  </p>
+</section>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 08</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Morning Briefing Reveal</div>
+  <div class="post-theme">THEME: Show the actual product — morning briefing mockup</div>
+  <div class="post-copy"><span class="hook">Here's what donna delivers to your Telegram at 7:30am every morning.</span>
+
+No setup required. No prompting. She read everything overnight so you don't have to.
+
+What's in the briefing:
+
+→ <strong>Today's priorities</strong> — ranked by urgency and impact, not arrival time
+→ <strong>Open commitments</strong> — things you said you'd do, with the source message attached
+→ <strong>Relationship alerts</strong> — contacts you haven't spoken to in too long, given recent context
+→ <strong>Top action</strong> — the single most important thing to do in the next 2 hours
+
+Every item is sourced. You can tap any claim and see exactly which email or message it came from.
+
+She doesn't guess. She reads.
+
+Early access → donna.app
+
+<span class="hashtags">#productivity #morningbriefing #ai #executivetools</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Telegram chat mockup showing donna's morning briefing message. Dark phone frame. Message bubble from "donna" in dawn/orange. Text shows: "Good morning. Here's what matters today. [Priority 1] [Priority 2] [Commitment: overdue] [Act on this first →]". Clean, real-feeling.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 09</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">The Integration Thread</div>
+  <div class="post-theme">THEME: Show what donna reads from — integrations</div>
+  <div class="post-copy"><div class="thread-item"><span class="thread-num">1/4</span><span>People keep asking: what exactly does donna read?<br><br>Everything.<br><br>Here's the full list at launch:</span></div>
+<div class="thread-item"><span class="thread-num">2/4</span><span>→ Gmail / Outlook (email)<br>→ Google Calendar / Outlook Calendar<br>→ Slack (messages + threads)<br>→ Notion (documents + pages)<br><br>All connected via OAuth. Your tokens are vaulted — we never see them. donna reads. Nothing is stored in plaintext. Ever.</span></div>
+<div class="thread-item"><span class="thread-num">3/4</span><span>She reads all of that overnight.<br><br>Not just the surface — threads, replies, document edits, calendar changes, message reactions. The full picture.<br><br>Then she synthesises it into one briefing delivered to your Telegram at whatever time you set.</span></div>
+<div class="thread-item"><span class="thread-num">4/4</span><span>What she doesn't do: forward your emails to a server, store your messages, or share any of your data.<br><br>Privacy isn't a feature. It's the architecture.<br><br>donna.app — early access opens this week</span></div></div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 10</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Heartbeat Monitor</div>
+  <div class="post-theme">THEME: Relationship intelligence feature deep-dive</div>
+  <div class="post-copy"><span class="hook">The relationship you most regret neglecting is probably one you didn't even notice going cold.</span>
+
+donna has a feature called the Heartbeat Monitor.
+
+It tracks the communication frequency with everyone in your network — and alerts you when the rhythm changes. Not when a contact goes completely silent, but earlier: when a weekly email exchange becomes fortnightly. When a Slack thread you were always active in has gone quiet on your end. When someone who used to reach out regularly has stopped.
+
+It doesn't just flag the silence. It tells you why it matters: recent context on who this person is, what you last discussed, and a suggested first step to reconnect.
+
+The relationships that slip away rarely announce their departure.
+
+donna notices before you do.
+
+→ donna.app
+
+<span class="hashtags">#networkbuilding #relationships #leadership #emotionalintelligence</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Dark card. Three contact rows showing heartbeat status: green pulse (active), amber pulse (cooling), red pulse with alert (gone cold). Each row shows name, last contact date, and a one-line context note. Elegant, minimal.</div>
+  </div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 11</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">Privacy Post</div>
+  <div class="post-theme">THEME: Address the obvious concern — data and security</div>
+  <div class="post-copy"><span class="hook">Giving an AI access to your inbox takes trust.</span>
+
+We built donna for people who don't give that lightly.
+
+Here's how your data is protected:
+
+→ OAuth tokens are vaulted — never stored in plaintext, ever
+→ AES-256 encryption on all sensitive fields
+→ Row-level security on every database table
+→ No data shared with third parties, full stop
+→ 2FA enforced on all accounts
+
+donna reads so she can brief you. She forgets when you ask her to.
+
+Your intelligence layer. Your data. Your call.
+
+<span class="cta">donna.app</span>
+<span class="hashtags">#privacy #datasecurity #ai #trust</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Dark midnight card. Shield icon in dawn colour. Below it, a clean list of 5 security properties in JetBrains Mono. Understated, credible. Bottom: "Built for people who don't trust easily." Cormorant italic.</div>
+  </div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 12</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Distinction Post</div>
+  <div class="post-theme">THEME: donna is NOT a chatbot — the critical positioning line</div>
+  <div class="post-copy"><span class="hook">donna is not a chatbot.</span>
+
+Here's why that distinction matters.
+
+A chatbot waits. You ask. It responds. You leave the conversation, the context disappears, and tomorrow you have to start again.
+
+donna doesn't wait to be asked. She reads your calendar before your meeting so you arrive prepared. She noticed the email thread where someone implied they were unhappy, even though they didn't say it directly. She tracked the deadline you mentioned in passing three weeks ago.
+
+You open Telegram in the morning. The briefing is already there.
+
+This is the difference between a tool and an intelligence layer. Between something that helps when you remember to use it — and something that's working while you're not.
+
+We're not building a smarter assistant. We're building the colleague who never drops a thing.
+
+→ donna.app
+
+<span class="hashtags">#ai #chatgpt #productivity #futureofwork</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Side-by-side comparison card. Left: "Chatbot" — user types, bot replies, context resets. Right: "donna" — reads everything, briefing arrives unprompted, nothing drops. Clean, typographic. Dark/light contrast.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 13</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">Meeting Prep Thread</div>
+  <div class="post-theme">THEME: Meeting prep brief feature reveal</div>
+  <div class="post-copy"><div class="thread-item"><span class="thread-num">1/4</span><span>One of donna's quietest features is one people keep asking about.<br><br>Meeting prep briefs.<br><br>Before any meeting on your calendar, donna generates a brief. Here's what's in it:</span></div>
+<div class="thread-item"><span class="thread-num">2/4</span><span>→ Who's attending and what donna knows about them<br>→ Last 3 threads you had with each person — topic, sentiment, any open items<br>→ Any commitments made or received since your last meeting<br>→ Suggested talking points based on recent context<br>→ Red flags: anything about this relationship that needs attention</span></div>
+<div class="thread-item"><span class="thread-num">3/4</span><span>You walk into every meeting already knowing what you need to know.<br><br>Not from spending 20 minutes on LinkedIn. Not from digging through old emails.<br><br>Because donna already did it.</span></div>
+<div class="thread-item"><span class="thread-num">4/4</span><span>The people who've tested this keep saying the same thing:<br><br>"I felt like the most prepared person in the room for the first time."<br><br>donna.app — early access this week</span></div></div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 14</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Autonomy Post</div>
+  <div class="post-theme">THEME: Graduated autonomy / user control — she acts when you say so</div>
+  <div class="post-copy"><span class="hook">An intelligence layer that takes actions you didn't ask for is a liability, not a tool.</span>
+
+We built donna's autonomy system with one principle: she suggests, you decide — unless you've explicitly told her otherwise.
+
+Every action falls into one of three tiers:
+
+Tier 1 (Silent): You've pre-authorised this. donna does it, logs it, tells you it happened.
+Tier 2 (One-tap): donna sends a notification with a one-tap confirmation. You approve in under 3 seconds.
+Tier 3 (Full): A full summary with source citations, requiring your explicit sign-off. Email sending is always Tier 3 — no exceptions, ever.
+
+You set the thresholds. She respects them.
+
+Trust is earned incrementally. donna is designed to earn it.
+
+→ donna.app
+
+<span class="hashtags">#ai #agenticai #trust #automation</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Three-tier autonomy diagram. Clean, dark card. Each tier shown as a horizontal row with icon, label, and short description. Dawn/dusk/sage colour coding for tiers 1/2/3. Elegant enough to feel like a feature showcase, not a spec sheet.</div>
+  </div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 15</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Reply Draft Feature</div>
+  <div class="post-theme">THEME: One-tap reply drafting feature</div>
+  <div class="post-copy"><span class="hook">The email you've been putting off for three days takes donna about four seconds.</span>
+
+From your morning briefing, tap any item and donna can draft a reply — with full context from your conversation history, your previous commitments, and the tone that fits.
+
+You review it. You send it (or don't). She never sends anything without you.
+
+The inbox that once took an hour takes ten minutes.
+
+<span class="cta">donna.app — join the early access waitlist</span>
+<span class="hashtags">#ai #inbox #emailproductivity #deepwork</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Phone mockup showing the reply draft flow in Telegram. User taps "Draft reply" → donna returns a composed response with context footnote. Clean, minimal. Dawn accent on the draft card.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 16</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">The Spec Thread</div>
+  <div class="post-theme">THEME: For the technical audience — how donna actually works</div>
+  <div class="post-copy"><div class="thread-item"><span class="thread-num">1/5</span><span>For the technically curious: here's how donna actually works under the hood.</span></div>
+<div class="thread-item"><span class="thread-num">2/5</span><span>Ingestion runs overnight via Trigger.dev background jobs.<br><br>Every integration (Gmail, Calendar, Slack, Notion) is read via OAuth — tokens vaulted in Nango, never touched by our application layer.<br><br>Content is sanitised before it reaches any AI prompt. No raw user data ever hits a model directly.</span></div>
+<div class="thread-item"><span class="thread-num">3/5</span><span>Two-pass AI pipeline:<br><br>Pass 1 → Claude Haiku: cheap, fast extraction — pull commitments, flag relationships, detect sentiment signals<br><br>Pass 2 → Claude Sonnet: accurate scoring and briefing generation — the reasoning layer that decides what actually matters</span></div>
+<div class="thread-item"><span class="thread-num">4/5</span><span>The briefing is generated, ranked by a 5-dimension priority engine, and delivered via Telegram Bot API.<br><br>Every factual claim in the briefing carries a source_ref — a pointer back to the originating message. We never show an AI claim without a citation.<br><br>Built on Next.js 16, Supabase (pgvector for semantic search), Vercel.</span></div>
+<div class="thread-item"><span class="thread-num">5/5</span><span>We're publishing an architecture deep-dive on the blog next week.<br><br>For now: donna.app — early access now live.</span></div></div>
+</div>
+
+
+<!-- ══════════════ PHASE 3: DESIRE ══════════════ -->
+<section class="section section-dark">
+  <div class="eyebrow eyebrow-light">Phase 03 — Desire</div>
+  <div class="section-title section-title-light">Days 17–23: <em>I need this.</em></div>
+  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+    By now people know what Donna is. This week we make them feel they'd be wrong not to have it. Use cases, identity, FOMO, and social proof. Every post is designed to make the ideal user — a founder, exec, or ambitious professional — see themselves in the story.
+  </p>
+</section>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 17</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Founder Use Case</div>
+  <div class="post-theme">THEME: Specific persona — the early-stage founder</div>
+  <div class="post-copy"><span class="hook">The hardest thing about running a company at 20 people isn't strategy. It's remembering everything you said to everyone.</span>
+
+You told the engineer on Tuesday you'd share feedback by Friday.
+You promised an investor an update "sometime this week."
+You told your head of sales you'd make that intro.
+
+None of these are in your calendar. None are in your task manager. They live in your inbox and your memory — two places famous for unreliability.
+
+donna was built specifically for this. She reads across all your communication channels overnight, extracts every commitment and deadline, and puts them in your morning briefing with a link back to the original message.
+
+The intro you promised three weeks ago — she remembers.
+
+Early-stage founders are our first cohort. If this resonates, the waitlist is at donna.app.
+
+<span class="hashtags">#founders #startups #leadership #productivity</span></div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 18</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">The Contrarian Take</div>
+  <div class="post-theme">THEME: Hot take / opinion — more AI tools ≠ better</div>
+  <div class="post-copy">The problem with productivity tools is there are too many of them.
+
+You have a task manager, a calendar, an email client, a note-taking app, a CRM, and three AI assistants.
+
+They don't talk to each other. None of them know what happened in the others.
+
+donna reads all of them. You get one briefing.
+
+The goal was never more tools. It was one layer that reads everything so you can focus on anything.
+
+donna.app</div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 19</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Aspirational Quote Card</div>
+  <div class="post-theme">THEME: Brand aesthetic / shareable quote</div>
+  <div class="post-copy">She reads everything you don't have time to.
+
+Delivers everything you need to know.
+
+Acts only when you say so.
+
+Every morning. Without being asked.
+
+donna — your intelligence layer.
+
+<span class="cta">donna.app</span>
+<span class="hashtags">#donna #productivitymindset #leadership #chiefofstaff</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Dark midnight card. Three lines of text, each in a slightly larger Cormorant Garamond italic, stacked with breathing room. "She reads everything you don't have time to." / "Delivers everything you need to know." / "Acts only when you say so." Each line punctuated by a small dawn dot. donna logo bottom right.</div>
+  </div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 20</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Telegram Delivery Story</div>
+  <div class="post-theme">THEME: Why Telegram — channel strategy explained</div>
+  <div class="post-copy"><span class="hook">We could have built an app. We built a Telegram message instead.</span>
+
+Here's why.
+
+The problem with most productivity tools is that checking them is itself a task. You have to remember to open them, navigate to the right view, and process what you see. That's friction before you've even started your day.
+
+donna arrives where you already are.
+
+Your morning routine probably includes checking Telegram, WhatsApp, or both. donna sends the briefing there — one message, already formatted, already prioritised. No app to open. No interface to learn. No habit to build.
+
+You're already in the habit of checking messages. donna just makes the one you receive worth reading.
+
+Telegram at launch. WhatsApp coming next.
+
+→ donna.app
+
+<span class="hashtags">#telegram #productivity #ux #aitools</span></div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 21</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">Social Proof Thread</div>
+  <div class="post-theme">THEME: Early tester feedback / beta testimonials</div>
+  <div class="post-copy"><div class="thread-item"><span class="thread-num">1/4</span><span>We gave early access to 30 people two weeks ago.<br><br>Here's what they told us after 10 days:</span></div>
+<div class="thread-item"><span class="thread-num">2/4</span><span>"The commitment tracking alone justified it. I had 14 open promises I'd completely forgotten. Found out over breakfast."<br><br>— Founder, Series A company</span></div>
+<div class="thread-item"><span class="thread-num">3/4</span><span>"I stopped dreading my inbox because I no longer have to process it. donna does that. I just show up to the briefing."<br><br>— Chief of Staff, scale-up</span></div>
+<div class="thread-item"><span class="thread-num">4/4</span><span>"The meeting prep brief is absurdly good. I walked into a board meeting yesterday knowing things I had no right to already know."<br><br>— GP, early-stage VC<br><br>Public early access opens tomorrow.<br>donna.app</span></div></div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 22</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The "Not For Everyone" Post</div>
+  <div class="post-theme">THEME: Qualification / exclusivity play</div>
+  <div class="post-copy"><span class="hook">donna isn't for everyone.</span>
+
+She's for the person whose day is driven by communication. Whose relationships are professional assets. Who knows that missing a commitment or letting a relationship go cold has real consequences.
+
+She's for the founder who's their own chief of staff.
+The executive with 200 unread emails and four directs to stay across.
+The investor who needs to know what's happening before walking into the room.
+
+If your morning doesn't depend on information — donna probably isn't for you.
+
+If it does — you should probably be on the waitlist.
+
+<span class="cta">donna.app</span>
+<span class="hashtags">#donna #leadership #founders #executivetools</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Clean dark card. Text only: "donna isn't for everyone." Large Cormorant Garamond italic. Below, three lines in smaller Inter: "Founders. Executives. Investors." Each separated by a dawn rule. Confident, selective, premium.</div>
+  </div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 23</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The FOMO Post</div>
+  <div class="post-theme">THEME: Early access urgency — cohort is filling</div>
+  <div class="post-copy"><span class="hook">The first 100 people who join donna's early access cohort get something the people after them don't.</span>
+
+They get to shape it.
+
+We're keeping the first cohort deliberately small — founders, chiefs of staff, executives, investors. People who depend on their communication layer the way a pilot depends on instruments.
+
+With that group we're running:
+→ Weekly feedback sessions
+→ Direct access to the founding team
+→ Input on which integrations we build next
+→ Lifetime pricing locked at launch rates
+
+The waitlist now has 800+ people on it. We're opening 100 spots this week.
+
+If you've been considering it: donna.app
+
+<span class="hashtags">#earlyaccess #productlaunch #startups #ai</span></div>
+</div>
+
+
+<!-- ══════════════ PHASE 4: LAUNCH ══════════════ -->
+<section class="section section-dark">
+  <div class="eyebrow eyebrow-light">Phase 04 — Launch</div>
+  <div class="section-title section-title-light">Days 24–30: <em>She's live.</em></div>
+  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+    Early access is now open. Every post this week drives to sign-ups. We answer objections, celebrate milestones, and make the FOMO real. The tone shifts from mysterious to celebratory — Donna is here.
+  </p>
+</section>
+
+<div class="post-card multi">
+  <div class="post-meta">
+    <span class="day-badge">DAY 24</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">🚀 LAUNCH DAY</div>
+  <div class="post-theme">THEME: Early access is live — all platforms, same day</div>
+  <div class="post-copy"><span class="hook">donna is live.</span>
+
+Early access is now open.
+
+She reads your email, calendar, Slack, and documents overnight and delivers one morning briefing: what matters, what you promised, who you've gone cold with, and what to do first.
+
+No inbox archaeology. No missed commitments. No cold relationships you didn't mean to let go.
+
+The first cohort is limited and hand-selected.
+
+<span class="cta">→ donna.app</span>
+
+We built this for people who depend on their mornings. If that's you — come in.
+
+<span class="hashtags">#launch #donna #ai #productivity #chiefofstaff</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">HERO LAUNCH IMAGE. Donna logo centred on dark midnight background. Below: "Early access is live." in Cormorant italic, large, dawn colour. Below that in JetBrains Mono: "donna.app". Subtle dawn gradient at bottom. Maximum visual impact.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 25</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">The FAQ Thread</div>
+  <div class="post-theme">THEME: Answer the top questions publicly</div>
+  <div class="post-copy"><div class="thread-item"><span class="thread-num">1/6</span><span>Since launch yesterday, the same questions keep coming up.<br><br>Let me answer them all here.</span></div>
+<div class="thread-item"><span class="thread-num">2/6</span><span><strong>Q: Can she read WhatsApp?</strong><br>Not yet. Telegram at launch. WhatsApp is next. We're blocked on Meta's API policy for now — working on it.</span></div>
+<div class="thread-item"><span class="thread-num">3/6</span><span><strong>Q: Does she keep all my emails forever?</strong><br>No. donna reads and processes. She retains structured intelligence (commitments, relationship data, summaries) — not raw message content. You can delete your data at any time from settings.</span></div>
+<div class="thread-item"><span class="thread-num">4/6</span><span><strong>Q: What if I don't want her to read a specific thread or inbox?</strong><br>You can exclude any label, folder, or channel. Onboarding walks you through this. Privacy controls are first-class, not an afterthought.</span></div>
+<div class="thread-item"><span class="thread-num">5/6</span><span><strong>Q: Is this just another AI wrapper?</strong><br>The intelligence pipeline has two passes. Extraction uses Haiku (fast, cheap). Briefing generation uses Sonnet (accurate, reasoning-heavy). The commitment tracker, heartbeat monitor, and priority engine are purpose-built. It's not a wrapper — it's a system.</span></div>
+<div class="thread-item"><span class="thread-num">6/6</span><span><strong>Q: What does it cost?</strong><br>Early access pricing is locked for the first cohort. Details at donna.app when you sign up.<br><br>Any other questions? Drop them below — I'll answer every one.</span></div></div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 26</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Milestone Post</div>
+  <div class="post-theme">THEME: Celebrate early traction / first cohort filling</div>
+  <div class="post-copy"><span class="hook">24 hours in. 200 people have joined donna's early access cohort.</span>
+
+We expected this to take a week.
+
+What's been striking isn't the numbers — it's who's signed up. The people joining are exactly who we built this for: founders managing investor relationships from Slack, chiefs of staff drowning in their principal's calendar, executives who haven't had a clean morning routine in months.
+
+It's a reminder that the pain is real. The inbox isn't a personal failing. It's a structural problem that scales with seniority.
+
+donna is 100 spots from closing the first cohort.
+
+If you've been on the fence — donna.app.
+
+Thank you to everyone who's been following this from the beginning. The people who reposted, replied, and shared the waitlist have been incredible. You know who you are.
+
+<span class="hashtags">#launch #founders #chiefofstaff #ai</span></div>
+</div>
+
+<div class="post-card instagram">
+  <div class="post-meta">
+    <span class="day-badge">DAY 27</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">Behind the Build</div>
+  <div class="post-theme">THEME: Humanise the team / behind the scenes</div>
+  <div class="post-copy"><span class="hook">We've been asked: why "donna"?</span>
+
+Because every person on our team — at some point in their career — wished they had someone like her.
+
+The meeting they walked into underprepared. The commitment they forgot. The client relationship they let slip. The email they should have sent weeks ago.
+
+We didn't build donna because we're organised people. We built her because we aren't, and we needed something that would compensate for that at scale.
+
+She's named after the most competent person in any room who's ever been underestimated.
+
+We hope she lives up to the name.
+
+<span class="cta">donna.app — early access open now</span>
+<span class="hashtags">#buildinpublic #startup #founder #donna</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Warm, human photo or illustrated flat graphic. Build environment — notebooks, monitors, coffee. Overlaid text: "We built donna because we needed her." Cormorant italic. Feels personal, not corporate.</div>
+  </div>
+</div>
+
+<div class="post-card twitter">
+  <div class="post-meta">
+    <span class="day-badge">DAY 28</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+  </div>
+  <div class="post-title">First User Story</div>
+  <div class="post-theme">THEME: Share a real early user story / outcome</div>
+  <div class="post-copy">One of our beta users — a chief of staff at a 60-person company — told us something yesterday.
+
+She said donna's morning briefing had flagged a commitment her principal made to an investor six weeks ago.
+
+The investor had a board meeting that morning.
+
+The commitment hadn't been fulfilled.
+
+She fixed it in 40 minutes. The conversation at the board meeting was a different one.
+
+That's what a missed thing costs. And that's what catching it is worth.
+
+donna.app</div>
+</div>
+
+<div class="post-card linkedin">
+  <div class="post-meta">
+    <span class="day-badge">DAY 29</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+  </div>
+  <div class="post-title">The Last Chance Post</div>
+  <div class="post-theme">THEME: Cohort closing — final urgency push</div>
+  <div class="post-copy"><span class="hook">The first cohort closes tomorrow.</span>
+
+If you've been on the waitlist and haven't activated yet — today is the day.
+
+After tomorrow, early access pricing goes away and donna joins the general queue. The founding cohort gets locked-in rates, direct founder access, and input on the product roadmap.
+
+300 people joined in 6 days. We're opening the last 30 spots now.
+
+One morning briefing. Everything that matters. Nothing you don't need.
+
+<span class="cta">→ donna.app</span>
+
+No further nudging after this. She's not the type to repeat herself.
+
+<span class="hashtags">#lastchance #donna #earlyaccess #ai</span></div>
+</div>
+
+<div class="post-card multi">
+  <div class="post-meta">
+    <span class="day-badge">DAY 30</span>
+    <span class="platform-tag tag-li">LINKEDIN</span>
+    <span class="platform-tag tag-tw">X / TWITTER</span>
+    <span class="platform-tag tag-ig">INSTAGRAM</span>
+  </div>
+  <div class="post-title">The Closer — Day 30</div>
+  <div class="post-theme">THEME: End of launch month — thank you, next chapter</div>
+  <div class="post-copy"><span class="hook">30 days ago, we announced donna.</span>
+
+Today, 330 people wake up with her every morning.
+
+Their inbox hasn't changed. Their calendar hasn't changed. The volume of communication hasn't changed.
+
+But they've stopped drowning in it.
+
+That's the whole product. That was always the whole product. Not AI for AI's sake — a system that reads the signal so you can act on it.
+
+Thank you to everyone who's joined, shared, and believed in this early. The next chapter starts now.
+
+If you missed the first cohort — we'll be opening more spots soon.
+
+Waitlist: donna.app
+
+See everything. Miss nothing.
+
+<span class="hashtags">#donna #launch #ai #productivity #chiefofstaff</span></div>
+  <div class="post-visual">
+    <div class="post-visual-label">🖼 VISUAL</div>
+    <div class="post-visual-desc">Full-bleed dark card. Large number "330" in Cormorant italic, dawn colour. Below: "people who don't drown in their inbox anymore." JetBrains Mono. donna logo bottom centre. This is the closing image of the campaign — make it count.</div>
+  </div>
+</div>
+
+
+<!-- ══════════════ KPIs ══════════════ -->
+<section class="section-dark">
+  <div class="eyebrow eyebrow-light">Metrics</div>
+  <div class="section-title section-title-light">What <em>success</em> looks like.</div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-num">1,000+</div>
+      <div class="kpi-label">Waitlist Signups</div>
+      <div class="kpi-desc">Target by Day 30. Driven by social + word of mouth. LinkedIn is the primary channel for qualified B2B leads.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">5%+</div>
+      <div class="kpi-label">Engagement Rate</div>
+      <div class="kpi-desc">LinkedIn benchmark for B2B SaaS is 2–3%. We should outperform with narrative-driven content. Track comments especially — they signal resonance.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">3 posts</div>
+      <div class="kpi-label">Viral Moments</div>
+      <div class="kpi-desc">At least 3 posts should break out of organic reach (1,000+ impressions on Twitter, 5,000+ on LinkedIn). Pain posts and contrarian takes perform best.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">300</div>
+      <div class="kpi-label">First Cohort Users</div>
+      <div class="kpi-desc">Paying or freemium early access users by Day 30. Quality over quantity — the right 300 will drive the next 3,000.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">2,000+</div>
+      <div class="kpi-label">Followers Gained</div>
+      <div class="kpi-desc">Across all platforms combined. LinkedIn is highest-value; X/Twitter for technical and founder reach; Instagram for brand awareness.</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num">10+</div>
+      <div class="kpi-label">Press / Creator Mentions</div>
+      <div class="kpi-desc">Secondary earned media from the launch. Send personal outreach to 20 relevant journalists and creators in Week 3 using the brand story.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<div class="footer">
+  <div>
+    <div class="footer-name">donna</div>
+    <div class="footer-tag">SOCIAL MEDIA LAUNCH PLAN · V1.0 · MARCH 2026</div>
+  </div>
+  <div class="footer-meta">
+    See everything. Miss nothing.<br>
+    donna.app<br>
+    Confidential — Donna Intelligence Inc.
+  </div>
+</div>
+
+</body>
+</html>

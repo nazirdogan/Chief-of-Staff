@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>donna — 30-Day Campaign Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --midnight: #1B1F3A;
+      --dawn:     #E8845C;
+      --dusk:     #4E7DAA;
+      --paper:    #FBF7F4;
+      --sage:     #52B788;
+      --gold:     #F4C896;
+      --deep:     #0E1225;
+      --charcoal: #2D3154;
+      --mist:     #9BAFC4;
+      --stone:    #F0EDE9;
+      --alert:    #D64B2A;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--stone);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--midnight);
+      font-size: 14px;
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      background: var(--midnight);
+      padding: 32px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(232,132,92,.25);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .header-brand {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 28px;
+      font-style: italic;
+      color: var(--paper);
+    }
+    .header-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mist);
+      letter-spacing: .08em;
+      border-left: 1px solid rgba(155,175,196,.25);
+      padding-left: 20px;
+    }
+    .header-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.45);
+      letter-spacing: .1em;
+      text-align: right;
+      line-height: 1.9;
+    }
+
+    /* ─── JUMP NAV ─── */
+    .jump-nav {
+      background: white;
+      padding: 16px 56px;
+      border-bottom: 1px solid rgba(27,31,58,.07);
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .jump-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-right: 8px;
+    }
+    .jump-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(27,31,58,.1);
+      background: none;
+      color: var(--midnight);
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+    }
+    .jump-btn:hover { background: var(--midnight); color: var(--paper); border-color: var(--midnight); }
+    .jump-btn.ph1 { border-color: rgba(232,132,92,.4); color: var(--dawn); }
+    .jump-btn.ph2 { border-color: rgba(78,125,170,.4); color: var(--dusk); }
+    .jump-btn.ph3 { border-color: rgba(82,183,136,.4); color: var(--sage); }
+    .jump-btn.ph4 { border-color: rgba(244,200,150,.5); color: #b8863a; }
+
+    /* ─── OVERVIEW STRIP ─── */
+    .overview {
+      background: var(--midnight);
+      padding: 40px 56px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+    .ov-phase {
+      padding: 24px 28px;
+      background: rgba(255,255,255,.03);
+    }
+    .ov-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .1em;
+      margin-bottom: 6px;
+    }
+    .ov-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 22px;
+      font-style: italic;
+      margin-bottom: 4px;
+    }
+    .ov-name.c1 { color: var(--dawn); }
+    .ov-name.c2 { color: var(--dusk); }
+    .ov-name.c3 { color: var(--sage); }
+    .ov-name.c4 { color: var(--gold); }
+    .ov-days { font-size: 12px; color: var(--mist); }
+
+    /* ─── CONTENT ─── */
+    .content { max-width: 1100px; margin: 0 auto; padding: 48px 56px; }
+
+    /* ─── PHASE HEADER ─── */
+    .phase-header {
+      background: var(--midnight);
+      border-radius: 8px 8px 0 0;
+      padding: 20px 28px;
+      margin-top: 48px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ph-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .ph-badge.p1 { background: rgba(232,132,92,.15); color: var(--dawn); }
+    .ph-badge.p2 { background: rgba(78,125,170,.15); color: var(--dusk); }
+    .ph-badge.p3 { background: rgba(82,183,136,.15); color: var(--sage); }
+    .ph-badge.p4 { background: rgba(244,200,150,.15); color: var(--gold); }
+    .ph-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 22px;
+      font-style: italic;
+      color: var(--paper);
+    }
+    .ph-goal { font-size: 13px; color: var(--mist); margin-left: auto; }
+
+    /* ─── DAY CARD ─── */
+    .day-card {
+      background: white;
+      margin-bottom: 2px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .day-card:last-of-type { border-radius: 0 0 8px 8px; }
+
+    .day-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(27,31,58,.06);
+      background: var(--stone);
+    }
+    .day-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--midnight);
+      min-width: 52px;
+    }
+    .day-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--midnight);
+      flex: 1;
+    }
+    .day-platforms { display: flex; gap: 6px; }
+    .plat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 500;
+      letter-spacing: .06em;
+    }
+    .plat-li { background: rgba(78,125,170,.1); color: var(--dusk); }
+    .plat-tw { background: rgba(27,31,58,.07); color: var(--charcoal); }
+    .plat-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
+    .day-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--mist);
+      letter-spacing: .06em;
+      margin-left: auto;
+    }
+
+    .day-body { padding: 24px 24px 20px; }
+
+    .copy-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .copy-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(27,31,58,.15);
+      background: none;
+      color: var(--mist);
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .06em;
+    }
+    .copy-btn:hover { background: var(--midnight); color: var(--paper); border-color: var(--midnight); }
+    .copy-btn.copied { background: var(--sage); color: white; border-color: var(--sage); }
+
+    .copy-text {
+      background: var(--stone);
+      border: 1px solid rgba(27,31,58,.07);
+      border-radius: 6px;
+      padding: 18px 20px;
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: #333;
+      white-space: pre-wrap;
+      font-family: 'Inter', sans-serif;
+      cursor: text;
+      user-select: text;
+      margin-bottom: 12px;
+    }
+
+    .hashtag-row {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--dusk);
+      padding: 8px 12px;
+      background: rgba(78,125,170,.05);
+      border-radius: 4px;
+      border: 1px solid rgba(78,125,170,.1);
+      margin-bottom: 12px;
+    }
+
+    .thread-note {
+      font-size: 12px;
+      color: var(--mist);
+      padding: 10px 14px;
+      background: rgba(155,175,196,.06);
+      border-radius: 4px;
+      border-left: 2px solid var(--mist);
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: .03em;
+    }
+
+    .visual-ref {
+      font-size: 12px;
+      color: #666;
+      padding: 10px 14px;
+      background: rgba(232,132,92,.04);
+      border-radius: 4px;
+      border-left: 2px solid var(--dawn);
+      line-height: 1.6;
+    }
+    .visual-ref strong {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--dawn);
+      letter-spacing: .1em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      background: var(--deep);
+      padding: 36px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 64px;
+    }
+    .footer-brand {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px;
+      font-style: italic;
+      color: var(--paper);
+    }
+    .footer-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(155,175,196,.38);
+      letter-spacing: .1em;
+      text-align: right;
+      line-height: 1.9;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-brand">donna</div>
+    <div class="header-title">30-Day Launch Campaign Calendar</div>
+  </div>
+  <div class="header-meta">
+    30 POSTS &nbsp;·&nbsp; 3 PLATFORMS<br>
+    LINKEDIN · X/TWITTER · INSTAGRAM
+  </div>
+</div>
+
+<!-- ══════════ JUMP NAV ══════════ -->
+<div class="jump-nav">
+  <span class="jump-label">Jump to →</span>
+  <a href="#ph1" class="jump-btn ph1">Phase 1: Intrigue</a>
+  <a href="#d01" class="jump-btn">01</a><a href="#d02" class="jump-btn">02</a><a href="#d03" class="jump-btn">03</a>
+  <a href="#d04" class="jump-btn">04</a><a href="#d05" class="jump-btn">05</a><a href="#d06" class="jump-btn">06</a>
+  <a href="#d07" class="jump-btn">07</a>
+  <a href="#ph2" class="jump-btn ph2">Phase 2: Education</a>
+  <a href="#d08" class="jump-btn">08</a><a href="#d09" class="jump-btn">09</a><a href="#d10" class="jump-btn">10</a>
+  <a href="#d11" class="jump-btn">11</a><a href="#d12" class="jump-btn">12</a><a href="#d13" class="jump-btn">13</a>
+  <a href="#d14" class="jump-btn">14</a><a href="#d15" class="jump-btn">15</a><a href="#d16" class="jump-btn">16</a>
+  <a href="#ph3" class="jump-btn ph3">Phase 3: Desire</a>
+  <a href="#d17" class="jump-btn">17</a><a href="#d18" class="jump-btn">18</a><a href="#d19" class="jump-btn">19</a>
+  <a href="#d20" class="jump-btn">20</a><a href="#d21" class="jump-btn">21</a><a href="#d22" class="jump-btn">22</a>
+  <a href="#d23" class="jump-btn">23</a>
+  <a href="#ph4" class="jump-btn ph4">Phase 4: Launch</a>
+  <a href="#d24" class="jump-btn">24</a><a href="#d25" class="jump-btn">25</a><a href="#d26" class="jump-btn">26</a>
+  <a href="#d27" class="jump-btn">27</a><a href="#d28" class="jump-btn">28</a><a href="#d29" class="jump-btn">29</a>
+  <a href="#d30" class="jump-btn">30</a>
+</div>
+
+<!-- ══════════ PHASE OVERVIEW ══════════ -->
+<div class="overview">
+  <div class="ov-phase">
+    <div class="ov-num">Phase 01 · Days 1–7</div>
+    <div class="ov-name c1">Intrigue</div>
+    <div class="ov-days">Name the pain. Tease the product. Build the mystery. No feature lists yet.</div>
+  </div>
+  <div class="ov-phase">
+    <div class="ov-num">Phase 02 · Days 8–16</div>
+    <div class="ov-name c2">Education</div>
+    <div class="ov-days">Feature-by-feature reveals. UI mockups. Make people feel what it's like to use donna.</div>
+  </div>
+  <div class="ov-phase">
+    <div class="ov-num">Phase 03 · Days 17–23</div>
+    <div class="ov-name c3">Desire</div>
+    <div class="ov-days">Use cases, social proof, FOMO. Close the gap between "interesting" and "I need this."</div>
+  </div>
+  <div class="ov-phase">
+    <div class="ov-num">Phase 04 · Days 24–30</div>
+    <div class="ov-name c4">Launch</div>
+    <div class="ov-days">Early access is live. Drive sign-ups, answer objections, celebrate the community.</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════
+     PHASE 1: INTRIGUE — DAYS 1–7
+══════════════════════════════════════ -->
+<div id="ph1" class="phase-header">
+  <span class="ph-badge p1">Phase 01</span>
+  <span class="ph-name">Intrigue — Who is she?</span>
+  <span class="ph-goal">Goal: build pain awareness + curiosity. No product demo yet.</span>
+</div>
+
+<!-- DAY 01 -->
+<div id="d01" class="day-card">
+  <div class="day-top">
+    <span class="day-num">01</span>
+    <span class="day-title">The Launch Announcement</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+      <span class="plat plat-ig">Instagram</span>
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">TUE–THU · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN &amp; INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d01-li', this)">Copy</button></div>
+    <div id="copy-d01-li" class="copy-text">We built something we've wanted for years.
+
+Not another AI chatbot. Not another to-do app.
+
+Something that reads your entire digital life — email, calendar, messages, documents — overnight. And arrives every morning with one briefing. What matters. What you promised. Who you've gone quiet with. What to do first.
+
+We named it after the only person in any room who always knew exactly what was happening.
+
+She's called donna.
+
+Early access is coming. The waitlist opens next week.
+
+→ Link in bio if you want to be first.</div>
+    <div class="hashtag-row">#donna #AIproductivity #futureofwork #chiefofstaff #morningbriefing</div>
+    <div class="copy-label">TWITTER/X THREAD — POST AS THREAD (5 TWEETS) <button class="copy-btn" onclick="copyText('copy-d01-tw', this)">Copy</button></div>
+    <div id="copy-d01-tw" class="copy-text">1/5 — We've been quietly building something.
+
+Not a chatbot. Not a productivity app.
+
+An intelligence layer that reads your entire digital life while you sleep and arrives with everything you need before your first coffee.
+
+We named it donna.
+
+——
+
+2/5 — Here's the problem it solves:
+
+You open your morning with 84 unread emails, 3 missed Slack threads, a calendar full of back-to-backs, and somewhere buried in Tuesday's inbox — a promise you forgot you made.
+
+donna reads all of it. You read one briefing.
+
+——
+
+3/5 — What that briefing tells you:
+→ What actually matters today
+→ What you promised and haven't delivered
+→ Who you've gone cold with (that you shouldn't have)
+→ What to do first
+
+Every morning. Unprompted. Before you ask.
+
+——
+
+4/5 — Why "donna"?
+
+Named after the idea that the most valuable person in any room isn't the most senior one.
+
+It's the one who already knows what everyone needs before they ask. The intelligence layer every leader wishes they had.
+
+——
+
+5/5 — Early access opens next week.
+
+We're keeping the first cohort small — founders, execs, and anyone who's ever missed something important because their inbox got in the way.
+
+Waitlist → donna.app
+
+(retweet if you know someone who needs her)</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 01</strong>Dark midnight card. donna logo centred. "See everything. Miss nothing." tagline. donna.app in JetBrains Mono at base.</div>
+  </div>
+</div>
+
+<!-- DAY 02 -->
+<div id="d02" class="day-card">
+  <div class="day-top">
+    <span class="day-num">02</span>
+    <span class="day-title">The Pain Post</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">TUE–THU · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d02', this)">Copy</button></div>
+    <div id="copy-d02" class="copy-text">The average knowledge worker checks their email 15 times a day.
+
+They find something actionable maybe twice.
+
+The rest is noise — newsletters, cc'd threads, scheduling back-and-forth, the reply-all you didn't need to be on.
+
+But buried in that noise is the thing you needed to see. The client who mentioned a concern in passing. The deadline that got pushed without you noticing. The colleague you said "let's catch up" to three weeks ago.
+
+You missed it. Not because you weren't paying attention. Because you're paying attention to everything — which is the same as paying attention to nothing.
+
+This is the problem donna solves. Not by giving you a smarter inbox. By reading the entire thing for you, overnight, and arriving in the morning with only what matters.
+
+One briefing. Every day. No noise.</div>
+    <div class="hashtag-row">#productivity #leadership #futureofwork #inbox #deepwork</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 02</strong>Split card: left panel "84 unread" (chaotic), right panel "1 briefing" (clean). Visual contrast is the message.</div>
+  </div>
+</div>
+
+<!-- DAY 03 -->
+<div id="d03" class="day-card">
+  <div class="day-top">
+    <span class="day-num">03</span>
+    <span class="day-title">The Origin Story</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">TUE–THU · 12PM (IG) · 9AM (X)</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d03-ig', this)">Copy</button></div>
+    <div id="copy-d03-ig" class="copy-text">Inspired by the greatest fictional chief of staff who ever existed.
+
+The one who walked into every room already knowing what everyone needed. Who tracked every commitment, every relationship, every promise made in every room — without being asked. Who read everything, missed nothing, and handled what mattered so the people around her could focus on what only they could do.
+
+She was never just an assistant. She was the intelligence layer.
+
+We named donna after that idea.
+
+donna — your morning intelligence briefing. Reads your digital life overnight. Delivers only what matters by 7:30 AM. Link in bio for early access.</div>
+    <div class="hashtag-row">#donna #ai #productivity #chiefofstaff #morningroutine #executiveteam</div>
+    <div class="copy-label">TWITTER/X <button class="copy-btn" onclick="copyText('copy-d03-tw', this)">Copy</button></div>
+    <div id="copy-d03-tw" class="copy-text">Named after the best fictional chief of staff to ever exist.
+
+The archetype: walks into every room already knowing what everyone needs. Tracks every commitment, every relationship, every loose thread. Handles what matters before anyone has to ask.
+
+That was always the job description. We just built the AI to do it.
+
+donna.app — waitlist open</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 03</strong>Dark card. Large italic: "Inspired by the best fictional chief of staff in the world." Body text below about what she does. donna mark bottom right.</div>
+  </div>
+</div>
+
+<!-- DAY 04 -->
+<div id="d04" class="day-card">
+  <div class="day-top">
+    <span class="day-num">04</span>
+    <span class="day-title">The Quotable Single</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">MON–FRI · 9AM OR 6PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X <button class="copy-btn" onclick="copyText('copy-d04', this)">Copy</button></div>
+    <div id="copy-d04" class="copy-text">Your inbox is not a to-do list. It's a crime scene.
+
+Every important thing that got buried — the missed follow-up, the forgotten commitment, the relationship that went cold — left a trace. You just didn't have time to find it.
+
+donna reads the crime scene. You get the debrief.
+
+donna.app — waitlist now open</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 04</strong>Dark typographic card. "Your inbox is not a to-do list." large, then "It's a crime scene." in dawn colour below. Stark and quotable.</div>
+  </div>
+</div>
+
+<!-- DAY 05 -->
+<div id="d05" class="day-card">
+  <div class="day-top">
+    <span class="day-num">05</span>
+    <span class="day-title">The Commitment Problem</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">TUE–THU · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d05', this)">Copy</button></div>
+    <div id="copy-d05" class="copy-text">You make promises in meetings you don't mean to forget.
+
+"I'll send that over by Friday."
+"Let me intro you to someone."
+"Circle back to me on that."
+
+You meant every one of them. But Friday came. The intro didn't happen. You never circled back.
+
+It's not a character flaw. It's a systems problem. The place you made the promise (email, Slack, a call) is completely disconnected from anywhere you track your commitments.
+
+One of donna's core features is commitment extraction. Every promise, deadline, and action item detected across your communications — automatically surfaced in your morning briefing, with the source message attached.
+
+You said it. She remembered it. You don't have to.
+
+Early access → donna.app</div>
+    <div class="hashtag-row">#accountability #productivity #executiveleadership #commitments #leadership</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 05</strong>Dark card. Three commitment rows with source refs: "Send deck to Marcus · from email · 2 days ago", etc. Dawn accent borders.</div>
+  </div>
+</div>
+
+<!-- DAY 06 -->
+<div id="d06" class="day-card">
+  <div class="day-top">
+    <span class="day-num">06</span>
+    <span class="day-title">The Morning Ritual</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">SAT · 12PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d06', this)">Copy</button></div>
+    <div id="copy-d06" class="copy-text">Imagine opening your morning and already knowing.
+
+No scrolling. No scanning. No "let me check my calendar really quick" that turns into 40 minutes lost.
+
+Just one clean briefing. What matters today. What you owe people. What's about to go wrong if you don't act. And the one thing to do first.
+
+That's donna. Every morning. Before you ask for it.
+
+Early access → donna.app</div>
+    <div class="hashtag-row">#morningroutine #deepwork #ai #productivity #intentionalliving</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 06</strong>Warm dark card. Simulated morning message from donna: "Good morning. 3 things need your attention today." Soft dawn glow effect.</div>
+  </div>
+</div>
+
+<!-- DAY 07 -->
+<div id="d07" class="day-card">
+  <div class="day-top">
+    <span class="day-num">07</span>
+    <span class="day-title">The Weekly Closer</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">FRI · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X <button class="copy-btn" onclick="copyText('copy-d07-tw', this)">Copy</button></div>
+    <div id="copy-d07-tw" class="copy-text">A week ago we announced donna.
+
+Here's what we've heard from the waitlist so far:
+
+"Finally — a morning briefing that's actually proactive."
+"I've been waiting for something that tracks my commitments automatically."
+"This is exactly what I've been waiting for — a briefing that actually understands what I'm managing."
+
+Early access opens in 7 days. Limited spots.
+
+donna.app → join the waitlist
+
+(what's the one thing you most want from your morning? reply below — we read every one)</div>
+    <div class="copy-label">LINKEDIN <button class="copy-btn" onclick="copyText('copy-d07-li', this)">Copy</button></div>
+    <div id="copy-d07-li" class="copy-text">One week since we announced donna.
+
+800+ people on the waitlist. We expected maybe 200 by now.
+
+What's been striking is who's signing up — founders, chiefs of staff, investors, executives. The people whose mornings are the most consequential and the most chaotic.
+
+It's a reminder that the pain we're solving isn't a personal failing. It's a structural problem that scales with the stakes of your work.
+
+Early access opens this week. The first cohort is deliberately small.
+
+If the last 7 days have resonated with you — donna.app.</div>
+    <div class="hashtag-row">#productlaunch #earlyaccess #donna #ai #founders</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 07</strong>Dark card. Large "800+" in dawn colour. "people on the waitlist" below. Momentum feels real.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PHASE 2: EDUCATION — DAYS 8–16
+══════════════════════════════════════ -->
+<div id="ph2" class="phase-header" style="margin-top:48px">
+  <span class="ph-badge p2">Phase 02</span>
+  <span class="ph-name">Education — What does she do?</span>
+  <span class="ph-goal">Goal: show the product, feature by feature. Real UI. Real mockups.</span>
+</div>
+
+<!-- DAY 08 -->
+<div id="d08" class="day-card">
+  <div class="day-top">
+    <span class="day-num">08</span>
+    <span class="day-title">The Morning Briefing Reveal</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">MON · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN &amp; INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d08', this)">Copy</button></div>
+    <div id="copy-d08" class="copy-text">Here's what donna delivers to your Telegram at 7:30am every morning.
+
+No setup required. No prompting. She read everything overnight so you don't have to.
+
+What's in the briefing:
+
+→ Today's priorities — ranked by urgency and impact, not arrival time
+→ Open commitments — things you said you'd do, with the source message attached
+→ Relationship alerts — contacts you haven't spoken to in too long, given recent context
+→ Top action — the single most important thing to do in the next 2 hours
+
+Every item is sourced. You can tap any claim and see exactly which email or message it came from.
+
+She doesn't guess. She reads.
+
+Early access → donna.app</div>
+    <div class="hashtag-row">#productivity #morningbriefing #ai #executivetools #chiefofstaff</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 08</strong>Dark card. Structured briefing with 4 ranked items visible. Source citations shown in monospace. donna mark bottom right.</div>
+  </div>
+</div>
+
+<!-- DAY 09 -->
+<div id="d09" class="day-card">
+  <div class="day-top">
+    <span class="day-num">09</span>
+    <span class="day-title">The Integration Thread</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">TUE · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X THREAD <button class="copy-btn" onclick="copyText('copy-d09', this)">Copy</button></div>
+    <div id="copy-d09" class="copy-text">1/4 — People keep asking: what exactly does donna read?
+
+Everything.
+
+Here's the full list at launch:
+
+——
+
+2/4 — → Gmail / Outlook (email)
+→ Google Calendar / Outlook Calendar
+→ Slack (messages + threads)
+→ Notion (documents + pages)
+
+All connected via OAuth. Your tokens are vaulted — we never see them. donna reads. Nothing is stored in plaintext. Ever.
+
+——
+
+3/4 — She reads all of that overnight.
+
+Not just the surface — threads, replies, document edits, calendar changes, message reactions. The full picture.
+
+Then she synthesises it into one briefing delivered to your Telegram at whatever time you set.
+
+——
+
+4/4 — What she doesn't do: forward your emails to a server, store your messages, or share any of your data.
+
+Privacy isn't a feature. It's the architecture.
+
+donna.app — early access opens this week</div>
+    <div class="thread-note">⌁ POST AS THREAD · 4 tweets · reply to each in sequence</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 09</strong>Dark grid card. Gmail, Calendar, Slack, Notion names connected by dawn lines to central "donna" hub. Clean integration map.</div>
+  </div>
+</div>
+
+<!-- DAY 10 -->
+<div id="d10" class="day-card">
+  <div class="day-top">
+    <span class="day-num">10</span>
+    <span class="day-title">The Heartbeat Monitor</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">WED · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d10', this)">Copy</button></div>
+    <div id="copy-d10" class="copy-text">The relationship you most regret neglecting is probably one you didn't even notice going cold.
+
+donna has a feature called the Heartbeat Monitor.
+
+It tracks the communication frequency with everyone in your network — and alerts you when the rhythm changes. Not when a contact goes completely silent, but earlier: when a weekly email exchange becomes fortnightly. When a Slack thread you were always active in has gone quiet on your end. When someone who used to reach out regularly has stopped.
+
+It doesn't just flag the silence. It tells you why it matters: recent context on who this person is, what you last discussed, and a suggested first step to reconnect.
+
+The relationships that slip away rarely announce their departure.
+
+donna notices before you do.
+
+→ donna.app</div>
+    <div class="hashtag-row">#networkbuilding #relationships #leadership #emotionalintelligence #networking</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 10</strong>Dark card. Three contacts: green/active, amber/cooling, red/gone cold. Each with pulse bar + last contact date + status badge.</div>
+  </div>
+</div>
+
+<!-- DAY 11 -->
+<div id="d11" class="day-card">
+  <div class="day-top">
+    <span class="day-num">11</span>
+    <span class="day-title">Privacy &amp; Security</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">THU · 12PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d11', this)">Copy</button></div>
+    <div id="copy-d11" class="copy-text">Giving an AI access to your inbox takes trust.
+
+We built donna for people who don't give that lightly.
+
+Here's how your data is protected:
+
+→ OAuth tokens are vaulted — never stored in plaintext, ever
+→ AES-256 encryption on all sensitive fields
+→ Row-level security on every database table
+→ No data shared with third parties, full stop
+→ 2FA enforced on all accounts
+
+donna reads so she can brief you. She forgets when you ask her to.
+
+Your intelligence layer. Your data. Your call.
+
+donna.app</div>
+    <div class="hashtag-row">#privacy #datasecurity #ai #trust #infosec</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 11</strong>Dark card. Shield icon in dawn colour. 5 security properties listed in monospace below. "Built for people who don't trust easily." italic at base.</div>
+  </div>
+</div>
+
+<!-- DAY 12 -->
+<div id="d12" class="day-card">
+  <div class="day-top">
+    <span class="day-num">12</span>
+    <span class="day-title">The Distinction — Not a Chatbot</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">TUE · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d12', this)">Copy</button></div>
+    <div id="copy-d12" class="copy-text">donna is not a chatbot.
+
+Here's why that distinction matters.
+
+A chatbot waits. You ask. It responds. You leave the conversation, the context disappears, and tomorrow you have to start again.
+
+donna doesn't wait to be asked. She reads your calendar before your meeting so you arrive prepared. She noticed the email thread where someone implied they were unhappy, even though they didn't say it directly. She tracked the deadline you mentioned in passing three weeks ago.
+
+You open Telegram in the morning. The briefing is already there.
+
+This is the difference between a tool and an intelligence layer. Between something that helps when you remember to use it — and something that's working while you're not.
+
+We're not building a smarter assistant. We're building the colleague who never drops a thing.
+
+→ donna.app</div>
+    <div class="hashtag-row">#ai #chatgpt #productivity #futureofwork #aitools</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 12</strong>Split card. Left: "Chatbot" — waits, forgets, reactive. Right: "donna" — proactive, reads everything, always on. Clean two-column contrast.</div>
+  </div>
+</div>
+
+<!-- DAY 13 -->
+<div id="d13" class="day-card">
+  <div class="day-top">
+    <span class="day-num">13</span>
+    <span class="day-title">Meeting Prep Briefs</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">WED · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X THREAD <button class="copy-btn" onclick="copyText('copy-d13', this)">Copy</button></div>
+    <div id="copy-d13" class="copy-text">1/4 — One of donna's quietest features is one people keep asking about.
+
+Meeting prep briefs.
+
+Before any meeting on your calendar, donna generates a brief. Here's what's in it:
+
+——
+
+2/4 — → Who's attending and what donna knows about them
+→ Last 3 threads you had with each person — topic, sentiment, any open items
+→ Any commitments made or received since your last meeting
+→ Suggested talking points based on recent context
+→ Red flags: anything about this relationship that needs attention
+
+——
+
+3/4 — You walk into every meeting already knowing what you need to know.
+
+Not from spending 20 minutes on LinkedIn. Not from digging through old emails.
+
+Because donna already did it.
+
+——
+
+4/4 — The people who've tested this keep saying the same thing:
+
+"I felt like the most prepared person in the room for the first time."
+
+donna.app — early access this week</div>
+    <div class="thread-note">⌁ POST AS THREAD · 4 tweets</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 13</strong>Dark card. Meeting prep brief mockup — attendee names, last discussed topics, open commitments, one red flag highlighted in alert colour.</div>
+  </div>
+</div>
+
+<!-- DAY 14 -->
+<div id="d14" class="day-card">
+  <div class="day-top">
+    <span class="day-num">14</span>
+    <span class="day-title">Graduated Autonomy</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">TUE–THU · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN &amp; INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d14', this)">Copy</button></div>
+    <div id="copy-d14" class="copy-text">An intelligence layer that takes actions you didn't ask for is a liability, not a tool.
+
+We built donna's autonomy system with one principle: she suggests, you decide — unless you've explicitly told her otherwise.
+
+Every action falls into one of three tiers:
+
+Tier 1 (Silent): You've pre-authorised this. donna does it, logs it, tells you it happened.
+
+Tier 2 (One-tap): donna sends a notification with a one-tap confirmation. You approve in under 3 seconds.
+
+Tier 3 (Full): A full summary with source citations, requiring your explicit sign-off. Email sending is always Tier 3 — no exceptions, ever.
+
+You set the thresholds. She respects them.
+
+Trust is earned incrementally. donna is designed to earn it.
+
+→ donna.app</div>
+    <div class="hashtag-row">#ai #agenticai #trust #automation #aitools #futureofwork</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 14</strong>Dark card. Three tiers shown as horizontal rows — Silent / One-tap / Full — with colour coding and short descriptions. Clean system diagram.</div>
+  </div>
+</div>
+
+<!-- DAY 15 -->
+<div id="d15" class="day-card">
+  <div class="day-top">
+    <span class="day-num">15</span>
+    <span class="day-title">Reply Drafting</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">SAT · 12PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d15', this)">Copy</button></div>
+    <div id="copy-d15" class="copy-text">The email you've been putting off for three days takes donna about four seconds.
+
+From your morning briefing, tap any item and donna can draft a reply — with full context from your conversation history, your previous commitments, and the tone that fits.
+
+You review it. You send it (or don't). She never sends anything without you.
+
+The inbox that once took an hour takes ten minutes.
+
+donna.app — join the early access waitlist</div>
+    <div class="hashtag-row">#ai #inbox #emailproductivity #deepwork #timemanagement</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 15</strong>Dark card. "The email you've been avoiding." top line. Large "4 seconds." in dawn colour centre. "donna drafted it." below. Minimal and punchy.</div>
+  </div>
+</div>
+
+<!-- DAY 16 -->
+<div id="d16" class="day-card">
+  <div class="day-top">
+    <span class="day-num">16</span>
+    <span class="day-title">The Technical Deep-Dive</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">MON · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X THREAD <button class="copy-btn" onclick="copyText('copy-d16', this)">Copy</button></div>
+    <div id="copy-d16" class="copy-text">1/5 — For the technically curious: here's how donna actually works under the hood.
+
+——
+
+2/5 — Ingestion runs overnight via Trigger.dev background jobs.
+
+Every integration (Gmail, Calendar, Slack, Notion) is read via OAuth — tokens vaulted in Nango, never touched by our application layer.
+
+Content is sanitised before it reaches any AI prompt. No raw user data ever hits a model directly.
+
+——
+
+3/5 — Two-pass AI pipeline:
+
+Pass 1 → Claude Haiku: cheap, fast extraction — pull commitments, flag relationships, detect sentiment signals
+
+Pass 2 → Claude Sonnet: accurate scoring and briefing generation — the reasoning layer that decides what actually matters
+
+——
+
+4/5 — The briefing is generated, ranked by a 5-dimension priority engine, and delivered via Telegram Bot API.
+
+Every factual claim in the briefing carries a source_ref — a pointer back to the originating message. We never show an AI claim without a citation.
+
+Built on Next.js 16, Supabase (pgvector for semantic search), Vercel.
+
+——
+
+5/5 — We're publishing a full architecture deep-dive on the blog next week.
+
+For now: donna.app — early access now live.</div>
+    <div class="thread-note">⌁ POST AS THREAD · 5 tweets · technical audience</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 16</strong>Dark technical card. "Pass 1: Haiku → extract" and "Pass 2: Sonnet → reason" shown as a two-step pipeline diagram in monospace style.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PHASE 3: DESIRE — DAYS 17–23
+══════════════════════════════════════ -->
+<div id="ph3" class="phase-header" style="margin-top:48px">
+  <span class="ph-badge p3">Phase 03</span>
+  <span class="ph-name">Desire — I need this.</span>
+  <span class="ph-goal">Goal: use cases, social proof, FOMO. Make the ideal user see themselves in every post.</span>
+</div>
+
+<!-- DAY 17 -->
+<div id="d17" class="day-card">
+  <div class="day-top">
+    <span class="day-num">17</span>
+    <span class="day-title">The Founder Use Case</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">TUE · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d17', this)">Copy</button></div>
+    <div id="copy-d17" class="copy-text">The hardest thing about running a company at 20 people isn't strategy. It's remembering everything you said to everyone.
+
+You told the engineer on Tuesday you'd share feedback by Friday.
+You promised an investor an update "sometime this week."
+You told your head of sales you'd make that intro.
+
+None of these are in your calendar. None are in your task manager. They live in your inbox and your memory — two places famous for unreliability.
+
+donna was built specifically for this. She reads across all your communication channels overnight, extracts every commitment and deadline, and puts them in your morning briefing with a link back to the original message.
+
+The intro you promised three weeks ago — she remembers.
+
+Early-stage founders are our first cohort. If this resonates, the waitlist is at donna.app.</div>
+    <div class="hashtag-row">#founders #startups #leadership #productivity #earlystagestartup</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 17</strong>Dark card. Three promise lines in italic: "I'll send that by Friday." / "Let me make that intro." / "Circle back to me on that." Each with a status — two crossed out (done), one in dawn/alert (overdue).</div>
+  </div>
+</div>
+
+<!-- DAY 18 -->
+<div id="d18" class="day-card">
+  <div class="day-top">
+    <span class="day-num">18</span>
+    <span class="day-title">The Contrarian Take</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">WED · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X <button class="copy-btn" onclick="copyText('copy-d18', this)">Copy</button></div>
+    <div id="copy-d18" class="copy-text">The problem with productivity tools is there are too many of them.
+
+You have a task manager, a calendar, an email client, a note-taking app, a CRM, and three AI assistants.
+
+They don't talk to each other. None of them know what happened in the others.
+
+donna reads all of them. You get one briefing.
+
+The goal was never more tools. It was one layer that reads everything so you can focus on anything.
+
+donna.app</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 18</strong>Dark card. Left side: pile of app logos/names (chaotic). Right side: "donna" alone, clean. "One layer." centred in dawn colour.</div>
+  </div>
+</div>
+
+<!-- DAY 19 -->
+<div id="d19" class="day-card">
+  <div class="day-top">
+    <span class="day-num">19</span>
+    <span class="day-title">The Aspirational Quote Card</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">TUE · 12PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d19', this)">Copy</button></div>
+    <div id="copy-d19" class="copy-text">She reads everything you don't have time to.
+
+Delivers everything you need to know.
+
+Acts only when you say so.
+
+Every morning. Without being asked.
+
+donna — your intelligence layer.
+
+donna.app</div>
+    <div class="hashtag-row">#donna #productivitymindset #leadership #chiefofstaff #morningroutine</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 19</strong>Deep dark card. Three lines stacked in large Cormorant italic. Each separated by a small dawn accent dot. Minimal, shareable, brand-pure.</div>
+  </div>
+</div>
+
+<!-- DAY 20 -->
+<div id="d20" class="day-card">
+  <div class="day-top">
+    <span class="day-num">20</span>
+    <span class="day-title">Why Telegram</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">THU · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d20', this)">Copy</button></div>
+    <div id="copy-d20" class="copy-text">We could have built an app. We built a Telegram message instead.
+
+Here's why.
+
+The problem with most productivity tools is that checking them is itself a task. You have to remember to open them, navigate to the right view, and process what you see. That's friction before you've even started your day.
+
+donna arrives where you already are.
+
+Your morning routine probably includes checking Telegram, WhatsApp, or both. donna sends the briefing there — one message, already formatted, already prioritised. No app to open. No interface to learn. No habit to build.
+
+You're already in the habit of checking messages. donna just makes the one you receive worth reading.
+
+Telegram at launch. WhatsApp coming next.
+
+→ donna.app</div>
+    <div class="hashtag-row">#telegram #productivity #ux #aitools #morningroutine</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 20</strong>Dark card. "Arrives where you already are." large italic. Below: Telegram icon in context. donna.app base line.</div>
+  </div>
+</div>
+
+<!-- DAY 21 -->
+<div id="d21" class="day-card">
+  <div class="day-top">
+    <span class="day-num">21</span>
+    <span class="day-title">Social Proof Thread</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">WED · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X THREAD <button class="copy-btn" onclick="copyText('copy-d21', this)">Copy</button></div>
+    <div id="copy-d21" class="copy-text">1/4 — We gave early access to 30 people two weeks ago.
+
+Here's what they told us after 10 days:
+
+——
+
+2/4 — "The commitment tracking alone justified it. I had 14 open promises I'd completely forgotten. Found out over breakfast."
+
+— Founder, Series A company
+
+——
+
+3/4 — "I stopped dreading my inbox because I no longer have to process it. donna does that. I just show up to the briefing."
+
+— Chief of Staff, scale-up
+
+——
+
+4/4 — "The meeting prep brief is absurdly good. I walked into a board meeting yesterday knowing things I had no right to already know."
+
+— GP, early-stage VC
+
+Public early access opens tomorrow.
+donna.app</div>
+    <div class="thread-note">⌁ POST AS THREAD · 4 tweets · social proof format</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 21</strong>Dark card. Single testimonial quote, large italic. Attribution below in monospace. Restrained and credible.</div>
+  </div>
+</div>
+
+<!-- DAY 22 -->
+<div id="d22" class="day-card">
+  <div class="day-top">
+    <span class="day-num">22</span>
+    <span class="day-title">Not For Everyone</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">SAT · 12PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d22', this)">Copy</button></div>
+    <div id="copy-d22" class="copy-text">donna isn't for everyone.
+
+She's for the person whose day is driven by communication. Whose relationships are professional assets. Who knows that missing a commitment or letting a relationship go cold has real consequences.
+
+She's for the founder who's their own chief of staff.
+The executive with 200 unread emails and four directs to stay across.
+The investor who needs to know what's happening before walking into the room.
+
+If your morning doesn't depend on information — donna probably isn't for you.
+
+If it does — you should probably be on the waitlist.
+
+donna.app</div>
+    <div class="hashtag-row">#donna #leadership #founders #executivetools #chiefofstaff</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 22</strong>Minimal dark card. "donna isn't for everyone." large italic. Below: "Founders. Executives. Investors." three lines, each with a thin dawn rule. Premium, selective.</div>
+  </div>
+</div>
+
+<!-- DAY 23 -->
+<div id="d23" class="day-card">
+  <div class="day-top">
+    <span class="day-num">23</span>
+    <span class="day-title">The FOMO Post</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">MON · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d23', this)">Copy</button></div>
+    <div id="copy-d23" class="copy-text">The first 100 people who join donna's early access cohort get something the people after them don't.
+
+They get to shape it.
+
+We're keeping the first cohort deliberately small — founders, chiefs of staff, executives, investors. People who depend on their communication layer the way a pilot depends on instruments.
+
+With that group we're running:
+→ Weekly feedback sessions
+→ Direct access to the founding team
+→ Input on which integrations we build next
+→ Lifetime pricing locked at launch rates
+
+The waitlist now has 800+ people on it. We're opening 100 spots this week.
+
+If you've been considering it: donna.app</div>
+    <div class="hashtag-row">#earlyaccess #productlaunch #startups #ai #founders</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 23</strong>Dark card. Progress bar showing "73 of 100 spots filled." Dawn colour fill. "27 remaining" below in monospace. Urgency is visual, not shouty.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PHASE 4: LAUNCH — DAYS 24–30
+══════════════════════════════════════ -->
+<div id="ph4" class="phase-header" style="margin-top:48px">
+  <span class="ph-badge p4">Phase 04</span>
+  <span class="ph-name">Launch — She's live.</span>
+  <span class="ph-goal">Goal: early access open, drive sign-ups, answer objections, celebrate the community.</span>
+</div>
+
+<!-- DAY 24 -->
+<div id="d24" class="day-card">
+  <div class="day-top">
+    <span class="day-num">24</span>
+    <span class="day-title">🚀 LAUNCH DAY</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+      <span class="plat plat-ig">Instagram</span>
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">TUE · 9AM — ALL PLATFORMS</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">ALL PLATFORMS — SAME DAY, SAME MESSAGE <button class="copy-btn" onclick="copyText('copy-d24', this)">Copy</button></div>
+    <div id="copy-d24" class="copy-text">donna is live.
+
+Early access is now open.
+
+She reads your email, calendar, Slack, and documents overnight and delivers one morning briefing: what matters, what you promised, who you've gone cold with, and what to do first.
+
+No inbox archaeology. No missed commitments. No cold relationships you didn't mean to let go.
+
+The first cohort is limited and hand-selected.
+
+→ donna.app
+
+We built this for people who depend on their mornings. If that's you — come in.</div>
+    <div class="hashtag-row">#launch #donna #ai #productivity #chiefofstaff #earlyaccess #morningbriefing</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 24</strong>HERO LAUNCH CARD. donna logo large on midnight. "Early access is live." in dawn italic below. "donna.app" in monospace at base. Green "live" pulse dot top left. Maximum impact.</div>
+  </div>
+</div>
+
+<!-- DAY 25 -->
+<div id="d25" class="day-card">
+  <div class="day-top">
+    <span class="day-num">25</span>
+    <span class="day-title">The Public FAQ</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">WED · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X THREAD <button class="copy-btn" onclick="copyText('copy-d25', this)">Copy</button></div>
+    <div id="copy-d25" class="copy-text">1/6 — Since launch yesterday, the same questions keep coming up.
+
+Let me answer them all here.
+
+——
+
+2/6 — Q: Can she read WhatsApp?
+Not yet. Telegram at launch. WhatsApp is next. We're blocked on Meta's API policy for now — working on it.
+
+——
+
+3/6 — Q: Does she keep all my emails forever?
+No. donna reads and processes. She retains structured intelligence (commitments, relationship data, summaries) — not raw message content. You can delete your data at any time from settings.
+
+——
+
+4/6 — Q: What if I don't want her to read a specific thread or inbox?
+You can exclude any label, folder, or channel. Onboarding walks you through this. Privacy controls are first-class, not an afterthought.
+
+——
+
+5/6 — Q: Is this just another AI wrapper?
+The intelligence pipeline has two passes. Extraction uses Haiku (fast, cheap). Briefing generation uses Sonnet (accurate, reasoning-heavy). The commitment tracker, heartbeat monitor, and priority engine are purpose-built. It's not a wrapper — it's a system.
+
+——
+
+6/6 — Q: What does it cost?
+Early access pricing is locked for the first cohort. Details at donna.app when you sign up.
+
+Any other questions? Drop them below — I'll answer every one.</div>
+    <div class="thread-note">⌁ POST AS THREAD · 6 tweets · reply to questions in the comments</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 25</strong>Dark card. Three Q&amp;A rows, each with a question in monospace and a short answer below. Clean FAQ layout.</div>
+  </div>
+</div>
+
+<!-- DAY 26 -->
+<div id="d26" class="day-card">
+  <div class="day-top">
+    <span class="day-num">26</span>
+    <span class="day-title">The Milestone Post</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">THU · 8–10AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d26', this)">Copy</button></div>
+    <div id="copy-d26" class="copy-text">24 hours in. 200 people have joined donna's early access cohort.
+
+We expected this to take a week.
+
+What's been striking isn't the numbers — it's who's signed up. The people joining are exactly who we built this for: founders managing investor relationships from Slack, chiefs of staff drowning in their principal's calendar, executives who haven't had a clean morning routine in months.
+
+It's a reminder that the pain is real. The inbox isn't a personal failing. It's a structural problem that scales with seniority.
+
+donna is 100 spots from closing the first cohort.
+
+If you've been on the fence — donna.app.
+
+Thank you to everyone who's been following this from the beginning. The people who reposted, replied, and shared the waitlist have been incredible. You know who you are.</div>
+    <div class="hashtag-row">#launch #founders #chiefofstaff #ai #milestone</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 26</strong>Dark card. Large "200" in dawn colour, Cormorant italic. "people who woke up with donna this morning." below in mist colour. Warm and celebratory.</div>
+  </div>
+</div>
+
+<!-- DAY 27 -->
+<div id="d27" class="day-card">
+  <div class="day-top">
+    <span class="day-num">27</span>
+    <span class="day-title">Behind the Build</span>
+    <div class="day-platforms">
+      <span class="plat plat-ig">Instagram</span>
+    </div>
+    <span class="day-time">SAT · 12PM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">INSTAGRAM CAPTION <button class="copy-btn" onclick="copyText('copy-d27', this)">Copy</button></div>
+    <div id="copy-d27" class="copy-text">We've been asked: why "donna"?
+
+Because every person on our team — at some point in their career — wished they had someone like her.
+
+The meeting they walked into underprepared. The commitment they forgot. The client relationship they let slip. The email they should have sent weeks ago.
+
+We didn't build donna because we're organised people. We built her because we aren't, and we needed something that would compensate for that at scale.
+
+She's named after the idea that the most valuable person in any room is the one who already knows what matters — and acts on it before anyone has to ask.
+
+We hope she lives up to the name.
+
+donna.app — early access open now</div>
+    <div class="hashtag-row">#buildinpublic #startup #founder #donna #origin</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 27</strong>Warm dark card. "We built donna because we needed her." large italic centred. Human, personal, honest.</div>
+  </div>
+</div>
+
+<!-- DAY 28 -->
+<div id="d28" class="day-card">
+  <div class="day-top">
+    <span class="day-num">28</span>
+    <span class="day-title">The First User Story</span>
+    <div class="day-platforms">
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">MON · 9AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">TWITTER/X <button class="copy-btn" onclick="copyText('copy-d28', this)">Copy</button></div>
+    <div id="copy-d28" class="copy-text">One of our beta users — a chief of staff at a 60-person company — told us something yesterday.
+
+She said donna's morning briefing had flagged a commitment her principal made to an investor six weeks ago.
+
+The investor had a board meeting that morning.
+
+The commitment hadn't been fulfilled.
+
+She fixed it in 40 minutes. The conversation at the board meeting was a different one.
+
+That's what a missed thing costs. And that's what catching it is worth.
+
+donna.app</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 28</strong>Dark card. Story told in 3 lines: "Commitment made. 6 weeks ago." / "Board meeting. This morning." / "donna caught it." Each line with its own weight and spacing. Narrative tension.</div>
+  </div>
+</div>
+
+<!-- DAY 29 -->
+<div id="d29" class="day-card">
+  <div class="day-top">
+    <span class="day-num">29</span>
+    <span class="day-title">The Last Chance Post</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+    </div>
+    <span class="day-time">TUE · 8AM</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">LINKEDIN CAPTION <button class="copy-btn" onclick="copyText('copy-d29', this)">Copy</button></div>
+    <div id="copy-d29" class="copy-text">The first cohort closes tomorrow.
+
+If you've been on the waitlist and haven't activated yet — today is the day.
+
+After tomorrow, early access pricing goes away and donna joins the general queue. The founding cohort gets locked-in rates, direct founder access, and input on the product roadmap.
+
+300 people joined in 6 days. We're opening the last 30 spots now.
+
+One morning briefing. Everything that matters. Nothing you don't need.
+
+→ donna.app
+
+No further nudging after this. She's not the type to repeat herself.</div>
+    <div class="hashtag-row">#lastchance #donna #earlyaccess #ai #founders</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 29</strong>Dark urgent card. "First cohort closes tomorrow." large. Progress bar: 97/100 spots filled. "3 remaining." in alert colour. donna.app base.</div>
+  </div>
+</div>
+
+<!-- DAY 30 -->
+<div id="d30" class="day-card">
+  <div class="day-top">
+    <span class="day-num">30</span>
+    <span class="day-title">The Closer</span>
+    <div class="day-platforms">
+      <span class="plat plat-li">LinkedIn</span>
+      <span class="plat plat-ig">Instagram</span>
+      <span class="plat plat-tw">Twitter/X</span>
+    </div>
+    <span class="day-time">WED · 9AM — ALL PLATFORMS</span>
+  </div>
+  <div class="day-body">
+    <div class="copy-label">ALL PLATFORMS <button class="copy-btn" onclick="copyText('copy-d30', this)">Copy</button></div>
+    <div id="copy-d30" class="copy-text">30 days ago, we announced donna.
+
+Today, 330 people wake up with her every morning.
+
+Their inbox hasn't changed. Their calendar hasn't changed. The volume of communication hasn't changed.
+
+But they've stopped drowning in it.
+
+That's the whole product. That was always the whole product. Not AI for AI's sake — a system that reads the signal so you can act on it.
+
+Thank you to everyone who's joined, shared, and believed in this early. The next chapter starts now.
+
+If you missed the first cohort — we'll be opening more spots soon.
+
+Waitlist: donna.app
+
+See everything. Miss nothing.</div>
+    <div class="hashtag-row">#donna #launch #ai #productivity #chiefofstaff #morningbriefing #milestone</div>
+    <div class="visual-ref"><strong>🖼 VISUAL · SEE POST CARDS FILE · DAY 30</strong>Hero closing card. Large "330" in dawn. "mornings. No signal missed." below. donna mark + "See everything. Miss nothing." tagline at base. Campaign closer.</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ══════════ FOOTER ══════════ -->
+<div class="footer">
+  <div>
+    <div class="footer-brand">donna</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(155,175,196,.35);letter-spacing:.08em;margin-top:6px;">30-DAY LAUNCH CALENDAR · MARCH 2026</div>
+  </div>
+  <div class="footer-meta">
+    See everything. Miss nothing.<br>
+    donna.app
+  </div>
+</div>
+
+<script>
+  function copyText(id, btn) {
+    const el = document.getElementById(id);
+    const text = el.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

@@ -535,7 +535,7 @@ export default function PrivateOfficeLanding() {
                 {
                   num: "01",
                   title: "Daily Briefing",
-                  text: "One morning message with everything ranked by what actually matters to you. No app to open, no inbox to scan. Delivered to Telegram at the time you choose.",
+                  text: "One morning message with everything ranked by what actually matters to you. Delivered in-app at the time you choose, with the most important items ranked at the top.",
                 },
                 {
                   num: "02",
@@ -640,7 +640,7 @@ export default function PrivateOfficeLanding() {
                 {
                   step: "03",
                   title: "Brief",
-                  text: "One Telegram message at your preferred time. What's critical, who needs a response, what you promised. Tap to act on anything instantly.",
+                  text: "Your briefing, in-app at your preferred time. What's critical, who needs a response, what you promised. Tap to act on anything instantly.",
                 },
               ].map((item, i) => (
                 <Reveal key={item.step} delay={i * 0.1}>
@@ -709,7 +709,7 @@ export default function PrivateOfficeLanding() {
                       style={{ background: c.dawn }}
                     />
                     <span className="text-[13px]" style={{ color: c.textTertiary }}>
-                      Delivered via Telegram at the time you set
+                      Delivered in-app at the time you set
                     </span>
                   </div>
                 </div>
@@ -930,7 +930,7 @@ export default function PrivateOfficeLanding() {
                       "Relationship radar",
                       "Meeting prep briefs",
                       "Smart reply drafts",
-                      "Telegram & WhatsApp",
+                      "In-app (WhatsApp coming soon)",
                       "Priority support",
                     ].map((feature) => (
                       <div key={feature} className="flex items-center gap-2.5">

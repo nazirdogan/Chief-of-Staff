@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>donna — Post Visuals Days 01–10</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --midnight: #1B1F3A; --dawn: #E8845C; --dusk: #4E7DAA;
+      --paper: #FBF7F4; --sage: #52B788; --gold: #F4C896;
+      --deep: #0E1225; --charcoal: #2D3154; --mist: #9BAFC4;
+      --stone: #F0EDE9; --alert: #D64B2A;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--stone); font-family: 'Inter', sans-serif; padding: 48px 56px; }
+
+    .header {
+      background: var(--midnight);
+      padding: 28px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(232,132,92,.25);
+      margin: -48px -56px 48px;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-style: italic; color: var(--paper); }
+    .header-sub { font-size: 12px; color: var(--mist); border-left: 1px solid rgba(155,175,196,.25); padding-left: 16px; letter-spacing: .04em; }
+    .header-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(155,175,196,.4); letter-spacing: .1em; text-align: right; line-height: 1.9; }
+
+    .day-block { margin-bottom: 56px; }
+    .day-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--mist); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .day-label-title { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--midnight); letter-spacing: 0; }
+    .day-label-plat {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 8px;
+      border-radius: 100px; margin-left: auto;
+    }
+    .plat-li { background: rgba(78,125,170,.1); color: var(--dusk); }
+    .plat-tw { background: rgba(27,31,58,.07); color: var(--charcoal); }
+    .plat-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
+    .plat-all { background: rgba(82,183,136,.1); color: var(--sage); }
+
+    .card-wrap {
+      display: flex; gap: 24px; align-items: flex-start;
+    }
+    .card-preview { flex-shrink: 0; }
+    .card-side { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+    .btn {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
+      padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer;
+      transition: all .15s; letter-spacing: .08em; text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-dawn { background: var(--dawn); color: white; }
+    .btn-dawn:hover { background: #d4724c; }
+    .btn-ghost { background: white; color: var(--midnight); border: 1px solid rgba(27,31,58,.12); }
+    .btn-ghost:hover { background: var(--midnight); color: var(--paper); }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    .card-info {
+      background: white; border-radius: 6px; padding: 16px 18px;
+      font-size: 13px; color: #555; line-height: 1.6;
+      border-left: 3px solid var(--dawn);
+    }
+    .card-info strong { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dawn); display: block; margin-bottom: 4px; letter-spacing: .1em; }
+
+    .divider { border: none; border-top: 1px solid rgba(27,31,58,.08); margin: 40px 0; }
+
+    /* ─ svg card display size ─ */
+    svg.card { display: block; border-radius: 8px; box-shadow: 0 8px 40px rgba(27,31,58,.18); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-brand">donna</div>
+    <div class="header-sub">Post Visuals · Days 01–10 · 1080×1080px</div>
+  </div>
+  <div class="header-meta">DOWNLOAD EACH CARD AS PNG<br>READY FOR INSTAGRAM · LINKEDIN · TWITTER</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     DAY 01 — LAUNCH ANNOUNCEMENT
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 01
+    <span class="day-label-title">Launch Announcement</span>
+    <span class="day-label-plat plat-all">LinkedIn · Instagram · Twitter</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d01" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <!-- radial glow -->
+        <radialGradient id="g01" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#E8845C" stop-opacity="0.07"/>
+          <stop offset="100%" stop-color="#1B1F3A" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g01)"/>
+        <!-- top dawn rule -->
+        <line x1="0" y1="3" x2="700" y2="3" stroke="#E8845C" stroke-width="3" opacity="0.5"/>
+        <!-- logo mark centred at 540,380 scale 3.2 -->
+        <g transform="translate(373,219) scale(3.2)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+        </g>
+        <!-- donna wordmark -->
+        <text x="540" y="590" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="128" font-weight="300" fill="#FBF7F4" letter-spacing="-2">donna</text>
+        <!-- divider line -->
+        <line x1="340" y1="632" x2="740" y2="632" stroke="#E8845C" stroke-width="1.5" opacity="0.35"/>
+        <!-- tagline -->
+        <text x="540" y="686" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="32" fill="#9BAFC4" letter-spacing="1">See everything. Miss nothing.</text>
+        <!-- eyebrow -->
+        <text x="540" y="760" text-anchor="middle" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4" opacity="0.45" letter-spacing="4">EARLY ACCESS COMING</text>
+        <!-- bottom bar -->
+        <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#E8845C" stroke-width="3" opacity="0.4"/>
+        <!-- bottom logo small -->
+        <g transform="translate(68,960) scale(0.58)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.4"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.4"/>
+        </g>
+        <text x="130" y="1002" font-family="Georgia,serif" font-style="italic" font-size="28" fill="#FBF7F4" opacity="0.3">donna</text>
+        <text x="1012" y="1002" text-anchor="end" font-family="'Courier New',monospace" font-size="18" fill="#E8845C" opacity="0.6" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 01 · LAUNCH ANNOUNCEMENT</strong>
+        Brand reveal card. Dark midnight base with radial glow, the donna logo mark large at centre, italic wordmark below, tagline "See everything. Miss nothing." Use this as your hero image across all three platforms on Day 1.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d01','donna-post-day01')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d01','donna-post-day01')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 02 — THE PAIN POST
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 02
+    <span class="day-label-title">The Pain Post</span>
+    <span class="day-label-plat plat-li">LinkedIn</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d02" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#FBF7F4"/>
+        <!-- left panel -->
+        <rect x="0" y="0" width="520" height="1080" fill="#F0EDE9"/>
+        <!-- right panel -->
+        <rect x="560" y="0" width="520" height="1080" fill="#1B1F3A"/>
+        <!-- divider -->
+        <rect x="520" y="0" width="40" height="1080" fill="#E8845C" opacity="0.15"/>
+        <line x1="540" y1="0" x2="540" y2="1080" stroke="#E8845C" stroke-width="1.5" opacity="0.4"/>
+
+        <!-- LEFT — chaos label -->
+        <text x="260" y="120" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="#9BAFC4" letter-spacing="4">BEFORE DONNA</text>
+        <!-- big number -->
+        <text x="260" y="330" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="180" fill="#1B1F3A" opacity="0.12">84</text>
+        <text x="260" y="420" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="40" fill="#2D3154">84 unread.</text>
+        <!-- email rows -->
+        <rect x="68" y="460" width="384" height="44" rx="4" fill="white" opacity="0.8"/>
+        <rect x="68" y="512" width="384" height="44" rx="4" fill="white" opacity="0.6"/>
+        <rect x="68" y="564" width="384" height="44" rx="4" fill="white" opacity="0.45"/>
+        <rect x="68" y="616" width="384" height="44" rx="4" fill="white" opacity="0.3"/>
+        <rect x="68" y="668" width="384" height="44" rx="4" fill="white" opacity="0.2"/>
+        <!-- unread dots -->
+        <circle cx="90" cy="482" r="5" fill="#E8845C"/>
+        <circle cx="90" cy="534" r="5" fill="#E8845C"/>
+        <circle cx="90" cy="586" r="5" fill="#4E7DAA"/>
+        <!-- text placeholders -->
+        <rect x="106" y="472" width="200" height="10" rx="3" fill="#9BAFC4" opacity="0.4"/>
+        <rect x="106" y="490" width="140" height="8" rx="3" fill="#9BAFC4" opacity="0.25"/>
+        <rect x="106" y="524" width="220" height="10" rx="3" fill="#9BAFC4" opacity="0.4"/>
+        <rect x="106" y="542" width="160" height="8" rx="3" fill="#9BAFC4" opacity="0.25"/>
+        <rect x="106" y="576" width="180" height="10" rx="3" fill="#9BAFC4" opacity="0.35"/>
+        <rect x="106" y="626" width="190" height="10" rx="3" fill="#9BAFC4" opacity="0.3"/>
+        <rect x="106" y="678" width="150" height="10" rx="3" fill="#9BAFC4" opacity="0.2"/>
+
+        <!-- LEFT caption -->
+        <text x="260" y="800" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="22" fill="#9BAFC4">3 hrs of your morning.</text>
+        <text x="260" y="836" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="22" fill="#9BAFC4">Actionable: maybe twice.</text>
+
+        <!-- RIGHT — donna label -->
+        <text x="820" y="120" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" letter-spacing="4">WITH DONNA</text>
+        <!-- big 1 -->
+        <text x="820" y="330" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="180" fill="#E8845C" opacity="0.1">1</text>
+        <text x="820" y="420" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="40" fill="#FBF7F4">1 briefing.</text>
+        <!-- clean card -->
+        <rect x="620" y="460" width="400" height="260" rx="8" fill="rgba(255,255,255,0.06)" stroke="rgba(155,175,196,0.15)" stroke-width="1"/>
+        <text x="636" y="492" font-family="'Courier New',monospace" font-size="12" fill="#E8845C" letter-spacing="2">07:30 · TODAY</text>
+        <line x1="636" y1="504" x2="1004" y2="504" stroke="rgba(155,175,196,0.12)" stroke-width="1"/>
+        <text x="636" y="528" font-family="Georgia,serif" font-style="italic" font-size="16" fill="#FBF7F4" opacity="0.8">Good morning. Here's what matters.</text>
+        <circle cx="644" cy="562" r="4" fill="#E8845C"/>
+        <text x="658" y="566" font-family="Georgia,serif" font-size="14" fill="#9BAFC4">Reply to Marcus re: deck · today</text>
+        <circle cx="644" cy="598" r="4" fill="#4E7DAA"/>
+        <text x="658" y="602" font-family="Georgia,serif" font-size="14" fill="#9BAFC4">Board meeting 11am · prep ready</text>
+        <circle cx="644" cy="634" r="4" fill="#F4C896"/>
+        <text x="658" y="638" font-family="Georgia,serif" font-size="14" fill="#9BAFC4">Sarah — 8 days, no reply</text>
+        <circle cx="644" cy="670" r="4" fill="#D64B2A"/>
+        <text x="658" y="674" font-family="Georgia,serif" font-size="14" fill="#9BAFC4" opacity="0.8">! Intro to James overdue</text>
+        <!-- right caption -->
+        <text x="820" y="800" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="22" fill="#9BAFC4">10 min. Everything that matters.</text>
+        <text x="820" y="836" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="22" fill="#9BAFC4">Nothing that doesn't.</text>
+
+        <!-- bottom bar -->
+        <rect x="0" y="900" width="1080" height="180" fill="#1B1F3A" opacity="0.95"/>
+        <line x1="0" y1="900" x2="1080" y2="900" stroke="#E8845C" stroke-width="1" opacity="0.3"/>
+        <text x="68" y="970" font-family="Georgia,serif" font-style="italic" font-size="36" fill="#FBF7F4" opacity="0.6">donna</text>
+        <text x="540" y="960" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="22" fill="#9BAFC4">One briefing. Every day. No noise.</text>
+        <text x="1012" y="970" text-anchor="end" font-family="'Courier New',monospace" font-size="16" fill="#E8845C" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 02 · THE PAIN POST</strong>
+        Split card contrast: left panel shows the chaotic inbox (84 unread, placeholder email rows), right panel shows the clean donna briefing with 4 ranked items. The visual makes the argument without words.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d02','donna-post-day02')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d02','donna-post-day02')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 03 — THE ORIGIN STORY
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 03
+    <span class="day-label-title">The Origin Story</span>
+    <span class="day-label-plat plat-ig">Instagram · Twitter</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d03" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#0E1225"/>
+        <radialGradient id="g03" cx="30%" cy="60%" r="60%">
+          <stop offset="0%" stop-color="#E8845C" stop-opacity="0.05"/>
+          <stop offset="100%" stop-color="#0E1225" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g03)"/>
+        <!-- large quotation mark bg -->
+        <text x="60" y="420" font-family="Georgia,serif" font-size="480" fill="#FBF7F4" opacity="0.025">"</text>
+        <!-- dawn top rule -->
+        <line x1="80" y1="80" x2="320" y2="80" stroke="#E8845C" stroke-width="2" opacity="0.5"/>
+        <circle cx="80" cy="80" r="4" fill="#E8845C" opacity="0.6"/>
+        <!-- eyebrow -->
+        <text x="100" y="74" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" opacity="0.7" letter-spacing="4">THE NAME</text>
+        <!-- main statement -->
+        <text x="100" y="224" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">Inspired by the best</text>
+        <text x="100" y="316" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">fictional chief of staff</text>
+        <text x="100" y="408" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#E8845C" letter-spacing="-1">in the world.</text>
+        <!-- dawn rule -->
+        <line x1="100" y1="448" x2="600" y2="448" stroke="#E8845C" stroke-width="1.5" opacity="0.35"/>
+        <!-- body text -->
+        <text x="100" y="508" font-family="Georgia,serif" font-size="28" fill="#9BAFC4" opacity="0.9">She read every room before anyone else did.</text>
+        <text x="100" y="552" font-family="Georgia,serif" font-size="28" fill="#9BAFC4" opacity="0.9">Tracked every commitment. Every relationship.</text>
+        <text x="100" y="596" font-family="Georgia,serif" font-size="28" fill="#9BAFC4" opacity="0.9">Handled what mattered. Before being asked.</text>
+        <!-- divider -->
+        <line x1="100" y1="644" x2="980" y2="644" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <!-- product line -->
+        <text x="100" y="706" font-family="Georgia,serif" font-style="italic" font-size="34" fill="#FBF7F4" opacity="0.7">donna does the same.</text>
+        <text x="100" y="748" font-family="Georgia,serif" font-style="italic" font-size="34" fill="#FBF7F4" opacity="0.7">For your morning. Every morning.</text>
+        <!-- bottom -->
+        <g transform="translate(80, 900) scale(0.56)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.35"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.45"/>
+        </g>
+        <text x="142" y="944" font-family="Georgia,serif" font-style="italic" font-size="30" fill="#FBF7F4" opacity="0.3">donna</text>
+        <text x="1000" y="944" text-anchor="end" font-family="'Courier New',monospace" font-size="16" fill="#E8845C" opacity="0.55" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 03 · ORIGIN STORY</strong>
+        Deep dark card. "Inspired by the best fictional chief of staff in the world." in three lines of italic serif, the last line in dawn orange. Body text below the rule: "She read every room before anyone else did. Tracked every commitment. Every relationship. Handled what mattered. Before being asked." Product line closes it out.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d03','donna-post-day03')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d03','donna-post-day03')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 04 — THE CRIME SCENE
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 04
+    <span class="day-label-title">The Quotable Single</span>
+    <span class="day-label-plat plat-tw">Twitter / X</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d04" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <!-- subtle grid lines -->
+        <line x1="0" y1="360" x2="1080" y2="360" stroke="rgba(155,175,196,0.04)" stroke-width="1"/>
+        <line x1="0" y1="720" x2="1080" y2="720" stroke="rgba(155,175,196,0.04)" stroke-width="1"/>
+        <line x1="360" y1="0" x2="360" y2="1080" stroke="rgba(155,175,196,0.04)" stroke-width="1"/>
+        <line x1="720" y1="0" x2="720" y2="1080" stroke="rgba(155,175,196,0.04)" stroke-width="1"/>
+        <!-- left accent bar -->
+        <rect x="0" y="0" width="8" height="1080" fill="#E8845C" opacity="0.5"/>
+        <!-- main text -->
+        <text x="100" y="310" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">Your inbox is not</text>
+        <text x="100" y="400" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">a to-do list.</text>
+        <!-- accent rule -->
+        <line x1="100" y1="440" x2="500" y2="440" stroke="#E8845C" stroke-width="2" opacity="0.5"/>
+        <!-- punch line -->
+        <text x="100" y="530" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#E8845C" letter-spacing="-1">It's a crime scene.</text>
+        <!-- body -->
+        <text x="100" y="640" font-family="Georgia,serif" font-size="28" fill="#9BAFC4">Every missed follow-up. Every forgotten</text>
+        <text x="100" y="680" font-family="Georgia,serif" font-size="28" fill="#9BAFC4">commitment. Every cold relationship.</text>
+        <text x="100" y="720" font-family="Georgia,serif" font-size="28" fill="#9BAFC4">All left a trace.</text>
+        <text x="100" y="790" font-family="Georgia,serif" font-style="italic" font-size="30" fill="#FBF7F4" opacity="0.7">donna reads the scene.</text>
+        <text x="100" y="836" font-family="Georgia,serif" font-style="italic" font-size="30" fill="#FBF7F4" opacity="0.7">You get the debrief.</text>
+        <!-- bottom -->
+        <g transform="translate(80, 920) scale(0.56)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.4"/>
+        </g>
+        <text x="142" y="964" font-family="Georgia,serif" font-style="italic" font-size="28" fill="#FBF7F4" opacity="0.28">donna</text>
+        <text x="1000" y="964" text-anchor="end" font-family="'Courier New',monospace" font-size="16" fill="#E8845C" opacity="0.5" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 04 · THE QUOTABLE</strong>
+        Typographic impact card. The first two lines build up, then "It's a crime scene." lands in dawn colour as the punchline. Designed to be screenshot and reshared. Works as a Twitter image card too.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d04','donna-post-day04')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d04','donna-post-day04')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 05 — COMMITMENT TRACKING
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 05
+    <span class="day-label-title">Commitment Tracking UI</span>
+    <span class="day-label-plat plat-li">LinkedIn</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d05" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#2D3154"/>
+        <radialGradient id="g05" cx="80%" cy="20%" r="50%">
+          <stop offset="0%" stop-color="#4E7DAA" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#2D3154" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g05)"/>
+        <!-- eyebrow -->
+        <text x="80" y="100" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" letter-spacing="5">COMMITMENT EXTRACTION</text>
+        <line x1="80" y1="116" x2="500" y2="116" stroke="#E8845C" stroke-width="1.5" opacity="0.3"/>
+        <!-- heading -->
+        <text x="80" y="196" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#FBF7F4">You said it.</text>
+        <text x="80" y="278" font-family="Georgia,serif" font-style="italic" font-size="72" fill="#FBF7F4">She remembered.</text>
+        <!-- sub -->
+        <text x="80" y="334" font-family="Georgia,serif" font-size="22" fill="#9BAFC4">Every promise. Every deadline. Every "circle back."</text>
+
+        <!-- CARD 1 -->
+        <rect x="80" y="374" width="920" height="84" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <rect x="80" y="374" width="5" height="84" rx="2" fill="#E8845C"/>
+        <circle cx="120" cy="416" r="7" fill="#E8845C" opacity="0.9"/>
+        <text x="146" y="410" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" font-weight="500">Send the Series A deck to Marcus</text>
+        <text x="146" y="436" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.6" letter-spacing="1">FROM: EMAIL · "Re: the raise" · MON 9:14AM</text>
+        <text x="960" y="420" text-anchor="end" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" letter-spacing="1">2 days ago</text>
+
+        <!-- CARD 2 -->
+        <rect x="80" y="476" width="920" height="84" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <rect x="80" y="476" width="5" height="84" rx="2" fill="#F4C896"/>
+        <circle cx="120" cy="518" r="7" fill="#F4C896" opacity="0.9"/>
+        <text x="146" y="512" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" font-weight="500">Introduce Sarah to the product team</text>
+        <text x="146" y="538" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.6" letter-spacing="1">FROM: SLACK · #partnerships · LAST WED</text>
+        <text x="960" y="522" text-anchor="end" font-family="'Courier New',monospace" font-size="13" fill="#F4C896" letter-spacing="1">6 days ago</text>
+
+        <!-- CARD 3 -->
+        <rect x="80" y="578" width="920" height="84" rx="6" fill="rgba(214,75,42,0.06)" stroke="rgba(214,75,42,0.2)" stroke-width="1"/>
+        <rect x="80" y="578" width="5" height="84" rx="2" fill="#D64B2A"/>
+        <circle cx="120" cy="620" r="7" fill="#D64B2A" opacity="0.9"/>
+        <text x="146" y="614" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" font-weight="500">Follow up on the contract review</text>
+        <text x="146" y="640" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.6" letter-spacing="1">FROM: EMAIL · "Re: MSA terms" · 3 WEEKS AGO</text>
+        <text x="960" y="624" text-anchor="end" font-family="'Courier New',monospace" font-size="13" fill="#D64B2A" letter-spacing="1">OVERDUE</text>
+
+        <!-- CARD 4 -->
+        <rect x="80" y="680" width="920" height="84" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(155,175,196,0.07)" stroke-width="1"/>
+        <rect x="80" y="680" width="5" height="84" rx="2" fill="#4E7DAA"/>
+        <circle cx="120" cy="722" r="7" fill="#4E7DAA" opacity="0.7"/>
+        <text x="146" y="716" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" opacity="0.7" font-weight="500">Make the intro to James Henderson</text>
+        <text x="146" y="742" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.45" letter-spacing="1">FROM: SLACK · DM · TUESDAY</text>
+        <text x="960" y="726" text-anchor="end" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.5" letter-spacing="1">4 days ago</text>
+
+        <!-- bottom caption -->
+        <text x="80" y="840" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#9BAFC4">Detected across email, Slack, calendar, and documents.</text>
+        <text x="80" y="876" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#9BAFC4">Surfaced every morning, sourced to the original message.</text>
+
+        <!-- bottom bar -->
+        <g transform="translate(80, 940) scale(0.56)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.4"/>
+        </g>
+        <text x="142" y="984" font-family="Georgia,serif" font-style="italic" font-size="28" fill="#FBF7F4" opacity="0.28">donna</text>
+        <text x="1000" y="984" text-anchor="end" font-family="'Courier New',monospace" font-size="16" fill="#E8845C" opacity="0.5" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 05 · COMMITMENT TRACKING</strong>
+        UI mockup showing 4 real commitment cards — each with source reference, colour-coded status (dawn/gold/alert/dusk), and age. The overdue card uses a red treatment. This is the feature that resonates most with founders and CoS's.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d05','donna-post-day05')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d05','donna-post-day05')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 06 — THE MORNING RITUAL
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 06
+    <span class="day-label-title">The Morning Ritual</span>
+    <span class="day-label-plat plat-ig">Instagram</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d06" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g06" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1B1F3A"/>
+            <stop offset="100%" stop-color="#0E1225"/>
+          </linearGradient>
+          <linearGradient id="g06b" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E8845C" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="#1B1F3A" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <rect width="1080" height="1080" fill="url(#g06)"/>
+        <rect width="1080" height="1080" fill="url(#g06b)"/>
+        <!-- dawn accent top -->
+        <line x1="0" y1="3" x2="400" y2="3" stroke="#E8845C" stroke-width="3" opacity="0.45"/>
+        <!-- eyebrow -->
+        <text x="80" y="90" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" opacity="0.7" letter-spacing="5">07:30 · EVERY MORNING</text>
+        <!-- heading -->
+        <text x="80" y="190" font-family="Georgia,serif" font-style="italic" font-size="76" fill="#FBF7F4">Imagine opening your</text>
+        <text x="80" y="278" font-family="Georgia,serif" font-style="italic" font-size="76" fill="#FBF7F4">morning and already</text>
+        <text x="80" y="366" font-family="Georgia,serif" font-style="italic" font-size="76" fill="#E8845C">knowing.</text>
+
+        <!-- briefing card -->
+        <rect x="80" y="420" width="920" height="360" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(155,175,196,0.12)" stroke-width="1"/>
+        <!-- card header -->
+        <circle cx="120" cy="462" r="16" fill="#E8845C" opacity="0.9"/>
+        <text x="120" y="468" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="16" fill="white" font-weight="600">D</text>
+        <text x="148" y="458" font-family="Georgia,serif" font-size="18" fill="#FBF7F4" font-weight="600">donna</text>
+        <text x="148" y="478" font-family="'Courier New',monospace" font-size="12" fill="#52B788" letter-spacing="2">● active · 07:30</text>
+
+        <line x1="80" y1="496" x2="1000" y2="496" stroke="rgba(155,175,196,0.08)" stroke-width="1"/>
+
+        <!-- message -->
+        <text x="104" y="534" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#FBF7F4" opacity="0.85">Good morning. 3 things need your attention today.</text>
+        <!-- items -->
+        <text x="104" y="578" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" letter-spacing="1">→</text>
+        <text x="126" y="578" font-family="Georgia,serif" font-size="18" fill="#9BAFC4">Reply to Marcus re: Series A deck · today</text>
+        <text x="104" y="616" font-family="'Courier New',monospace" font-size="14" fill="#4E7DAA" letter-spacing="1">→</text>
+        <text x="126" y="616" font-family="Georgia,serif" font-size="18" fill="#9BAFC4">Board meeting 11am · prep brief ready</text>
+        <text x="104" y="654" font-family="'Courier New',monospace" font-size="14" fill="#D64B2A" letter-spacing="1">!</text>
+        <text x="126" y="654" font-family="Georgia,serif" font-size="18" fill="#9BAFC4">Intro to James — 3 weeks overdue</text>
+        <!-- CTA buttons -->
+        <rect x="104" y="686" width="160" height="40" rx="6" fill="#E8845C"/>
+        <text x="184" y="712" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="white" font-weight="600">View all</text>
+        <rect x="276" y="686" width="200" height="40" rx="6" fill="rgba(155,175,196,0.1)"/>
+        <text x="376" y="712" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="#9BAFC4">Meeting prep →</text>
+
+        <!-- caption -->
+        <text x="80" y="870" font-family="Georgia,serif" font-size="26" fill="#9BAFC4">No scrolling. No scanning. One briefing.</text>
+        <text x="80" y="906" font-family="Georgia,serif" font-size="26" fill="#9BAFC4">Every morning. Before you ask.</text>
+
+        <!-- bottom -->
+        <g transform="translate(80, 960) scale(0.54)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.28"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.38"/>
+        </g>
+        <text x="136" y="1002" font-family="Georgia,serif" font-style="italic" font-size="27" fill="#FBF7F4" opacity="0.27">donna</text>
+        <text x="1000" y="1002" text-anchor="end" font-family="'Courier New',monospace" font-size="15" fill="#E8845C" opacity="0.5" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 06 · MORNING RITUAL</strong>
+        Aspirational card. The heading "Imagine opening your morning and already knowing." leads into a realistic donna briefing mockup with 3 items and action buttons. Warm dawn gradient gives it a morning-light feeling.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d06','donna-post-day06')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d06','donna-post-day06')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 07 — THE WAITLIST
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 07
+    <span class="day-label-title">Waitlist Momentum</span>
+    <span class="day-label-plat plat-tw">Twitter · LinkedIn</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d07" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#0E1225"/>
+        <radialGradient id="g07" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#E8845C" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#0E1225" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g07)"/>
+        <!-- top rule -->
+        <line x1="0" y1="3" x2="1080" y2="3" stroke="#E8845C" stroke-width="2" opacity="0.25"/>
+        <!-- eyebrow -->
+        <text x="540" y="160" text-anchor="middle" font-family="'Courier New',monospace" font-size="15" fill="#9BAFC4" opacity="0.5" letter-spacing="5">7 DAYS SINCE LAUNCH</text>
+        <!-- big number -->
+        <text x="540" y="440" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="280" fill="#E8845C" letter-spacing="-8">800+</text>
+        <!-- label -->
+        <line x1="200" y1="490" x2="880" y2="490" stroke="rgba(155,175,196,0.12)" stroke-width="1"/>
+        <text x="540" y="554" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="40" fill="#9BAFC4">people on the waitlist.</text>
+        <text x="540" y="614" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="40" fill="#9BAFC4">We expected 200.</text>
+        <!-- body -->
+        <text x="540" y="710" text-anchor="middle" font-family="Georgia,serif" font-size="26" fill="#FBF7F4" opacity="0.55">Founders. Executives. Chiefs of Staff.</text>
+        <text x="540" y="752" text-anchor="middle" font-family="Georgia,serif" font-size="26" fill="#FBF7F4" opacity="0.55">The people whose mornings matter most.</text>
+        <!-- CTA -->
+        <text x="540" y="840" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="32" fill="#E8845C">Early access opens this week.</text>
+        <!-- bottom -->
+        <g transform="translate(68, 940) scale(0.54)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.28"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.38"/>
+        </g>
+        <text x="128" y="982" font-family="Georgia,serif" font-style="italic" font-size="27" fill="#FBF7F4" opacity="0.27">donna</text>
+        <text x="1012" y="982" text-anchor="end" font-family="'Courier New',monospace" font-size="15" fill="#E8845C" opacity="0.5" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 07 · WAITLIST MOMENTUM</strong>
+        Milestone card. The "800+" number is massive in dawn colour — the single dominant visual element. Builds social proof and FOMO simultaneously. Use this at the end of Week 1 across Twitter and LinkedIn.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d07','donna-post-day07')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d07','donna-post-day07')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 08 — MORNING BRIEFING REVEAL
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 08
+    <span class="day-label-title">Morning Briefing Reveal</span>
+    <span class="day-label-plat plat-li">LinkedIn · Instagram</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d08" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <radialGradient id="g08" cx="85%" cy="15%" r="50%">
+          <stop offset="0%" stop-color="#4E7DAA" stop-opacity="0.07"/>
+          <stop offset="100%" stop-color="#1B1F3A" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g08)"/>
+        <!-- eyebrow -->
+        <text x="80" y="90" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" opacity="0.7" letter-spacing="5">DAILY BRIEFING</text>
+        <line x1="80" y1="106" x2="460" y2="106" stroke="#E8845C" stroke-width="1.5" opacity="0.3"/>
+        <!-- heading -->
+        <text x="80" y="190" font-family="Georgia,serif" font-style="italic" font-size="68" fill="#FBF7F4">One message.</text>
+        <text x="80" y="270" font-family="Georgia,serif" font-style="italic" font-size="68" fill="#FBF7F4">Everything</text>
+        <text x="80" y="350" font-family="Georgia,serif" font-style="italic" font-size="68" fill="#E8845C">that matters.</text>
+
+        <!-- briefing items -->
+        <!-- item 1 -->
+        <rect x="80" y="400" width="920" height="100" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <rect x="80" y="400" width="4" height="100" rx="2" fill="#E8845C"/>
+        <text x="108" y="442" font-family="'Courier New',monospace" font-size="12" fill="#E8845C" opacity="0.8" letter-spacing="2">01 · TODAY'S PRIORITIES</text>
+        <text x="108" y="470" font-family="Georgia,serif" font-size="20" fill="#9BAFC4">Reply to Marcus re: Series A — deadline today</text>
+        <text x="960" y="460" text-anchor="end" font-family="'Courier New',monospace" font-size="11" fill="#9BAFC4" opacity="0.4">↗ source</text>
+
+        <!-- item 2 -->
+        <rect x="80" y="510" width="920" height="100" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <rect x="80" y="510" width="4" height="100" rx="2" fill="#F4C896"/>
+        <text x="108" y="552" font-family="'Courier New',monospace" font-size="12" fill="#F4C896" opacity="0.8" letter-spacing="2">02 · OPEN COMMITMENTS</text>
+        <text x="108" y="580" font-family="Georgia,serif" font-size="20" fill="#9BAFC4">3 promises from last week still open</text>
+        <text x="960" y="570" text-anchor="end" font-family="'Courier New',monospace" font-size="11" fill="#9BAFC4" opacity="0.4">↗ view all</text>
+
+        <!-- item 3 -->
+        <rect x="80" y="620" width="920" height="100" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <rect x="80" y="620" width="4" height="100" rx="2" fill="#4E7DAA"/>
+        <text x="108" y="662" font-family="'Courier New',monospace" font-size="12" fill="#4E7DAA" opacity="0.8" letter-spacing="2">03 · RELATIONSHIP ALERT</text>
+        <text x="108" y="690" font-family="Georgia,serif" font-size="20" fill="#9BAFC4">Sarah Lin — 8 days without reply</text>
+        <text x="960" y="680" text-anchor="end" font-family="'Courier New',monospace" font-size="11" fill="#9BAFC4" opacity="0.4">↗ context</text>
+
+        <!-- item 4 -->
+        <rect x="80" y="730" width="920" height="100" rx="6" fill="rgba(232,132,92,0.07)" stroke="rgba(232,132,92,0.2)" stroke-width="1"/>
+        <rect x="80" y="730" width="4" height="100" rx="2" fill="#E8845C"/>
+        <text x="108" y="772" font-family="'Courier New',monospace" font-size="12" fill="#E8845C" opacity="0.8" letter-spacing="2">04 · DO THIS FIRST</text>
+        <text x="108" y="800" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" opacity="0.85">Send the deck. Everything else follows from it.</text>
+
+        <!-- caption -->
+        <text x="80" y="900" font-family="Georgia,serif" font-size="22" fill="#9BAFC4" opacity="0.8">Every item sourced. Tap any claim to see the original message.</text>
+        <text x="80" y="930" font-family="Georgia,serif" font-size="22" fill="#9BAFC4" opacity="0.8">Delivered to Telegram at 07:30. Unprompted. Every day.</text>
+
+        <!-- bottom -->
+        <g transform="translate(80, 970) scale(0.52)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.28"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.38"/>
+        </g>
+        <text x="136" y="1010" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.25">donna</text>
+        <text x="1000" y="1010" text-anchor="end" font-family="'Courier New',monospace" font-size="15" fill="#E8845C" opacity="0.45" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 08 · BRIEFING REVEAL</strong>
+        First proper product reveal. Four structured briefing categories shown as UI rows — Priorities / Commitments / Relationship Alert / Do This First. Each with colour coding and a source citation link. This is the core product in one card.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d08','donna-post-day08')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d08','donna-post-day08')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 09 — INTEGRATIONS
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 09
+    <span class="day-label-title">Integration Map</span>
+    <span class="day-label-plat plat-tw">Twitter / X</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d09" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#0E1225"/>
+        <radialGradient id="g09" cx="50%" cy="55%" r="40%">
+          <stop offset="0%" stop-color="#E8845C" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#0E1225" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g09)"/>
+        <!-- eyebrow -->
+        <text x="540" y="90" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="#9BAFC4" opacity="0.5" letter-spacing="5">WHAT DONNA READS</text>
+        <line x1="280" y1="104" x2="800" y2="104" stroke="rgba(155,175,196,0.1)" stroke-width="1"/>
+        <!-- heading -->
+        <text x="540" y="180" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="64" fill="#FBF7F4">Everything.</text>
+
+        <!-- central donna hub -->
+        <circle cx="540" cy="580" r="70" fill="rgba(232,132,92,0.1)" stroke="#E8845C" stroke-width="1.5" opacity="0.6"/>
+        <g transform="translate(483,543) scale(1.14)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4" stroke-linejoin="round" opacity="0.7"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="26" cy="50" r="4.5" fill="#E8845C"/>
+        </g>
+
+        <!-- source nodes + connecting lines -->
+        <!-- Gmail — top left -->
+        <line x1="300" y1="340" x2="490" y2="530" stroke="#E8845C" stroke-width="1.5" opacity="0.3" stroke-dasharray="6,4"/>
+        <rect x="160" y="270" width="280" height="80" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.15)" stroke-width="1"/>
+        <circle cx="204" cy="310" r="14" fill="rgba(232,132,92,0.15)"/>
+        <text x="204" y="316" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#E8845C" font-weight="600">G</text>
+        <text x="228" y="305" font-family="Georgia,serif" font-size="18" fill="#FBF7F4" font-weight="600">Gmail / Outlook</text>
+        <text x="228" y="325" font-family="'Courier New',monospace" font-size="12" fill="#9BAFC4" opacity="0.5">email · threads · replies</text>
+
+        <!-- Calendar — top right -->
+        <line x1="780" y1="340" x2="590" y2="530" stroke="#4E7DAA" stroke-width="1.5" opacity="0.3" stroke-dasharray="6,4"/>
+        <rect x="640" y="270" width="280" height="80" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.15)" stroke-width="1"/>
+        <circle cx="684" cy="310" r="14" fill="rgba(78,125,170,0.15)"/>
+        <text x="684" y="316" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#4E7DAA" font-weight="600">C</text>
+        <text x="708" y="305" font-family="Georgia,serif" font-size="18" fill="#FBF7F4" font-weight="600">Calendar</text>
+        <text x="708" y="325" font-family="'Courier New',monospace" font-size="12" fill="#9BAFC4" opacity="0.5">events · changes · prep</text>
+
+        <!-- Slack — bottom left -->
+        <line x1="300" y1="820" x2="490" y2="632" stroke="#52B788" stroke-width="1.5" opacity="0.3" stroke-dasharray="6,4"/>
+        <rect x="160" y="750" width="280" height="80" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.15)" stroke-width="1"/>
+        <circle cx="204" cy="790" r="14" fill="rgba(82,183,136,0.15)"/>
+        <text x="204" y="796" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#52B788" font-weight="600">S</text>
+        <text x="228" y="785" font-family="Georgia,serif" font-size="18" fill="#FBF7F4" font-weight="600">Slack</text>
+        <text x="228" y="805" font-family="'Courier New',monospace" font-size="12" fill="#9BAFC4" opacity="0.5">messages · threads · DMs</text>
+
+        <!-- Notion — bottom right -->
+        <line x1="780" y1="820" x2="590" y2="632" stroke="#F4C896" stroke-width="1.5" opacity="0.3" stroke-dasharray="6,4"/>
+        <rect x="640" y="750" width="280" height="80" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(155,175,196,0.15)" stroke-width="1"/>
+        <circle cx="684" cy="790" r="14" fill="rgba(244,200,150,0.15)"/>
+        <text x="684" y="796" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#F4C896" font-weight="600">N</text>
+        <text x="708" y="785" font-family="Georgia,serif" font-size="18" fill="#FBF7F4" font-weight="600">Notion</text>
+        <text x="708" y="805" font-family="'Courier New',monospace" font-size="12" fill="#9BAFC4" opacity="0.5">documents · pages · notes</text>
+
+        <!-- bottom caption -->
+        <text x="540" y="926" text-anchor="middle" font-family="Georgia,serif" font-size="24" fill="#9BAFC4" opacity="0.8">All read overnight. One briefing delivered.</text>
+        <text x="540" y="960" text-anchor="middle" font-family="Georgia,serif" font-size="24" fill="#9BAFC4" opacity="0.8">Tokens vaulted. Never stored in plaintext.</text>
+
+        <!-- bottom bar -->
+        <g transform="translate(68, 1002) scale(0.5)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.25"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.35"/>
+        </g>
+        <text x="120" y="1042" font-family="Georgia,serif" font-style="italic" font-size="25" fill="#FBF7F4" opacity="0.22">donna</text>
+        <text x="1012" y="1042" text-anchor="end" font-family="'Courier New',monospace" font-size="15" fill="#E8845C" opacity="0.45" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 09 · INTEGRATION MAP</strong>
+        Hub-and-spoke diagram with the donna logo at centre, four source nodes (Gmail, Calendar, Slack, Notion) connected by dashed lines. Each node is colour-coded. Answers "what does she actually read?" visually.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d09','donna-post-day09')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d09','donna-post-day09')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════
+     DAY 10 — HEARTBEAT MONITOR
+═══════════════════════════════════════════════ -->
+<div class="day-block">
+  <div class="day-label">
+    Day 10
+    <span class="day-label-title">Heartbeat Monitor</span>
+    <span class="day-label-plat plat-li">LinkedIn</span>
+  </div>
+  <div class="card-wrap">
+    <div class="card-preview">
+      <svg id="card-d10" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1080" height="1080" fill="#2D3154"/>
+        <radialGradient id="g10" cx="20%" cy="80%" r="55%">
+          <stop offset="0%" stop-color="#4E7DAA" stop-opacity="0.07"/>
+          <stop offset="100%" stop-color="#2D3154" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1080" height="1080" fill="url(#g10)"/>
+        <!-- eyebrow -->
+        <text x="80" y="90" font-family="'Courier New',monospace" font-size="14" fill="#4E7DAA" opacity="0.8" letter-spacing="5">HEARTBEAT MONITOR</text>
+        <line x1="80" y1="106" x2="520" y2="106" stroke="#4E7DAA" stroke-width="1.5" opacity="0.3"/>
+        <!-- heading -->
+        <text x="80" y="188" font-family="Georgia,serif" font-style="italic" font-size="64" fill="#FBF7F4">The relationship</text>
+        <text x="80" y="264" font-family="Georgia,serif" font-style="italic" font-size="64" fill="#FBF7F4">that goes cold</text>
+        <text x="80" y="340" font-family="Georgia,serif" font-style="italic" font-size="64" fill="#E8845C">announces nothing.</text>
+
+        <!-- ROW 1 — Active -->
+        <rect x="80" y="390" width="920" height="96" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(82,183,136,0.15)" stroke-width="1"/>
+        <!-- pulse bars green -->
+        <rect x="108" y="418" width="4" height="18" rx="2" fill="#52B788"/>
+        <rect x="118" y="410" width="4" height="34" rx="2" fill="#52B788"/>
+        <rect x="128" y="422" width="4" height="14" rx="2" fill="#52B788"/>
+        <rect x="138" y="406" width="4" height="42" rx="2" fill="#52B788"/>
+        <rect x="148" y="416" width="4" height="22" rx="2" fill="#52B788"/>
+        <rect x="158" y="412" width="4" height="30" rx="2" fill="#52B788"/>
+        <rect x="168" y="420" width="4" height="16" rx="2" fill="#52B788"/>
+        <text x="196" y="428" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" font-weight="600">James Thornton</text>
+        <text x="196" y="452" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.6">Weekly cadence steady · last discussed Series B timeline</text>
+        <rect x="840" y="418" width="120" height="28" rx="14" fill="rgba(82,183,136,0.15)"/>
+        <text x="900" y="437" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" fill="#52B788" letter-spacing="1">Active</text>
+        <text x="840" y="462" text-anchor="end" font-family="'Courier New',monospace" font-size="11" fill="#9BAFC4" opacity="0.5">2 days ago</text>
+
+        <!-- ROW 2 — Cooling -->
+        <rect x="80" y="498" width="920" height="96" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(244,200,150,0.15)" stroke-width="1"/>
+        <!-- pulse bars amber — trailing off -->
+        <rect x="108" y="518" width="4" height="34" rx="2" fill="#F4C896"/>
+        <rect x="118" y="524" width="4" height="22" rx="2" fill="#F4C896"/>
+        <rect x="128" y="530" width="4" height="12" rx="2" fill="#F4C896" opacity="0.7"/>
+        <rect x="138" y="534" width="4" height="8" rx="2" fill="#F4C896" opacity="0.5"/>
+        <rect x="148" y="536" width="4" height="6" rx="2" fill="#F4C896" opacity="0.35"/>
+        <rect x="158" y="538" width="4" height="4" rx="2" fill="#F4C896" opacity="0.2"/>
+        <rect x="168" y="539" width="4" height="3" rx="2" fill="#F4C896" opacity="0.12"/>
+        <text x="196" y="528" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" font-weight="600">Priya Mehta</text>
+        <text x="196" y="552" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.6">Frequency dropping · was monthly, now 6 weeks</text>
+        <rect x="830" y="518" width="130" height="28" rx="14" fill="rgba(244,200,150,0.12)"/>
+        <text x="895" y="537" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" fill="#F4C896" letter-spacing="1">Cooling</text>
+        <text x="840" y="562" text-anchor="end" font-family="'Courier New',monospace" font-size="11" fill="#9BAFC4" opacity="0.5">6 weeks ago</text>
+
+        <!-- ROW 3 — Gone cold -->
+        <rect x="80" y="606" width="920" height="96" rx="8" fill="rgba(214,75,42,0.06)" stroke="rgba(214,75,42,0.2)" stroke-width="1"/>
+        <!-- pulse bars red — almost flat -->
+        <rect x="108" y="636" width="4" height="20" rx="2" fill="#D64B2A"/>
+        <rect x="118" y="646" width="4" height="4" rx="2" fill="#D64B2A" opacity="0.5"/>
+        <rect x="128" y="648" width="4" height="2" rx="2" fill="#D64B2A" opacity="0.3"/>
+        <rect x="138" y="648" width="4" height="2" rx="2" fill="#D64B2A" opacity="0.2"/>
+        <rect x="148" y="649" width="4" height="1" rx="2" fill="#D64B2A" opacity="0.15"/>
+        <rect x="158" y="649" width="4" height="1" rx="2" fill="#D64B2A" opacity="0.1"/>
+        <rect x="168" y="649" width="4" height="1" rx="2" fill="#D64B2A" opacity="0.05"/>
+        <text x="196" y="636" font-family="Georgia,serif" font-size="20" fill="#FBF7F4" font-weight="600">David Okafor</text>
+        <text x="196" y="660" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.6">No contact 3 months · open intro pending since Oct</text>
+        <rect x="806" y="628" width="154" height="28" rx="14" fill="rgba(214,75,42,0.15)"/>
+        <text x="883" y="647" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" fill="#D64B2A" letter-spacing="1">Gone cold</text>
+        <text x="840" y="670" text-anchor="end" font-family="'Courier New',monospace" font-size="11" fill="#D64B2A" opacity="0.6">3 months ago</text>
+
+        <!-- bottom copy -->
+        <text x="80" y="778" font-family="Georgia,serif" font-size="25" fill="#9BAFC4" opacity="0.9">donna notices before you do.</text>
+        <text x="80" y="816" font-family="Georgia,serif" font-size="25" fill="#9BAFC4" opacity="0.7">Not when it's already gone. When it's cooling.</text>
+        <text x="80" y="852" font-family="Georgia,serif" font-size="25" fill="#9BAFC4" opacity="0.7">When there's still time to act.</text>
+
+        <!-- bottom bar -->
+        <g transform="translate(80, 910) scale(0.52)">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.28"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.38"/>
+        </g>
+        <text x="136" y="952" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.25">donna</text>
+        <text x="1000" y="952" text-anchor="end" font-family="'Courier New',monospace" font-size="15" fill="#E8845C" opacity="0.45" letter-spacing="3">DONNA.APP</text>
+      </svg>
+    </div>
+    <div class="card-side">
+      <div class="card-info">
+        <strong>DAY 10 · HEARTBEAT MONITOR</strong>
+        Three-row UI showing the spectrum of relationship health — Active (green pulse), Cooling (amber trailing off), Gone cold (nearly flat red). The pulse bars visually encode the data story. Compelling for any relationship-driven professional.
+      </div>
+      <button class="btn btn-dawn" onclick="dlCard('card-d10','donna-post-day10')">↓ Download 1080px PNG</button>
+      <button class="btn btn-ghost" onclick="dlSVG('card-d10','donna-post-day10')">↓ Download SVG</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════ -->
+<div style="background:var(--deep);margin:64px -56px -48px;padding:32px 56px;display:flex;justify-content:space-between;align-items:center;">
+  <div>
+    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-style:italic;color:var(--paper);">donna</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(155,175,196,.35);letter-spacing:.08em;margin-top:4px;">POST VISUALS · DAYS 01–10 · 1080×1080PX</div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(155,175,196,.35);letter-spacing:.1em;text-align:right;line-height:1.9;">
+    Days 11–20 → post-visuals-days-11-20.html<br>
+    Days 21–30 → post-visuals-days-21-30.html
+  </div>
+</div>
+
+<script>
+  // ─── SVG DOWNLOAD ───────────────────────────────
+  function dlSVG(id, filename) {
+    const svg = document.getElementById(id);
+    const serialised = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([serialised], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename + '.svg';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  // ─── PNG DOWNLOAD (same technique as donna-logo-assets.html) ───
+  async function dlCard(id, filename) {
+    await document.fonts.ready;
+    const svg = document.getElementById(id);
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('width', 1080);
+    clone.setAttribute('height', 1080);
+    const serialised = new XMLSerializer().serializeToString(clone);
+    const blob = new Blob([serialised], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080; canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, 1080, 1080);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(pngBlob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(pngBlob);
+        a.download = filename + '-1080px.png';
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+      }, 'image/png');
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  }
+</script>
+</body>
+</html>

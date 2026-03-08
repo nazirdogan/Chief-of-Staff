@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>donna — Logo Assets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --midnight: #1B1F3A;
+      --dawn:     #E8845C;
+      --paper:    #FBF7F4;
+      --stone:    #EDEAE6;
+      --mist:     #9BAFC4;
+      --deep:     #0E1225;
+    }
+
+    body {
+      background: var(--stone);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      color: var(--midnight);
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--midnight);
+      padding: 36px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(232,132,92,.25);
+    }
+    .header-brand {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 32px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--paper);
+    }
+    .header-meta {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: rgba(155,175,196,.5);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    /* ── LAYOUT ── */
+    .content { max-width: 1160px; margin: 0 auto; padding: 56px; }
+
+    .concept-block { margin-bottom: 64px; }
+    .concept-heading { margin-bottom: 28px; }
+    .concept-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--midnight);
+      margin-bottom: 4px;
+    }
+    .concept-desc {
+      font-size: 12px;
+      color: #999;
+      letter-spacing: .02em;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--dawn), transparent);
+      opacity: .3;
+      margin: 56px 0;
+    }
+
+    /* ── CARD GRID ── */
+    .card-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card-grid-2-wide { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* ── LOGO CARD ── */
+    .logo-card {
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(27,31,58,.07);
+    }
+    .logo-card-dark {
+      background: var(--midnight);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(27,31,58,.18);
+    }
+
+    .card-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      min-height: 180px;
+    }
+    .preview-light  { background: var(--stone); }
+    .preview-dark   { background: var(--midnight); }
+    .preview-white  { background: #ffffff; }
+    .preview-deep   { background: var(--deep); }
+
+    .card-footer {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,.06);
+      gap: 12px;
+    }
+    .card-footer-dark {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,.07);
+      gap: 12px;
+    }
+
+    .card-label { min-width: 0; }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--midnight);
+      white-space: nowrap;
+    }
+    .card-title-light {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--paper);
+      white-space: nowrap;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: #bbb;
+      margin-top: 2px;
+    }
+    .card-sub-dark {
+      font-size: 11px;
+      color: rgba(155,175,196,.45);
+      margin-top: 2px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .btn {
+      padding: 7px 13px;
+      border-radius: 7px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .03em;
+      cursor: pointer;
+      border: none;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn:hover:not(:disabled) { opacity: .85; }
+
+    .btn-dawn    { background: var(--dawn); color: white; }
+    .btn-ghost   { background: rgba(27,31,58,.07); color: var(--midnight); }
+    .btn-ghost-d { background: rgba(255,255,255,.1); color: var(--paper); }
+
+    /* ── FOOTER NOTE ── */
+    .page-note {
+      font-size: 12px;
+      color: #aaa;
+      font-style: italic;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,0,0,.08);
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-brand">donna</div>
+  </div>
+  <div class="header-meta">
+    Logo Assets &nbsp;·&nbsp; v1.0<br>
+    Concepts A &amp; B &nbsp;·&nbsp; Standard + Reversed
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ══════════════════════════════════
+       CONCEPT A — THE MERIDIAN
+  ══════════════════════════════════ -->
+  <div class="concept-block">
+    <div class="concept-heading">
+      <div class="concept-name">Concept A &nbsp;—&nbsp; The Meridian</div>
+      <div class="concept-desc">Icon mark &nbsp;·&nbsp; Full lockup &nbsp;·&nbsp; Standard &amp; reversed</div>
+    </div>
+
+    <div class="card-grid-2">
+
+      <!-- A1: Icon — Standard (dark bg) -->
+      <div class="logo-card">
+        <div class="card-preview preview-light">
+          <svg id="svg-a-icon-standard"
+               viewBox="0 0 100 100"
+               width="140" height="140"
+               xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                  fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50"
+                  stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <div class="card-footer">
+          <div class="card-label">
+            <div class="card-title">A · Icon · Standard</div>
+            <div class="card-sub">Dark bg · Square · For light surfaces</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost"
+                    onclick="dlSVG('svg-a-icon-standard','donna-icon-standard')">SVG</button>
+            <button class="btn btn-ghost"
+                    onclick="dlPNG('svg-a-icon-standard','donna-icon-standard',512,512,this)">512</button>
+            <button class="btn btn-dawn"
+                    onclick="dlPNG('svg-a-icon-standard','donna-icon-standard',1024,1024,this)">1024</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A2: Icon — Reversed (light bg) -->
+      <div class="logo-card-dark">
+        <div class="card-preview preview-deep">
+          <svg id="svg-a-icon-reversed"
+               viewBox="0 0 100 100"
+               width="140" height="140"
+               xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" rx="18" fill="#FBF7F4"/>
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                  fill="none" stroke="#1B1F3A" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50"
+                  stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <div class="card-footer-dark">
+          <div class="card-label">
+            <div class="card-title-light">A · Icon · Reversed</div>
+            <div class="card-sub-dark">Light bg · Square · For dark surfaces</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost-d"
+                    onclick="dlSVG('svg-a-icon-reversed','donna-icon-reversed')">SVG</button>
+            <button class="btn btn-ghost-d"
+                    onclick="dlPNG('svg-a-icon-reversed','donna-icon-reversed',512,512,this)">512</button>
+            <button class="btn btn-dawn"
+                    onclick="dlPNG('svg-a-icon-reversed','donna-icon-reversed',1024,1024,this)">1024</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A3: Full Lockup — Standard -->
+      <div class="logo-card">
+        <div class="card-preview preview-light" style="padding:44px 56px">
+          <svg id="svg-a-lockup-standard"
+               viewBox="0 0 310 100"
+               width="100%" height="auto"
+               style="max-width:380px"
+               xmlns="http://www.w3.org/2000/svg"
+               overflow="visible">
+            <!-- D mark (transparent bg, dark stroke) -->
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                  fill="none" stroke="#1B1F3A" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50"
+                  stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+            <!-- Wordmark -->
+            <text x="108" y="70"
+                  font-family="'Cormorant Garamond', Georgia, serif"
+                  font-size="58" font-weight="300" font-style="italic"
+                  fill="#1B1F3A">donna</text>
+          </svg>
+        </div>
+        <div class="card-footer">
+          <div class="card-label">
+            <div class="card-title">A · Full Lockup · Standard</div>
+            <div class="card-sub">Dark on transparent · Horizontal</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost"
+                    onclick="dlSVG('svg-a-lockup-standard','donna-lockup-standard')">SVG</button>
+            <button class="btn btn-dawn"
+                    onclick="dlPNG('svg-a-lockup-standard','donna-lockup-standard',1600,516,this)">PNG</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A4: Full Lockup — Reversed -->
+      <div class="logo-card-dark">
+        <div class="card-preview preview-dark" style="padding:44px 56px">
+          <svg id="svg-a-lockup-reversed"
+               viewBox="0 0 310 100"
+               width="100%" height="auto"
+               style="max-width:380px"
+               xmlns="http://www.w3.org/2000/svg">
+            <!-- Dark background -->
+            <rect width="310" height="100" fill="#1B1F3A"/>
+            <!-- D mark (light stroke) -->
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
+                  fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round"/>
+            <line x1="26" y1="50" x2="72" y2="50"
+                  stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+            <!-- Wordmark -->
+            <text x="108" y="70"
+                  font-family="'Cormorant Garamond', Georgia, serif"
+                  font-size="58" font-weight="300" font-style="italic"
+                  fill="#FBF7F4">donna</text>
+          </svg>
+        </div>
+        <div class="card-footer-dark">
+          <div class="card-label">
+            <div class="card-title-light">A · Full Lockup · Reversed</div>
+            <div class="card-sub-dark">Light on dark · Horizontal</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost-d"
+                    onclick="dlSVG('svg-a-lockup-reversed','donna-lockup-reversed')">SVG</button>
+            <button class="btn btn-dawn"
+                    onclick="dlPNG('svg-a-lockup-reversed','donna-lockup-reversed',1600,516,this)">PNG</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /card-grid -->
+  </div><!-- /concept A -->
+
+
+  <div class="divider"></div>
+
+
+  <!-- ══════════════════════════════════
+       CONCEPT B — THE ITALIC
+  ══════════════════════════════════ -->
+  <div class="concept-block">
+    <div class="concept-heading">
+      <div class="concept-name">Concept B &nbsp;—&nbsp; The Italic</div>
+      <div class="concept-desc">Editorial wordmark &nbsp;·&nbsp; Standard &amp; reversed</div>
+    </div>
+
+    <div class="card-grid-2-wide">
+
+      <!-- B1: Wordmark — Standard -->
+      <div class="logo-card">
+        <div class="card-preview preview-light" style="padding:52px 56px">
+          <svg id="svg-b-standard"
+               viewBox="0 0 280 90"
+               width="100%" height="auto"
+               style="max-width:400px"
+               xmlns="http://www.w3.org/2000/svg"
+               overflow="visible">
+            <text x="8" y="70"
+                  font-family="'Cormorant Garamond', Georgia, serif"
+                  font-size="72" font-weight="300" font-style="italic"
+                  fill="#1B1F3A">donna</text>
+            <line x1="8" y1="80" x2="272" y2="80"
+                  stroke="#E8845C" stroke-width="1.5" opacity=".55"/>
+            <circle cx="40" cy="80" r="3.5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <div class="card-footer">
+          <div class="card-label">
+            <div class="card-title">B · Wordmark · Standard</div>
+            <div class="card-sub">Dark on transparent · Horizontal</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost"
+                    onclick="dlSVG('svg-b-standard','donna-wordmark-standard')">SVG</button>
+            <button class="btn btn-dawn"
+                    onclick="dlPNG('svg-b-standard','donna-wordmark-standard',1400,450,this)">PNG</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- B2: Wordmark — Reversed -->
+      <div class="logo-card-dark">
+        <div class="card-preview preview-deep" style="padding:52px 56px">
+          <svg id="svg-b-reversed"
+               viewBox="0 0 280 90"
+               width="100%" height="auto"
+               style="max-width:400px"
+               xmlns="http://www.w3.org/2000/svg"
+               overflow="visible">
+            <text x="8" y="70"
+                  font-family="'Cormorant Garamond', Georgia, serif"
+                  font-size="72" font-weight="300" font-style="italic"
+                  fill="#FBF7F4">donna</text>
+            <line x1="8" y1="80" x2="272" y2="80"
+                  stroke="#E8845C" stroke-width="1.5" opacity=".55"/>
+            <circle cx="40" cy="80" r="3.5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <div class="card-footer-dark">
+          <div class="card-label">
+            <div class="card-title-light">B · Wordmark · Reversed</div>
+            <div class="card-sub-dark">Light on dark · Horizontal</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost-d"
+                    onclick="dlSVG('svg-b-reversed','donna-wordmark-reversed')">SVG</button>
+            <button class="btn btn-dawn"
+                    onclick="dlPNG('svg-b-reversed','donna-wordmark-reversed',1400,450,this)">PNG</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /card-grid -->
+  </div><!-- /concept B -->
+
+  <div class="page-note">
+    SVG files are vector and scale to any size — use these for Figma, Illustrator, Canva, and any design tool.
+    PNG files export at the specified pixel width. Icon PNGs (512 / 1024px) are sized for app stores and profile pictures.
+    Lockup PNGs export at 1600px wide, suitable for social headers and banners.
+  </div>
+
+</div><!-- /content -->
+
+
+<script>
+  // ─── SVG DOWNLOAD ───────────────────────────────────────
+  function dlSVG(id, filename) {
+    const svg = document.getElementById(id);
+    const serialised = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([serialised], { type: 'image/svg+xml;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename + '.svg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ─── PNG DOWNLOAD ────────────────────────────────────────
+  async function dlPNG(id, filename, w, h, btn) {
+    const original = btn.textContent;
+    btn.textContent = '…';
+    btn.disabled = true;
+
+    // Wait for fonts then render
+    await document.fonts.ready;
+
+    const svg    = document.getElementById(id);
+    const clone  = svg.cloneNode(true);
+
+    // Force explicit dimensions on the clone for canvas
+    clone.setAttribute('width',  w);
+    clone.setAttribute('height', h);
+
+    const serialised = new XMLSerializer().serializeToString(clone);
+    const blob       = new Blob([serialised], { type: 'image/svg+xml;charset=utf-8' });
+    const url        = URL.createObjectURL(blob);
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob((pngBlob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(pngBlob);
+        a.download = filename + '-' + w + 'px.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        btn.textContent = original;
+        btn.disabled    = false;
+      }, 'image/png');
+    };
+    img.onerror = () => {
+      btn.textContent = original;
+      btn.disabled    = false;
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+</script>
+
+</body>
+</html>

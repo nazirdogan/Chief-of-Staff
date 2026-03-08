@@ -141,20 +141,21 @@ export function DesktopOnboardingFlow() {
   const progressSteps: readonly Step[] = STEPS.filter((s) => s !== 'welcome' && s !== 'complete');
   const currentProgressIndex = progressSteps.indexOf(step);
   const showProgress = step !== 'welcome' && step !== 'complete';
+  const isWelcome = step === 'welcome';
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-8 py-10"
       style={{ background: '#0E1225' }}
     >
       {/* Ambient background glow */}
       <div
         className="animate-glow-pulse pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
         style={{
-          width: 600,
-          height: 600,
+          width: 800,
+          height: 800,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(232,132,92,0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(232,132,92,0.05) 0%, transparent 70%)',
         }}
       />
 
@@ -167,10 +168,10 @@ export function DesktopOnboardingFlow() {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-[480px]">
+      <div className={`relative z-10 w-full transition-all duration-500 ${isWelcome ? 'max-w-[820px]' : 'max-w-[640px]'}`}>
         {/* Step progress — refined horizontal stepper */}
         {showProgress && (
-          <div className="mb-6 flex items-center justify-center gap-1 animate-fade-in">
+          <div className="mb-8 flex items-center justify-center gap-2 animate-fade-in">
             {progressSteps.map((s, i) => {
               const meta = STEP_META[s];
               const isCurrent = s === step;
@@ -180,7 +181,7 @@ export function DesktopOnboardingFlow() {
                 <div key={s} className="flex items-center">
                   <div className="flex flex-col items-center gap-1.5">
                     <div
-                      className="flex h-7 w-7 items-center justify-center rounded-full transition-all duration-500"
+                      className="flex h-8 w-8 items-center justify-center rounded-full transition-all duration-500"
                       style={{
                         background: isDone
                           ? 'rgba(82, 183, 136, 0.15)'
@@ -200,7 +201,7 @@ export function DesktopOnboardingFlow() {
                         </svg>
                       ) : (
                         <span
-                          className="text-[10px] font-medium"
+                          className="text-[11px] font-medium"
                           style={{
                             fontFamily: 'var(--font-mono)',
                             color: isCurrent ? '#FBF7F4' : 'rgba(155, 175, 196, 0.4)',
@@ -211,7 +212,7 @@ export function DesktopOnboardingFlow() {
                       )}
                     </div>
                     <span
-                      className="text-[9px] font-medium tracking-wide transition-colors duration-300"
+                      className="text-[10px] font-medium tracking-wide transition-colors duration-300"
                       style={{
                         fontFamily: 'var(--font-mono)',
                         color: isCurrent
@@ -228,7 +229,7 @@ export function DesktopOnboardingFlow() {
                   </div>
                   {i < progressSteps.length - 1 && (
                     <div
-                      className="mb-5 mx-1 h-px w-6 transition-colors duration-500"
+                      className="mb-5 mx-2 h-px w-10 transition-colors duration-500"
                       style={{
                         background: isDone
                           ? 'rgba(82, 183, 136, 0.25)'
@@ -265,9 +266,9 @@ export function DesktopOnboardingFlow() {
           )}
 
           <div
-            className={`px-8 py-10 transition-all duration-250 ${
+            className={`transition-all duration-250 ${
               transitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-            }`}
+            } ${isWelcome ? 'p-0' : 'px-10 py-10'}`}
             style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
           >
             {step === 'welcome' && (
@@ -322,7 +323,7 @@ export function DesktopOnboardingFlow() {
 
         {/* Bottom security note */}
         <p
-          className="mt-4 text-center text-[10px] tracking-wide animate-fade-in"
+          className="mt-5 text-center text-[10px] tracking-wide animate-fade-in"
           style={{
             fontFamily: 'var(--font-mono)',
             color: 'rgba(155, 175, 196, 0.25)',

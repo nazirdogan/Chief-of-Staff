@@ -3,8 +3,8 @@
 ## What This Project Is
 Donna is an AI-powered personal intelligence app. It reads across a user's entire digital
 life (email, calendar, messages, documents, tasks) and delivers one proactive daily briefing every
-morning via Telegram (and later WhatsApp) telling the user what matters, what they promised, who
-they've gone cold with, and what to do first. It then helps them act on it.
+morning in-app telling the user what matters, what they promised, who they've gone cold with, and
+what to do first. It then helps them act on it.
 
 **This is not a chat assistant. It is a proactive, background-running intelligence layer.**
 
@@ -54,7 +54,7 @@ they've gone cold with, and what to do first. It then helps them act on it.
 | AI Orchestration | Vercel AI SDK | Multi-provider support |
 | AI Models | Anthropic + OpenAI | See model selection rules below |
 | Background Jobs | Trigger.dev | Heartbeat Monitor, briefing generation |
-| Messaging Gateway | Telegram Bot API (launch), Twilio (WhatsApp) | See messaging layer |
+| Messaging Gateway | In-app (current), Twilio/WhatsApp (planned) | Briefings and confirmations are in-app |
 | API Gateway | Next.js middleware + rate limiter | Custom rate limiting per route |
 | Secrets | Environment variables | AWS Secrets Manager in production |
 | CSS | Tailwind CSS | + shadcn/ui components |
@@ -114,7 +114,6 @@ Always import model constants from `@/lib/ai/models.ts` — never hardcode model
 │   ├── api/
 │   │   ├── auth/[...supabase]/route.ts
 │   │   ├── webhooks/
-│   │   │   ├── telegram/route.ts      ← Public — Telegram webhook
 │   │   │   ├── gmail/route.ts         ← Public — Gmail push notifications
 │   │   │   └── nango/route.ts         ← Public — Nango token events
 │   │   ├── integrations/
@@ -136,11 +135,9 @@ Always import model constants from `@/lib/ai/models.ts` — never hardcode model
 │   │   │   └── [id]/
 │   │   │       ├── draft/route.ts     ← POST: generate reply draft
 │   │   │       └── action/route.ts    ← POST: archive/snooze/delegate
-│   │   ├── actions/
-│   │   │   ├── confirm/route.ts       ← POST: user approves pending action
-│   │   │   └── reject/route.ts        ← POST: user rejects pending action
-│   │   └── telegram/
-│   │       └── send/route.ts          ← POST: send message via Telegram
+│   │   └── actions/
+│   │       ├── confirm/route.ts       ← POST: user approves pending action
+│   │       └── reject/route.ts        ← POST: user rejects pending action
 │   │
 ├── components/
 │   ├── ui/                            ← shadcn/ui base components
@@ -166,6 +163,7 @@ Always import model constants from `@/lib/ai/models.ts` — never hardcode model
 │   │   ├── ProjectSetupStep.tsx
 │   │   ├── CommitmentCalibrationStep.tsx  ← Shows 10 extracted commitments
 │   │   └── OAuthConsentScreen.tsx         ← Pre-consent education
+│   │   (Note: TelegramConnectStep.tsx removed — delivery is in-app)
 │   └── shared/
 │       ├── SourceCitation.tsx
 │       ├── ConfirmActionModal.tsx         ← Required before any write action
@@ -197,8 +195,7 @@ Always import model constants from `@/lib/ai/models.ts` — never hardcode model
 │   │   ├── google-calendar.ts         ← Google Calendar API wrapper
 │   │   ├── outlook.ts                 ← Microsoft Graph API wrapper
 │   │   ├── slack.ts                   ← Slack API wrapper
-│   │   ├── notion.ts                  ← Notion API wrapper
-│   │   └── telegram.ts                ← Telegram Bot API wrapper
+│   │   └── notion.ts                  ← Notion API wrapper
 │   ├── db/
 │   │   ├── client.ts                  ← Supabase client (server + browser)
 │   │   ├── queries/                   ← Typed query functions per domain

@@ -40,6 +40,14 @@ export async function middleware(request: NextRequest) {
 
   // Public routes that don't require authentication
   const isPublicRoute = pathname === '/' || pathname === '/beta';
+
+  // If a logged-in user hits the landing page, send them to dashboard
+  if (isPublicRoute && user) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
+  }
+
   if (isPublicRoute) return response;
 
   const isDashboardRoute =
@@ -53,12 +61,17 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/admin');
 
   const isOnboardingRoute = pathname === '/onboarding';
+  const isGettingReadyRoute = pathname === '/getting-ready';
 
-  if (!user && (isDashboardRoute || isOnboardingRoute)) {
+  // Unauthenticated users trying to access protected routes -> login
+  if (!user && (isDashboardRoute || isOnboardingRoute || isGettingReadyRoute)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
+
+  // Getting-ready is a standalone authenticated route — no further checks
+  if (user && isGettingReadyRoute) return response;
 
   // Authenticated users: check onboarding status for dashboard routes
   if (user && isDashboardRoute) {

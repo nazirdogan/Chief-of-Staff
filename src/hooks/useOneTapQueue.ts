@@ -70,7 +70,11 @@ export function useOneTapQueue(): {
             });
           }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.warn('Supabase Realtime unavailable — one-tap actions will load on mount only', err);
+          }
+        });
     }
 
     init();

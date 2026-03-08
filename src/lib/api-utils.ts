@@ -17,7 +17,12 @@ export function handleApiError(error: unknown): NextResponse {
 
   // Unexpected error — always report to Sentry
   Sentry.captureException(error);
-  console.error('[API] Unexpected error:', error instanceof Error ? error.message : 'Unknown error');
+  const errorDetail = error instanceof Error
+    ? error.message
+    : typeof error === 'object' && error !== null
+      ? JSON.stringify(error)
+      : String(error);
+  console.error('[API] Unexpected error:', errorDetail);
 
   return NextResponse.json(
     { error: 'Internal server error', code: 'INTERNAL_ERROR' },

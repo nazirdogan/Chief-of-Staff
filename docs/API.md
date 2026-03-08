@@ -476,41 +476,6 @@ User rejects a pending action. Records are kept for model feedback.
 
 ---
 
-## Telegram Routes
-
-### `POST /api/webhooks/telegram`
-**Public — HMAC verified**
-Telegram sends all bot events here. MUST verify the `X-Telegram-Bot-Api-Secret-Token` header.
-```typescript
-// Telegram Update object (standard Telegram Bot API format)
-// Internal — no consumer-facing request shape
-
-// This route:
-// 1. Verifies webhook secret token
-// 2. Identifies user by chat_id
-// 3. Parses command or free text
-// 4. Routes to appropriate handler
-// 5. Responds via Telegram API
-
-// No response body needed — Telegram doesn't process it
-// Returns 200 immediately to acknowledge receipt
-```
-
-### `POST /api/telegram/connect`
-**Auth required**
-Initiates Telegram connection. Returns a deep link for the user to open in Telegram.
-```typescript
-// Response 200
-{
-  data: {
-    connect_url: string;    // https://t.me/DonnaBot?start=TOKEN
-    token: string;          // one-time token, expires in 10 minutes
-  }
-}
-```
-
----
-
 ## Heartbeat Routes
 
 ### `GET /api/heartbeat/config`

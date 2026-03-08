@@ -15,7 +15,7 @@ import { triageEmails } from '../../src/lib/ai/agents/operations/email-triage';
 import { classifyTasks, presentClassification } from '../../src/lib/ai/agents/operations/am-sweep';
 import { dispatchSubagents } from '../../src/lib/ai/agents/operations/dispatch';
 import { generateTimeBlocks, confirmTimeBlockSchedule } from '../../src/lib/ai/agents/operations/time-blocker';
-import { formatCompletionReport, sendCompletionReportToTelegram } from '../../src/lib/ai/agents/operations/completion-report';
+import { formatCompletionReport } from '../../src/lib/ai/agents/operations/completion-report';
 import { createServiceClient } from '../../src/lib/db/client';
 
 function ask(question: string): Promise<string> {
@@ -99,12 +99,7 @@ async function main() {
       }
       console.log(`\n  ${formatted.summary}`);
 
-      try {
-        await sendCompletionReportToTelegram(userId, report);
-        console.log('  Report sent to Telegram.\n');
-      } catch {
-        // Telegram not connected
-      }
+      console.log('  Report ready in-app.\n');
     }
   }
 

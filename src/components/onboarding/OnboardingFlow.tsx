@@ -9,14 +9,13 @@ import { IntegrationConnectStep } from './IntegrationConnectStep';
 import { VIPSetupStep } from './VIPSetupStep';
 import { ProjectSetupStep } from './ProjectSetupStep';
 import { CommitmentCalibrationStep } from './CommitmentCalibrationStep';
-import { TelegramConnectStep } from './TelegramConnectStep';
 
 interface VIPContact {
   email: string;
   name: string;
 }
 
-const STEP_LABELS = ['Connect Apps', 'VIP Contacts', 'Projects', 'Calibration', 'Telegram'];
+const STEP_LABELS = ['Connect Apps', 'VIP Contacts', 'Projects', 'Calibration'];
 
 export function OnboardingFlow() {
   const router = useRouter();
@@ -207,17 +206,9 @@ export function OnboardingFlow() {
             <CommitmentCalibrationStep
               onNext={(decisions) => {
                 calibrationDecisionsRef.current = decisions;
-                setStep(4);
+                handleComplete(decisions);
               }}
               onBack={() => setStep(2)}
-            />
-          )}
-
-          {step === 4 && (
-            <TelegramConnectStep
-              onNext={() => handleComplete(calibrationDecisionsRef.current)}
-              onBack={() => setStep(3)}
-              onSkip={() => handleComplete(calibrationDecisionsRef.current)}
             />
           )}
 

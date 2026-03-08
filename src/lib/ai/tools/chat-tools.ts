@@ -117,7 +117,7 @@ export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'list_inbox',
-    description: 'List inbox items (emails, messages) across all connected providers.',
+    description: 'List inbox items (emails, messages) from OAuth-connected providers (Gmail, Outlook, Slack). For WhatsApp, iMessage, Telegram, or other desktop apps, use search_memory instead.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -165,7 +165,7 @@ export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
   // ── Context Memory Tools ──────────────────────────────────
   {
     name: 'search_memory',
-    description: 'Semantic search across all context memory — emails, messages, meetings, documents, tasks. Use this to find relevant context for any question.',
+    description: 'Semantic search across ALL context memory — emails, messages, meetings, documents, tasks, AND desktop-observed app activity (WhatsApp, iMessage, Telegram, Signal, Discord, etc.). Use this to find relevant context for any question. ALWAYS use this for questions about messaging apps not connected via OAuth.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -236,7 +236,7 @@ export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'what_happened',
-    description: "Answer 'what happened' questions — summarizes activity over a time range with optional focus area.",
+    description: "Answer 'what happened' questions — summarizes activity over a time range with optional focus area. Includes both OAuth-integrated data AND desktop-observed activity (WhatsApp, iMessage, etc.).",
     input_schema: {
       type: 'object' as const,
       properties: {

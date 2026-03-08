@@ -19,11 +19,6 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   OPENAI_API_KEY: z.string().min(1),
 
-  // Telegram
-  TELEGRAM_BOT_TOKEN: z.string().min(1),
-  TELEGRAM_WEBHOOK_SECRET: z.string().min(1),
-  TELEGRAM_BOT_USERNAME: z.string().optional(),
-
   // Trigger.dev (optional until background jobs are configured)
   TRIGGER_SECRET_KEY: z.string().min(1).optional(),
   TRIGGER_PROJECT_ID: z.string().min(1).optional(),

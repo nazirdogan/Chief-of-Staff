@@ -8,7 +8,7 @@ import 'dotenv/config';
 import * as readline from 'readline';
 import { classifyTasks, presentClassification } from '../../src/lib/ai/agents/operations/am-sweep';
 import { dispatchSubagents } from '../../src/lib/ai/agents/operations/dispatch';
-import { formatCompletionReport, sendCompletionReportToTelegram } from '../../src/lib/ai/agents/operations/completion-report';
+import { formatCompletionReport } from '../../src/lib/ai/agents/operations/completion-report';
 
 function ask(question: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -66,13 +66,7 @@ async function main() {
   }
   console.log(formatted.summary);
 
-  // Send to Telegram
-  try {
-    const sent = await sendCompletionReportToTelegram(userId, report);
-    if (sent) console.log('\nReport sent to Telegram.');
-  } catch {
-    console.log('\n(Telegram notification skipped — not connected)');
-  }
+  console.log('\nReport ready in-app.');
 
   console.log('\n=== AM SWEEP COMPLETE ===\n');
 }

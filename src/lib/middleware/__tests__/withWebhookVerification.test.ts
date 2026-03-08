@@ -3,44 +3,17 @@ import { NextRequest } from 'next/server';
 import crypto from 'crypto';
 
 // Set env vars before importing
-const TEST_TELEGRAM_SECRET = 'test-telegram-secret-token';
 const TEST_NANGO_SECRET = 'test-nango-webhook-secret';
 
-vi.stubEnv('TELEGRAM_WEBHOOK_SECRET', TEST_TELEGRAM_SECRET);
 vi.stubEnv('NANGO_WEBHOOK_SECRET', TEST_NANGO_SECRET);
 
-import { verifyTelegramWebhook, verifyNangoWebhook } from '../withWebhookVerification';
+import { verifyNangoWebhook } from '../withWebhookVerification';
 
 function makeRequest(headers: Record<string, string> = {}): NextRequest {
   return new NextRequest(new URL('http://localhost/api/webhooks/test'), {
     headers,
   });
 }
-
-describe('verifyTelegramWebhook', () => {
-  beforeEach(() => {
-    vi.stubEnv('TELEGRAM_WEBHOOK_SECRET', TEST_TELEGRAM_SECRET);
-  });
-
-  it('returns true when secret token matches', () => {
-    const req = makeRequest({
-      'X-Telegram-Bot-Api-Secret-Token': TEST_TELEGRAM_SECRET,
-    });
-    expect(verifyTelegramWebhook(req)).toBe(true);
-  });
-
-  it('returns false when secret token is missing', () => {
-    const req = makeRequest();
-    expect(verifyTelegramWebhook(req)).toBe(false);
-  });
-
-  it('returns false when secret token is wrong', () => {
-    const req = makeRequest({
-      'X-Telegram-Bot-Api-Secret-Token': 'wrong-secret',
-    });
-    expect(verifyTelegramWebhook(req)).toBe(false);
-  });
-});
 
 describe('verifyNangoWebhook', () => {
   beforeEach(() => {

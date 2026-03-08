@@ -332,6 +332,58 @@ export async function getRecentMemorySnapshots(
   return data ?? [];
 }
 
+// ── Desktop Observer Queries ─────────────────────────────────
+
+/**
+ * Fetch recent desktop observer context chunks, optionally filtered by activity type.
+ * Used by briefing generation and operations to include desktop-captured data
+ * (e.g. WhatsApp messages, iMessage, Slack desktop) alongside OAuth-integrated sources.
+ */
+export async function getDesktopObserverChunks(
+  supabase: SupabaseClient,
+  userId: string,
+  opts?: {
+    activityTypes?: string[];
+    after?: string;
+    before?: string;
+    minImportance?: ContextImportance;
+    limit?: number;
+  }
+): Promise<ContextChunk[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query = (supabase as any)
+    .from('context_chunks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('provider', 'desktop_observer')
+    .order('occurred_at', { ascending: false });
+
+  if (opts?.after) query = query.gte('occurred_at', opts.after);
+  if (opts?.before) query = query.lte('occurred_at', opts.before);
+  if (opts?.minImportance) {
+    const importanceOrder: ContextImportance[] = ['critical', 'important', 'background', 'noise'];
+    const minIdx = importanceOrder.indexOf(opts.minImportance);
+    const allowed = importanceOrder.slice(0, minIdx + 1);
+    query = query.in('importance', allowed);
+  }
+  query = query.limit(opts?.limit ?? 50);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  let chunks = (data ?? []) as ContextChunk[];
+
+  // Client-side filter for activity types (stored in source_ref.activity_type)
+  if (opts?.activityTypes?.length) {
+    chunks = chunks.filter((c) => {
+      const activityType = (c.source_ref as Record<string, unknown>)?.activity_type as string | undefined;
+      return activityType && opts.activityTypes!.includes(activityType);
+    });
+  }
+
+  return chunks;
+}
+
 // ── Semantic Search ──────────────────────────────────────────
 
 export async function matchContextChunks(

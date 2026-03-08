@@ -32,7 +32,7 @@ const ACTION_CONFIGS: ActionConfig[] = [
   {
     type: 'send_message',
     label: 'Send messages',
-    description: 'Donna sends follow-up messages via Slack or Telegram on your behalf.',
+    description: 'Donna sends follow-up messages via Slack on your behalf.',
   },
   {
     type: 'reschedule_meeting',

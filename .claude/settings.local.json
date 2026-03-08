@@ -52,7 +52,20 @@
       "Bash(cargo install:*)",
       "Bash(xargs kill)",
       "Bash(python3:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cargo check:*)",
+      "WebFetch(domain:littlebird.ai)",
+      "Bash(cat:*)",
+      "Bash(supabase db:*)",
+      "Bash(cargo build:*)",
+      "Bash(./node_modules/.bin/tailwindcss init:*)",
+      "Bash(pkill:*)",
+      "Bash(open:*)",
+      "Read(//Users/nazir/.netlify/**)",
+      "Read(//Users/nazir/.config/**)",
+      "Bash(kill 44771:*)",
+      "Bash(tail:*)",
+      "Bash(xargs -I {} basename {} .ts)"
     ]
   }
 }

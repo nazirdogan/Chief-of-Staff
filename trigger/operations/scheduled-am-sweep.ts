@@ -1,7 +1,6 @@
 import { schedules, logger } from '@trigger.dev/sdk/v3';
 import { classifyTasks } from '@/lib/ai/agents/operations/am-sweep';
 import { dispatchSubagents } from '@/lib/ai/agents/operations/dispatch';
-import { sendCompletionReportToTelegram } from '@/lib/ai/agents/operations/completion-report';
 import { createServiceClient } from '@/lib/db/client';
 
 export const scheduledAmSweep = schedules.task({
@@ -45,13 +44,6 @@ export const scheduledAmSweep = schedules.task({
           classified.green,
           classified.yellow
         );
-
-        // Send report via Telegram
-        try {
-          await sendCompletionReportToTelegram(userId, report);
-        } catch {
-          logger.warn('Telegram notification failed for user', { userId });
-        }
 
         usersProcessed++;
         logger.info('AM Sweep complete for user', {

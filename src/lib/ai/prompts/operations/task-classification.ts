@@ -49,6 +49,7 @@ export const TASK_CLASSIFICATION_USER_TEMPLATE = (params: {
   }>;
   vipContacts: string[];
   activeProjects: string[];
+  desktopContext?: string[];
 }) => `Classify these tasks for today's AM Sweep.
 
 TODAY'S CALENDAR:
@@ -56,7 +57,10 @@ ${params.calendarEvents.map((e) => `- ${e.start} — ${e.summary} (${e.attendees
 
 VIP CONTACTS: ${params.vipContacts.join(', ') || 'None configured'}
 ACTIVE PROJECTS: ${params.activeProjects.join(', ') || 'None configured'}
-
+${params.desktopContext?.length ? `
+RECENT DESKTOP ACTIVITY (WhatsApp, Messages, etc.):
+${params.desktopContext.join('\n')}
+` : ''}
 TASKS TO CLASSIFY:
 ${params.tasks
   .map(

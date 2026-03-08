@@ -17,7 +17,7 @@ export function SocialAuthButtons() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
           ...(provider === 'google' && {
             queryParams: {
               access_type: 'offline',

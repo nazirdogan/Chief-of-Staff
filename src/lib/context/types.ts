@@ -7,7 +7,8 @@ export type ContextChunkType =
   | 'code_activity'
   | 'crm_activity'
   | 'file_activity'
-  | 'general_note';
+  | 'general_note'
+  | 'desktop_observation';
 
 export type ContextImportance = 'critical' | 'important' | 'background' | 'noise';
 

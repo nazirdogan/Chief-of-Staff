@@ -1,4 +1,3 @@
-import { sendTelegramMessage } from '@/lib/integrations/telegram';
 import { createServiceClient } from '@/lib/db/client';
 import { listSubagentRuns } from '@/lib/db/queries/operations';
 import type { CompletionReport } from './dispatch';
@@ -12,7 +11,6 @@ import type { PrepResult } from './subagents/prep-agent';
 export interface FormattedReport {
   sections: ReportSection[];
   summary: string;
-  telegramText: string;
 }
 
 export interface ReportSection {
@@ -128,58 +126,7 @@ export function formatCompletionReport(report: CompletionReport): FormattedRepor
 
   const summary = `${report.totalTasksProcessed} tasks processed: ${report.emailDrafts.length} drafts, ${report.executedTasks.filter((t) => t.completed).length} completed, ${report.preppedTasks.length} prepped, ${report.research.length} researched`;
 
-  const telegramText = formatForTelegram(sections, summary);
-
-  return { sections, summary, telegramText };
-}
-
-function formatForTelegram(sections: ReportSection[], summary: string): string {
-  const emojiMap: Record<string, string> = {
-    check: '\u2705',
-    email: '\u2709\uFE0F',
-    decision: '\u{1F7E1}',
-    research: '\u{1F50D}',
-    calendar: '\u{1F4C5}',
-    warning: '\u26A0\uFE0F',
-  };
-
-  const lines: string[] = ['<b>Morning Operations Report</b>', ''];
-
-  for (const section of sections) {
-    const emoji = emojiMap[section.emoji] ?? '\u{1F4CB}';
-    lines.push(`${emoji} <b>${section.title}</b>`);
-    for (const item of section.items) {
-      lines.push(`  \u2022 ${item.label}`);
-    }
-    lines.push('');
-  }
-
-  lines.push(`<i>${summary}</i>`);
-
-  return lines.join('\n');
-}
-
-export async function sendCompletionReportToTelegram(
-  userId: string,
-  report: CompletionReport
-): Promise<boolean> {
-  const supabase = createServiceClient();
-
-  // Get user's telegram chat_id
-  const { data: session } = await supabase
-    .from('telegram_sessions')
-    .select('chat_id')
-    .eq('user_id', userId)
-    .eq('is_active', true)
-    .limit(1)
-    .single();
-
-  if (!session) return false;
-
-  const formatted = formatCompletionReport(report);
-  const chatId = (session as Record<string, unknown>).chat_id as string;
-
-  return sendTelegramMessage(chatId, formatted.telegramText);
+  return { sections, summary };
 }
 
 export async function getCompletionReportForRun(
