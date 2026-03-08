@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
+import { useChatStore } from '@/stores/chat-store';
 import {
   LayoutDashboard,
   Inbox,
@@ -15,7 +16,8 @@ import {
   ShieldCheck,
   MessageCircle,
   Zap,
-  ChevronRight,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
@@ -23,17 +25,14 @@ import { OneTapConfirmToast } from '@/components/shared/OneTapConfirmToast';
 import { useOneTapQueue } from '@/hooks/useOneTapQueue';
 
 /* ── Navigation structure ── */
-const primaryNav = [
+const navItems = [
+  { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
+  { href: '/operations', label: 'Operations', icon: Zap },
   { href: '/dashboard', label: 'Briefing', icon: LayoutDashboard },
   { href: '/inbox', label: 'Inbox', icon: Inbox },
   { href: '/commitments', label: 'Commitments', icon: CheckCircle2 },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/people', label: 'People', icon: Users },
-];
-
-const secondaryNav = [
-  { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
-  { href: '/operations', label: 'Operations', icon: Zap },
 ];
 
 /* Donna brand tokens */
@@ -89,18 +88,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+
+  const conversations = useChatStore((s) => s.conversations);
+  const loadConversations = useChatStore((s) => s.loadConversations);
 
   const { current: currentToast, resolve: resolveToast } = useOneTapQueue();
 
   const supabase = getSupabaseBrowserClient();
 
-  // Auto-expand secondary nav if user is on one of those pages
+  // Load chat history for sidebar
   useEffect(() => {
-    if (secondaryNav.some(item => pathname.startsWith(item.href))) {
-      setMoreOpen(true); // eslint-disable-line react-hooks/set-state-in-effect -- sync derived state from pathname
-    }
-  }, [pathname]);
+    loadConversations();
+  }, [loadConversations]);
 
   // Check if a Tier 3 dialog is open — defer toast rendering
   useEffect(() => {
@@ -196,52 +195,95 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             }}
           />
 
-          {/* Primary nav */}
-          <nav className="flex flex-1 flex-col px-3 pt-3">
+          {/* Nav */}
+          <nav className="flex flex-1 flex-col px-3 pt-3 overflow-hidden">
             <div className="space-y-0.5">
-              {primaryNav.map((item) => (
+              {navItems.map((item) => (
                 <NavItem key={item.href} {...item} pathname={pathname} />
               ))}
             </div>
 
-            {/* Secondary nav — collapsible */}
-            <div className="mt-4">
-              <button
-                onClick={() => setMoreOpen(!moreOpen)}
-                className="flex w-full items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold tracking-[0.10em] uppercase transition-colors duration-150"
-                style={{ color: t.textQuaternary }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = t.textTertiary; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = t.textQuaternary; }}
-              >
-                <ChevronRight
-                  size={10}
-                  className="transition-transform duration-200"
-                  style={{ transform: moreOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                />
-                More
-              </button>
-
-              <div
-                className="overflow-hidden transition-all duration-200 ease-in-out"
-                style={{
-                  maxHeight: moreOpen ? '200px' : '0px',
-                  opacity: moreOpen ? 1 : 0,
-                }}
-              >
-                <div className="space-y-0.5 pt-1">
-                  {secondaryNav.map((item) => (
-                    <NavItem key={item.href} {...item} pathname={pathname} />
-                  ))}
+            {/* Chat history */}
+            {conversations.length > 0 && (
+              <div className="mt-4 flex flex-col overflow-hidden min-h-0">
+                <div className="flex items-center justify-between px-3 mb-1.5">
+                  <span
+                    className="text-[10px] font-semibold tracking-[0.10em] uppercase"
+                    style={{ color: t.textQuaternary }}
+                  >
+                    Recent chats
+                  </span>
+                  <Link
+                    href="/chat"
+                    className="rounded p-0.5 transition-colors duration-150"
+                    style={{ color: t.textQuaternary }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = t.textTertiary; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = t.textQuaternary; }}
+                    title="New chat"
+                  >
+                    <Plus size={12} />
+                  </Link>
+                </div>
+                <div className="flex-1 overflow-y-auto space-y-px min-h-0">
+                  {conversations.slice(0, 15).map((conv) => {
+                    const href = `/chat/${conv.id}`;
+                    const active = pathname === href;
+                    return (
+                      <Link
+                        key={conv.id}
+                        href={href}
+                        className="group flex items-center gap-2 rounded-lg px-3 py-[7px] text-[12px] transition-all duration-150"
+                        style={{
+                          background: active ? t.activeAccent : 'transparent',
+                          border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
+                          color: active ? t.text : t.textQuaternary,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!active) {
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                            e.currentTarget.style.color = t.textTertiary;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = t.textQuaternary;
+                          }
+                        }}
+                      >
+                        <MessageCircle size={12} style={{ opacity: 0.4, flexShrink: 0 }} />
+                        <span className="truncate">
+                          {conv.title || 'New conversation'}
+                        </span>
+                        {active && (
+                          <button
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              await fetch(`/api/chat/conversations/${conv.id}`, { method: 'DELETE' });
+                              loadConversations();
+                              router.push('/chat');
+                            }}
+                            className="ml-auto opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5 rounded"
+                            style={{ color: t.textQuaternary }}
+                            title="Delete conversation"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Spacer */}
-            <div className="flex-1" />
+            <div className="flex-1 min-h-4" />
 
             {/* Keyboard shortcut hint */}
             <div
-              className="mx-2 mb-3 rounded-lg px-3 py-2 text-center"
+              className="mx-2 mb-3 rounded-lg px-3 py-2 text-center shrink-0"
               style={{ background: t.surface }}
             >
               <p className="text-[11px]" style={{ color: t.textQuaternary }}>

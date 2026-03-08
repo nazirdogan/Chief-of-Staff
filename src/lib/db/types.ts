@@ -12,7 +12,6 @@ export type IntegrationProvider =
   | 'onedrive'
   | 'slack'
   | 'notion'
-  | 'telegram'
   | 'whatsapp'
   | 'todoist'
   | 'linear'
@@ -88,7 +87,7 @@ export type PendingActionStatus =
   | 'executed'
   | 'failed';
 
-export type MessageDeliveryChannel = 'telegram' | 'whatsapp' | 'in_app' | 'sms';
+export type MessageDeliveryChannel = 'whatsapp' | 'in_app' | 'sms';
 
 export type HeartbeatFrequency = 'realtime' | 'hourly' | 'daily';
 
@@ -134,6 +133,10 @@ export type ContextImportance = 'critical' | 'important' | 'background' | 'noise
 
 export type ContextSentiment = 'positive' | 'negative' | 'neutral' | 'urgent';
 
+export type MessageSentiment = 'positive' | 'negative' | 'neutral' | 'urgent';
+
+export type ReflectionType = 'weekly' | 'monthly';
+
 // ── Row types ──────────────────────────────────────────────
 
 export interface Profile {
@@ -147,7 +150,6 @@ export interface Profile {
   data_region: DataRegion;
   briefing_time: string;
   primary_channel: MessageDeliveryChannel;
-  telegram_chat_id: string | null;
   whatsapp_number: string | null;
   onboarding_completed: boolean;
   privacy_mode: boolean;
@@ -247,6 +249,7 @@ export interface BriefingItem {
   reasoning: string;
   source_ref: SourceRef;
   action_suggestion: string | null;
+  sentiment: MessageSentiment | null;
   urgency_score: number | null;
   importance_score: number | null;
   risk_score: number | null;
@@ -420,6 +423,7 @@ export interface InboxItem {
   is_archived: boolean;
   needs_reply: boolean;
   reply_drafted: boolean;
+  sentiment: MessageSentiment | null;
   urgency_score: number | null;
   received_at: string;
   snoozed_until: string | null;
@@ -506,16 +510,6 @@ export interface UserOperationsConfig {
   updated_at: string;
 }
 
-export interface TelegramSession {
-  id: string;
-  user_id: string;
-  chat_id: string;
-  username: string | null;
-  is_active: boolean;
-  last_message_at: string | null;
-  created_at: string;
-}
-
 export interface UserSession {
   id: string;
   user_id: string;
@@ -551,6 +545,39 @@ export interface UserFeedback {
   rating: number | null;
   metadata: Record<string, unknown>;
   resolved: boolean;
+  created_at: string;
+}
+
+export interface Reflection {
+  id: string;
+  user_id: string;
+  reflection_type: ReflectionType;
+  period_start: string;
+  period_end: string;
+  summary: string;
+  accomplishments: Array<{ description: string; source_ref?: SourceRef }>;
+  slipped_items: Array<{ description: string; source_ref?: SourceRef }>;
+  relationship_highlights: Array<{ contact_name: string; note: string }>;
+  patterns: Array<{ observation: string; suggestion?: string }>;
+  recommendations: string | null;
+  generation_model: string | null;
+  generation_ms: number | null;
+  created_at: string;
+}
+
+export interface ChatConversation {
+  id: string;
+  user_id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant';
+  content: string;
   created_at: string;
 }
 
@@ -667,10 +694,11 @@ export interface Database {
       };
       inbox_items: {
         Row: InboxItem;
-        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at' | 'operation_category' | 'operation_context' | 'estimated_duration_minutes' | 'task_tags' | 'task_title' | 'deferred_to' | 'defer_reason'> & {
+        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at' | 'sentiment' | 'operation_category' | 'operation_context' | 'estimated_duration_minutes' | 'task_tags' | 'task_title' | 'deferred_to' | 'defer_reason'> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
+          sentiment?: MessageSentiment | null;
           operation_category?: OperationCategory | null;
           operation_context?: Record<string, unknown>;
           estimated_duration_minutes?: number | null;
@@ -731,14 +759,6 @@ export interface Database {
         };
         Update: Partial<Omit<UserOperationsConfig, 'user_id'>>;
       };
-      telegram_sessions: {
-        Row: TelegramSession;
-        Insert: Omit<TelegramSession, 'id' | 'created_at'> & {
-          id?: string;
-          created_at?: string;
-        };
-        Update: Partial<Omit<TelegramSession, 'id'>>;
-      };
       user_sessions: {
         Row: UserSession;
         Insert: Omit<UserSession, 'id' | 'created_at' | 'last_active_at'> & {
@@ -755,6 +775,14 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<WaitlistEntry, 'id'>>;
+      };
+      reflections: {
+        Row: Reflection;
+        Insert: Omit<Reflection, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<Reflection, 'id'>>;
       };
       user_feedback: {
         Row: UserFeedback;
@@ -783,6 +811,23 @@ export interface Database {
       audit_log: {
         Row: AuditLogEntry;
         Insert: Omit<AuditLogEntry, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
+      };
+      chat_conversations: {
+        Row: ChatConversation;
+        Insert: Omit<ChatConversation, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<ChatConversation, 'id'>>;
+      };
+      chat_messages: {
+        Row: ChatMessage;
+        Insert: Omit<ChatMessage, 'id' | 'created_at'> & {
           id?: string;
           created_at?: string;
         };
