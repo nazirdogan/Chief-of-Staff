@@ -13,7 +13,6 @@ import {
   Users,
   Settings,
   LogOut,
-  ShieldCheck,
   MessageCircle,
   Plus,
   Trash2,
@@ -84,7 +83,6 @@ function NavItem({ href, label, icon: Icon, pathname }: { href: string; label: s
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -122,20 +120,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect -- intentional hydration guard
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any)
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', user.id)
-          .single()
-          .then(({ data }: { data: { is_admin: boolean } | null }) => {
-            if (data?.is_admin) setIsAdmin(true);
-          });
-      }
-    });
-  }, [supabase]);
+  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -306,10 +291,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             />
 
             <NavItem href="/settings" label="Settings" icon={Settings} pathname={pathname} />
-
-            {isAdmin && (
-              <NavItem href="/admin" label="Admin" icon={ShieldCheck} pathname={pathname} />
-            )}
 
             <button
               onClick={handleSignOut}
