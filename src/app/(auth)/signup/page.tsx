@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -145,6 +146,18 @@ export default function SignupPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
             </Button>
+
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            <SocialAuthButtons />
+
             <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
