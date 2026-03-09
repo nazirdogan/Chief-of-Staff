@@ -1,6 +1,15 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+/**
+ * Platform detection: The desktop app (Tauri) sets a `donna_client=desktop`
+ * cookie at launch. This is the only reliable way to distinguish desktop
+ * from web on navigation requests (custom headers don't apply to page loads).
+ */
+function isDesktopClient(request: NextRequest): boolean {
+  return request.cookies.get('donna_client')?.value === 'desktop';
+}
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
@@ -37,12 +46,12 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const isDesktop = isDesktopClient(request);
 
-  // Public routes that don't require authentication
-  const isPublicRoute = pathname === '/' || pathname === '/beta';
+  // ── Public routes (landing, download, beta) ──
+  const isPublicRoute = pathname === '/' || pathname === '/beta' || pathname === '/download';
 
-  // If a logged-in user hits the landing page, send them to dashboard
-  if (isPublicRoute && user) {
+  if (isPublicRoute && user && isDesktop) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
@@ -50,6 +59,23 @@ export async function middleware(request: NextRequest) {
 
   if (isPublicRoute) return response;
 
+  // ── Auth routes: desktop-only ──
+  const isAuthRoute = pathname === '/login' || pathname === '/signup';
+
+  if (isAuthRoute && !isDesktop) {
+    // Web users cannot sign up or log in — redirect to download page
+    const url = request.nextUrl.clone();
+    url.pathname = '/download';
+    return NextResponse.redirect(url);
+  }
+
+  if (isAuthRoute && user && isDesktop) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
+  }
+
+  // ── Dashboard routes: desktop-only ──
   const isDashboardRoute =
     pathname === '/dashboard' ||
     pathname.startsWith('/inbox') ||
@@ -63,7 +89,14 @@ export async function middleware(request: NextRequest) {
   const isOnboardingRoute = pathname === '/onboarding';
   const isGettingReadyRoute = pathname === '/getting-ready';
 
-  // Unauthenticated users trying to access protected routes -> login
+  // Gate: dashboard, onboarding, and getting-ready are desktop-only
+  if (!isDesktop && (isDashboardRoute || isOnboardingRoute || isGettingReadyRoute)) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/download';
+    return NextResponse.redirect(url);
+  }
+
+  // Unauthenticated desktop users trying to access protected routes -> login
   if (!user && (isDashboardRoute || isOnboardingRoute || isGettingReadyRoute)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
@@ -73,7 +106,7 @@ export async function middleware(request: NextRequest) {
   // Getting-ready is a standalone authenticated route — no further checks
   if (user && isGettingReadyRoute) return response;
 
-  // Authenticated users: check onboarding status for dashboard routes
+  // Authenticated desktop users: check onboarding status for dashboard routes
   if (user && isDashboardRoute) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -86,15 +119,6 @@ export async function middleware(request: NextRequest) {
       url.pathname = '/onboarding';
       return NextResponse.redirect(url);
     }
-  }
-
-  // Authenticated users trying to access auth routes -> redirect to dashboard
-  const isAuthRoute = pathname === '/login' || pathname === '/signup';
-
-  if (user && isAuthRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
   }
 
   return response;

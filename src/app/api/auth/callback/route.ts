@@ -2,10 +2,14 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Public route — handles Supabase auth callbacks (email verification, OAuth)
+// Public route — handles Supabase auth callbacks (email verification, OAuth).
+// Auth only happens through the desktop app — web users are redirected to /download.
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
+
+  // Default redirect target. The middleware will gate /dashboard for non-desktop
+  // clients, but auth callbacks typically originate from the desktop app's webview.
   const next = searchParams.get('next') ?? '/dashboard';
 
   if (code) {

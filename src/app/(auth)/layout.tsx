@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useIsTauri } from '@/lib/utils/is-tauri';
 import { DotGlobeHero } from '@/components/ui/globe-hero';
 
@@ -9,6 +10,14 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const isTauri = useIsTauri();
+
+  // Set the donna_client cookie as early as possible so middleware
+  // can distinguish desktop from web on all subsequent navigations
+  useEffect(() => {
+    if (isTauri) {
+      document.cookie = 'donna_client=desktop;path=/;max-age=31536000;samesite=lax';
+    }
+  }, [isTauri]);
 
   if (isTauri) {
     return (

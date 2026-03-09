@@ -291,9 +291,11 @@ export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // Desktop app (Tauri) should never show the landing page — go straight to login
+  // Desktop app (Tauri) should never show the landing page — go straight to login.
+  // Also sets the donna_client cookie so middleware can gate routes.
   useEffect(() => {
     if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      document.cookie = "donna_client=desktop;path=/;max-age=31536000;samesite=lax";
       router.replace("/login");
     }
   }, [router]);
@@ -435,7 +437,7 @@ export default function LandingPage() {
                 </a>
               ))}
               <Link
-                href="/login"
+                href="/download"
                 style={{
                   fontFamily: fonts.body,
                   fontSize: 13,
@@ -447,7 +449,7 @@ export default function LandingPage() {
                 onMouseEnter={(e) => ((e.target as HTMLElement).style.color = c.paper)}
                 onMouseLeave={(e) => ((e.target as HTMLElement).style.color = c.mist)}
               >
-                Sign in
+                Download
               </Link>
               <a
                 href="#waitlist"

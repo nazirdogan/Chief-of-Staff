@@ -169,30 +169,58 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     };
   }, [setCatchUpState, setStaleWarnings]);
 
-  // Start desktop observer frontend listener (Tauri only)
+  // Start desktop observer frontend listener + heartbeat (Tauri only)
   // The Rust backend auto-starts the AX loop, but the JS event listener
   // must be registered to receive events and flush context to the API.
   useEffect(() => {
     if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) return;
 
+    // Ensure the donna_client cookie is set for middleware platform detection
+    document.cookie = 'donna_client=desktop;path=/;max-age=31536000;samesite=lax';
+
     let stopFn: (() => Promise<void>) | null = null;
+    let stopHeartbeatFn: (() => void) | null = null;
+    let observerRunning = false;
+    let observationCount = 0;
 
     async function boot() {
       try {
-        const { startObserver, stopObserver } = await import('@/lib/desktop-observer/client');
+        const { startObserver, stopObserver, getObserverStatus } = await import('@/lib/desktop-observer/client');
         const started = await startObserver();
         if (started) {
           stopFn = stopObserver;
+          observerRunning = true;
           console.log('[DashboardShell] Desktop observer listener started');
+
+          // Get initial observation count
+          try {
+            const status = await getObserverStatus();
+            if (status) observationCount = status.context_changes_emitted ?? 0;
+          } catch {
+            // Non-fatal
+          }
         }
       } catch {
         // Desktop observer not available — non-fatal
+      }
+
+      // Start heartbeat regardless of observer status
+      try {
+        const { startHeartbeat } = await import('@/lib/desktop/heartbeat');
+        stopHeartbeatFn = startHeartbeat(() => ({
+          observer_running: observerRunning,
+          observation_count: observationCount,
+        }));
+        console.log('[DashboardShell] Desktop heartbeat started');
+      } catch {
+        // Heartbeat not available — non-fatal
       }
     }
     boot();
 
     return () => {
       stopFn?.().catch(() => {});
+      stopHeartbeatFn?.();
     };
   }, []);
 

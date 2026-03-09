@@ -584,7 +584,31 @@ export async function executeChatTool(
     case 'get_day_summary': {
       const date = (input.date as string) ?? new Date().toISOString().split('T')[0];
       const snapshot = await getMemorySnapshot(supabase, userId, date);
-      if (!snapshot) return JSON.stringify({ message: `No summary available for ${date}.` });
+      if (!snapshot) {
+        // Provide factual diagnostics when no summary exists
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: desktopSession } = await (supabase as any)
+          .from('desktop_sessions')
+          .select('last_seen_at, observer_running, observation_count')
+          .eq('user_id', userId)
+          .single();
+
+        const desktopConnected = desktopSession
+          ? Date.now() - new Date(desktopSession.last_seen_at).getTime() < 2 * 60 * 1000
+          : false;
+
+        return JSON.stringify({
+          message: `No summary available for ${date}.`,
+          diagnostics: {
+            desktop_app: {
+              connected: desktopConnected,
+              observer_running: desktopSession?.observer_running ?? false,
+              last_seen_at: desktopSession?.last_seen_at ?? null,
+              total_observations: desktopSession?.observation_count ?? 0,
+            },
+          },
+        });
+      }
       return JSON.stringify({
         date: snapshot.snapshot_date,
         narrative: snapshot.day_narrative,
@@ -705,7 +729,46 @@ export async function executeChatTool(
       });
 
       if (chunks.length === 0) {
-        return JSON.stringify({ message: `No activity found for ${timeRange}.` });
+        // Gather factual diagnostics instead of letting the AI guess
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: desktopSession } = await (supabase as any)
+          .from('desktop_sessions')
+          .select('last_seen_at, observer_running, observation_count')
+          .eq('user_id', userId)
+          .single();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: integrations } = await (supabase as any)
+          .from('user_integrations')
+          .select('provider, status')
+          .eq('user_id', userId);
+
+        const connectedIntegrations = (integrations ?? []).filter(
+          (i: { status: string }) => i.status === 'connected'
+        );
+
+        const desktopConnected = desktopSession
+          ? Date.now() - new Date(desktopSession.last_seen_at).getTime() < 2 * 60 * 1000
+          : false;
+
+        return JSON.stringify({
+          message: `No activity found for ${timeRange}.`,
+          diagnostics: {
+            desktop_app: {
+              connected: desktopConnected,
+              observer_running: desktopSession?.observer_running ?? false,
+              last_seen_at: desktopSession?.last_seen_at ?? null,
+              total_observations: desktopSession?.observation_count ?? 0,
+            },
+            integrations: {
+              connected_count: connectedIntegrations.length,
+              connected_providers: connectedIntegrations.map(
+                (i: { provider: string }) => i.provider
+              ),
+              total_configured: (integrations ?? []).length,
+            },
+          },
+        });
       }
 
       // Also check for memory snapshots in the range
