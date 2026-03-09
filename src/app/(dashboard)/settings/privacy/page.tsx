@@ -5,6 +5,111 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { BackButton } from '@/components/shared/BackButton';
 
+// Comprehensive list of macOS apps — sorted alphabetically.
+// Donna's desktop observer has access to everything visible on screen,
+// so this list covers the full range of apps a user may have installed.
+const ALL_APPS: string[] = [
+  '1Password',
+  'Activity Monitor',
+  'Adobe Acrobat',
+  'Adobe After Effects',
+  'Adobe Creative Cloud',
+  'Adobe Illustrator',
+  'Adobe Lightroom',
+  'Adobe Photoshop',
+  'Adobe Premiere Pro',
+  'Alfred',
+  'App Store',
+  'Arc',
+  'Bartender',
+  'Bear',
+  'Books',
+  'Brave Browser',
+  'Calculator',
+  'Calendar',
+  'Canva',
+  'ChatGPT',
+  'Claude',
+  'CleanMyMac',
+  'Contacts',
+  'Cursor',
+  'Discord',
+  'Dropbox',
+  'FaceTime',
+  'Figma',
+  'Finder',
+  'Firefox',
+  'Font Book',
+  'Framer',
+  'GitHub Desktop',
+  'Google Chrome',
+  'Google Drive',
+  'Grammarly',
+  'Home',
+  'Image Capture',
+  'IntelliJ IDEA',
+  'iStat Menus',
+  'iTerm2',
+  'Jira',
+  'Keynote',
+  'Linear',
+  'Little Bird',
+  'Loom',
+  'Mail',
+  'Maps',
+  'Messages',
+  'Microsoft Excel',
+  'Microsoft Outlook',
+  'Microsoft PowerPoint',
+  'Microsoft Teams',
+  'Microsoft Word',
+  'Miro',
+  'Music',
+  'News',
+  'Notes',
+  'Notion',
+  'Numbers',
+  'Obsidian',
+  'Pages',
+  'Parallels Desktop',
+  'Photo Booth',
+  'Photos',
+  'Podcasts',
+  'Postman',
+  'Preview',
+  'QuickTime Player',
+  'Raycast',
+  'Reminders',
+  'Safari',
+  'Screen Time',
+  'Shortcuts',
+  'Signal',
+  'Sketch',
+  'Slack',
+  'Spotify',
+  'Stocks',
+  'Sublime Text',
+  'System Settings',
+  'TablePlus',
+  'Telegram',
+  'Terminal',
+  'TextEdit',
+  'Tot',
+  'Tower',
+  'Tuple',
+  'TV',
+  'VS Code',
+  'Voice Memos',
+  'Warp',
+  'Weather',
+  'WhatsApp',
+  'Wispr Flow',
+  'Xcode',
+  'Xcode Simulator',
+  'Zed',
+  'Zoom',
+];
+
 function Toggle({
   checked,
   onChange,
@@ -39,7 +144,6 @@ function Toggle({
 }
 
 export default function PrivacySettingsPage() {
-  const [observedApps, setObservedApps] = useState<string[]>([]);
   const [blockedApps, setBlockedApps] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -50,7 +154,6 @@ export default function PrivacySettingsPage() {
       if (res.ok) {
         const data = await res.json();
         setBlockedApps(new Set(data.blocked_apps ?? []));
-        setObservedApps(data.observed_apps ?? []);
       }
     } finally {
       setLoading(false);
@@ -106,41 +209,30 @@ export default function PrivacySettingsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Privacy Controls</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Donna&apos;s desktop observer reads everything visible on your screen — including every
-          app you use. The list below shows every app Donna has seen since you connected. Toggle
-          an app off and Donna will immediately stop capturing any context from it.
+          Because you granted accessibility access, Donna can read everything visible on your
+          screen — across every app. Toggle an app off and Donna will immediately stop capturing
+          any context from it.
         </p>
       </div>
 
-      {observedApps.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <p className="text-sm text-muted-foreground">
-              No apps observed yet. Once you start using the desktop observer, every app that
-              appears on your screen will be listed here.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            {observedApps.map((appName) => {
-              const isObserved = !blockedApps.has(appName);
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          {ALL_APPS.map((appName) => {
+            const isObserved = !blockedApps.has(appName);
 
-              return (
-                <div key={appName} className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{appName}</p>
-                  <Toggle
-                    checked={isObserved}
-                    onChange={(v) => handleToggle(appName, v)}
-                    disabled={saving === appName}
-                  />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      )}
+            return (
+              <div key={appName} className="flex items-center justify-between">
+                <p className="text-sm font-medium">{appName}</p>
+                <Toggle
+                  checked={isObserved}
+                  onChange={(v) => handleToggle(appName, v)}
+                  disabled={saving === appName}
+                />
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
     </div>
   );
 }

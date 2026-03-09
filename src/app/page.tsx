@@ -290,6 +290,7 @@ export default function LandingPage() {
   const [heroSubmitted, setHeroSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Desktop app (Tauri) should never show the landing page — go straight to login.
   // Also sets the donna_client cookie so middleware can gate routes.
@@ -374,6 +375,141 @@ export default function LandingPage() {
           border-color: rgba(232,132,92,0.6) !important;
           box-shadow: 0 0 0 3px rgba(232,132,92,0.12);
         }
+
+        /* ─── Mobile hamburger + overlay nav ─── */
+        .mobile-hamburger {
+          display: none;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 8px;
+          color: #FBF7F4;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+          min-height: 44px;
+        }
+        .desktop-nav-links { display: flex; align-items: center; gap: 32px; }
+
+        .mobile-nav-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(14,18,37,0.97);
+          z-index: 98;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 40px;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+        }
+        .mobile-nav-overlay.open { display: flex; animation: heroFadeUp 0.25s ease both; }
+        .mobile-nav-overlay a {
+          font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+          font-size: 34px;
+          font-weight: 400;
+          font-style: italic;
+          color: #FBF7F4;
+          text-decoration: none;
+          letter-spacing: -0.01em;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+        }
+        .mobile-nav-overlay a:hover { color: #E8845C; }
+        .mobile-nav-overlay .mobile-nav-cta {
+          font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+          font-size: 15px;
+          font-style: normal;
+          font-weight: 600;
+          background: #E8845C;
+          color: #0E1225;
+          padding: 14px 32px;
+          border-radius: 8px;
+          margin-top: 8px;
+        }
+
+        /* ─── Responsive layout ─── */
+        @media (max-width: 860px) {
+          .mobile-hamburger { display: flex !important; }
+          .desktop-nav-links { display: none !important; }
+          .nav-inner-pad { padding: 0 20px !important; }
+
+          .hero-layout-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+            padding: 96px 20px 64px !important;
+          }
+          .hero-feed-panel { display: none !important; }
+          .hero-email-form {
+            flex-direction: column !important;
+            gap: 10px !important;
+            max-width: 100% !important;
+          }
+          .hero-email-form input {
+            border-radius: 8px !important;
+            border-right: 1px solid rgba(255,255,255,0.1) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+          .hero-email-form button {
+            border-radius: 8px !important;
+            width: 100% !important;
+            justify-content: center;
+            padding: 16px 24px !important;
+            min-height: 48px;
+          }
+
+          .problem-header-2col { grid-template-columns: 1fr !important; gap: 28px !important; }
+          .problem-cards-3col { grid-template-columns: 1fr !important; gap: 16px !important; margin-top: 48px !important; }
+
+          .how-cards-3col { grid-template-columns: 1fr !important; gap: 16px !important; }
+          .how-connector-line { display: none !important; }
+
+          .briefing-layout-2col { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .briefing-telegram-mock { max-width: 100% !important; }
+
+          .features-cards-2col { grid-template-columns: 1fr !important; gap: 16px !important; }
+
+          .stats-grid-4col { grid-template-columns: repeat(2, 1fr) !important; }
+          .stat-cell { border-right: none !important; padding: 36px 20px !important; }
+          .stat-cell-border-right { border-right: 1px solid rgba(255,255,255,0.06) !important; }
+
+          .footer-bar {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            padding: 40px 24px !important;
+            gap: 20px !important;
+          }
+
+          .section-lg { padding-top: 72px !important; padding-bottom: 72px !important; }
+          .section-md { padding-top: 56px !important; padding-bottom: 56px !important; }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid-4col { grid-template-columns: 1fr !important; }
+          .stat-cell-border-right { border-right: none !important; }
+          .stat-cell { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+        }
+
+        /* iOS safe area insets */
+        @supports (padding: max(0px)) {
+          .footer-bar {
+            padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+          }
+          .mobile-nav-overlay {
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: env(safe-area-inset-top);
+          }
+        }
+
+        /* Ensure tap targets are 44px minimum on touch devices */
+        @media (pointer: coarse) {
+          .landing-cta-btn { min-height: 48px !important; }
+          button, [role="button"] { min-height: 44px; }
+          nav a { min-height: 44px; display: inline-flex; align-items: center; }
+        }
       `}</style>
 
       <div className="landing-page" style={{ fontFamily: fonts.body, overflowX: "hidden" }}>
@@ -394,6 +530,7 @@ export default function LandingPage() {
           }}
         >
           <div
+            className="nav-inner-pad"
             style={{
               maxWidth: 1200,
               margin: "0 auto",
@@ -417,7 +554,7 @@ export default function LandingPage() {
               Donna
             </span>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+            <div className="desktop-nav-links">
               {["How It Works", "Features", "Briefing"].map((item) => (
                 <a
                   key={item}
@@ -471,8 +608,54 @@ export default function LandingPage() {
                 Early access
               </a>
             </div>
+
+            {/* Hamburger — mobile only */}
+            <button
+              className="mobile-hamburger"
+              aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+              onClick={() => setMobileNavOpen((v) => !v)}
+              style={{ zIndex: 101 }}
+            >
+              {mobileNavOpen ? (
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                  <line x1="4" y1="4" x2="18" y2="18" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="18" y1="4" x2="4" y2="18" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                  <line x1="3" y1="7" x2="19" y2="7" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="3" y1="11" x2="19" y2="11" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="3" y1="15" x2="19" y2="15" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              )}
+            </button>
           </div>
         </nav>
+
+        {/* Mobile nav overlay */}
+        <div className={`mobile-nav-overlay${mobileNavOpen ? " open" : ""}`}>
+          {["How It Works", "Features", "Briefing"].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(/ /g, "-")}`}
+              onClick={() => setMobileNavOpen(false)}
+            >
+              {item}
+            </a>
+          ))}
+          <Link href="/download" onClick={() => setMobileNavOpen(false)}
+            style={{ fontFamily: fonts.display, fontSize: 34, fontWeight: 400, fontStyle: "italic", color: c.paper, textDecoration: "none", minHeight: 44, display: "flex", alignItems: "center" }}
+          >
+            Download
+          </Link>
+          <a
+            href="#waitlist"
+            className="mobile-nav-cta"
+            onClick={() => setMobileNavOpen(false)}
+          >
+            Early access
+          </a>
+        </div>
 
         {/* ══════════════════════════════════════
             HERO
@@ -531,6 +714,7 @@ export default function LandingPage() {
           />
 
           <div
+            className="hero-layout-grid"
             style={{
               maxWidth: 1200,
               margin: "0 auto",
@@ -620,7 +804,7 @@ export default function LandingPage() {
               {/* Email input + CTA */}
               <div className="landing-hero-line-4">
                 {!heroSubmitted ? (
-                  <div style={{ display: "flex", gap: 0, maxWidth: 440 }}>
+                  <div className="hero-email-form" style={{ display: "flex", gap: 0, maxWidth: 440 }}>
                     <input
                       type="email"
                       placeholder="your@email.com"
@@ -693,7 +877,7 @@ export default function LandingPage() {
             </div>
 
             {/* Right: Live intelligence feed preview */}
-            <div style={{ position: "relative" }}>
+            <div className="hero-feed-panel" style={{ position: "relative" }}>
               {/* Terminal header */}
               <div
                 style={{
@@ -781,6 +965,7 @@ export default function LandingPage() {
             PROBLEM SECTION
         ══════════════════════════════════════ */}
         <section
+          className="section-lg"
           style={{
             background: c.paper,
             padding: "120px 24px",
@@ -804,6 +989,7 @@ export default function LandingPage() {
             </Reveal>
 
             <div
+              className="problem-header-2col"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
@@ -848,7 +1034,7 @@ export default function LandingPage() {
             </div>
 
             {/* Staggered problem cards */}
-            <div style={{ marginTop: 80, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+            <div className="problem-cards-3col" style={{ marginTop: 80, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
               {[
                 { number: "01", title: "The inbox illusion", body: "You achieve inbox zero at 8am. By 9am it\u2019s impossible again. The important message is buried under 40 newsletters.", color: c.dawn },
                 { number: "02", title: "The commitment gap", body: "\u201CI\u2019ll send that over tonight\u201D becomes a week of silence. Not because you forgot \u2014 because you had no one to remind you.", color: c.dusk },
@@ -881,7 +1067,7 @@ export default function LandingPage() {
         {/* ══════════════════════════════════════
             HOW IT WORKS
         ══════════════════════════════════════ */}
-        <section id="how-it-works" style={{ background: c.stone, padding: "120px 24px" }}>
+        <section id="how-it-works" className="section-lg" style={{ background: c.stone, padding: "120px 24px" }}>
           <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <Reveal>
               <div style={{ marginBottom: 72, textAlign: "center" }}>
@@ -894,10 +1080,11 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32, position: "relative" }}>
+            <div className="how-cards-3col" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32, position: "relative" }}>
               {/* Connector line */}
               <div
                 aria-hidden
+                className="how-connector-line"
                 style={{
                   position: "absolute",
                   top: 56,
@@ -972,6 +1159,7 @@ export default function LandingPage() {
         ══════════════════════════════════════ */}
         <section
           id="briefing"
+          className="section-lg"
           style={{
             background: c.midnight,
             padding: "120px 24px",
@@ -992,6 +1180,7 @@ export default function LandingPage() {
           />
 
           <div
+            className="briefing-layout-2col"
             style={{
               maxWidth: 1080,
               margin: "0 auto",
@@ -1032,6 +1221,7 @@ export default function LandingPage() {
 
             <Reveal delay={120}>
               <div
+                className="briefing-telegram-mock"
                 style={{
                   background: "#17212B",
                   borderRadius: 18,
@@ -1096,7 +1286,7 @@ export default function LandingPage() {
         {/* ══════════════════════════════════════
             INTELLIGENCE PILLARS
         ══════════════════════════════════════ */}
-        <section id="features" style={{ background: c.paper, padding: "120px 24px" }}>
+        <section id="features" className="section-lg" style={{ background: c.paper, padding: "120px 24px" }}>
           <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <Reveal>
               <div style={{ textAlign: "center", marginBottom: 72 }}>
@@ -1109,7 +1299,7 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
+            <div className="features-cards-2col" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
               {[
                 { icon: <CheckSquare size={20} strokeWidth={1.5} />, label: "COMMITMENT TRACKING", headline: "Nothing you promised is ever forgotten", body: "Every \u201CI\u2019ll send that over\u201D, \u201CLet\u2019s catch up next week\u201D, and \u201CI\u2019ll have it to you by Friday\u201D is extracted, tracked, and surfaced before it becomes a broken promise.", accent: c.sage, accentBg: `${c.sage}10` },
                 { icon: <Users size={20} strokeWidth={1.5} />, label: "RELATIONSHIP INTELLIGENCE", headline: "Know when a relationship needs attention", body: "Donna monitors contact frequency across all channels. When someone important goes quiet \u2014 or you do \u2014 she tells you before the relationship costs you.", accent: c.dusk, accentBg: `${c.dusk}10` },
@@ -1148,7 +1338,7 @@ export default function LandingPage() {
         {/* ══════════════════════════════════════
             STATS
         ══════════════════════════════════════ */}
-        <section style={{ background: c.charcoal, padding: "100px 24px" }}>
+        <section className="section-md" style={{ background: c.charcoal, padding: "100px 24px" }}>
           <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <Reveal>
               <div style={{ textAlign: "center", marginBottom: 64 }}>
@@ -1158,7 +1348,7 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
+            <div className="stats-grid-4col" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2 }}>
               {[
                 { value: 847, suffix: "", label: "commitments tracked per user", accent: c.dawn },
                 { value: 3, suffix: ".2s", label: "average briefing read time", accent: c.gold },
@@ -1166,7 +1356,7 @@ export default function LandingPage() {
                 { value: 94, suffix: "%", label: "of users open their briefing first", accent: c.dusk },
               ].map(({ value, suffix, label, accent }, i) => (
                 <Reveal key={label} delay={i * 80}>
-                  <div style={{ padding: "48px 32px", textAlign: "center", borderRight: i < 3 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
+                  <div className={`stat-cell${i < 3 ? " stat-cell-border-right" : ""}`} style={{ padding: "48px 32px", textAlign: "center", borderRight: i < 3 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
                     <div style={{ fontFamily: fonts.display, fontSize: "clamp(42px, 4vw, 58px)", fontWeight: 300, color: accent, lineHeight: 1, marginBottom: 12, letterSpacing: "-0.02em" }}>
                       <Counter target={value} suffix={suffix} />
                     </div>
@@ -1181,7 +1371,7 @@ export default function LandingPage() {
         {/* ══════════════════════════════════════
             MANIFESTO
         ══════════════════════════════════════ */}
-        <section style={{ background: c.paper, padding: "100px 24px", borderTop: `1px solid ${c.stone}`, borderBottom: `1px solid ${c.stone}` }}>
+        <section className="section-md" style={{ background: c.paper, padding: "100px 24px", borderTop: `1px solid ${c.stone}`, borderBottom: `1px solid ${c.stone}` }}>
           <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
             <Reveal>
               <blockquote
@@ -1211,6 +1401,7 @@ export default function LandingPage() {
         ══════════════════════════════════════ */}
         <section
           id="waitlist"
+          className="section-lg"
           style={{
             background: c.midnight,
             padding: "120px 24px",
@@ -1295,6 +1486,7 @@ export default function LandingPage() {
             FOOTER
         ══════════════════════════════════════ */}
         <footer
+          className="footer-bar"
           style={{
             background: c.deep,
             padding: "48px 40px",
