@@ -5,7 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_MODELS } from '@/lib/ai/models';
-import { sanitiseContent } from '@/lib/ai/safety/sanitise';
+import { sanitiseContent, redactPII } from '@/lib/ai/safety/sanitise';
 import { getSessionTextBuffer, updateSessionSummary } from './session-manager';
 
 const anthropic = new Anthropic();
@@ -47,7 +47,8 @@ export async function summariseActiveSession(userId: string): Promise<void> {
   if (buffer.length < MIN_BUFFER_SIZE) return;
 
   const combinedText = buffer.join('\n---\n').slice(0, 3000);
-  const { content: safeContent } = sanitiseContent(combinedText, `session:${userId}`);
+  const redactedText = redactPII(combinedText);
+  const { content: safeContent } = sanitiseContent(redactedText, `session:${userId}`);
 
   try {
     const response = await anthropic.messages.create({

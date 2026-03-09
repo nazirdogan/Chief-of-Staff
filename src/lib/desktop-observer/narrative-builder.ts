@@ -13,6 +13,7 @@ import { createServiceClient } from '@/lib/db/client';
 import { getSessionsInRange, getTodaySessionStats } from '@/lib/db/queries/activity-sessions';
 import { upsertDayNarrative, getDayNarrative } from '@/lib/db/queries/day-narratives';
 import { generateEmbedding } from '@/lib/ai/embeddings';
+import { redactPII } from '@/lib/ai/safety/sanitise';
 import type { ActivitySession } from '@/lib/context/types';
 
 const anthropic = new Anthropic();
@@ -66,12 +67,12 @@ function formatSessionForPrompt(session: ActivitySession): string {
     detail += `\n  Projects: ${session.projects.join(', ')}`;
   }
 
-  // Add key structured data
+  // Add key structured data (redact PII before interpolating into prompt)
   const pd = session.parsed_data;
-  if (pd.subject) detail += `\n  Email subject: ${pd.subject}`;
-  if (pd.conversationPartner) detail += `\n  Chat with: ${pd.conversationPartner}`;
-  if (pd.fileName) detail += `\n  File: ${pd.fileName}`;
-  if (pd.pageTitle) detail += `\n  Page: ${pd.pageTitle}`;
+  if (pd.subject) detail += `\n  Email subject: ${redactPII(String(pd.subject))}`;
+  if (pd.conversationPartner) detail += `\n  Chat with: ${redactPII(String(pd.conversationPartner))}`;
+  if (pd.fileName) detail += `\n  File: ${String(pd.fileName)}`;
+  if (pd.pageTitle) detail += `\n  Page: ${redactPII(String(pd.pageTitle))}`;
 
   return detail;
 }

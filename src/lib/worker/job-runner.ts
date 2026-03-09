@@ -330,6 +330,12 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       return { processed: 1 };
     }
 
+    // ── Data Retention Cleanup ──
+    case 'pii-retention-cleanup': {
+      await db.rpc('cleanup_old_activity_sessions');
+      return { processed: 1 };
+    }
+
     // ── Memory ──
     case 'generate-daily-snapshot': {
       const { generateDailySnapshot } = await import('@/lib/ai/agents/memory-snapshot');

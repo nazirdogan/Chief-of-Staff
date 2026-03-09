@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitiseContent, buildSafeAIContext } from '../sanitise';
+import { sanitiseContent, buildSafeAIContext, redactPII, sanitiseUrl, sanitiseWindowTitle } from '../sanitise';
 
 describe('sanitiseContent', () => {
   it('returns unmodified content when no injection patterns found', () => {
@@ -135,5 +135,108 @@ describe('buildSafeAIContext', () => {
 
     expect(result).not.toContain('Ignore previous instructions');
     expect(result).toContain('[content removed]');
+  });
+});
+
+// ── PII Redaction Tests ──
+
+describe('redactPII', () => {
+  it('redacts secret env var exports', () => {
+    const result = redactPII('export AWS_SECRET=real_value');
+    expect(result).toContain('[SECRET_ENV_REDACTED]');
+    expect(result).not.toContain('real_value');
+  });
+
+  it('redacts Authorization Bearer headers', () => {
+    const result = redactPII('curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"');
+    expect(result).toContain('[AUTH_HEADER_REDACTED]');
+  });
+
+  it('redacts MySQL CLI password flags', () => {
+    const result = redactPII('mysql -u root -pMyP4ss!');
+    expect(result).toContain('[DB_CLI_PASSWORD_REDACTED]');
+  });
+
+  it('redacts database connection strings', () => {
+    const result = redactPII('postgres://user:password@host:5432/db');
+    expect(result).toContain('[DB_CONNECTION_STRING_REDACTED]');
+  });
+
+  it('redacts credit card numbers', () => {
+    const result = redactPII('Card: 4111 1111 1111 1111');
+    expect(result).toContain('[CREDIT_CARD_REDACTED]');
+  });
+
+  it('redacts US SSN patterns', () => {
+    const result = redactPII('SSN: 123-45-6789');
+    expect(result).toContain('[SSN_REDACTED]');
+  });
+
+  it('leaves normal text unchanged', () => {
+    const input = 'Hello world, this is normal text';
+    expect(redactPII(input)).toBe(input);
+  });
+
+  it('redacts generic API key assignments', () => {
+    const result = redactPII('const API_KEY = "sk-abc123def456ghi789"');
+    expect(result).toContain('[API_KEY_REDACTED]');
+  });
+
+  it('redacts AWS access key IDs', () => {
+    const result = redactPII('Key: AKIA1234567890ABCDEF');
+    expect(result).toContain('[AWS_ACCESS_KEY]');
+  });
+
+  it('redacts PEM private key blocks', () => {
+    const pem = '-----BEGIN RSA PRIVATE KEY-----\nMIIEowI...\n-----END RSA PRIVATE KEY-----';
+    const result = redactPII(pem);
+    expect(result).toContain('[PRIVATE_KEY_REDACTED]');
+    expect(result).not.toContain('MIIEowI');
+  });
+});
+
+describe('sanitiseUrl', () => {
+  it('strips query params and fragments from URLs', () => {
+    const result = sanitiseUrl(
+      'https://s3.amazonaws.com/bucket/file?X-Amz-Signature=abc123&X-Amz-Credential=xyz'
+    );
+    expect(result).toBe('https://s3.amazonaws.com/bucket/file');
+  });
+
+  it('returns null for null input', () => {
+    expect(sanitiseUrl(null)).toBeNull();
+  });
+
+  it('returns null for undefined input', () => {
+    expect(sanitiseUrl(undefined)).toBeNull();
+  });
+
+  it('returns null for unparseable URLs', () => {
+    expect(sanitiseUrl('not-a-url')).toBeNull();
+  });
+
+  it('preserves origin and pathname for valid URLs', () => {
+    expect(sanitiseUrl('https://example.com/path/to/page#section')).toBe(
+      'https://example.com/path/to/page'
+    );
+  });
+});
+
+describe('sanitiseWindowTitle', () => {
+  it('redacts AWS access keys in window titles', () => {
+    const result = sanitiseWindowTitle('Config - AKIA1234567890ABCDEF - Settings');
+    expect(result).toContain('[AWS_ACCESS_KEY]');
+    expect(result).not.toContain('AKIA1234567890ABCDEF');
+  });
+
+  it('truncates titles longer than 200 characters', () => {
+    const longTitle = 'A'.repeat(300);
+    const result = sanitiseWindowTitle(longTitle);
+    expect(result.length).toBe(200);
+  });
+
+  it('passes through normal titles unchanged', () => {
+    const title = 'Visual Studio Code - main.ts';
+    expect(sanitiseWindowTitle(title)).toBe(title);
   });
 });

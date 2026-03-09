@@ -14,8 +14,10 @@ described here must be implemented before beta launch. Nothing ships without it.
    (send email, create task, reschedule meeting) goes through the `pending_actions`
    table and requires explicit user approval before execution.
 
-3. **No raw message bodies in the database.** All external content is processed
-   in-memory and discarded. Only AI-generated summaries and vector embeddings persist.
+3. **Minimal raw content in the database.** Integration content (emails, messages)
+   is processed in-memory and discarded -- only AI-generated summaries and vector
+   embeddings persist. Desktop observer data retains sanitised text snippets (see
+   "Desktop Observer Data Handling" below) with automatic retention-based deletion.
 
 4. **Every AI claim has a source.** The citation validator rejects any AI output
    that contains unsourced factual claims.
@@ -136,6 +138,49 @@ export function verifyNangoWebhook(req: NextRequest, body: string): boolean {
   );
 }
 ```
+
+---
+
+## 1b. Desktop Observer Data Handling
+
+The desktop observer captures screen context from the user's machine via the Tauri
+desktop app. Multiple layers of defence ensure PII and secrets do not persist or
+leak into AI prompts.
+
+### What IS captured
+- Window titles (sanitised), app names, activity types
+- Sanitised text snippets from on-screen content (code, emails, chat messages)
+- Session metadata: duration, app category, people names, project names
+
+### What IS stripped at the API boundary
+- **Clipboard content** -- zeroed out before any processing (`clipboard_text: ''`)
+- **Full URLs** -- query parameters and fragments removed via `sanitiseUrl()`; only
+  `origin + pathname` is retained
+- **Window titles** -- run through `redactPII()` and truncated to 200 characters
+
+### What IS redacted via `redactPII()`
+Applied in every parser and before every AI call:
+- PEM private keys, AWS access/secret keys
+- Database connection strings with embedded passwords
+- Authorization headers and Bearer tokens
+- Shell exports of secret environment variables (`export API_KEY=...`)
+- Database CLI password flags (`mysql -p`, `psql -W`)
+- Generic key/token/secret assignments in code
+- US Social Security Numbers (SSN)
+- Credit card numbers (Visa, Mastercard, Amex, Discover)
+- High-entropy strings >= 32 characters (Shannon entropy > 3.5 bits/char) -- catches
+  base64 tokens, hex secrets, and similar random strings
+
+### Retention policy
+- **Activity sessions and app transitions**: deleted after **90 days**
+- **Day narratives**: deleted after **365 days**
+- Cleanup runs nightly via the `pii-retention-cleanup` background job, backed by
+  the `cleanup_old_activity_sessions()` PostgreSQL function (migration 018)
+
+### Compliance
+- GDPR/CCPA compliant: PII is redacted at capture time, retention is bounded,
+  and users can request data deletion through account settings
+- No raw clipboard data, full URLs, or unredacted secrets are ever stored
 
 ---
 

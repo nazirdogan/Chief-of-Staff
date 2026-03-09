@@ -1,4 +1,5 @@
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII, sanitiseUrl } from '@/lib/ai/safety/sanitise';
 
 const EMAIL_PATTERN = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
 const TIMESTAMP_PATTERN = /\b\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?\b/;
@@ -119,13 +120,13 @@ export const emailParser: AppParser = {
       appCategory: 'email',
       structuredData: {
         provider,
-        subject,
+        subject: subject ? redactPII(subject) : null,
         from: sender,
-        bodyPreview: fullBody,
+        bodyPreview: redactPII(fullBody),
         threadParticipants,
         hasAttachment,
         emailAddresses: emails,
-        url: ctx.url,
+        url: sanitiseUrl(ctx.url),
       },
       rawText: `[Email${subject ? `: ${subject}` : ''}]\n${sender ? `From: ${sender.name}${sender.email ? ` <${sender.email}>` : ''}\n` : ''}${fullBody}`,
       people,

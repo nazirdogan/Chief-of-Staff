@@ -1,4 +1,5 @@
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII } from '@/lib/ai/safety/sanitise';
 
 interface SlackMessage {
   sender: string;
@@ -93,9 +94,9 @@ export const slackTeamsParser: AppParser = {
         channel,
         isDm,
         participants: senders,
-        messages: messages.slice(-10),
+        messages: messages.slice(-10).map(m => ({ ...m, text: redactPII(m.text.slice(0, 500)) })),
         messageCount: messages.length,
-        threadContext: ctx.focused_text?.slice(0, 500) || null,
+        threadContext: ctx.focused_text ? redactPII(ctx.focused_text.slice(0, 500)) : null,
       },
       rawText: `[${platform.toUpperCase()}${channel ? ` ${isDm ? 'DM' : channel}` : ''}]\n${messageText}`,
       people,

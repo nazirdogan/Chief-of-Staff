@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/db/client';
 import { processSnapshots } from '@/lib/desktop-observer/session-manager';
 import { buildDayNarrative } from '@/lib/desktop-observer/narrative-builder';
 import { summariseActiveSession } from '@/lib/desktop-observer/session-summariser';
+import { sanitiseWindowTitle } from '@/lib/ai/safety/sanitise';
 import type { DesktopContextSnapshot } from '@/lib/desktop-observer/parsers/types';
 
 /**
@@ -48,8 +49,15 @@ export const POST = withAuth(
           )
       ) as DesktopContextSnapshot[];
 
+      // Strip clipboard content and sanitise window titles at API boundary
+      const sanitisedContexts = filtered.map((ctx: DesktopContextSnapshot) => ({
+        ...ctx,
+        clipboard_text: '',
+        window_title: sanitiseWindowTitle(ctx.window_title ?? ''),
+      }));
+
       // Process through the session manager (app-aware parsing + session tracking)
-      const result = await processSnapshots(supabase, userId, filtered);
+      const result = await processSnapshots(supabase, userId, sanitisedContexts);
 
       // Trigger AI session summarisation in background (non-blocking)
       summariseActiveSession(userId).catch(err =>

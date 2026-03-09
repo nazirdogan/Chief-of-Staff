@@ -1,4 +1,5 @@
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII, sanitiseUrl } from '@/lib/ai/safety/sanitise';
 
 function extractDomain(url: string): string | null {
   try {
@@ -87,14 +88,14 @@ export const browserParser: AppParser = {
     return {
       appCategory: 'browser',
       structuredData: {
-        url: ctx.url,
+        url: sanitiseUrl(ctx.url),
         domain,
-        pageTitle,
+        pageTitle: redactPII(pageTitle),
         contentType,
         topic,
-        keyContent,
+        keyContent: redactPII(keyContent),
       },
-      rawText: `[Browser: ${pageTitle}]\nURL: ${ctx.url ?? 'unknown'}\n${keyContent}`,
+      rawText: `[Browser: ${redactPII(pageTitle)}]\nURL: ${sanitiseUrl(ctx.url) ?? 'unknown'}\n${redactPII(keyContent)}`,
       people: [],
       actionItems: [],
       confidence: ctx.url ? 0.7 : 0.3,

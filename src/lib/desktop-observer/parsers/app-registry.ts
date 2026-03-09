@@ -6,6 +6,7 @@
  */
 
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII } from '@/lib/ai/safety/sanitise';
 import { emailParser } from './email-parser';
 import { chatParser } from './chat-parser';
 import { slackTeamsParser } from './slack-teams-parser';
@@ -53,7 +54,7 @@ function fallbackParse(ctx: DesktopContextSnapshot): ParsedScreenContent {
       app: ctx.active_app,
       windowTitle: ctx.window_title,
     },
-    rawText: `[${ctx.active_app}] ${contentParts.join('\n')}`.slice(0, 1000),
+    rawText: redactPII(`[${ctx.active_app}] ${contentParts.join('\n')}`.slice(0, 1000)),
     people: [],
     actionItems: [],
     confidence: 0.2,

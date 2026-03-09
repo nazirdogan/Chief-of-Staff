@@ -233,6 +233,21 @@ export const JOB_REGISTRY: JobDefinition[] = [
     label: 'Updating day narrative',
   },
 
+  // ── Priority 4: Data retention cleanup (nightly) ──
+  {
+    id: 'pii-retention-cleanup',
+    category: 'memory',
+    provider: null,
+    priority: 4,
+    intervalMs: HOUR_24,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: HOUR_12,
+    timeoutMs: TIMEOUT_MED,
+    estimatedDurationMs: 15_000,
+    label: 'Cleaning up old activity data',
+  },
+
   // ── Priority 5: Deferred synthesis ──
   {
     id: 'generate-daily-snapshot',

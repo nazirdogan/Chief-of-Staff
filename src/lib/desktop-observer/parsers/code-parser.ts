@@ -1,4 +1,5 @@
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII } from '@/lib/ai/safety/sanitise';
 
 const LANGUAGE_EXTENSIONS: Record<string, string> = {
   '.ts': 'typescript', '.tsx': 'typescript', '.js': 'javascript', '.jsx': 'javascript',
@@ -113,9 +114,9 @@ export const codeParser: AppParser = {
         fileName,
         projectName,
         language,
-        imports,
-        functions,
-        codeSnippet: snippet,
+        imports: imports.map(line => redactPII(line)),
+        functions: functions.map(line => redactPII(line)),
+        codeSnippet: redactPII(snippet),
       },
       rawText: `[Code Editor: ${ctx.active_app}]\n${parts.join('\n')}`,
       people: [],

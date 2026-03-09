@@ -1,4 +1,5 @@
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII } from '@/lib/ai/safety/sanitise';
 
 const TIMESTAMP_RE = /\b\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?\b/;
 const _PHONE_RE = /\+?\d[\d\s()-]{7,}/;
@@ -134,7 +135,7 @@ export const chatParser: AppParser = {
         isGroup,
         groupName: isGroup ? partner : null,
         participants: senders,
-        messages: messages.slice(-10), // Last 10 for storage
+        messages: messages.slice(-10).map(m => ({ ...m, text: redactPII(m.text.slice(0, 300)) })), // Last 10 for storage
         messageCount: messages.length,
       },
       rawText: `[${platform.toUpperCase()} Chat${partner ? ` with ${partner}` : ''}${isGroup ? ' (group)' : ''}]\n${messageText}`,

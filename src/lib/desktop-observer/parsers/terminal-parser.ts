@@ -1,4 +1,5 @@
 import type { AppParser, DesktopContextSnapshot, ParsedScreenContent } from './types';
+import { redactPII } from '@/lib/ai/safety/sanitise';
 
 const SHELL_PROMPT_RE = /^[\w@.~/-]*[%$#>]\s*/;
 const PATH_RE = /(?:\/[\w.-]+){2,}/;
@@ -79,8 +80,8 @@ export const terminalParser: AppParser = {
         terminal: ctx.active_app,
         currentDirectory,
         project,
-        activeProcess,
-        recentCommands: commands,
+        activeProcess: activeProcess ? redactPII(activeProcess) : null,
+        recentCommands: commands.map(cmd => redactPII(cmd)),
       },
       rawText: `[Terminal: ${ctx.active_app}]\n${parts.join('\n')}`,
       people: [],
