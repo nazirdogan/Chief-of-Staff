@@ -23,7 +23,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // 'standalone' is for Docker/self-hosted builds only — not needed on Vercel
+  ...(process.env.DOCKER_BUILD === 'true' && { output: 'standalone' }),
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
   },

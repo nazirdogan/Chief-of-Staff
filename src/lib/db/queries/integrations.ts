@@ -95,3 +95,58 @@ export async function deleteIntegration(
 
   if (error) throw error;
 }
+
+/**
+ * Persist the Gmail historyId (and optionally the watch expiry) in the gmail
+ * integration row's metadata JSONB column. Merges with existing metadata so
+ * a historyId update never overwrites watch_expires_at, and vice-versa.
+ */
+export async function saveGmailHistoryId(
+  supabase: Client,
+  userId: string,
+  historyId: string,
+  watchExpiresAt?: string
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .from('user_integrations')
+    .select('metadata')
+    .eq('user_id', userId)
+    .eq('provider', 'gmail')
+    .single();
+
+  const existing = (data?.metadata as Record<string, unknown> | null) ?? {};
+  const updated: Record<string, unknown> = {
+    ...existing,
+    gmail_history_id: historyId,
+    ...(watchExpiresAt ? { watch_expires_at: watchExpiresAt } : {}),
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
+    .from('user_integrations')
+    .update({ metadata: updated })
+    .eq('user_id', userId)
+    .eq('provider', 'gmail');
+
+  if (error) throw error;
+}
+
+/**
+ * Read the stored Gmail historyId for a user, or null if not yet set.
+ */
+export async function getGmailHistoryId(
+  supabase: Client,
+  userId: string
+): Promise<string | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('user_integrations')
+    .select('metadata')
+    .eq('user_id', userId)
+    .eq('provider', 'gmail')
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return (data?.metadata as { gmail_history_id?: string } | null)?.gmail_history_id ?? null;
+}

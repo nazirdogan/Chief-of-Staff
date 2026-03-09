@@ -43,6 +43,24 @@ export const POST = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedR
     const scopes = PROVIDER_SCOPES[provider];
     const sessionToken = await createConnectSession(req.user.id, provider, scopes);
 
+    // For Gmail, attempt to register a push-notification watch so real-time
+    // webhooks replace 15-minute polling. This call is best-effort: Nango
+    // processes the OAuth token exchange asynchronously, so the token may not
+    // be available yet. If it fails here, the gmail-watch-renew job (runs every
+    // 6 days) will set it up on its first run.
+    if (provider === 'google-mail') {
+      try {
+        const { setupGmailWatch } = await import('@/lib/integrations/gmail');
+        const { saveGmailHistoryId } = await import('@/lib/db/queries/integrations');
+        const { createServiceClient } = await import('@/lib/db/client');
+        const { historyId, expiration } = await setupGmailWatch(req.user.id);
+        const serviceSupabase = createServiceClient();
+        await saveGmailHistoryId(serviceSupabase, req.user.id, historyId, expiration);
+      } catch {
+        // Non-fatal — watch will be established by gmail-watch-renew job
+      }
+    }
+
     return NextResponse.json({
       sessionToken,
       connectionId: req.user.id,

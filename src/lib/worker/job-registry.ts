@@ -53,17 +53,33 @@ const TIMEOUT_LONG = 300_000;
 export const JOB_REGISTRY: JobDefinition[] = [
   // ── Priority 1: Critical data freshness ──
   {
+    // Fallback safety net — primary delivery is now via Pub/Sub webhook.
+    // Runs every 4 hours to catch anything the webhook may have missed.
     id: 'gmail-scan',
     category: 'heartbeat',
     provider: 'gmail',
     priority: 1,
-    intervalMs: MIN_15,
+    intervalMs: HOUR_4,
     requiresIntegration: true,
     collapsible: true,
     minGapMs: MIN_15,
     timeoutMs: TIMEOUT_MED,
     estimatedDurationMs: 15_000,
     label: 'Scanning emails',
+  },
+  {
+    // Gmail watch expires every 7 days — renew 1 day early to avoid gaps.
+    id: 'gmail-watch-renew',
+    category: 'heartbeat',
+    provider: 'gmail',
+    priority: 1,
+    intervalMs: 6 * 24 * 60 * 60 * 1000,
+    requiresIntegration: true,
+    collapsible: true,
+    minGapMs: HOUR_4,
+    timeoutMs: TIMEOUT_SHORT,
+    estimatedDurationMs: 5_000,
+    label: 'Renewing Gmail watch',
   },
   {
     id: 'calendar-scan',

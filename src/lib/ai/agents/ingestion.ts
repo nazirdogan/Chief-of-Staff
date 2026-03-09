@@ -198,6 +198,80 @@ export async function ingestGmailMessages(
   return { processed, found };
 }
 
+/**
+ * Ingest a specific set of Gmail message refs delivered via Pub/Sub webhook.
+ * Same pipeline as ingestGmailMessages but for individual messages rather than
+ * a full inbox scan. Does not delete existing rows.
+ */
+export async function ingestGmailMessageRefs(
+  userId: string,
+  messageRefs: Array<{ id: string; threadId: string }>
+): Promise<{ processed: number }> {
+  if (messageRefs.length === 0) return { processed: 0 };
+
+  const supabase = createServiceClient();
+  const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'gmail');
+
+  let processed = 0;
+  const contextItems: ContextPipelineInput[] = [];
+
+  for (const ref of messageRefs) {
+    const fullMessage = await fetchMessageForProcessing(userId, ref.id);
+    const parsed = parseGmailMessage(fullMessage);
+
+    const existingSummary = existingSummaries.get(parsed.id);
+    const receivedAt = parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString();
+
+    if (existingSummary != null) {
+      contextItems.push({
+        sourceId: parsed.id,
+        sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
+        title: parsed.subject ?? 'No subject',
+        rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
+        occurredAt: receivedAt,
+        people: [parsed.from].filter(Boolean),
+        threadId: parsed.threadId,
+        chunkType: 'email_thread',
+      });
+      continue;
+    }
+
+    const result = await summariseGmailMessage(parsed);
+    if (result.is_promotional) continue;
+
+    await upsertInboxItem(supabase, {
+      user_id: userId,
+      provider: 'gmail',
+      external_id: parsed.id,
+      thread_id: parsed.threadId,
+      from_email: parsed.from,
+      from_name: parsed.fromName,
+      subject: parsed.subject,
+      ai_summary: result.summary,
+      urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
+      needs_reply: result.needs_reply,
+      sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
+      received_at: receivedAt,
+    });
+
+    contextItems.push({
+      sourceId: parsed.id,
+      sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
+      title: parsed.subject ?? 'No subject',
+      rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
+      occurredAt: receivedAt,
+      people: [parsed.from].filter(Boolean),
+      threadId: parsed.threadId,
+      chunkType: 'email_thread',
+    });
+
+    processed++;
+  }
+
+  await feedContext(userId, 'gmail', contextItems);
+  return { processed };
+}
+
 export async function ingestSlackDMs(
   userId: string
 ): Promise<{ processed: number; found: number }> {

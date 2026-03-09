@@ -74,6 +74,7 @@ export async function runJob(
   // Determine provider for heartbeat logging
   const providerMap: Record<string, string> = {
     'gmail-scan': 'gmail',
+    'gmail-watch-renew': 'gmail',
     'calendar-scan': 'google_calendar',
     'slack-scan': 'slack',
     'document-index': 'notion',
@@ -121,6 +122,13 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       // Run engagement/archiving post-processing
       await runGmailPostProcessing(db, userId);
       return { processed: result.processed, found: result.found };
+    }
+    case 'gmail-watch-renew': {
+      const { setupGmailWatch } = await import('@/lib/integrations/gmail');
+      const { saveGmailHistoryId } = await import('@/lib/db/queries/integrations');
+      const { historyId, expiration } = await setupGmailWatch(userId);
+      await saveGmailHistoryId(db, userId, historyId, expiration);
+      return { processed: 1 };
     }
     case 'slack-scan': {
       const { ingestSlackDMs } = await import('@/lib/ai/agents/ingestion');

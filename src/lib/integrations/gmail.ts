@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { getAccessToken } from './nango';
+import { env } from '@/lib/config';
 
 export async function getGmailClient(userId: string) {
   const accessToken = await getAccessToken(userId, 'google-mail');
@@ -272,4 +273,80 @@ export function parseGmailMessage(
     date: getHeader(headers, 'Date'),
     labelIds: message.labelIds ?? [],
   };
+}
+
+/**
+ * Register a Gmail push notification watch via Google Pub/Sub.
+ * Returns the starting historyId (for incremental fetches) and expiration timestamp.
+ * Gmail watches expire after ~7 days — renew via the gmail-watch-renew job.
+ */
+export async function setupGmailWatch(
+  userId: string
+): Promise<{ historyId: string; expiration: string }> {
+  const topic = env.GOOGLE_PUBSUB_TOPIC;
+  if (!topic) throw new Error('GOOGLE_PUBSUB_TOPIC is not configured');
+
+  const gmail = await getGmailClient(userId);
+  const response = await gmail.users.watch({
+    userId: 'me',
+    requestBody: {
+      topicName: topic,
+      labelIds: ['INBOX'],
+    },
+  });
+
+  return {
+    historyId: String(response.data.historyId ?? ''),
+    expiration: String(response.data.expiration ?? ''),
+  };
+}
+
+/**
+ * Fetch message refs added to INBOX since the given historyId.
+ * Returns the new message refs and the latest historyId for the next call.
+ *
+ * If historyId is too old (410 from Gmail), returns empty messages and an empty
+ * string for newHistoryId — the caller must call setupGmailWatch to renew.
+ */
+export async function fetchNewMessagesSinceHistory(
+  userId: string,
+  startHistoryId: string
+): Promise<{ messages: Array<{ id: string; threadId: string }>; newHistoryId: string }> {
+  const gmail = await getGmailClient(userId);
+
+  try {
+    const response = await gmail.users.history.list({
+      userId: 'me',
+      startHistoryId,
+      historyTypes: ['messageAdded'],
+      labelId: 'INBOX',
+    });
+
+    const historyRecords = response.data.history ?? [];
+    const newHistoryId = String(response.data.historyId ?? startHistoryId);
+
+    const messages: Array<{ id: string; threadId: string }> = [];
+    for (const record of historyRecords) {
+      for (const added of record.messagesAdded ?? []) {
+        const msg = added.message;
+        if (!msg?.id) continue;
+        // Only INBOX messages — skip sent, drafts, trash
+        const labels = msg.labelIds ?? [];
+        if (!labels.includes('INBOX')) continue;
+        if (labels.includes('SENT') || labels.includes('DRAFT') || labels.includes('TRASH')) continue;
+        messages.push({ id: msg.id, threadId: msg.threadId ?? '' });
+      }
+    }
+
+    return { messages, newHistoryId };
+  } catch (err: unknown) {
+    // 410 = historyId expired / too old — caller must re-setup watch
+    const status =
+      (err as { status?: number })?.status ??
+      (err as { code?: number })?.code;
+    if (status === 410) {
+      return { messages: [], newHistoryId: '' };
+    }
+    throw err;
+  }
 }
