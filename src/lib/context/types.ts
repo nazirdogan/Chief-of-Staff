@@ -133,3 +133,68 @@ export interface ProcessContextResult {
 export interface ContextAdapter {
   toContextInput(rawData: unknown): ContextPipelineInput[];
 }
+
+// ── Activity Sessions (observer-first intelligence) ──────────
+
+export type AppCategory =
+  | 'email'
+  | 'chat'
+  | 'calendar'
+  | 'code'
+  | 'terminal'
+  | 'browser'
+  | 'document'
+  | 'design'
+  | 'unknown';
+
+export interface ActivitySession {
+  id: string;
+  user_id: string;
+  app_name: string;
+  app_category: AppCategory;
+  window_title: string | null;
+  url: string | null;
+  started_at: string;
+  ended_at: string | null;
+  snapshot_count: number;
+  summary: string | null;
+  parsed_data: Record<string, unknown>;
+  people: string[];
+  projects: string[];
+  topics: string[];
+  action_items: Array<{ text: string; source?: string }>;
+  importance: ContextImportance;
+  importance_score: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppTransition {
+  id: string;
+  user_id: string;
+  from_app: string;
+  to_app: string;
+  from_category: string;
+  to_category: string;
+  transitioned_at: string;
+}
+
+export interface DayNarrative {
+  id: string;
+  user_id: string;
+  narrative_date: string;
+  narrative: string;
+  session_count: number;
+  email_sessions: number;
+  chat_sessions: number;
+  code_sessions: number;
+  meeting_sessions: number;
+  browsing_sessions: number;
+  total_active_seconds: number;
+  key_events: Array<{ event: string; time: string; importance: string }>;
+  people_seen: string[];
+  projects_worked_on: string[];
+  embedding: number[] | null;
+  last_updated_at: string;
+  created_at: string;
+}

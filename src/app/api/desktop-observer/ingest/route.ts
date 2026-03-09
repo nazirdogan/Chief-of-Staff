@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
-import { processContextFromScan } from '@/lib/context/pipeline';
-import { desktopAdapter } from '@/lib/context/adapters/desktop-adapter';
+import { createServiceClient } from '@/lib/db/client';
+import { processSnapshots } from '@/lib/desktop-observer/session-manager';
+import { buildDayNarrative } from '@/lib/desktop-observer/narrative-builder';
+import { summariseActiveSession } from '@/lib/desktop-observer/session-summariser';
+import type { DesktopContextSnapshot } from '@/lib/desktop-observer/parsers/types';
 
 /**
  * POST /api/desktop-observer/ingest
  *
- * Receives batched desktop context snapshots from the Tauri desktop observer
- * and feeds them into the Donna context pipeline.
+ * Receives batched desktop context snapshots from the Tauri desktop observer.
+ * Routes through the session manager (app-aware parsing, session tracking,
+ * transition logging) instead of the old flat context pipeline.
  */
 export const POST = withAuth(
   withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
@@ -23,23 +27,30 @@ export const POST = withAuth(
       }
 
       // Limit batch size to prevent abuse
-      const capped = contexts.slice(0, 50);
+      const capped = contexts.slice(0, 50) as DesktopContextSnapshot[];
+      const supabase = createServiceClient();
+      const userId = req.user.id;
 
-      // Convert desktop context snapshots into pipeline input format
-      const pipelineInputs = desktopAdapter.toContextInput(capped);
+      // Process through the session manager (app-aware parsing + session tracking)
+      const result = await processSnapshots(supabase, userId, capped);
 
-      if (pipelineInputs.length === 0) {
-        return NextResponse.json({ processed: 0, skipped: 0, errors: 0 });
+      // Trigger AI session summarisation in background (non-blocking)
+      summariseActiveSession(userId).catch(err =>
+        console.error('[desktop-observer/ingest] Session summarisation failed:', err)
+      );
+
+      // Trigger narrative update if enough time has passed (non-blocking)
+      if (result.shouldUpdateNarrative) {
+        buildDayNarrative(userId).catch(err =>
+          console.error('[desktop-observer/ingest] Narrative update failed:', err)
+        );
       }
 
-      // Process through the standard context pipeline
-      const result = await processContextFromScan({
-        userId: req.user.id,
-        provider: 'desktop_observer',
-        items: pipelineInputs,
+      return NextResponse.json({
+        sessionsProcessed: result.sessionsProcessed,
+        transitionsLogged: result.transitionsLogged,
+        narrativeQueued: result.shouldUpdateNarrative,
       });
-
-      return NextResponse.json(result);
     } catch (error) {
       console.error('[desktop-observer/ingest] Error:', error);
       return NextResponse.json(

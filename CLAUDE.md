@@ -53,7 +53,7 @@ what to do first. It then helps them act on it.
 | Vector Store | Supabase pgvector | Same DB instance as main database |
 | AI Orchestration | Vercel AI SDK | Multi-provider support |
 | AI Models | Anthropic + OpenAI | See model selection rules below |
-| Background Jobs | Trigger.dev | Heartbeat Monitor, briefing generation |
+| Background Jobs | Local Worker (in-process) | Heartbeat Monitor, briefing generation |
 | Messaging Gateway | In-app (current), Twilio/WhatsApp (planned) | Briefings and confirmations are in-app |
 | API Gateway | Next.js middleware + rate limiter | Custom rate limiting per route |
 | Secrets | Environment variables | AWS Secrets Manager in production |
@@ -213,16 +213,6 @@ Always import model constants from `@/lib/ai/models.ts` — never hardcode model
 │   └── utils/
 │       ├── encryption.ts              ← AES-256 helpers for sensitive fields
 │       └── timezone.ts                ← User timezone handling for Heartbeat
-│
-├── trigger/                           ← Trigger.dev background jobs
-│   ├── heartbeat/
-│   │   ├── gmail-scan.ts
-│   │   ├── calendar-scan.ts
-│   │   ├── commitment-check.ts
-│   │   ├── relationship-check.ts
-│   │   └── document-index.ts
-│   └── briefing/
-│       └── generate-daily-briefing.ts
 │
 ├── supabase/
 │   ├── migrations/                    ← All schema changes as numbered migrations

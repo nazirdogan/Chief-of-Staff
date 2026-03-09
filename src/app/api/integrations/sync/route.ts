@@ -11,26 +11,8 @@ import type { IntegrationProvider } from '@/lib/db/types';
 const NANGO_TO_DB_PROVIDER: Record<string, IntegrationProvider> = {
   'google-mail': 'gmail',
   'google-calendar': 'google_calendar',
-  'google-drive': 'google_drive',
-  microsoft: 'outlook',
-  'microsoft-teams': 'microsoft_teams',
   slack: 'slack',
   notion: 'notion',
-  icloud: 'apple_icloud_mail',
-  calendly: 'calendly',
-  linkedin: 'linkedin',
-  twitter: 'twitter',
-  dropbox: 'dropbox',
-  asana: 'asana',
-  monday: 'monday',
-  jira: 'jira',
-  linear: 'linear',
-  clickup: 'clickup',
-  trello: 'trello',
-  hubspot: 'hubspot',
-  salesforce: 'salesforce',
-  pipedrive: 'pipedrive',
-  github: 'github',
 };
 
 /**

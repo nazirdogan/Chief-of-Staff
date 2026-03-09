@@ -84,7 +84,12 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/people') ||
     pathname.startsWith('/heartbeat') ||
     pathname.startsWith('/settings') ||
-    pathname.startsWith('/admin');
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/chat') ||
+    pathname.startsWith('/memory') ||
+    pathname.startsWith('/patterns') ||
+    pathname.startsWith('/operations') ||
+    pathname.startsWith('/reflections');
 
   const isOnboardingRoute = pathname === '/onboarding';
   const isGettingReadyRoute = pathname === '/getting-ready';

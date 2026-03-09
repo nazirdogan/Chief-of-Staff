@@ -19,10 +19,6 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   OPENAI_API_KEY: z.string().min(1),
 
-  // Trigger.dev (optional until background jobs are configured)
-  TRIGGER_SECRET_KEY: z.string().min(1).optional(),
-  TRIGGER_PROJECT_ID: z.string().min(1).optional(),
-
   // Google (optional — not needed until push notifications)
   GOOGLE_PUBSUB_TOPIC: z.string().optional(),
   GOOGLE_SERVICE_ACCOUNT_KEY: z.string().optional(),

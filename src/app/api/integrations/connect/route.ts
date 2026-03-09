@@ -9,43 +9,16 @@ import type { IntegrationProvider } from '@/lib/db/types';
 const PROVIDER_SCOPES: Record<string, string[]> = {
   'google-mail': ['https://www.googleapis.com/auth/gmail.readonly'],
   'google-calendar': ['https://www.googleapis.com/auth/calendar.readonly'],
-  'google-drive': ['https://www.googleapis.com/auth/drive.readonly'],
-  microsoft: ['Mail.Read', 'Calendars.Read', 'Files.Read.All', 'offline_access'],
-  'microsoft-teams': ['Chat.Read', 'ChannelMessage.Read.All', 'offline_access'],
   slack: ['channels:history', 'im:history', 'users:read', 'users:read.email'],
   notion: ['read_content'],
-  github: ['repo', 'read:user', 'notifications'],
-  linkedin: ['r_liteprofile', 'r_emailaddress', 'w_member_social'],
-  twitter: ['tweet.read', 'users.read', 'dm.read', 'offline.access'],
-  dropbox: ['files.metadata.read', 'files.content.read'],
-  hubspot: ['crm.objects.contacts.read', 'crm.objects.deals.read'],
-  salesforce: ['api', 'refresh_token'],
 };
 
 // Maps Nango provider keys to our integration_provider enum values
 const NANGO_TO_DB_PROVIDER: Record<string, IntegrationProvider> = {
   'google-mail': 'gmail',
   'google-calendar': 'google_calendar',
-  'google-drive': 'google_drive',
-  microsoft: 'outlook',
-  'microsoft-teams': 'microsoft_teams',
   slack: 'slack',
   notion: 'notion',
-  icloud: 'apple_icloud_mail',
-  calendly: 'calendly',
-  linkedin: 'linkedin',
-  twitter: 'twitter',
-  dropbox: 'dropbox',
-  asana: 'asana',
-  monday: 'monday',
-  jira: 'jira',
-  linear: 'linear',
-  clickup: 'clickup',
-  trello: 'trello',
-  hubspot: 'hubspot',
-  salesforce: 'salesforce',
-  pipedrive: 'pipedrive',
-  github: 'github',
 };
 
 /**

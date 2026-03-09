@@ -53,7 +53,13 @@ function parseExtractionResult(text: string): ContextExtractionResult {
       projects: Array.isArray(parsed.projects) ? parsed.projects : [],
       people: Array.isArray(parsed.people) ? parsed.people : [],
     };
-  } catch {
+  } catch (err) {
+    console.warn(
+      '[context-extractor] Failed to parse AI extraction result:',
+      err instanceof Error ? err.message : 'unknown',
+      '| Raw response:',
+      text.slice(0, 200),
+    );
     return {
       content_summary: 'Failed to extract context.',
       entities: {},
@@ -65,6 +71,25 @@ function parseExtractionResult(text: string): ContextExtractionResult {
       people: [],
     };
   }
+}
+
+/** Fallback extraction when the AI call fails entirely */
+function fallbackExtraction(item: ContextPipelineInput): ContextExtractionResult {
+  // Use a truncated version of the raw content as the summary
+  const summary = item.rawContent.length > 200
+    ? item.rawContent.slice(0, 200) + '...'
+    : item.rawContent;
+
+  return {
+    content_summary: summary || 'Content captured but extraction unavailable.',
+    entities: {},
+    sentiment: 'neutral',
+    importance: 'background',
+    importance_score: 3,
+    topics: [],
+    projects: [],
+    people: item.people ?? [],
+  };
 }
 
 export async function extractContext(
@@ -83,25 +108,36 @@ export async function extractContext(
     `${provider}:${item.sourceId}`
   );
 
-  const prompt = buildContextExtractionPrompt(activeProjects, vipContacts);
-  const context = buildSafeAIContext(prompt, [
-    {
-      label: item.chunkType,
-      content: `${item.title ? `Title: ${item.title}\n` : ''}${safeContent}`,
-      source: `${provider}:${item.sourceId}`,
-    },
-  ]);
+  let extraction: ContextExtractionResult;
 
-  const response = await anthropic.messages.create({
-    model: AI_MODELS.FAST,
-    max_tokens: 500,
-    messages: [{ role: 'user', content: context }],
-  });
+  try {
+    const prompt = buildContextExtractionPrompt(activeProjects, vipContacts);
+    const context = buildSafeAIContext(prompt, [
+      {
+        label: item.chunkType,
+        content: `${item.title ? `Title: ${item.title}\n` : ''}${safeContent}`,
+        source: `${provider}:${item.sourceId}`,
+      },
+    ]);
 
-  const textBlock = response.content.find((c) => c.type === 'text');
-  const extraction = parseExtractionResult(
-    textBlock && textBlock.type === 'text' ? textBlock.text : ''
-  );
+    const response = await anthropic.messages.create({
+      model: AI_MODELS.FAST,
+      max_tokens: 500,
+      messages: [{ role: 'user', content: context }],
+    });
+
+    const textBlock = response.content.find((c) => c.type === 'text');
+    extraction = parseExtractionResult(
+      textBlock && textBlock.type === 'text' ? textBlock.text : ''
+    );
+  } catch (err) {
+    console.error(
+      '[context-extractor] AI extraction failed, using fallback:',
+      err instanceof Error ? err.message : 'unknown',
+      `| provider=${provider}, sourceId=${item.sourceId}`,
+    );
+    extraction = fallbackExtraction(item);
+  }
 
   // Merge people from input with extracted people
   if (item.people) {

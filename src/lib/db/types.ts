@@ -6,33 +6,8 @@
 export type IntegrationProvider =
   | 'gmail'
   | 'google_calendar'
-  | 'google_drive'
-  | 'outlook'
-  | 'microsoft_calendar'
-  | 'onedrive'
   | 'slack'
-  | 'notion'
-  | 'whatsapp'
-  | 'todoist'
-  | 'linear'
-  | 'hubspot'
-  | 'salesforce'
-  // TIER 1 — added in migration 002
-  | 'apple_icloud_mail'
-  | 'apple_icloud_calendar'
-  | 'calendly'
-  | 'microsoft_teams'
-  | 'linkedin'
-  | 'twitter'
-  // TIER 2 — added in migration 002
-  | 'dropbox'
-  | 'asana'
-  | 'monday'
-  | 'jira'
-  | 'clickup'
-  | 'trello'
-  | 'pipedrive'
-  | 'github';
+  | 'notion';
 
 export type IntegrationStatus = 'connected' | 'disconnected' | 'error' | 'pending';
 

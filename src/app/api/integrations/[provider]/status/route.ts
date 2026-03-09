@@ -10,7 +10,6 @@ import type { IntegrationProvider } from '@/lib/db/types';
 const VALID_PROVIDERS: IntegrationProvider[] = [
   'gmail',
   'google_calendar',
-  'outlook',
   'slack',
   'notion',
 ];
@@ -18,7 +17,6 @@ const VALID_PROVIDERS: IntegrationProvider[] = [
 const DB_TO_NANGO_PROVIDER: Record<string, string> = {
   gmail: 'google-mail',
   google_calendar: 'google-calendar',
-  outlook: 'microsoft',
   slack: 'slack',
   notion: 'notion',
 };

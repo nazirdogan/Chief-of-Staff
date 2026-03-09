@@ -6,6 +6,16 @@ import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
 import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
 import type { ParsedOutlookMessage } from '@/lib/integrations/outlook';
 import type { ContextChunk } from '@/lib/context/types';
+import type { EnrichedContext } from './briefing-context';
+import { serializeEnrichedContext } from './briefing-context';
+import {
+  SYNTHESIS_SYSTEM_PROMPT,
+  buildSynthesisUserMessage,
+  VALID_SECTIONS,
+  VALID_SENTIMENTS,
+  type SynthesisInputItem,
+  type SynthesisOutputItem,
+} from '@/lib/ai/prompts/briefing-synthesis';
 
 const anthropic = new Anthropic();
 
@@ -36,111 +46,7 @@ export interface RankedBriefingItem extends BriefingItemCandidate {
   reasoning: string;
 }
 
-// ── Dimension scoring functions ──
-
-function scoreUrgency(item: BriefingItemCandidate): number {
-  let score = 5;
-
-  if (item.raw_urgency) {
-    score = item.raw_urgency;
-  }
-
-  if (item.item_type === 'calendar_event') {
-    score = Math.max(score, 8);
-  }
-
-  if (item.item_type === 'commitment') {
-    score = Math.max(score, 7);
-  }
-
-  // VIP inbox items get urgency boost
-  if (item.section === 'vip_inbox') {
-    score = Math.max(score, 8);
-  }
-
-  // Action-required items are inherently urgent
-  if (item.section === 'action_required') {
-    score = Math.max(score, 7);
-  }
-
-  // Negative or urgent sentiment boosts urgency
-  if (item.sentiment === 'urgent') score += 2;
-  if (item.sentiment === 'negative') score += 1;
-
-  return Math.min(10, Math.max(1, score));
-}
-
-function scoreImportance(item: BriefingItemCandidate, ctx: UserContext): number {
-  let score = 5;
-
-  if (item.from_email && ctx.vipEmails.includes(item.from_email)) {
-    score += 3;
-  }
-
-  if (ctx.activeProjects.some(p =>
-    item.title?.toLowerCase().includes(p.toLowerCase()) ||
-    item.summary?.toLowerCase().includes(p.toLowerCase())
-  )) {
-    score += 2;
-  }
-
-  // VIP items are always important
-  if (item.section === 'vip_inbox') {
-    score = Math.max(score, 9);
-  }
-
-  return Math.min(10, Math.max(1, score));
-}
-
-function scoreRisk(item: BriefingItemCandidate): number {
-  let score = 3;
-
-  if (item.item_type === 'commitment') {
-    score += 4;
-  }
-
-  if (item.item_type === 'relationship_alert') {
-    score += 3;
-  }
-
-  // Awaiting reply = risk of dropped ball
-  if (item.section === 'awaiting_reply') {
-    score += 3;
-  }
-
-  // Negative sentiment = risk of relationship damage
-  if (item.sentiment === 'negative') score += 2;
-  if (item.sentiment === 'urgent') score += 1;
-
-  return Math.min(10, Math.max(1, score));
-}
-
-function scoreEffort(item: BriefingItemCandidate): number {
-  if (item.item_type === 'relationship_alert') return 8;
-  if (item.item_type === 'email') return 7;
-  if (item.item_type === 'commitment') return 5;
-  if (item.item_type === 'calendar_event') return 4;
-  return 5;
-}
-
-// ── Composite scoring ──
-
-function computeCompositeScore(item: BriefingItemCandidate, ctx: UserContext) {
-  const urgency = scoreUrgency(item);
-  const importance = scoreImportance(item, ctx);
-  const risk = scoreRisk(item);
-  const effort = scoreEffort(item);
-
-  const composite =
-    urgency * 0.30 +
-    importance * 0.25 +
-    risk * 0.35 +
-    effort * 0.10;
-
-  return { urgency, importance, risk, effort, composite };
-}
-
-// ── AI reasoning generation ──
+// ── AI Synthesis (primary path) ──
 
 function extractText(content: Anthropic.ContentBlock[]): string {
   for (const block of content) {
@@ -149,109 +55,216 @@ function extractText(content: Anthropic.ContentBlock[]): string {
   return '';
 }
 
-const REASONING_PROMPT = `You are generating brief ranking explanations for a C-Suite executive's daily briefing.
-For each item, write ONE sentence explaining why it was ranked at this position.
-Start with "Ranked #N because..." and reference the specific signal (VIP sender, approaching deadline, at-risk commitment, awaiting reply, etc.).
-
-Return a JSON array of objects: [{ "rank": 1, "reasoning": "..." }, ...]
-Respond ONLY with JSON.`;
-
-async function generateReasoning(
-  scored: Array<BriefingItemCandidate & {
-    rank: number;
-    urgency_score: number;
-    importance_score: number;
-    risk_score: number;
-    composite_score: number;
-  }>,
-  ctx: UserContext
+/**
+ * Synthesise and rank briefing items using AI.
+ * Falls back to formula-based scoring if the AI call fails.
+ */
+export async function synthesiseBriefing(
+  candidates: BriefingItemCandidate[],
+  userContext: UserContext,
+  enrichedContext: EnrichedContext,
 ): Promise<RankedBriefingItem[]> {
-  const topItems = scored.slice(0, 20);
-
-  if (topItems.length === 0) return [];
-
-  const itemSummaries = topItems.map(item => ({
-    rank: item.rank,
-    type: item.item_type,
-    section: item.section,
-    title: item.title,
-    summary: item.summary,
-    urgency: item.urgency_score,
-    importance: item.importance_score,
-    risk: item.risk_score,
-    sentiment: item.sentiment ?? 'neutral',
-    is_vip: item.from_email ? ctx.vipEmails.includes(item.from_email) : false,
-  }));
-
-  const context = buildSafeAIContext(
-    REASONING_PROMPT,
-    [{
-      label: 'ranked_items',
-      content: JSON.stringify(itemSummaries),
-      source: 'prioritisation-engine',
-    }]
-  );
+  if (candidates.length === 0) return [];
 
   try {
-    const response = await anthropic.messages.create({
-      model: AI_MODELS.STANDARD,
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: context }],
-    });
-
-    const text = extractText(response.content)
-      .replace(/```json\s*/g, '')
-      .replace(/```\s*/g, '')
-      .trim();
-    const reasonings: Array<{ rank: number; reasoning: string }> = JSON.parse(text);
-
-    const reasoningMap = new Map(reasonings.map(r => [r.rank, r.reasoning]));
-
-    return topItems.map(item => ({
-      ...item,
-      reasoning: reasoningMap.get(item.rank) ?? `Ranked #${item.rank} based on composite score of ${item.composite_score.toFixed(1)}`,
-    }));
-  } catch {
-    return topItems.map(item => ({
-      ...item,
-      reasoning: `Ranked #${item.rank} based on composite score of ${item.composite_score.toFixed(1)}`,
-    }));
+    return await runAISynthesis(candidates, userContext, enrichedContext);
+  } catch (err) {
+    console.error('[briefing] AI synthesis failed, falling back to formula scoring:', err);
+    return fallbackPrioritise(candidates, userContext);
   }
 }
 
-// ── Main prioritisation function ──
-
-export async function prioritiseItems(
+async function runAISynthesis(
   candidates: BriefingItemCandidate[],
-  userContext: UserContext
+  userContext: UserContext,
+  enrichedContext: EnrichedContext,
 ): Promise<RankedBriefingItem[]> {
+  // Cap candidates to avoid exceeding token limits
+  const capped = candidates.slice(0, 50);
+
+  // Build indexed input items (strip source_ref to save tokens — we'll reattach after)
+  const inputItems: SynthesisInputItem[] = capped.map((c, i) => ({
+    idx: i,
+    item_type: c.item_type,
+    suggested_section: c.section,
+    title: c.title,
+    summary: c.summary,
+    from_email: c.from_email,
+    raw_urgency: c.raw_urgency,
+    sentiment: c.sentiment,
+    action_suggestion: c.action_suggestion,
+  }));
+
+  const contextStr = serializeEnrichedContext(enrichedContext);
+
+  const userMessage = buildSynthesisUserMessage(
+    inputItems,
+    contextStr,
+    userContext.vipEmails,
+    userContext.activeProjects,
+    userContext.weeklyPriority,
+  );
+
+  const safeContent = buildSafeAIContext(
+    SYNTHESIS_SYSTEM_PROMPT,
+    [{ label: 'briefing_input', content: userMessage, source: 'briefing-synthesis' }]
+  );
+
+  const response = await anthropic.messages.create({
+    model: AI_MODELS.STANDARD,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: safeContent }],
+  });
+
+  const text = extractText(response.content)
+    .replace(/```json\s*/g, '')
+    .replace(/```\s*/g, '')
+    .trim();
+
+  const parsed: SynthesisOutputItem[] = JSON.parse(text);
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error('AI synthesis returned empty or invalid result');
+  }
+
+  // Map AI output back to full RankedBriefingItem with original source_ref
+  const ranked: RankedBriefingItem[] = [];
+
+  for (const output of parsed) {
+    const original = capped[output.idx];
+    if (!original) {
+      // AI referenced a non-existent idx — skip
+      continue;
+    }
+
+    // Validate section
+    const section = VALID_SECTIONS.includes(output.section)
+      ? output.section
+      : original.section;
+
+    // Validate sentiment
+    const sentiment = output.sentiment && VALID_SENTIMENTS.includes(output.sentiment)
+      ? output.sentiment
+      : original.sentiment ?? null;
+
+    ranked.push({
+      item_type: original.item_type,
+      section,
+      title: output.title || original.title,
+      summary: output.summary || original.summary,
+      source_ref: original.source_ref,
+      action_suggestion: output.action_suggestion ?? original.action_suggestion,
+      from_email: original.from_email,
+      raw_urgency: original.raw_urgency,
+      sentiment,
+      rank: output.rank,
+      urgency_score: clampScore(output.urgency_score),
+      importance_score: clampScore(output.importance_score),
+      risk_score: clampScore(output.risk_score),
+      composite_score: clampScore(output.composite_score),
+      reasoning: output.reasoning || `Ranked #${output.rank}`,
+    });
+  }
+
+  // Ensure ranks are sequential (AI might skip numbers)
+  ranked.sort((a, b) => a.rank - b.rank);
+  ranked.forEach((item, i) => { item.rank = i + 1; });
+
+  return ranked;
+}
+
+function clampScore(score: number | undefined): number {
+  if (typeof score !== 'number' || isNaN(score)) return 5;
+  return Math.min(10, Math.max(1, Math.round(score)));
+}
+
+// ── Formula-based fallback (used when AI synthesis fails) ──
+
+function scoreUrgency(item: BriefingItemCandidate): number {
+  let score = 5;
+  if (item.raw_urgency) score = item.raw_urgency;
+  if (item.item_type === 'calendar_event') score = Math.max(score, 8);
+  if (item.item_type === 'commitment') score = Math.max(score, 7);
+  if (item.section === 'vip_inbox') score = Math.max(score, 8);
+  if (item.section === 'action_required') score = Math.max(score, 7);
+  if (item.sentiment === 'urgent') score += 2;
+  if (item.sentiment === 'negative') score += 1;
+  return Math.min(10, Math.max(1, score));
+}
+
+function scoreImportance(item: BriefingItemCandidate, ctx: UserContext): number {
+  let score = 5;
+  if (item.from_email && ctx.vipEmails.includes(item.from_email)) score += 3;
+  if (ctx.activeProjects.some(p =>
+    item.title?.toLowerCase().includes(p.toLowerCase()) ||
+    item.summary?.toLowerCase().includes(p.toLowerCase())
+  )) score += 2;
+  if (item.section === 'vip_inbox') score = Math.max(score, 9);
+  return Math.min(10, Math.max(1, score));
+}
+
+function scoreRisk(item: BriefingItemCandidate): number {
+  let score = 3;
+  if (item.item_type === 'commitment') score += 4;
+  if (item.item_type === 'relationship_alert') score += 3;
+  if (item.section === 'awaiting_reply') score += 3;
+  if (item.sentiment === 'negative') score += 2;
+  if (item.sentiment === 'urgent') score += 1;
+  return Math.min(10, Math.max(1, score));
+}
+
+function fallbackPrioritise(
+  candidates: BriefingItemCandidate[],
+  ctx: UserContext,
+): RankedBriefingItem[] {
   const scored = candidates.map(item => {
-    const scores = computeCompositeScore(item, userContext);
+    const urgency = scoreUrgency(item);
+    const importance = scoreImportance(item, ctx);
+    const risk = scoreRisk(item);
+    // Effort inverted: low-effort items get higher boost (quick wins surface)
+    const effortRaw = item.item_type === 'relationship_alert' ? 8
+      : item.item_type === 'email' ? 7
+      : item.item_type === 'commitment' ? 5
+      : item.item_type === 'calendar_event' ? 4
+      : 5;
+    const effortInverted = 11 - effortRaw;
+
+    const composite =
+      urgency * 0.30 +
+      importance * 0.25 +
+      risk * 0.35 +
+      effortInverted * 0.10;
+
     return {
       ...item,
-      urgency_score: scores.urgency,
-      importance_score: scores.importance,
-      risk_score: scores.risk,
-      composite_score: scores.composite,
+      urgency_score: urgency,
+      importance_score: importance,
+      risk_score: risk,
+      composite_score: Math.round(composite * 10) / 10,
       rank: 0,
+      reasoning: '',
     };
   });
 
   scored.sort((a, b) => b.composite_score - a.composite_score);
-
-  scored.forEach((item, index) => {
-    item.rank = index + 1;
+  scored.forEach((item, i) => {
+    item.rank = i + 1;
+    item.reasoning = `Ranked #${i + 1} based on composite score of ${item.composite_score.toFixed(1)}`;
   });
 
-  return generateReasoning(scored, userContext);
+  return scored.slice(0, 25);
 }
 
-// ── Candidate mapping functions ──
+// Keep the old function name as a compatibility alias that uses fallback scoring
+export async function prioritiseItems(
+  candidates: BriefingItemCandidate[],
+  userContext: UserContext
+): Promise<RankedBriefingItem[]> {
+  return fallbackPrioritise(candidates, userContext);
+}
 
-/**
- * Map an inbox item to the appropriate section based on executive priorities.
- * VIP senders → vip_inbox, needs_reply → action_required, otherwise → priority_inbox
- */
+// ── Candidate mapping functions (unchanged) ──
+
 export function mapInboxItemToCandidate(
   item: InboxItem,
   vipEmails: string[] = []
@@ -343,9 +356,6 @@ export function mapColdContactToCandidate(contact: Contact): BriefingItemCandida
   };
 }
 
-/**
- * Map a sent message awaiting reply to the awaiting_reply section.
- */
 export function mapSentAwaitingReplyToCandidate(
   message: ParsedGmailMessage | ParsedOutlookMessage,
   provider: 'gmail' | 'outlook'
@@ -383,9 +393,6 @@ export function mapSentAwaitingReplyToCandidate(
   };
 }
 
-/**
- * Map an after-hours email to the after_hours section.
- */
 export function mapAfterHoursToCandidate(
   message: ParsedGmailMessage
 ): BriefingItemCandidate {
@@ -411,11 +418,6 @@ export function mapAfterHoursToCandidate(
   };
 }
 
-/**
- * Map a desktop observer context chunk (WhatsApp, Messages, Slack desktop, etc.)
- * to a briefing candidate. Communication activity goes to priority_inbox;
- * high-importance observations go to action_required.
- */
 export function mapDesktopObservationToCandidate(
   chunk: ContextChunk,
   vipEmails: string[] = []
@@ -425,10 +427,8 @@ export function mapDesktopObservationToCandidate(
   const activityType = (sourceRef.activity_type as string) ?? 'unknown';
   const capturedAt = (sourceRef.captured_at as string) ?? chunk.occurred_at;
 
-  // Determine if any people in this chunk are VIPs
   const hasVip = chunk.people.some((p) => vipEmails.includes(p));
 
-  // Section assignment based on importance and VIP status
   let section: BriefingItemSection = 'priority_inbox';
   if (hasVip) {
     section = 'vip_inbox';
@@ -436,10 +436,8 @@ export function mapDesktopObservationToCandidate(
     section = 'action_required';
   }
 
-  // Determine item type based on activity
-  const itemType: BriefingItemType = activityType === 'communicating' ? 'email' : 'email';
+  const itemType: BriefingItemType = activityType === 'communicating' ? 'email' : activityType === 'coding' ? 'document' : activityType === 'planning' ? 'task' : 'document';
 
-  // Build a descriptive title
   const title = chunk.title ?? `${app} activity`;
 
   return {

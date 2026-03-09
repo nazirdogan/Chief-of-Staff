@@ -61,6 +61,9 @@ mod macos {
 
     /// Safely convert a CFTypeRef to a String, returning None if it's not a CFString.
     /// This prevents crashes when AX attributes return non-string types (CFNumber, etc.).
+    ///
+    /// IMPORTANT: This does NOT release the input ref. The caller must release it
+    /// separately if it was obtained via a Copy/Create function.
     pub unsafe fn cftype_to_string(cf_ref: CFTypeRef) -> Option<String> {
         if cf_ref.is_null() {
             return None;
@@ -70,6 +73,24 @@ mod macos {
         }
         let cf_str = CFString::wrap_under_get_rule(cf_ref as CFStringRef);
         Some(cf_str.to_string())
+    }
+
+    /// Convert a CFTypeRef to a String AND release the ref (for Copy/Create rule refs).
+    /// Returns None if the ref is null or not a CFString.
+    pub unsafe fn cftype_to_string_and_release(cf_ref: CFTypeRef) -> Option<String> {
+        if cf_ref.is_null() {
+            return None;
+        }
+        let result = cftype_to_string(cf_ref);
+        CFRelease(cf_ref);
+        result
+    }
+
+    /// Release a CFTypeRef if it is not null. Safe no-op for null pointers.
+    pub unsafe fn release_if_not_null(cf_ref: CFTypeRef) {
+        if !cf_ref.is_null() {
+            CFRelease(cf_ref);
+        }
     }
 
     extern "C" {
@@ -146,7 +167,7 @@ mod macos {
             let mut title_ref: CFTypeRef = ptr::null();
             AXUIElementCopyAttributeValue(app_ref, title_attr.as_concrete_TypeRef(), &mut title_ref);
 
-            let app_name = cftype_to_string(title_ref).unwrap_or_else(|| "Unknown".to_string());
+            let app_name = cftype_to_string_and_release(title_ref).unwrap_or_else(|| "Unknown".to_string());
 
             // Get PID via AXPid attribute
             let pid_attr = CFString::new("AXPid");
@@ -159,10 +180,12 @@ mod macos {
 
             // Default PID
             let pid: i32 = if pid_err == K_AX_ERROR_SUCCESS && !pid_ref.is_null() {
-                // pid_ref is a CFNumber
-                let cf_num = CFNumber::wrap_under_get_rule(pid_ref as _);
+                // pid_ref is a CFNumber — we own it from CopyAttributeValue
+                let cf_num = CFNumber::wrap_under_create_rule(pid_ref as _);
                 cf_num.to_i32().unwrap_or(0)
+                // cf_num Drop releases pid_ref
             } else {
+                release_if_not_null(pid_ref);
                 0
             };
 
@@ -196,7 +219,7 @@ mod macos {
                 &mut title_ref,
             );
 
-            let title = cftype_to_string(title_ref).unwrap_or_default();
+            let title = cftype_to_string_and_release(title_ref).unwrap_or_default();
 
             CFRelease(window_ref);
             title
@@ -228,7 +251,7 @@ mod macos {
                 &mut value_ref,
             );
 
-            let focused_text = cftype_to_string(value_ref).unwrap_or_default();
+            let focused_text = cftype_to_string_and_release(value_ref).unwrap_or_default();
 
             // Get selected text
             let sel_attr = CFString::new("AXSelectedText");
@@ -239,7 +262,7 @@ mod macos {
                 &mut sel_ref,
             );
 
-            let selected_text = cftype_to_string(sel_ref).unwrap_or_default();
+            let selected_text = cftype_to_string_and_release(sel_ref).unwrap_or_default();
 
             CFRelease(element_ref);
             (focused_text, selected_text)
@@ -286,7 +309,7 @@ mod macos {
         let mut role_ref: CFTypeRef = ptr::null();
         AXUIElementCopyAttributeValue(element, role_attr.as_concrete_TypeRef(), &mut role_ref);
 
-        let role = cftype_to_string(role_ref).unwrap_or_default();
+        let role = cftype_to_string_and_release(role_ref).unwrap_or_default();
 
         // Extract text from text-bearing roles
         let text_roles = [
@@ -307,8 +330,10 @@ mod macos {
             AXUIElementCopyAttributeValue(element, value_attr.as_concrete_TypeRef(), &mut value_ref);
 
             let text = if let Some(val) = cftype_to_string(value_ref) {
+                release_if_not_null(value_ref);
                 val
             } else {
+                release_if_not_null(value_ref);
                 let title_attr = CFString::new("AXTitle");
                 let mut title_ref: CFTypeRef = ptr::null();
                 AXUIElementCopyAttributeValue(
@@ -316,7 +341,7 @@ mod macos {
                     title_attr.as_concrete_TypeRef(),
                     &mut title_ref,
                 );
-                cftype_to_string(title_ref).unwrap_or_default()
+                cftype_to_string_and_release(title_ref).unwrap_or_default()
             };
 
             let trimmed = text.trim().to_string();
@@ -335,10 +360,13 @@ mod macos {
         );
 
         if err == K_AX_ERROR_SUCCESS && !children_ref.is_null() {
-            let children: CFArray = CFArray::wrap_under_get_rule(children_ref as _);
+            // Use create_rule since CopyAttributeValue follows the Create Rule
+            let children: CFArray = CFArray::wrap_under_create_rule(children_ref as _);
             let child_ptrs = children.get_all_values();
             for child_ptr in child_ptrs {
                 if !child_ptr.is_null() {
+                    // Children within the array are NOT owned by us — the array owns them.
+                    // Do NOT release individual children.
                     collect_text_recursive(
                         child_ptr as CFTypeRef,
                         texts,
@@ -347,6 +375,7 @@ mod macos {
                     );
                 }
             }
+            // children (CFArray) goes out of scope here and releases via Drop
         }
     }
 
@@ -376,7 +405,7 @@ mod macos {
                 &mut doc_ref,
             );
 
-            let url = cftype_to_string(doc_ref);
+            let url = cftype_to_string_and_release(doc_ref);
 
             CFRelease(window_ref);
             url
@@ -682,7 +711,7 @@ fn capture_desktop_context() -> Option<DesktopContext> {
             &mut title_ref,
         );
 
-        let app_name = macos::cftype_to_string(title_ref).unwrap_or_else(|| "Unknown".to_string());
+        let app_name = macos::cftype_to_string_and_release(title_ref).unwrap_or_else(|| "Unknown".to_string());
 
         // 2. Get window title
         let window_title = macos::get_focused_window_title(app_ref);

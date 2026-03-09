@@ -686,7 +686,7 @@ Adds the Context Capture & Deep Memory System tables.
 ### New enums:
 | Enum | Values |
 |---|---|
-| `context_chunk_type` | `email_thread`, `calendar_event`, `document_edit`, `slack_conversation`, `task_update`, `code_activity`, `crm_activity`, `file_activity`, `general_note` |
+| `context_chunk_type` | `email_thread`, `calendar_event`, `document_edit`, `slack_conversation`, `task_update`, `code_activity`, `crm_activity`, `file_activity`, `general_note`, `desktop_observation` |
 | `context_importance` | `critical`, `important`, `background`, `noise` |
 
 ### New tables:

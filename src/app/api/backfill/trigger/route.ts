@@ -6,7 +6,7 @@ import type { AuthenticatedRequest } from '@/lib/middleware/withAuth';
 /**
  * POST /api/backfill/trigger
  *
- * Creates a backfill job and runs it in-process (no Trigger.dev dependency).
+ * Creates a backfill job and runs it in-process.
  * The cold-start backfill runs as a background async task — the API returns immediately.
  */
 export const POST = withAuth(async (req: AuthenticatedRequest) => {
@@ -51,7 +51,6 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
   }
 
   // Run the backfill in the background (fire-and-forget)
-  // This avoids the Trigger.dev dependency entirely
   runBackfillInBackground(userId, job.id).catch((err) => {
     console.error('[Backfill] Background execution failed:', err);
   });
@@ -61,7 +60,6 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
 
 /**
  * Runs the cold-start backfill phases in-process.
- * Extracted from trigger/onboarding/cold-start-backfill.ts.
  */
 async function runBackfillInBackground(userId: string, jobId: string): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,13 +119,6 @@ async function runBackfillInBackground(userId: string, jobId: string): Promise<v
       try {
         const { ingestGmailMessages } = await import('@/lib/ai/agents/ingestion');
         const result = await ingestGmailMessages(userId);
-        emailsIngested += result.processed;
-      } catch { /* partial failure */ }
-    }
-    if (connected.has('outlook')) {
-      try {
-        const { ingestOutlookMessages } = await import('@/lib/ai/agents/ingestion');
-        const result = await ingestOutlookMessages(userId);
         emailsIngested += result.processed;
       } catch { /* partial failure */ }
     }

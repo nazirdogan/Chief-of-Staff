@@ -63,9 +63,14 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       await updateConversationTitle(supabase, conversationId, autoTitle);
     }
 
-    // Build the full message history for the AI (all previous messages + new one)
+    // Build the message history for the AI, windowed to prevent context overflow.
+    // Keep the last 40 messages to stay within model context limits.
+    const MAX_HISTORY = 40;
+    const recentMessages = conversation.messages.length > MAX_HISTORY
+      ? conversation.messages.slice(-MAX_HISTORY)
+      : conversation.messages;
     const allMessages = [
-      ...conversation.messages,
+      ...recentMessages,
       { role: 'user' as const, content: content.trim() },
     ];
 
@@ -155,14 +160,28 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
         { role: 'user', content: toolResults },
       ];
 
-      if (textBlocks.length > 0) {
-        finalText = textBlocks.map((b) => b.text).join('\n');
-      }
+      // Don't capture intermediate text as final — it may be partial reasoning
+      // alongside tool calls. Only the loop-exit text block (no tool_use) is final.
 
       toolRound++;
     }
 
-    if (toolRound >= MAX_TOOL_ROUNDS && !finalText) {
+    if (toolRound >= MAX_TOOL_ROUNDS) {
+      // If we exhausted tool rounds, make one last call without tools to get a summary
+      const summaryResponse = await anthropic.messages.create({
+        model: AI_MODELS.STANDARD,
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: anthropicMessages,
+      });
+      const summaryText = summaryResponse.content
+        .filter((b): b is Anthropic.Messages.TextBlock => b.type === 'text')
+        .map((b) => b.text)
+        .join('\n');
+      finalText = summaryText || 'I gathered some information but had trouble summarizing it. Could you try rephrasing your question?';
+    }
+
+    if (!finalText) {
       finalText = 'I ran into a loop trying to gather that information. Could you try rephrasing your question?';
     }
 

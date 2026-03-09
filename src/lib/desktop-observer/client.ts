@@ -33,10 +33,14 @@ async function loadTauriApis() {
 
 const FLUSH_INTERVAL_MS = 5_000; // flush every 5 seconds
 const MAX_BUFFER_SIZE = 20;
+const MAX_RETRY_BUFFER = MAX_BUFFER_SIZE * 5; // 100 items max in retry
+const MAX_BACKOFF_MS = 60_000; // 1 minute max between retries
 
 const contextBuffer: DesktopContext[] = [];
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 let unlistenFn: (() => void) | null = null;
+let consecutiveFailures = 0;
+let nextRetryAt = 0;
 
 type ContextChangeHandler = (ctx: DesktopContext) => void;
 const changeListeners: Set<ContextChangeHandler> = new Set();
@@ -196,23 +200,48 @@ function handleContextChange(ctx: DesktopContext) {
 async function flushBuffer() {
   if (contextBuffer.length === 0) return;
 
+  // Exponential backoff: skip flush if we're in a cooldown period
+  if (consecutiveFailures > 0 && Date.now() < nextRetryAt) {
+    return;
+  }
+
   const items = contextBuffer.splice(0); // take all items
 
   try {
     const response = await fetch('/api/desktop-observer/ingest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Send auth cookies from Tauri webview
       body: JSON.stringify({ contexts: items }),
     });
 
-    if (!response.ok) {
+    if (response.ok) {
+      // Reset backoff on success
+      consecutiveFailures = 0;
+      nextRetryAt = 0;
+    } else {
       console.error('[desktop-observer] Ingest failed:', response.status);
-      // Put items back if server is down (but limit to avoid memory leak)
-      if (contextBuffer.length < MAX_BUFFER_SIZE * 5) {
-        contextBuffer.unshift(...items);
-      }
+      requeueItems(items);
     }
   } catch (e) {
     console.error('[desktop-observer] Ingest error:', e);
+    requeueItems(items);
+  }
+}
+
+function requeueItems(items: DesktopContext[]) {
+  consecutiveFailures++;
+
+  // Exponential backoff: 2s, 4s, 8s, 16s, 32s, capped at 60s
+  const backoffMs = Math.min(MAX_BACKOFF_MS, 2000 * Math.pow(2, consecutiveFailures - 1));
+  nextRetryAt = Date.now() + backoffMs;
+
+  // Put items back only if buffer isn't already too large (prevent memory leak)
+  if (contextBuffer.length < MAX_RETRY_BUFFER) {
+    // Keep the newer items (already in buffer) and prepend the failed ones
+    contextBuffer.unshift(...items);
+  } else {
+    // Buffer full — drop oldest items to prevent memory growth
+    console.warn(`[desktop-observer] Buffer full (${contextBuffer.length} items), dropping ${items.length} observations`);
   }
 }

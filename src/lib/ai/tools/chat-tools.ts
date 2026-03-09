@@ -13,9 +13,11 @@ import {
   getRecentMemorySnapshots,
   getContextChunksByUser,
 } from '@/lib/db/queries/context';
+import { getSessionsInRange } from '@/lib/db/queries/activity-sessions';
+import { getDayNarrative, getRecentDayNarratives } from '@/lib/db/queries/day-narratives';
 import { queryContext, summarizeContext } from '@/lib/context/query-engine';
 import type { CommitmentStatus, CommitmentConfidence, IntegrationProvider } from '@/lib/db/types';
-import type { ContextChunkType } from '@/lib/context/types';
+import type { ContextChunkType, AppCategory } from '@/lib/context/types';
 
 // Tool definitions for Anthropic tool-use API
 export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
@@ -236,14 +238,27 @@ export const CHAT_TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'what_happened',
-    description: "Answer 'what happened' questions — summarizes activity over a time range with optional focus area. Includes both OAuth-integrated data AND desktop-observed activity (WhatsApp, iMessage, etc.).",
+    description: "Answer 'what happened' questions — summarizes activity over a time range with optional focus area. Combines desktop-observed activity sessions, day narratives, and context memory for a complete picture.",
     input_schema: {
       type: 'object' as const,
       properties: {
-        time_range: { type: 'string', enum: ['yesterday', 'this_week', 'last_week', 'this_month'], description: 'Time range to summarize' },
-        focus: { type: 'string', enum: ['meetings', 'emails', 'tasks', 'projects', 'people'], description: 'Optional focus area' },
+        time_range: { type: 'string', enum: ['last_hour', 'today', 'yesterday', 'this_week', 'last_week', 'this_month'], description: 'Time range to summarize' },
+        focus: { type: 'string', enum: ['meetings', 'emails', 'tasks', 'projects', 'people', 'code', 'chat'], description: 'Optional focus area' },
       },
       required: ['time_range'],
+    },
+  },
+  {
+    name: 'get_activity_timeline',
+    description: 'Get a timeline of activity sessions from the desktop observer. Shows what apps the user used, who they talked to, what they worked on, and for how long. Best for questions about recent work activity.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        date: { type: 'string', description: 'ISO date (YYYY-MM-DD). Defaults to today.' },
+        category: { type: 'string', enum: ['email', 'chat', 'code', 'terminal', 'browser', 'calendar', 'document', 'design'], description: 'Filter by activity type' },
+        limit: { type: 'number', description: 'Max sessions to return (default 30)' },
+      },
+      required: [],
     },
   },
 ];
@@ -463,7 +478,7 @@ export async function executeChatTool(
 
       // Create pending action
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: pendingAction } = await (supabase as any)
+      const { data: pendingAction, error: actionError } = await (supabase as any)
         .from('pending_actions')
         .insert({
           user_id: userId,
@@ -487,9 +502,18 @@ export async function executeChatTool(
         .select('id, expires_at')
         .single();
 
+      if (actionError || !pendingAction) {
+        console.error('[draft_reply] Failed to create pending action:', actionError);
+        return JSON.stringify({
+          draft,
+          pending_action_id: null,
+          error: 'Draft generated but failed to create pending action for confirmation.',
+        });
+      }
+
       return JSON.stringify({
         draft,
-        pending_action_id: pendingAction?.id,
+        pending_action_id: pendingAction.id,
         message: 'Draft created. This will NOT be sent until you confirm it.',
       });
     }
@@ -583,46 +607,83 @@ export async function executeChatTool(
 
     case 'get_day_summary': {
       const date = (input.date as string) ?? new Date().toISOString().split('T')[0];
+
+      // Try day narrative first (observer-first, continuously updated)
+      const dayNarrative = await getDayNarrative(supabase, userId, date);
+
+      // Also check legacy memory snapshot
       const snapshot = await getMemorySnapshot(supabase, userId, date);
-      if (!snapshot) {
-        // Provide factual diagnostics when no summary exists
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: desktopSession } = await (supabase as any)
-          .from('desktop_sessions')
-          .select('last_seen_at, observer_running, observation_count')
-          .eq('user_id', userId)
-          .single();
 
-        const desktopConnected = desktopSession
-          ? Date.now() - new Date(desktopSession.last_seen_at).getTime() < 2 * 60 * 1000
-          : false;
-
+      if (dayNarrative) {
         return JSON.stringify({
-          message: `No summary available for ${date}.`,
-          diagnostics: {
-            desktop_app: {
-              connected: desktopConnected,
-              observer_running: desktopSession?.observer_running ?? false,
-              last_seen_at: desktopSession?.last_seen_at ?? null,
-              total_observations: desktopSession?.observation_count ?? 0,
-            },
+          date,
+          source: 'desktop_observer',
+          narrative: dayNarrative.narrative,
+          stats: {
+            sessions: dayNarrative.session_count,
+            email_sessions: dayNarrative.email_sessions,
+            chat_sessions: dayNarrative.chat_sessions,
+            code_sessions: dayNarrative.code_sessions,
+            meeting_sessions: dayNarrative.meeting_sessions,
+            browsing_sessions: dayNarrative.browsing_sessions,
+            active_minutes: Math.round(dayNarrative.total_active_seconds / 60),
           },
+          key_events: dayNarrative.key_events,
+          people_seen: dayNarrative.people_seen,
+          projects_worked_on: dayNarrative.projects_worked_on,
+          last_updated: dayNarrative.last_updated_at,
+          // Include legacy snapshot data if available
+          ...(snapshot ? {
+            legacy_data: {
+              key_decisions: snapshot.key_decisions,
+              open_loops: snapshot.open_loops,
+              notable_interactions: snapshot.notable_interactions,
+            },
+          } : {}),
         });
       }
+
+      if (snapshot) {
+        return JSON.stringify({
+          date: snapshot.snapshot_date,
+          source: 'memory_snapshot',
+          narrative: snapshot.day_narrative,
+          stats: {
+            emails: snapshot.emails_received,
+            slack: snapshot.slack_messages,
+            meetings: snapshot.meetings_attended,
+            tasks: snapshot.tasks_completed,
+            docs: snapshot.documents_edited,
+            prs: snapshot.code_prs_opened,
+          },
+          key_decisions: snapshot.key_decisions,
+          open_loops: snapshot.open_loops,
+          notable_interactions: snapshot.notable_interactions,
+        });
+      }
+
+      // No data at all — provide diagnostics
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: desktopSession } = await (supabase as any)
+        .from('desktop_sessions')
+        .select('last_seen_at, observer_running, observation_count')
+        .eq('user_id', userId)
+        .single();
+
+      const desktopConnected = desktopSession
+        ? Date.now() - new Date(desktopSession.last_seen_at).getTime() < 2 * 60 * 1000
+        : false;
+
       return JSON.stringify({
-        date: snapshot.snapshot_date,
-        narrative: snapshot.day_narrative,
-        stats: {
-          emails: snapshot.emails_received,
-          slack: snapshot.slack_messages,
-          meetings: snapshot.meetings_attended,
-          tasks: snapshot.tasks_completed,
-          docs: snapshot.documents_edited,
-          prs: snapshot.code_prs_opened,
+        message: `No summary available for ${date}.`,
+        diagnostics: {
+          desktop_app: {
+            connected: desktopConnected,
+            observer_running: desktopSession?.observer_running ?? false,
+            last_seen_at: desktopSession?.last_seen_at ?? null,
+            total_observations: desktopSession?.observation_count ?? 0,
+          },
         },
-        key_decisions: snapshot.key_decisions,
-        open_loops: snapshot.open_loops,
-        notable_interactions: snapshot.notable_interactions,
       });
     }
 
@@ -684,6 +745,14 @@ export async function executeChatTool(
       let before: string | undefined;
 
       switch (timeRange) {
+        case 'last_hour': {
+          after = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+          break;
+        }
+        case 'today': {
+          after = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+          break;
+        }
         case 'yesterday': {
           const d = new Date(now);
           d.setDate(d.getDate() - 1);
@@ -713,77 +782,130 @@ export async function executeChatTool(
         }
       }
 
-      // Map focus to chunk type filter
-      const chunkTypeMap: Record<string, ContextChunkType> = {
+      // Map focus to session category
+      const focusCategoryMap: Record<string, AppCategory> = {
+        meetings: 'calendar',
+        emails: 'email',
+        code: 'code',
+        chat: 'chat',
+      };
+      const sessionCategory = focus ? focusCategoryMap[focus] : undefined;
+
+      // First: try activity sessions (observer-first)
+      const sessions = await getSessionsInRange(supabase, userId, after, before, {
+        category: sessionCategory,
+        limit: 50,
+      });
+
+      // Second: try day narratives for multi-day ranges
+      const dayNarratives = (timeRange !== 'last_hour' && timeRange !== 'today')
+        ? await getRecentDayNarratives(supabase, userId, 14)
+        : [];
+      const relevantNarratives = dayNarratives.filter(n => {
+        const nDate = new Date(n.narrative_date).getTime();
+        return nDate >= new Date(after).getTime() && (!before || nDate <= new Date(before).getTime());
+      });
+
+      // Third: fall back to context chunks
+      const chunkTypeMap: Record<string, ContextChunkType | ContextChunkType[]> = {
         meetings: 'calendar_event',
         emails: 'email_thread',
         tasks: 'task_update',
+        projects: ['document_edit', 'code_activity', 'file_activity'],
+        people: ['slack_conversation', 'email_thread', 'crm_activity'],
       };
-      const chunkType = focus ? chunkTypeMap[focus] : undefined;
+      const chunkTypeFilter = focus ? chunkTypeMap[focus] : undefined;
+      const chunkType = Array.isArray(chunkTypeFilter) ? undefined : chunkTypeFilter;
 
-      const chunks = await getContextChunksByUser(supabase, userId, {
+      // Build response from best available data
+      const result: Record<string, unknown> = {
+        time_range: timeRange,
+        focus: focus ?? 'all',
+      };
+
+      // Include session-based data if we have it
+      if (sessions.length > 0) {
+        const sessionSummaries = sessions
+          .filter(s => s.summary)
+          .map(s => ({
+            app: s.app_name,
+            category: s.app_category,
+            summary: s.summary,
+            people: s.people,
+            projects: s.projects,
+            started_at: s.started_at,
+            duration_min: s.ended_at
+              ? Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
+              : null,
+          }));
+
+        result.activity_sessions = sessionSummaries;
+        result.session_count = sessions.length;
+
+        // Compute aggregate stats
+        const allPeople = new Set<string>();
+        const allProjects = new Set<string>();
+        let totalMinutes = 0;
+        for (const s of sessions) {
+          const dur = s.ended_at
+            ? (new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000
+            : 0;
+          totalMinutes += dur;
+          for (const p of s.people) allPeople.add(p);
+          for (const p of s.projects) allProjects.add(p);
+        }
+        result.total_active_minutes = Math.round(totalMinutes);
+        result.people_involved = [...allPeople];
+        result.projects_touched = [...allProjects];
+      }
+
+      // Include day narratives if we have them
+      if (relevantNarratives.length > 0) {
+        result.daily_narratives = relevantNarratives.map(n => ({
+          date: n.narrative_date,
+          narrative: n.narrative,
+          key_events: n.key_events,
+          people_seen: n.people_seen,
+          projects_worked_on: n.projects_worked_on,
+          active_minutes: Math.round(n.total_active_seconds / 60),
+        }));
+      }
+
+      // If we have session data, return it directly
+      if (sessions.length > 0 || relevantNarratives.length > 0) {
+        return JSON.stringify(result);
+      }
+
+      // Fallback to context chunks
+      let chunks = await getContextChunksByUser(supabase, userId, {
         after,
         before,
         chunkType,
         limit: 50,
       });
 
+      if (Array.isArray(chunkTypeFilter)) {
+        chunks = chunks.filter(c => (chunkTypeFilter as ContextChunkType[]).includes(c.chunk_type));
+      }
+
       if (chunks.length === 0) {
-        // Gather factual diagnostics instead of letting the AI guess
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: desktopSession } = await (supabase as any)
-          .from('desktop_sessions')
-          .select('last_seen_at, observer_running, observation_count')
-          .eq('user_id', userId)
-          .single();
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: integrations } = await (supabase as any)
-          .from('user_integrations')
-          .select('provider, status')
-          .eq('user_id', userId);
-
-        const connectedIntegrations = (integrations ?? []).filter(
-          (i: { status: string }) => i.status === 'connected'
-        );
-
-        const desktopConnected = desktopSession
-          ? Date.now() - new Date(desktopSession.last_seen_at).getTime() < 2 * 60 * 1000
-          : false;
-
         return JSON.stringify({
           message: `No activity found for ${timeRange}.`,
-          diagnostics: {
-            desktop_app: {
-              connected: desktopConnected,
-              observer_running: desktopSession?.observer_running ?? false,
-              last_seen_at: desktopSession?.last_seen_at ?? null,
-              total_observations: desktopSession?.observation_count ?? 0,
-            },
-            integrations: {
-              connected_count: connectedIntegrations.length,
-              connected_providers: connectedIntegrations.map(
-                (i: { provider: string }) => i.provider
-              ),
-              total_configured: (integrations ?? []).length,
-            },
-          },
         });
       }
 
-      // Also check for memory snapshots in the range
-      const snapshots = await getRecentMemorySnapshots(supabase, userId, 14);
-      const relevantSnapshots = snapshots.filter((s) => {
+      // Also check for legacy memory snapshots
+      const snapshots = !focus ? await getRecentMemorySnapshots(supabase, userId, 14) : [];
+      const relevantSnapshots = snapshots.filter(s => {
         const sDate = new Date(s.snapshot_date).getTime();
         return sDate >= new Date(after).getTime() && (!before || sDate <= new Date(before).getTime());
       });
 
-      // If we have snapshots, use their narratives
       if (relevantSnapshots.length > 0) {
         return JSON.stringify({
           time_range: timeRange,
           focus: focus ?? 'all',
-          daily_summaries: relevantSnapshots.map((s) => ({
+          daily_summaries: relevantSnapshots.map(s => ({
             date: s.snapshot_date,
             narrative: s.day_narrative,
             stats: {
@@ -799,7 +921,6 @@ export async function executeChatTool(
         });
       }
 
-      // Fallback: summarize from chunks directly
       const contextSummary = await summarizeContext({
         chunks,
         purpose: `Summarize what happened ${timeRange}${focus ? ` focusing on ${focus}` : ''}`,
@@ -812,6 +933,47 @@ export async function executeChatTool(
         summary: contextSummary.summary,
         sources: contextSummary.sources.slice(0, 10),
         total_activity_items: chunks.length,
+      });
+    }
+
+    case 'get_activity_timeline': {
+      const date = (input.date as string) ?? new Date().toISOString().split('T')[0];
+      const category = input.category as AppCategory | undefined;
+      const limit = (input.limit as number) ?? 30;
+
+      const dayStart = `${date}T00:00:00.000Z`;
+      const dayEnd = `${date}T23:59:59.999Z`;
+
+      const [sessions, narrative] = await Promise.all([
+        getSessionsInRange(supabase, userId, dayStart, dayEnd, { category, limit }),
+        getDayNarrative(supabase, userId, date),
+      ]);
+
+      if (sessions.length === 0 && !narrative) {
+        return JSON.stringify({ message: `No activity tracked for ${date}.` });
+      }
+
+      return JSON.stringify({
+        date,
+        narrative: narrative?.narrative ?? null,
+        key_events: narrative?.key_events ?? [],
+        people_seen: narrative?.people_seen ?? [],
+        projects_worked_on: narrative?.projects_worked_on ?? [],
+        active_minutes: narrative ? Math.round(narrative.total_active_seconds / 60) : 0,
+        sessions: sessions.map(s => ({
+          app: s.app_name,
+          category: s.app_category,
+          window: s.window_title,
+          summary: s.summary,
+          people: s.people,
+          projects: s.projects,
+          importance: s.importance,
+          started_at: s.started_at,
+          ended_at: s.ended_at,
+          duration_min: s.ended_at
+            ? Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
+            : null,
+        })),
       });
     }
 

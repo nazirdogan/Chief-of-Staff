@@ -78,7 +78,7 @@ describe('mapInboxItemToCandidate', () => {
   });
 
   it('includes source_ref with correct provider and message_id', () => {
-    const item = makeInboxItem({ provider: 'outlook', external_id: 'msg-99' });
+    const item = makeInboxItem({ provider: 'gmail', external_id: 'msg-99' });
     const candidate = mapInboxItemToCandidate(item);
     expect(candidate.source_ref.provider).toBe('outlook');
     expect(candidate.source_ref.message_id).toBe('msg-99');

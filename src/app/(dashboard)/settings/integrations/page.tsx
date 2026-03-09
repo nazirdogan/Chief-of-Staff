@@ -28,32 +28,10 @@ const INTEGRATIONS: IntegrationConfig[] = [
   // EMAIL & CALENDAR
   { nangoProvider: 'google-mail', dbProvider: 'gmail', label: 'Gmail', category: 'Email & Calendar', permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }] },
   { nangoProvider: 'google-calendar', dbProvider: 'google_calendar', label: 'Google Calendar', category: 'Email & Calendar', permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }] },
-  { nangoProvider: 'microsoft', dbProvider: 'outlook', label: 'Outlook', category: 'Email & Calendar', permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }, { label: 'Read your calendar', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }] },
-  { nangoProvider: 'icloud', dbProvider: 'apple_icloud_mail', label: 'iCloud Mail', category: 'Email & Calendar', permissions: [{ label: 'Read your iCloud emails', description: 'We read iCloud Mail metadata and content for your daily briefing. Raw bodies are never stored.' }] },
-  { nangoProvider: 'calendly', dbProvider: 'calendly', label: 'Calendly', category: 'Email & Calendar', permissions: [{ label: 'Read your scheduled events', description: 'We fetch upcoming bookings so you are aware of scheduled meetings before they happen.' }] },
   // MESSAGING
   { nangoProvider: 'slack', dbProvider: 'slack', label: 'Slack', category: 'Messaging', permissions: [{ label: 'Read channel messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }] },
-  { nangoProvider: 'microsoft-teams', dbProvider: 'microsoft_teams', label: 'Teams', category: 'Messaging', permissions: [{ label: 'Read your Teams messages and DMs', description: 'We read Teams messages where you are mentioned or sent direct messages.' }] },
-  { nangoProvider: 'linkedin', dbProvider: 'linkedin', label: 'LinkedIn', category: 'Messaging', permissions: [{ label: 'Read your LinkedIn messages', description: 'We read unread LinkedIn conversations to surface important professional messages.' }] },
-  { nangoProvider: 'twitter', dbProvider: 'twitter', label: 'X / Twitter', category: 'Messaging', permissions: [{ label: 'Read your Twitter/X direct messages', description: 'We read unread DMs so important messages surface in your daily briefing.' }] },
   // DOCUMENTS
   { nangoProvider: 'notion', dbProvider: 'notion', label: 'Notion', category: 'Documents', permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }] },
-  { nangoProvider: 'google-drive', dbProvider: 'google_drive', label: 'Google Drive', category: 'Documents', permissions: [{ label: 'Read your documents', description: 'We index Docs and files for meeting prep and context. Raw content is never stored.' }] },
-  { nangoProvider: 'dropbox', dbProvider: 'dropbox', label: 'Dropbox', category: 'Documents', permissions: [{ label: 'Read your files', description: 'We index text files for meeting prep and context. Raw content is never stored.' }] },
-  { nangoProvider: 'microsoft', dbProvider: 'onedrive', label: 'OneDrive', category: 'Documents', permissions: [{ label: 'Read your OneDrive files', description: 'We index documents for meeting prep and context. Raw content is never stored.' }] },
-  // TASK MANAGEMENT
-  { nangoProvider: 'asana', dbProvider: 'asana', label: 'Asana', category: 'Tasks', permissions: [{ label: 'Read tasks assigned to you', description: 'We fetch your open Asana tasks so they surface in your daily briefing.' }] },
-  { nangoProvider: 'monday', dbProvider: 'monday', label: 'Monday', category: 'Tasks', permissions: [{ label: 'Read board items assigned to you', description: 'We fetch your Monday.com items so they surface in your daily briefing.' }] },
-  { nangoProvider: 'jira', dbProvider: 'jira', label: 'Jira', category: 'Tasks', permissions: [{ label: 'Read issues assigned to you', description: 'We fetch your open Jira issues so they surface in your daily briefing.' }] },
-  { nangoProvider: 'linear', dbProvider: 'linear', label: 'Linear', category: 'Tasks', permissions: [{ label: 'Read issues assigned to you', description: 'We fetch your open Linear issues so they surface in your daily briefing.' }] },
-  { nangoProvider: 'clickup', dbProvider: 'clickup', label: 'ClickUp', category: 'Tasks', permissions: [{ label: 'Read tasks assigned to you', description: 'We fetch your open ClickUp tasks so they surface in your daily briefing.' }] },
-  { nangoProvider: 'trello', dbProvider: 'trello', label: 'Trello', category: 'Tasks', permissions: [{ label: 'Read cards assigned to you', description: 'We fetch your open Trello cards so they surface in your daily briefing.' }] },
-  // CRM
-  { nangoProvider: 'hubspot', dbProvider: 'hubspot', label: 'HubSpot', category: 'CRM', permissions: [{ label: 'Read deals, contacts, and tasks', description: 'We surface your open deals and tasks so you stay on top of your pipeline.' }] },
-  { nangoProvider: 'salesforce', dbProvider: 'salesforce', label: 'Salesforce', category: 'CRM', permissions: [{ label: 'Read opportunities, tasks, and contacts', description: 'We surface open opportunities and tasks so your pipeline is always front of mind.' }] },
-  { nangoProvider: 'pipedrive', dbProvider: 'pipedrive', label: 'Pipedrive', category: 'CRM', permissions: [{ label: 'Read deals and activities', description: 'We surface open deals and upcoming activities so you never miss a follow-up.' }] },
-  // CODE
-  { nangoProvider: 'github', dbProvider: 'github', label: 'GitHub', category: 'Code', permissions: [{ label: 'Read PR reviews requested and @mentions', description: 'We surface PRs awaiting your review and issues where you are mentioned.' }] },
 ];
 
 const CATEGORIES = Array.from(new Set(INTEGRATIONS.map((i) => i.category)));
@@ -374,7 +352,7 @@ export default function IntegrationsSettingsPage() {
             return (
               <div key={category}>
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{category}</h2>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {items.map((config) => {
                     const integration = getStatus(config.dbProvider);
                     const isConnected = integration?.status === 'connected';

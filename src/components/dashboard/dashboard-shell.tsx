@@ -244,7 +244,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect -- intentional hydration guard
+    setMounted(true);
   }, []);
 
   async function handleSignOut() {

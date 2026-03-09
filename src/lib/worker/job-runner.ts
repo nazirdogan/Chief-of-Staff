@@ -2,7 +2,7 @@
  * Job Runner — executes a single job for a single user.
  *
  * Each job's run function is the extracted body of the corresponding
- * Trigger.dev task. Imports are dynamic to avoid loading everything at startup.
+ * background task. Imports are dynamic to avoid loading everything at startup.
  */
 
 import { createServiceClient } from '@/lib/db/client';
@@ -74,27 +74,8 @@ export async function runJob(
   // Determine provider for heartbeat logging
   const providerMap: Record<string, string> = {
     'gmail-scan': 'gmail',
-    'outlook-scan': 'outlook',
     'calendar-scan': 'google_calendar',
     'slack-scan': 'slack',
-    'teams-scan': 'microsoft_teams',
-    'linkedin-scan': 'linkedin',
-    'twitter-scan': 'twitter',
-    'github-scan': 'github',
-    'asana-scan': 'asana',
-    'jira-scan': 'jira',
-    'linear-scan': 'linear',
-    'monday-scan': 'monday',
-    'clickup-scan': 'clickup',
-    'trello-scan': 'trello',
-    'hubspot-scan': 'hubspot',
-    'salesforce-scan': 'salesforce',
-    'pipedrive-scan': 'pipedrive',
-    'google-drive-scan': 'google_drive',
-    'dropbox-scan': 'dropbox',
-    'onedrive-scan': 'onedrive',
-    'icloud-scan': 'apple_icloud_mail',
-    'calendly-scan': 'calendly',
     'document-index': 'notion',
   };
 
@@ -141,29 +122,9 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       await runGmailPostProcessing(db, userId);
       return { processed: result.processed, found: result.found };
     }
-    case 'outlook-scan': {
-      const { ingestOutlookMessages } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestOutlookMessages(userId);
-      return { processed: result.processed, found: result.found };
-    }
     case 'slack-scan': {
       const { ingestSlackDMs } = await import('@/lib/ai/agents/ingestion');
       const result = await ingestSlackDMs(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'teams-scan': {
-      const { ingestTeamsMessages } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestTeamsMessages(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'linkedin-scan': {
-      const { ingestLinkedInMessages } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestLinkedInMessages(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'twitter-scan': {
-      const { ingestTwitterDMs } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestTwitterDMs(userId);
       return { processed: result.processed, found: result.found };
     }
 
@@ -175,104 +136,19 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
         const events = await getTodaysParsedEvents(userId);
         eventsLoaded += events.length;
       } catch { /* not connected */ }
-      try {
-        const { getTodaysOutlookEvents } = await import('@/lib/integrations/outlook');
-        const events = await getTodaysOutlookEvents(userId);
-        eventsLoaded += events.length;
-      } catch { /* not connected */ }
       return { processed: eventsLoaded, found: eventsLoaded };
     }
 
-    // ── Task Management Scans ──
-    case 'asana-scan': {
-      const { ingestAsanaTasks } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestAsanaTasks(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'jira-scan': {
-      const { ingestJiraIssues } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestJiraIssues(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'linear-scan': {
-      const { ingestLinearIssues } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestLinearIssues(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'monday-scan': {
-      const { ingestMondayItems } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestMondayItems(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'clickup-scan': {
-      const { ingestClickUpTasks } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestClickUpTasks(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'trello-scan': {
-      const { ingestTrelloCards } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestTrelloCards(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'github-scan': {
-      const { ingestGitHubItems } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestGitHubItems(userId);
-      return { processed: result.processed, found: result.found };
-    }
-
-    // ── CRM Scans ──
-    case 'hubspot-scan': {
-      const { ingestHubSpotItems } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestHubSpotItems(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'salesforce-scan': {
-      const { ingestSalesforceItems } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestSalesforceItems(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'pipedrive-scan': {
-      const { ingestPipedriveItems } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestPipedriveItems(userId);
-      return { processed: result.processed, found: result.found };
-    }
-
-    // ── Cloud Storage ──
-    case 'google-drive-scan': {
-      const { ingestGoogleDriveDocuments } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestGoogleDriveDocuments(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'dropbox-scan': {
-      const { ingestDropboxDocuments } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestDropboxDocuments(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'onedrive-scan': {
-      const { ingestOneDriveDocuments } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestOneDriveDocuments(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'icloud-scan': {
-      const { ingestICloudMessages } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestICloudMessages(userId);
-      return { processed: result.processed, found: result.found };
-    }
-    case 'calendly-scan': {
-      const { ingestCalendlyBookings } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestCalendlyBookings(userId);
-      return { processed: result.processed, found: result.found };
-    }
 
     // ── Intelligence ──
     case 'commitment-check': {
-      const { extractCommitmentsFromGmail, extractCommitmentsFromOutlook } = await import('@/lib/ai/agents/commitment');
+      const { extractCommitmentsFromGmail } = await import('@/lib/ai/agents/commitment');
       const { data: integrations } = await db
         .from('user_integrations')
         .select('provider')
         .eq('user_id', userId)
         .eq('status', 'connected')
-        .in('provider', ['gmail', 'outlook']);
+        .eq('provider', 'gmail');
       const connected = new Set((integrations ?? []).map((i: { provider: string }) => i.provider));
       let extracted = 0;
       let total = 0;
@@ -293,13 +169,6 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
           extracted += result.extracted;
           total += result.total;
         } catch { /* gmail not connected */ }
-      }
-      if (connected.has('outlook')) {
-        try {
-          const result = await extractCommitmentsFromOutlook(userId);
-          extracted += result.extracted;
-          total += result.total;
-        } catch { /* outlook not connected */ }
       }
       return { processed: extracted, found: total };
     }
@@ -363,7 +232,15 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       const { executeIfTierOne } = await import('@/lib/actions/executor');
       const { AutonomyTier } = await import('@/lib/db/types');
 
-      const briefing = await generateDailyBriefing(userId);
+      // Fetch user's timezone for correct date calculation
+      const { data: userProfile } = await db
+        .from('profiles')
+        .select('timezone')
+        .eq('id', userId)
+        .single();
+      const timezone = userProfile?.timezone as string | undefined;
+
+      const briefing = await generateDailyBriefing(userId, timezone);
 
       // Auto-execute Tier 1 actions
       const { data: tierOneActions } = await db
@@ -438,6 +315,13 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       return { processed: result.transitEventsCreated };
     }
 
+    // ── Observer-first narrative ──
+    case 'update-day-narrative': {
+      const { buildDayNarrative } = await import('@/lib/desktop-observer/narrative-builder');
+      await buildDayNarrative(userId);
+      return { processed: 1 };
+    }
+
     // ── Memory ──
     case 'generate-daily-snapshot': {
       const { generateDailySnapshot } = await import('@/lib/ai/agents/memory-snapshot');
@@ -497,7 +381,7 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
 
 /**
  * Gmail post-processing: engagement tracking and archive candidate creation.
- * Extracted from trigger/heartbeat/gmail-scan.ts.
+ * Gmail post-processing for engagement and archive candidates.
  */
 async function runGmailPostProcessing(db: DB, userId: string): Promise<void> {
   try {

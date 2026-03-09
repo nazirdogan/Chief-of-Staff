@@ -32,14 +32,14 @@ const ESSENTIAL_PROVIDERS: ProviderConfig[] = [
     permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for today's schedule and meeting prep." }],
   },
   {
-    nangoProvider: 'microsoft', dbProvider: 'outlook', label: 'Outlook',
-    description: 'Email and calendar from your Microsoft account',
-    permissions: [{ label: 'Read emails and calendar', description: 'We read email metadata and calendar events. Raw email bodies are never stored.' }],
-  },
-  {
     nangoProvider: 'slack', dbProvider: 'slack', label: 'Slack',
     description: 'Conversations, action items, and @mentions',
     permissions: [{ label: 'Read messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }],
+  },
+  {
+    nangoProvider: 'notion', dbProvider: 'notion', label: 'Notion',
+    description: 'Pages and databases for context and meeting prep',
+    permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }],
   },
 ];
 

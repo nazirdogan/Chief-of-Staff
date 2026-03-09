@@ -1,7 +1,7 @@
 import { AI_MODELS } from '@/lib/ai/models';
 import { validateBriefingItem } from '@/lib/ai/safety/citation-validator';
 import {
-  prioritiseItems,
+  synthesiseBriefing,
   mapInboxItemToCandidate,
   mapCommitmentToCandidate,
   mapEventToCandidate,
@@ -10,17 +10,19 @@ import {
   mapAfterHoursToCandidate,
   mapDesktopObservationToCandidate,
 } from './prioritisation';
+import { fetchEnrichedContext } from './briefing-context';
 import { generateMeetingPrep } from './meeting-prep';
 import type { MeetingPrep } from './meeting-prep';
-import type { UserContext, BriefingItemCandidate, RankedBriefingItem } from './prioritisation';
+import type { BriefingItemCandidate, RankedBriefingItem } from './prioritisation';
 import { createServiceClient } from '@/lib/db/client';
 import { listInboxItems } from '@/lib/db/queries/inbox';
 import { listCommitments } from '@/lib/db/queries/commitments';
 import { getProfile, getOnboardingData, getVipContacts, getColdContacts } from '@/lib/db/queries/users';
-import { insertBriefing, insertBriefingItems, updateBriefingDelivery } from '@/lib/db/queries/briefings';
+import { insertBriefing, insertBriefingItems } from '@/lib/db/queries/briefings';
 import { getDesktopObserverChunks } from '@/lib/db/queries/context';
 import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
 import type { Briefing, BriefingItem, BriefingItemSection } from '@/lib/db/types';
+import { getTodayInTimezone } from '@/lib/utils/timezone';
 
 export interface GeneratedBriefing extends Briefing {
   items: BriefingItem[];
@@ -33,16 +35,19 @@ const SECTION_ORDER: BriefingItemSection[] = [
   'commitment_queue',
   'vip_inbox',
   'action_required',
+  'decision_queue',
   'awaiting_reply',
   'after_hours',
   'at_risk',
   'priority_inbox',
+  'quick_wins',
+  'people_context',
 ];
 
 async function getUserContext(
   supabase: ReturnType<typeof createServiceClient>,
   userId: string
-): Promise<UserContext> {
+) {
   const [onboardingData, vipContacts] = await Promise.all([
     getOnboardingData(supabase, userId),
     getVipContacts(supabase, userId),
@@ -80,13 +85,9 @@ async function getTodaysCalendarEvents(userId: string): Promise<ParsedCalendarEv
   return events;
 }
 
-/**
- * Fetch sent emails awaiting reply from Gmail and Outlook.
- */
 async function getSentAwaitingReply(userId: string): Promise<BriefingItemCandidate[]> {
   const candidates: BriefingItemCandidate[] = [];
 
-  // Gmail sent-awaiting-reply
   try {
     const { fetchSentAwaitingReply } = await import('@/lib/integrations/gmail');
     const gmailSent = await fetchSentAwaitingReply(userId);
@@ -95,7 +96,6 @@ async function getSentAwaitingReply(userId: string): Promise<BriefingItemCandida
     // Gmail not connected or error
   }
 
-  // Outlook sent-awaiting-reply
   try {
     const { fetchOutlookSentAwaitingReply } = await import('@/lib/integrations/outlook');
     const outlookSent = await fetchOutlookSentAwaitingReply(userId);
@@ -107,9 +107,6 @@ async function getSentAwaitingReply(userId: string): Promise<BriefingItemCandida
   return candidates;
 }
 
-/**
- * Fetch after-hours email arrivals from Gmail.
- */
 async function getAfterHoursEmails(userId: string): Promise<BriefingItemCandidate[]> {
   try {
     const { fetchAfterHoursMessages } = await import('@/lib/integrations/gmail');
@@ -140,7 +137,7 @@ function buildBriefingSections(
     }));
 }
 
-export async function generateDailyBriefing(userId: string): Promise<GeneratedBriefing> {
+export async function generateDailyBriefing(userId: string, timezone?: string): Promise<GeneratedBriefing> {
   const startTime = Date.now();
   const supabase = createServiceClient();
 
@@ -158,7 +155,7 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     afterHoursEmails,
     desktopObservations,
     userContext,
-    profile,
+    _profile,
   ] = await Promise.all([
     listInboxItems(supabase, userId, { unreadOnly: true, limit: 30 }),
     listCommitments(supabase, userId, { status: 'open' }),
@@ -166,7 +163,6 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     getColdContacts(supabase, userId),
     getSentAwaitingReply(userId),
     getAfterHoursEmails(userId),
-    // Desktop observer: fetch recent observations (last 24h, communication + important activity)
     getDesktopObserverChunks(supabase, userId, {
       after: yesterday.toISOString(),
       minImportance: 'background',
@@ -176,33 +172,35 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
     getProfile(supabase, userId),
   ]);
 
-  // Build candidate items with executive-focused section assignment
+  // Build candidate items with suggested section assignment
   const candidates: BriefingItemCandidate[] = [
-    // Inbox items routed to vip_inbox, action_required, or priority_inbox
     ...inboxItems.map(item => mapInboxItemToCandidate(item, userContext.vipEmails)),
-    // Commitments
     ...commitments.map(mapCommitmentToCandidate),
-    // Calendar events for today
     ...todaysEvents.map(mapEventToCandidate),
-    // Cold contacts at risk
     ...coldContacts.map(mapColdContactToCandidate),
-    // Sent emails awaiting reply
     ...sentAwaitingReply,
-    // After-hours arrivals
     ...afterHoursEmails,
-    // Desktop observer data (WhatsApp, Messages, Slack desktop, etc.)
     ...desktopObservations.map(chunk =>
       mapDesktopObservationToCandidate(chunk, userContext.vipEmails)
     ),
   ];
 
-  // Prioritise within each section
-  const ranked = await prioritiseItems(candidates, userContext);
+  // Fetch enriched context (memory snapshots, working patterns, threads, person/project context)
+  // This runs in parallel with meeting prep generation below
+  const [enrichedContext, ...meetingPreps] = await Promise.all([
+    fetchEnrichedContext(
+      supabase,
+      userId,
+      candidates,
+      userContext.vipEmails,
+      userContext.activeProjects,
+      timezone,
+    ),
+    ...todaysEvents.map(event => generateMeetingPrep(userId, event)),
+  ]);
 
-  // Generate meeting prep for each today's event
-  const meetingPreps = await Promise.all(
-    todaysEvents.map(event => generateMeetingPrep(userId, event))
-  );
+  // AI synthesis: rank, group, and reason about all candidates using full context
+  const ranked = await synthesiseBriefing(candidates, userContext, enrichedContext);
 
   // Build sections
   const sections = buildBriefingSections(ranked);
@@ -214,7 +212,7 @@ export async function generateDailyBriefing(userId: string): Promise<GeneratedBr
   }
 
   const generationMs = Date.now() - startTime;
-  const briefingDate = new Date().toISOString().split('T')[0];
+  const briefingDate = timezone ? getTodayInTimezone(timezone) : new Date().toISOString().split('T')[0];
 
   // Write briefing to database
   const briefing = await insertBriefing(supabase, {

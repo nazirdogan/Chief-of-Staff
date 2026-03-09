@@ -55,6 +55,14 @@ export async function insertBriefing(
     .single();
 
   if (error) throw error;
+
+  // On regeneration, remove stale items from the previous run
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any)
+    .from('briefing_items')
+    .delete()
+    .eq('briefing_id', (data as Briefing).id);
+
   return data as Briefing;
 }
 

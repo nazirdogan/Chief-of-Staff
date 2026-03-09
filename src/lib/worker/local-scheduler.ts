@@ -1,5 +1,5 @@
 /**
- * Local Scheduler — replaces Trigger.dev cron scheduling.
+ * Local Scheduler — runs background jobs on configurable intervals.
  *
  * Runs jobs on their defined intervals while the app is open.
  * Respects connected integrations, circuit breaker state, and retries.
