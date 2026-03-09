@@ -10,11 +10,14 @@ import { listUserIntegrations } from '@/lib/db/queries/integrations';
 // This endpoint first syncs data from all connected integrations, then generates.
 export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRequest) => {
   try {
+    console.log('[BRIEFING_GENERATE] Starting for user:', req.user.id);
     const supabase = createServiceClient();
 
     // Check that the user has at least one connected integration
+    console.log('[BRIEFING_GENERATE] Fetching integrations...');
     const integrations = await listUserIntegrations(supabase, req.user.id);
     const connected = integrations.filter(i => i.status === 'connected');
+    console.log('[BRIEFING_GENERATE] Connected integrations:', connected.map(i => i.provider));
 
     if (connected.length === 0) {
       return NextResponse.json(
@@ -27,7 +30,9 @@ export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRe
     }
 
     // Step 1: Sync data from all connected integrations
+    console.log('[BRIEFING_GENERATE] Starting sync...');
     const syncResults = await syncAllIntegrations(req.user.id);
+    console.log('[BRIEFING_GENERATE] Sync complete:', JSON.stringify(syncResults.map(r => ({ provider: r.provider, status: r.status, error: r.error }))));
     const syncSucceeded = syncResults.filter(r => r.status === 'success');
     const totalSynced = syncSucceeded.reduce((sum, r) => sum + (r.itemsProcessed ?? 0), 0);
 
@@ -53,7 +58,9 @@ export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRe
     }
 
     // Step 2: Generate the briefing (reads from DB + live calendar)
+    console.log('[BRIEFING_GENERATE] Starting briefing generation...');
     const briefing = await generateDailyBriefing(req.user.id);
+    console.log('[BRIEFING_GENERATE] Briefing generated, items:', briefing.item_count);
 
     if (briefing.item_count === 0) {
       return NextResponse.json(
@@ -82,7 +89,8 @@ export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRe
       },
     });
   } catch (err) {
-    console.error('Briefing generation failed:', err);
+    console.error('[BRIEFING_GENERATE] FAILED:', err);
+    console.error('[BRIEFING_GENERATE] Stack:', err instanceof Error ? err.stack : 'no stack');
     const message = err instanceof Error ? err.message : 'Briefing generation failed';
     return NextResponse.json(
       { error: message, code: 'GENERATION_FAILED' },

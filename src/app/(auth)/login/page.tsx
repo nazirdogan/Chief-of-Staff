@@ -52,7 +52,7 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/dashboard');
+        router.push('/chat');
         router.refresh();
       }
     } catch {
@@ -98,7 +98,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/dashboard');
+      router.push('/chat');
       router.refresh();
     } catch {
       setError('An unexpected error occurred. Please try again.');

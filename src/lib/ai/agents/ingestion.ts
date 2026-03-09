@@ -1,10 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_MODELS } from '@/lib/ai/models';
-import { sanitiseContent, buildSafeAIContext } from '@/lib/ai/safety/sanitise';
+import { sanitiseContent } from '@/lib/ai/safety/sanitise';
 import { INGESTION_PROMPT } from '@/lib/ai/prompts/briefing';
 import { fetchInboxMessages, fetchMessageForProcessing, parseGmailMessage } from '@/lib/integrations/gmail';
 import { fetchRecentDMs } from '@/lib/integrations/slack';
-import { upsertInboxItem, clearInboxItems } from '@/lib/db/queries/inbox';
+import { upsertInboxItem, getExistingInboxSummaries, deleteInboxItemsNotIn } from '@/lib/db/queries/inbox';
 import { createServiceClient } from '@/lib/db/client';
 import { processContextFromScan } from '@/lib/context/pipeline';
 import type { ContextPipelineInput } from '@/lib/context/types';
@@ -66,18 +66,23 @@ async function summariseContent(
   // ALWAYS sanitise before sending to AI
   const { content: safeBody } = sanitiseContent(content, sourceId);
 
-  const context = buildSafeAIContext(
-    INGESTION_PROMPT,
-    [{ label: sourceLabel, content: safeBody, source: sourceId }]
-  );
+  const userMessage = `[${sourceLabel}] (source: ${sourceId})\n\n${safeBody}`;
 
-  const response = await anthropic.messages.create({
+  const response = await anthropic.beta.messages.create({
     model: AI_MODELS.FAST,
     max_tokens: 300,
-    messages: [{ role: 'user', content: context }],
+    system: [
+      {
+        type: 'text',
+        text: INGESTION_PROMPT,
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
+    messages: [{ role: 'user', content: userMessage }],
+    betas: ['prompt-caching-2024-07-31'],
   });
 
-  return parseIngestionResult(extractText(response.content));
+  return parseIngestionResult(extractText(response.content as Anthropic.ContentBlock[]));
 }
 
 async function summariseGmailMessage(
@@ -110,30 +115,50 @@ export async function ingestGmailMessages(
 
   const supabase = createServiceClient();
 
-  // Clear old Gmail inbox items so promotional/filtered items don't linger
-  await clearInboxItems(supabase, userId, 'gmail');
+  // Delta sync: load existing summaries so we can skip re-processing
+  const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'gmail');
 
   if (found === 0) {
+    // Inbox is empty — remove all stored items for this provider
+    await deleteInboxItemsNotIn(supabase, userId, 'gmail', []);
     return { processed: 0, found: 0 };
   }
 
   let processed = 0;
   const contextItems: ContextPipelineInput[] = [];
+  const scannedIds: string[] = [];
 
   for (const ref of messageRefs) {
     if (!ref.id) continue;
+    scannedIds.push(ref.id);
 
-    // Fetch full message for AI processing — body is NEVER stored
+    // Fetch full message — body is NEVER stored
     const fullMessage = await fetchMessageForProcessing(userId, ref.id);
     const parsed = parseGmailMessage(fullMessage);
 
-    // AI summarisation — sanitiseContent is called inside summariseGmailMessage
+    const existingSummary = existingSummaries.get(parsed.id);
+    const receivedAt = parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString();
+
+    if (existingSummary != null) {
+      // Already summarised — skip AI, row is already correct in DB
+      contextItems.push({
+        sourceId: parsed.id,
+        sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
+        title: parsed.subject ?? 'No subject',
+        rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
+        occurredAt: receivedAt,
+        people: [parsed.from].filter(Boolean),
+        threadId: parsed.threadId,
+        chunkType: 'email_thread',
+      });
+      continue;
+    }
+
+    // New message — run AI summarisation
     const result = await summariseGmailMessage(parsed);
 
     // Skip promotional content that got through Gmail's category filter
     if (result.is_promotional) continue;
-
-    const receivedAt = parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString();
 
     // Store only metadata + AI summary — raw body discarded
     await upsertInboxItem(supabase, {
@@ -166,6 +191,9 @@ export async function ingestGmailMessages(
     processed++;
   }
 
+  // Remove rows for messages no longer in the inbox
+  await deleteInboxItemsNotIn(supabase, userId, 'gmail', scannedIds);
+
   await feedContext(userId, 'gmail', contextItems);
   return { processed, found };
 }
@@ -176,16 +204,41 @@ export async function ingestSlackDMs(
   const messages = await fetchRecentDMs(userId);
   const found = messages.length;
 
+  const supabase = createServiceClient();
+
+  // Delta sync: load existing summaries so we can skip re-processing
+  const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'slack');
+
   if (found === 0) {
+    await deleteInboxItemsNotIn(supabase, userId, 'slack', []);
     return { processed: 0, found: 0 };
   }
 
-  const supabase = createServiceClient();
   let processed = 0;
   const contextItems: ContextPipelineInput[] = [];
+  const scannedIds: string[] = [];
 
   for (const msg of messages) {
-    // AI summarisation — sanitiseContent is called inside summariseSlackMessage
+    scannedIds.push(msg.id);
+
+    const existingSummary = existingSummaries.get(msg.id);
+
+    if (existingSummary != null) {
+      // Already summarised — skip AI, row is already correct in DB
+      contextItems.push({
+        sourceId: msg.id,
+        sourceRef: { provider: 'slack', message_id: msg.id, thread_ts: msg.threadTs },
+        title: `Slack DM from ${msg.fromName}`,
+        rawContent: `From: ${msg.fromName}\n\n${msg.text}`,
+        occurredAt: msg.date,
+        people: [msg.from].filter(Boolean),
+        threadId: msg.threadTs ?? undefined,
+        chunkType: 'slack_conversation',
+      });
+      continue;
+    }
+
+    // New message — run AI summarisation
     const result = await summariseSlackMessage(msg);
 
     await upsertInboxItem(supabase, {
@@ -216,6 +269,9 @@ export async function ingestSlackDMs(
 
     processed++;
   }
+
+  // Remove rows for messages no longer in the recent DM window
+  await deleteInboxItemsNotIn(supabase, userId, 'slack', scannedIds);
 
   await feedContext(userId, 'slack', contextItems);
   return { processed, found };

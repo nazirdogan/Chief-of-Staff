@@ -157,12 +157,12 @@ export default function MeetingDetailPage({ eventId }: MeetingDetailPageProps) {
     return (
       <div style={{ fontFamily: "'Inter', sans-serif" }}>
         <Link
-          href="/calendar"
+          href="/"
           className="inline-flex items-center gap-1.5 text-[13px] mb-6"
           style={{ color: c.textTertiary, textDecoration: 'none' }}
         >
           <ArrowLeft size={14} />
-          Back to Calendar
+          Back to Briefing
         </Link>
         <div className="flex flex-col gap-3">
           <div
@@ -195,12 +195,12 @@ export default function MeetingDetailPage({ eventId }: MeetingDetailPageProps) {
     return (
       <div style={{ fontFamily: "'Inter', sans-serif" }}>
         <Link
-          href="/calendar"
+          href="/"
           className="inline-flex items-center gap-1.5 text-[13px] mb-6"
           style={{ color: c.textTertiary, textDecoration: 'none' }}
         >
           <ArrowLeft size={14} />
-          Back to Calendar
+          Back to Briefing
         </Link>
         <div
           className="rounded-xl py-12 text-center"

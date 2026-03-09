@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function OperationsPage() {
-  redirect('/dashboard');
+  redirect('/chat');
 }

@@ -117,7 +117,7 @@ export function OnboardingFlow() {
 
       if (updateError) throw updateError;
 
-      router.push('/dashboard');
+      router.push('/chat');
       router.refresh();
     } catch (err) {
       setError(

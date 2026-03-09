@@ -97,6 +97,54 @@ export async function clearInboxItems(
   if (error) throw error;
 }
 
+/**
+ * Returns a map of external_id -> ai_summary for all existing rows for this user+provider.
+ * Used by the ingestion agents to skip re-processing already-summarised messages.
+ */
+export async function getExistingInboxSummaries(
+  supabase: Client,
+  userId: string,
+  provider: IntegrationProvider
+): Promise<Map<string, string | null>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('inbox_items')
+    .select('external_id, ai_summary')
+    .eq('user_id', userId)
+    .eq('provider', provider);
+
+  if (error) throw error;
+  const map = new Map<string, string | null>();
+  for (const row of (data ?? [])) {
+    map.set(row.external_id as string, (row.ai_summary as string | null) ?? null);
+  }
+  return map;
+}
+
+/**
+ * Deletes all inbox_items for this user+provider whose external_id is NOT in keepIds.
+ * This trims messages that have left the inbox since the last scan.
+ */
+export async function deleteInboxItemsNotIn(
+  supabase: Client,
+  userId: string,
+  provider: IntegrationProvider,
+  keepIds: string[]
+): Promise<void> {
+  if (keepIds.length === 0) {
+    return clearInboxItems(supabase, userId, provider);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
+    .from('inbox_items')
+    .delete()
+    .eq('user_id', userId)
+    .eq('provider', provider)
+    .not('external_id', 'in', `(${keepIds.join(',')})`);
+
+  if (error) throw error;
+}
+
 export async function updateInboxItem(
   supabase: Client,
   userId: string,

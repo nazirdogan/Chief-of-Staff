@@ -63,7 +63,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
         /Mac|iPhone|iPad|iPod/.test(navigator.platform);
       const modKey = isMac ? e.metaKey : e.ctrlKey;
 
-      if (modKey && e.key === 'Enter') {
+      if (e.key === 'Enter' && !modKey && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
@@ -148,11 +148,12 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
         className="mt-1.5 text-center text-[11px]"
         style={{ color: c.textGhost }}
       >
+        Enter to send &middot;{' '}
         {typeof navigator !== 'undefined' &&
         /Mac|iPhone|iPad|iPod/.test(navigator?.platform ?? '')
           ? 'Cmd'
           : 'Ctrl'}
-        +Enter to send
+        +Enter for new line
       </p>
     </div>
   );

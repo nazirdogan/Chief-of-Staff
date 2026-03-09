@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
 
   if (isPublicRoute && user && isDesktop) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/chat';
     return NextResponse.redirect(url);
   }
 
@@ -71,7 +71,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user && isDesktop) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = '/chat';
     return NextResponse.redirect(url);
   }
 

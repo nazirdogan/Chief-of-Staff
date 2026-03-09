@@ -69,6 +69,29 @@ export async function classifyTasks(userId: string): Promise<ClassifiedTaskSet> 
       return { green: [], yellow: [], red: [], gray: [], runId: run.id };
     }
 
+    // Delta filter: only classify items that arrived after the last completed sweep
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: lastRunRow } = await (supabase as any)
+      .from('operation_runs')
+      .select('created_at')
+      .eq('user_id', userId)
+      .eq('run_type', 'am_sweep')
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastRunRow) {
+      const newItems = actionableItems.filter(
+        (item) => item.received_at > lastRunRow.created_at
+      );
+      if (newItems.length === 0) {
+        await completeOperationRun(supabase, run.id, { message: 'No new items since last sweep' });
+        return { green: [], yellow: [], red: [], gray: [], runId: run.id };
+      }
+      actionableItems.splice(0, actionableItems.length, ...newItems);
+    }
+
     // Fetch today's calendar events
     let calendarEvents: Array<{ summary: string; start: string; end: string; attendees: string[] }> = [];
     try {
@@ -130,7 +153,7 @@ export async function classifyTasks(userId: string): Promise<ClassifiedTaskSet> 
     // Call Sonnet for classification (higher quality reasoning needed)
     const aiResponse = await anthropic.messages.create({
       model: AI_MODELS.STANDARD,
-      max_tokens: 4096,
+      max_tokens: 2048,
       system: TASK_CLASSIFICATION_PROMPT,
       messages: [
         {

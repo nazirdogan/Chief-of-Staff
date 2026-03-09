@@ -8,7 +8,6 @@ import { useChatStore } from '@/stores/chat-store';
 import {
   LayoutDashboard,
   Inbox,
-  Calendar,
   CheckCircle2,
   Users,
   Settings,
@@ -31,7 +30,6 @@ const navItems = [
   { href: '/dashboard', label: 'Today', icon: LayoutDashboard },
   { href: '/inbox', label: 'Inbox', icon: Inbox },
   { href: '/commitments', label: 'Commitments', icon: CheckCircle2 },
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/people', label: 'People', icon: Users },
   { href: '/reflections', label: 'Reflections', icon: BookOpen },
 ];

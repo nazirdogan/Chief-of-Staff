@@ -142,6 +142,27 @@ export async function buildDayNarrative(userId: string): Promise<void> {
 
   if (sessions.length === 0) return;
 
+  // ── Staleness checks — skip AI call if nothing meaningful has changed ──
+
+  if (existingNarrative) {
+    const TWENTY_MINUTES_MS = 20 * 60 * 1000;
+    const narrativeAge = Date.now() - new Date(existingNarrative.last_updated_at).getTime();
+
+    // 1. Narrative is still fresh — no need to regenerate yet
+    if (narrativeAge < TWENTY_MINUTES_MS) return;
+
+    // 2. Neither session count nor latest session timestamp has changed
+    const lastSessionAt = sessions.reduce(
+      (max, s) => Math.max(max, new Date(s.started_at).getTime()),
+      0
+    );
+    const lastNarrativeAt = new Date(existingNarrative.last_updated_at).getTime();
+    const sessionCountUnchanged = sessions.length === existingNarrative.session_count;
+    const noNewSessions = lastSessionAt <= lastNarrativeAt;
+
+    if (sessionCountUnchanged && noNewSessions) return;
+  }
+
   // Group into time blocks
   const blocks = groupSessionsByTimeBlock(sessions);
 

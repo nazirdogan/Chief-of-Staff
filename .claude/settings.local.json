@@ -65,7 +65,9 @@
       "Read(//Users/nazir/.config/**)",
       "Bash(kill 44771:*)",
       "Bash(tail:*)",
-      "Bash(xargs -I {} basename {} .ts)"
+      "Bash(xargs -I {} basename {} .ts)",
+      "Bash(/tmp/audit_notes.txt:*)",
+      "Read(//tmp/**)"
     ]
   }
 }

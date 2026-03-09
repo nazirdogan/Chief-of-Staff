@@ -69,7 +69,7 @@ export function GettingReadyScreen() {
   }, []);
 
   const enterDashboard = useCallback(() => {
-    router.push('/dashboard');
+    router.push('/chat');
     router.refresh();
   }, [router]);
 

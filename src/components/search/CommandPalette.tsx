@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   Inbox,
-  Calendar,
   CheckCircle2,
   Users,
   MessageCircle,
@@ -48,7 +47,6 @@ const t = {
 const pages = [
   { label: 'Briefing', path: '/', icon: LayoutDashboard, shortcut: 'B' },
   { label: 'Inbox', path: '/inbox', icon: Inbox, shortcut: 'I' },
-  { label: 'Calendar', path: '/calendar', icon: Calendar, shortcut: 'C' },
   { label: 'Commitments', path: '/commitments', icon: CheckCircle2, shortcut: 'M' },
   { label: 'People', path: '/people', icon: Users, shortcut: 'P' },
   { label: 'Chat', path: '/chat', icon: MessageCircle, shortcut: 'T' },
