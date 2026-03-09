@@ -12,6 +12,8 @@ import {
   Reply,
   Clock,
   MailCheck,
+  CheckCircle2,
+  ArrowRightFromLine,
 } from 'lucide-react';
 import type { BriefingItem as BriefingItemType, BriefingItemSection as SectionType } from '@/lib/db/types';
 import { BriefingItem } from './BriefingItem';
@@ -45,11 +47,28 @@ const c = {
 };
 
 const SECTION_META: Record<SectionType, { label: string; description?: string; icon: typeof Inbox }> = {
+  // New 3-section briefing
+  priorities: {
+    label: "Today's Priorities",
+    description: 'Your ranked action list for today',
+    icon: ListChecks,
+  },
+  yesterday_completed: {
+    label: 'Completed Yesterday',
+    description: 'What got done',
+    icon: CheckCircle2,
+  },
+  yesterday_carried_over: {
+    label: 'Carried Over',
+    description: 'Still needs attention',
+    icon: ArrowRightFromLine,
+  },
   todays_schedule: {
     label: "Today's Schedule",
     description: 'Meetings and events for today',
     icon: Calendar,
   },
+  // Legacy sections — kept for backward compatibility
   commitment_queue: {
     label: 'Commitments',
     description: 'Promises you made that need follow-up',

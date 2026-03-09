@@ -185,10 +185,11 @@ function scoreUrgency(item: BriefingItemCandidate): number {
   if (item.raw_urgency) score = item.raw_urgency;
   if (item.item_type === 'calendar_event') score = Math.max(score, 8);
   if (item.item_type === 'commitment') score = Math.max(score, 7);
-  if (item.section === 'vip_inbox') score = Math.max(score, 8);
-  if (item.section === 'action_required') score = Math.max(score, 7);
+  if (item.section === 'priorities') score = Math.max(score, 7);
   if (item.sentiment === 'urgent') score += 2;
   if (item.sentiment === 'negative') score += 1;
+  // Yesterday items are lower urgency
+  if (item.section === 'yesterday_completed' || item.section === 'yesterday_carried_over') score = Math.max(3, score - 2);
   return Math.min(10, Math.max(1, score));
 }
 
@@ -199,7 +200,6 @@ function scoreImportance(item: BriefingItemCandidate, ctx: UserContext): number 
     item.title?.toLowerCase().includes(p.toLowerCase()) ||
     item.summary?.toLowerCase().includes(p.toLowerCase())
   )) score += 2;
-  if (item.section === 'vip_inbox') score = Math.max(score, 9);
   return Math.min(10, Math.max(1, score));
 }
 
@@ -207,7 +207,7 @@ function scoreRisk(item: BriefingItemCandidate): number {
   let score = 3;
   if (item.item_type === 'commitment') score += 4;
   if (item.item_type === 'relationship_alert') score += 3;
-  if (item.section === 'awaiting_reply') score += 3;
+  if (item.section === 'yesterday_carried_over') score += 2;
   if (item.sentiment === 'negative') score += 2;
   if (item.sentiment === 'urgent') score += 1;
   return Math.min(10, Math.max(1, score));

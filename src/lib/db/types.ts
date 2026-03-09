@@ -24,7 +24,11 @@ export type BriefingItemType =
   | 'pull_request';
 
 export type BriefingItemSection =
+  | 'priorities'
+  | 'yesterday_completed'
+  | 'yesterday_carried_over'
   | 'todays_schedule'
+  // Legacy sections — kept for backward compatibility with existing data
   | 'commitment_queue'
   | 'vip_inbox'
   | 'action_required'

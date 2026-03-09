@@ -29,20 +29,27 @@ export interface GeneratedBriefing extends Briefing {
   meeting_preps: MeetingPrep[];
 }
 
-// Executive briefing section order
+// New 3-section briefing order
 const SECTION_ORDER: BriefingItemSection[] = [
+  'priorities',
+  'yesterday_completed',
+  'yesterday_carried_over',
   'todays_schedule',
-  'commitment_queue',
-  'vip_inbox',
-  'action_required',
-  'decision_queue',
-  'awaiting_reply',
-  'after_hours',
-  'at_risk',
-  'priority_inbox',
-  'quick_wins',
-  'people_context',
 ];
+
+// Legacy sections map to priorities for backward compatibility
+const LEGACY_SECTION_MAP: Record<string, BriefingItemSection> = {
+  commitment_queue: 'priorities',
+  vip_inbox: 'priorities',
+  action_required: 'priorities',
+  awaiting_reply: 'priorities',
+  after_hours: 'priorities',
+  at_risk: 'priorities',
+  priority_inbox: 'priorities',
+  decision_queue: 'priorities',
+  quick_wins: 'priorities',
+  people_context: 'priorities',
+};
 
 async function getUserContext(
   supabase: ReturnType<typeof createServiceClient>,
@@ -117,12 +124,81 @@ async function getAfterHoursEmails(userId: string): Promise<BriefingItemCandidat
   }
 }
 
+/**
+ * Fetch yesterday's resolved commitments as "completed" candidates,
+ * and still-open commitments from yesterday as "carried over" candidates.
+ */
+async function getYesterdaySummary(
+  supabase: ReturnType<typeof createServiceClient>,
+  userId: string,
+): Promise<BriefingItemCandidate[]> {
+  const candidates: BriefingItemCandidate[] = [];
+
+  try {
+    // Get commitments resolved yesterday
+    const resolvedCommitments = await listCommitments(supabase, userId, { status: 'resolved' });
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const c of resolvedCommitments) {
+      const resolvedAt = c.resolved_at ? new Date(c.resolved_at) : null;
+      if (resolvedAt && resolvedAt >= yesterday && resolvedAt < today) {
+        candidates.push({
+          item_type: 'commitment',
+          section: 'yesterday_completed',
+          title: c.commitment_text,
+          summary: `Completed commitment to ${c.recipient_name || c.recipient_email}`,
+          source_ref: c.source_ref as unknown as BriefingItemCandidate['source_ref'],
+          sentiment: 'positive',
+        });
+      }
+    }
+
+    // Get open commitments that were created before today (carried over)
+    const openCommitments = await listCommitments(supabase, userId, { status: 'open' });
+    for (const c of openCommitments) {
+      const createdAt = new Date(c.created_at);
+      if (createdAt < today) {
+        candidates.push({
+          item_type: 'commitment',
+          section: 'yesterday_carried_over',
+          title: c.commitment_text,
+          summary: c.implied_deadline
+            ? `Still open — deadline: ${c.implied_deadline}. To ${c.recipient_name || c.recipient_email}`
+            : `Still open — commitment to ${c.recipient_name || c.recipient_email}`,
+          source_ref: c.source_ref as unknown as BriefingItemCandidate['source_ref'],
+          sentiment: c.implied_deadline && new Date(c.implied_deadline) < today ? 'urgent' : 'neutral',
+        });
+      }
+    }
+  } catch {
+    // Silently handle — yesterday data is best-effort
+  }
+
+  return candidates;
+}
+
+function normalizeSection(section: string): BriefingItemSection {
+  if (SECTION_ORDER.includes(section as BriefingItemSection)) {
+    return section as BriefingItemSection;
+  }
+  return LEGACY_SECTION_MAP[section] ?? 'priorities';
+}
+
 function buildBriefingSections(
   ranked: RankedBriefingItem[]
 ): Array<{
   section: BriefingItemSection;
   items: RankedBriefingItem[];
 }> {
+  // Normalize any legacy sections
+  for (const item of ranked) {
+    item.section = normalizeSection(item.section);
+  }
+
   const grouped: Record<string, RankedBriefingItem[]> = {};
   for (const item of ranked) {
     if (!grouped[item.section]) grouped[item.section] = [];
@@ -154,6 +230,7 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     sentAwaitingReply,
     afterHoursEmails,
     desktopObservations,
+    yesterdaySummary,
     userContext,
     _profile,
   ] = await Promise.all([
@@ -168,21 +245,49 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
       minImportance: 'background',
       limit: 30,
     }).catch(() => []),
+    getYesterdaySummary(supabase, userId),
     getUserContext(supabase, userId),
     getProfile(supabase, userId),
   ]);
 
-  // Build candidate items with suggested section assignment
+  // Build candidate items — map to new sections
   const candidates: BriefingItemCandidate[] = [
-    ...inboxItems.map(item => mapInboxItemToCandidate(item, userContext.vipEmails)),
-    ...commitments.map(mapCommitmentToCandidate),
-    ...todaysEvents.map(mapEventToCandidate),
-    ...coldContacts.map(mapColdContactToCandidate),
-    ...sentAwaitingReply,
-    ...afterHoursEmails,
-    ...desktopObservations.map(chunk =>
-      mapDesktopObservationToCandidate(chunk, userContext.vipEmails)
-    ),
+    // Today's actionable items → will be synthesised into "priorities"
+    ...inboxItems.map(item => ({
+      ...mapInboxItemToCandidate(item, userContext.vipEmails),
+      section: 'priorities' as BriefingItemSection,
+    })),
+    ...commitments.map(c => ({
+      ...mapCommitmentToCandidate(c),
+      section: 'priorities' as BriefingItemSection,
+    })),
+    // Calendar → todays_schedule
+    ...todaysEvents.map(e => ({
+      ...mapEventToCandidate(e),
+      section: 'todays_schedule' as BriefingItemSection,
+    })),
+    // Relationship alerts → priorities
+    ...coldContacts.map(c => ({
+      ...mapColdContactToCandidate(c),
+      section: 'priorities' as BriefingItemSection,
+    })),
+    // Sent awaiting → priorities
+    ...sentAwaitingReply.map(c => ({
+      ...c,
+      section: 'priorities' as BriefingItemSection,
+    })),
+    // After hours → priorities
+    ...afterHoursEmails.map(c => ({
+      ...c,
+      section: 'priorities' as BriefingItemSection,
+    })),
+    // Desktop observations → priorities
+    ...desktopObservations.map(chunk => ({
+      ...mapDesktopObservationToCandidate(chunk, userContext.vipEmails),
+      section: 'priorities' as BriefingItemSection,
+    })),
+    // Yesterday's completed + carried over
+    ...yesterdaySummary,
   ];
 
   // Fetch enriched context (memory snapshots, working patterns, threads, person/project context)

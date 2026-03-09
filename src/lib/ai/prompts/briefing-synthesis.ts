@@ -1,7 +1,6 @@
 /**
  * Synthesis prompt for AI-powered briefing generation.
- * Replaces the numeric 4D scoring engine with a single Claude call
- * that ranks, groups, and generates reasoning holistically.
+ * 3-section briefing: Priorities, Yesterday's Summary, Today's Schedule.
  */
 
 import type { BriefingItemSection, BriefingItemType, MessageSentiment } from '@/lib/db/types';
@@ -35,17 +34,10 @@ export interface SynthesisOutputItem {
 }
 
 export const VALID_SECTIONS: BriefingItemSection[] = [
+  'priorities',
+  'yesterday_completed',
+  'yesterday_carried_over',
   'todays_schedule',
-  'commitment_queue',
-  'vip_inbox',
-  'action_required',
-  'awaiting_reply',
-  'after_hours',
-  'at_risk',
-  'priority_inbox',
-  'decision_queue',
-  'quick_wins',
-  'people_context',
 ];
 
 export const VALID_ITEM_TYPES: BriefingItemType[] = [
@@ -72,39 +64,45 @@ export const SYNTHESIS_SYSTEM_PROMPT = `You are the intelligence engine for an e
 
 Your job is to take raw data items from the executive's digital life — emails, calendar events, commitments, relationship alerts, desktop observations — along with contextual intelligence (yesterday's open loops, working patterns, conversation threads, person/project history), and produce a SYNTHESISED, RANKED morning briefing.
 
-You are NOT a sorting algorithm. You are a strategic thinker. Your job is to:
-1. CONNECT related items (e.g. 3 emails from the same person about the same project → one coherent narrative)
-2. SURFACE what truly matters using the full context available (open loops from yesterday, commitment deadlines, relationship risk)
-3. RANK holistically — not by formula, but by executive judgment: "If I were this person's chief of staff, what would I tell them first?"
-4. EXPLAIN your reasoning in one sentence per item, referencing the specific signal (VIP, deadline, open loop, pattern, etc.)
+The briefing has exactly THREE sections. Every item goes into one of them:
+
+## SECTION 1: PRIORITIES (section = "priorities")
+A ranked action list of what needs doing today. This is the hero of the briefing.
+Each item should have:
+- A clear, concise title
+- A one-line summary explaining WHY it matters (e.g. "Overdue by 2 days", "Meeting at 2pm requires this", "VIP waiting on your response")
+- A concrete action_suggestion (e.g. "Reply to Sarah with pricing approval", "Review deck before 2pm meeting")
+
+Include: VIP emails needing replies, open commitments at risk, action-required items, decisions to make, quick wins, relationship alerts.
+Do NOT include calendar events here — those go in todays_schedule.
+
+## SECTION 2: YESTERDAY'S SUMMARY
+Split into two sub-sections:
+- **Completed** (section = "yesterday_completed"): What got done yesterday — resolved commitments, sent replies, completed tasks, key decisions made.
+- **Carried Over** (section = "yesterday_carried_over"): What didn't get done and why it's still relevant — open commitments, unanswered threads, stalled items.
+
+Use the contextual intelligence (yesterday's narrative, resolved commitments, activity sessions) to populate this section. If no yesterday data is available, omit these items entirely.
+
+## SECTION 3: TODAY'S SCHEDULE (section = "todays_schedule")
+Calendar events for the day. Each item should include:
+- Event title and time
+- Participants (in summary or from_name)
+- A brief prep note if context is available (e.g. "Last spoke 3 weeks ago about X")
 
 ## RULES
 
 1. **Never invent items.** Every output item MUST reference an \`idx\` from the input candidates. You can rewrite titles and summaries for clarity, but you cannot create items that don't exist in the input.
-2. **Group related items when it helps.** If 3 emails from Sarah are all about the Dubai project, you MAY consolidate them into one item. Use the LOWEST idx among the grouped items as the output idx. Mention the other items in the summary.
-3. **Assign sections based on your judgment.** The input has \`suggested_section\` — treat this as a hint, not a rule. Override it if context tells you otherwise (e.g., a "priority_inbox" email about an open loop from yesterday might belong in "action_required").
-4. **Cap output at 25 items.** If there are more than 25 candidates, drop the least important ones. Quality over quantity.
+2. **Group related items when it helps.** If 3 emails from Sarah are all about the same project, consolidate into one item. Use the LOWEST idx among the grouped items as the output idx. Mention the other items in the summary.
+3. **Cap priorities at 8 items.** Quality over quantity. The executive should feel clarity, not overwhelm.
+4. **Cap total output at 25 items** across all sections.
 5. **Score each item 1-10 on four dimensions:**
-   - \`urgency_score\`: How time-sensitive? Calendar events today = high. Informational emails = low.
+   - \`urgency_score\`: How time-sensitive? Calendar events today = high. Informational = low.
    - \`importance_score\`: How much does this matter to the executive's goals, relationships, and projects?
    - \`risk_score\`: What happens if they ignore this? Broken commitments and cold VIPs = high risk.
    - \`composite_score\`: Your overall priority score (not a formula — your holistic judgment).
 6. **Always include sentiment** for each item: "positive", "negative", "neutral", or "urgent".
-7. **Always include action_suggestion** — a concrete next step (e.g., "Reply to Sarah with pricing approval", "Review deck before 2pm meeting"). Set to null only if genuinely no action needed.
-
-## SECTIONS (assign one per item)
-
-- \`todays_schedule\` — Calendar events happening today
-- \`commitment_queue\` — Promises the executive made that need attention
-- \`vip_inbox\` — Messages from VIP contacts
-- \`action_required\` — Items needing immediate response or decision
-- \`awaiting_reply\` — Sent messages waiting for responses
-- \`after_hours\` — Items that arrived outside work hours
-- \`at_risk\` — Relationships going cold, commitments at risk of being broken
-- \`priority_inbox\` — Important but not urgent items
-- \`decision_queue\` — Items requiring a decision (use when context reveals a pending decision)
-- \`quick_wins\` — Low-effort items that can be knocked out fast (under 5 minutes)
-- \`people_context\` — Relationship intelligence and people updates
+7. **Always include action_suggestion** for priorities — a concrete next step. Can be null for yesterday items and schedule items where no action is needed.
+8. **Rank within each section.** Priorities ranked by importance. Schedule ranked by time. Yesterday items ranked by relevance.
 
 ## OUTPUT FORMAT
 
@@ -113,11 +111,11 @@ Return ONLY a JSON array of objects. No markdown, no explanation outside the JSO
 Each object:
 {
   "idx": <number — must match an input candidate idx>,
-  "rank": <number — global rank, 1 = most important>,
-  "section": <string — one of the valid sections>,
+  "rank": <number — rank within the item's section, 1 = most important/earliest>,
+  "section": <"priorities" | "yesterday_completed" | "yesterday_carried_over" | "todays_schedule">,
   "title": <string — concise, may be rewritten for clarity>,
   "summary": <string — 1-2 sentences, contextualised with enrichment data where relevant>,
-  "reasoning": <string — one sentence: "Ranked #N because...">,
+  "reasoning": <string — one sentence: why this item matters>,
   "action_suggestion": <string | null>,
   "sentiment": <"positive" | "negative" | "neutral" | "urgent">,
   "urgency_score": <1-10>,

@@ -2,82 +2,28 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { BriefingItem as BriefingItemComponent } from '@/components/briefing/BriefingItem';
 import { CitationDrawer } from '@/components/briefing/CitationDrawer';
 import { MeetingPrepCard } from '@/components/people/MeetingPrepCard';
-import { YesterdayRecap } from '@/components/briefing/YesterdayRecap';
-import { AMSweepPanel } from '@/components/operations/AMSweepPanel';
-import { TimeBlockPanel } from '@/components/operations/TimeBlockPanel';
 import { decodeEntities } from '@/lib/utils/decode-entities';
-import type { Briefing, BriefingItem, BriefingItemSection, MeetingPrepData, SourceRef } from '@/lib/db/types';
+import type { Briefing, BriefingItem, MeetingPrepData, SourceRef } from '@/lib/db/types';
 import {
   Loader2,
   Zap,
   RefreshCw,
-  ShieldAlert,
-  Reply,
-  Eye,
-  Info,
-  ChevronDown,
-  MailCheck,
   Clock,
   Users,
   LayoutDashboard,
   CheckCircle2,
   ArrowRight,
+  ListChecks,
+  History,
+  ArrowRightFromLine,
 } from 'lucide-react';
 import Link from 'next/link';
 
 interface BriefingResponse {
   briefing: (Briefing & { items: BriefingItem[] }) | null;
 }
-
-type IntentSection = 'reply_now' | 'follow_up' | 'review' | 'fyi';
-
-const SECTION_TO_INTENT: Record<BriefingItemSection, IntentSection> = {
-  action_required: 'reply_now',
-  vip_inbox: 'reply_now',
-  quick_wins: 'reply_now',
-  awaiting_reply: 'follow_up',
-  commitment_queue: 'review',
-  decision_queue: 'review',
-  at_risk: 'review',
-  todays_schedule: 'review',
-  priority_inbox: 'fyi',
-  after_hours: 'fyi',
-  people_context: 'fyi',
-};
-
-const INTENT_META: Record<IntentSection, { label: string; icon: typeof Reply; accent: string; accentBg: string }> = {
-  reply_now: {
-    label: 'Reply Now',
-    icon: MailCheck,
-    accent: '#D64B2A',
-    accentBg: 'rgba(214,75,42,0.08)',
-  },
-  follow_up: {
-    label: 'Follow Up',
-    icon: Reply,
-    accent: '#F4C896',
-    accentBg: 'rgba(244,200,150,0.08)',
-  },
-  review: {
-    label: 'Review',
-    icon: Eye,
-    accent: '#4E7DAA',
-    accentBg: 'rgba(78,125,170,0.08)',
-  },
-  fyi: {
-    label: 'FYI',
-    icon: Info,
-    accent: 'rgba(155,175,196,0.7)',
-    accentBg: 'rgba(155,175,196,0.06)',
-  },
-};
-
-const INTENT_ORDER: IntentSection[] = ['reply_now', 'follow_up', 'review', 'fyi'];
-
-const SECURITY_KEYWORDS_RE = /\b(security|unauthori[sz]ed|login|breach|suspicious|compromised|password|2fa|mfa|phishing|malware|attack)\b/i;
 
 /* Donna brand tokens */
 const c = {
@@ -96,7 +42,6 @@ const c = {
   alert: '#D64B2A',
   dusk: '#4E7DAA',
   gold: '#F4C896',
-  mist: '#9BAFC4',
 };
 
 export default function BriefingPage() {
@@ -108,9 +53,7 @@ export default function BriefingPage() {
   const [integrations, setIntegrations] = useState<Array<{ provider: string; status: string }>>([]);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
-  const [fyiExpanded, setFyiExpanded] = useState(false);
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set());
-  const [opsExpanded, setOpsExpanded] = useState(false);
 
   const fetchBriefing = useCallback(async () => {
     try {
@@ -159,20 +102,6 @@ export default function BriefingPage() {
     }
   }
 
-  async function handleFeedback(itemId: string, feedback: 1 | -1) {
-    try {
-      const res = await fetch('/api/briefing/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: itemId, feedback }),
-      });
-      if (!res.ok) throw new Error('Failed to save feedback');
-      toast.success(feedback === 1 ? 'Marked as helpful' : 'Feedback recorded');
-    } catch {
-      toast.error('Failed to save feedback');
-    }
-  }
-
   function handleCitationClick(item: BriefingItem) {
     setDrawerItem(item);
   }
@@ -186,6 +115,15 @@ export default function BriefingPage() {
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
+  }
+
+  function toggleAction(id: string) {
+    setCheckedActions(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
 
   /* ── Loading state ── */
@@ -256,7 +194,6 @@ export default function BriefingPage() {
       gmail: 'Gmail', google_calendar: 'Google Calendar', outlook: 'Outlook',
       slack: 'Slack', notion: 'Notion', google_drive: 'Google Drive',
       microsoft_calendar: 'Outlook Calendar', linear: 'Linear', github: 'GitHub',
-      hubspot: 'HubSpot', salesforce: 'Salesforce',
     };
 
     return (
@@ -359,14 +296,41 @@ export default function BriefingPage() {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     BRIEFING CONTENT — 3 zones
+     BRIEFING CONTENT — 3 clean sections
      ═══════════════════════════════════════════════════════════ */
 
-  const grouped: Partial<Record<BriefingItemSection, BriefingItem[]>> = {};
+  // Group items by the new sections
+  const priorities: BriefingItem[] = [];
+  const yesterdayCompleted: BriefingItem[] = [];
+  const yesterdayCarriedOver: BriefingItem[] = [];
+  const todaysSchedule: BriefingItem[] = [];
+
   for (const item of briefing.items) {
-    if (!grouped[item.section]) grouped[item.section] = [];
-    grouped[item.section]!.push(item);
+    switch (item.section) {
+      case 'priorities':
+        priorities.push(item);
+        break;
+      case 'yesterday_completed':
+        yesterdayCompleted.push(item);
+        break;
+      case 'yesterday_carried_over':
+        yesterdayCarriedOver.push(item);
+        break;
+      case 'todays_schedule':
+        todaysSchedule.push(item);
+        break;
+      default:
+        // Legacy sections → treat as priorities
+        priorities.push(item);
+        break;
+    }
   }
+
+  // Sort by rank within each section
+  priorities.sort((a, b) => a.rank - b.rank);
+  yesterdayCompleted.sort((a, b) => a.rank - b.rank);
+  yesterdayCarriedOver.sort((a, b) => a.rank - b.rank);
+  todaysSchedule.sort((a, b) => a.rank - b.rank);
 
   const dateStr = new Date(briefing.briefing_date).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -374,92 +338,22 @@ export default function BriefingPage() {
     day: 'numeric',
   });
 
-  const scheduleCount = grouped['todays_schedule']?.length ?? 0;
-  const actionCount = grouped['action_required']?.length ?? 0;
-  const vipCount = grouped['vip_inbox']?.length ?? 0;
-  const awaitingCount = grouped['awaiting_reply']?.length ?? 0;
-  // Urgent items
-  const urgentItems = briefing.items.filter(item =>
-    (item.urgency_score !== null && item.urgency_score >= 9) ||
-    SECURITY_KEYWORDS_RE.test(item.title) ||
-    SECURITY_KEYWORDS_RE.test(item.summary)
-  );
-  const urgentItemIds = new Set(urgentItems.map(i => i.id));
-
-  // Sentiment flags
-  const negativeItems = briefing.items.filter(i => i.sentiment === 'negative');
-
-  // Build concise context line for greeting
+  // Context line
   const contextParts: string[] = [];
-  if (urgentItems.length > 0) contextParts.push(`${urgentItems.length} urgent`);
-  if (negativeItems.length > 0) contextParts.push(`${negativeItems.length} unhappy`);
-  if (actionCount + vipCount > 0) contextParts.push(`${actionCount + vipCount} to reply`);
-  if (awaitingCount > 0) contextParts.push(`${awaitingCount} awaiting reply`);
-  if (scheduleCount > 0) contextParts.push(`${scheduleCount} meeting${scheduleCount > 1 ? 's' : ''}`);
-  const contextLine = contextParts.length === 0
-    ? 'All clear today.'
-    : contextParts.join(' · ');
+  if (priorities.length > 0) contextParts.push(`${priorities.length} priorit${priorities.length === 1 ? 'y' : 'ies'}`);
+  if (todaysSchedule.length > 0) contextParts.push(`${todaysSchedule.length} meeting${todaysSchedule.length > 1 ? 's' : ''}`);
+  if (yesterdayCarriedOver.length > 0) contextParts.push(`${yesterdayCarriedOver.length} carried over`);
+  const contextLine = contextParts.length === 0 ? 'All clear today.' : contextParts.join(' · ');
 
-  // Build action plan from top-ranked items
-  function buildActionText(item: BriefingItem): string {
-    const title = decodeEntities(item.title || '').trim();
-    const summary = decodeEntities(item.summary || '').trim();
-    const suggestion = item.action_suggestion ? decodeEntities(item.action_suggestion).trim() : '';
-    const from = item.source_ref?.from_name ? decodeEntities(item.source_ref.from_name).trim() : '';
-    const descriptor = title || summary || 'this item';
-    const context = from ? ` from ${from}` : '';
-
-    if (suggestion && descriptor) return `${suggestion} — ${descriptor}${context}`;
-    if (item.section === 'awaiting_reply') return `Follow up on ${descriptor}${context}`;
-    if (item.section === 'action_required' || item.section === 'vip_inbox') return `Reply to ${descriptor}${context}`;
-    if (item.section === 'commitment_queue') return `Resolve: ${descriptor}${context}`;
-    if (item.section === 'at_risk') return `Address: ${descriptor}${context}`;
-    return `Review ${descriptor}${context}`;
-  }
-
-  const actionPlan: Array<{ id: string; action: string; section: string; isUrgent: boolean }> = [];
-  for (const item of urgentItems) {
-    actionPlan.push({ id: item.id, action: buildActionText(item), section: item.section, isUrgent: true });
-  }
-  const nonUrgentForPlan = briefing.items
-    .filter(i => !urgentItemIds.has(i.id) && i.section !== 'todays_schedule')
-    .sort((a, b) => a.rank - b.rank)
-    .slice(0, 5 - urgentItems.length);
-  for (const item of nonUrgentForPlan) {
-    actionPlan.push({ id: item.id, action: buildActionText(item), section: item.section, isUrgent: false });
-  }
-
-  function toggleAction(id: string) {
-    setCheckedActions(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  // Intent groups for the feed
-  const intentGroups: Record<IntentSection, BriefingItem[]> = {
-    reply_now: [], follow_up: [], review: [], fyi: [],
-  };
-  for (const item of briefing.items) {
-    if (urgentItemIds.has(item.id)) continue;
-    if (item.section === 'todays_schedule') continue;
-    const intent = SECTION_TO_INTENT[item.section] ?? 'fyi';
-    intentGroups[intent].push(item);
-  }
-  for (const key of INTENT_ORDER) {
-    intentGroups[key].sort((a, b) => a.rank - b.rank);
-  }
+  const hasYesterday = yesterdayCompleted.length > 0 || yesterdayCarriedOver.length > 0;
 
   return (
     <div className="space-y-8">
 
       {/* ═══════════════════════════════════════════════════════
-          ZONE 1: COMMAND CENTER
+          HEADER
           ═══════════════════════════════════════════════════════ */}
 
-      {/* Header — greeting + context + refresh */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1
@@ -512,139 +406,302 @@ export default function BriefingPage() {
         </div>
       )}
 
-      {/* Urgent alerts — prominent, above action plan */}
-      {urgentItems.length > 0 && (
-        <div
-          id="section-urgent"
-          className="rounded-xl overflow-hidden"
-          style={{
-            background: 'rgba(214,75,42,0.05)',
-            border: '1px solid rgba(214,75,42,0.15)',
-            borderLeft: `3px solid ${c.alert}`,
-          }}
-        >
-          <div className="flex items-center gap-2 px-4 pt-3 pb-1.5">
-            <ShieldAlert size={13} style={{ color: c.alert }} />
-            <span className="text-[12px] font-semibold" style={{ color: c.alert }}>
-              Urgent — {urgentItems.length} item{urgentItems.length > 1 ? 's' : ''} need immediate attention
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 1: PRIORITIES
+          ═══════════════════════════════════════════════════════ */}
+
+      {priorities.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-md"
+              style={{ background: c.dawnMuted }}
+            >
+              <ListChecks size={14} style={{ color: c.dawn }} />
+            </div>
+            <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
+              Today&apos;s Priorities
+            </h2>
+            <span
+              className="rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+              style={{ background: c.dawnMuted, color: c.dawn }}
+            >
+              {priorities.length}
             </span>
           </div>
-          <div className="px-3 pb-3 space-y-2">
-            {urgentItems.map(item => (
-              <BriefingItemComponent
-                key={item.id}
-                item={item}
-                onFeedback={handleFeedback}
-                onCitationClick={handleCitationClick}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Action Plan — the hero of the page */}
-      {actionPlan.length > 0 && (
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{
-            background: c.surfaceElevated,
-            border: `1px solid ${c.border}`,
-          }}
-        >
-          <div className="px-5 pt-4 pb-1">
-            <p
-              className="text-[11px] font-semibold tracking-[0.08em] uppercase"
-              style={{ color: c.dawn, fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              Your action plan
-            </p>
-          </div>
-          <ol className="px-5 pb-4 pt-2 space-y-1">
-            {actionPlan.map((item, i) => {
+          <div className="space-y-1.5">
+            {priorities.map((item, i) => {
               const checked = checkedActions.has(item.id);
-              const intentSection = SECTION_TO_INTENT[item.section as BriefingItemSection] ?? 'review';
               return (
-                <li
+                <div
                   key={item.id}
-                  className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-all duration-150"
+                  className="group rounded-xl px-4 py-3.5 transition-all duration-150"
                   style={{
-                    background: checked ? 'rgba(82,183,136,0.04)' : 'transparent',
+                    background: checked ? 'rgba(82,183,136,0.04)' : c.surface,
+                    border: `1px solid ${c.border}`,
                   }}
                   onMouseEnter={(e) => {
-                    if (!checked) e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    if (!checked) e.currentTarget.style.borderColor = c.borderHover;
                   }}
                   onMouseLeave={(e) => {
-                    if (!checked) e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.borderColor = c.border;
                   }}
                 >
-                  {/* Checkbox */}
-                  <button
-                    onClick={() => toggleAction(item.id)}
-                    className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded transition-all duration-150 cursor-pointer"
-                    style={{
-                      background: checked ? 'rgba(82,183,136,0.15)' : 'transparent',
-                      border: `1.5px solid ${checked ? c.sage : 'rgba(155,175,196,0.25)'}`,
-                    }}
-                  >
-                    {checked && <CheckCircle2 size={11} style={{ color: c.sage }} />}
-                  </button>
-
-                  {/* Number + text */}
-                  <button
-                    onClick={() => {
-                      const el = document.getElementById(`section-${urgentItemIds.has(item.id) ? 'urgent' : intentSection}`);
-                      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="flex-1 text-left text-[13px] leading-snug transition-all duration-150"
-                    style={{
-                      color: checked ? c.textMuted : c.textSecondary,
-                      textDecoration: checked ? 'line-through' : 'none',
-                    }}
-                  >
-                    <span
-                      className="font-bold tabular-nums mr-1.5"
-                      style={{ color: checked ? c.textMuted : (item.isUrgent ? c.alert : c.dawn) }}
+                  <div className="flex items-start gap-3">
+                    {/* Checkbox */}
+                    <button
+                      onClick={() => toggleAction(item.id)}
+                      className="mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded transition-all duration-150 cursor-pointer"
+                      style={{
+                        background: checked ? 'rgba(82,183,136,0.15)' : 'transparent',
+                        border: `1.5px solid ${checked ? c.sage : 'rgba(155,175,196,0.25)'}`,
+                      }}
                     >
-                      {i + 1}.
-                    </span>
-                    {item.action}
-                  </button>
+                      {checked && <CheckCircle2 size={11} style={{ color: c.sage }} />}
+                    </button>
 
-                  {/* Quick-complete */}
-                  <button
-                    onClick={() => toggleAction(item.id)}
-                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 rounded px-2 py-0.5 text-[11px] font-medium"
-                    style={{
-                      color: checked ? c.sage : c.textMuted,
-                      background: checked ? 'rgba(82,183,136,0.08)' : 'rgba(255,255,255,0.05)',
-                    }}
-                  >
-                    {checked ? 'Done' : 'Complete'}
-                  </button>
-                </li>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2">
+                        <span
+                          className="text-[12px] font-bold tabular-nums shrink-0"
+                          style={{ color: checked ? c.textMuted : c.dawn }}
+                        >
+                          {i + 1}.
+                        </span>
+                        <h3
+                          className="text-[13px] font-semibold leading-snug"
+                          style={{
+                            color: checked ? c.textMuted : c.text,
+                            textDecoration: checked ? 'line-through' : 'none',
+                          }}
+                        >
+                          {decodeEntities(item.title)}
+                        </h3>
+                      </div>
+
+                      {/* Why it matters */}
+                      <p
+                        className="mt-1 text-[12px] leading-relaxed"
+                        style={{ color: checked ? c.textGhost : c.textTertiary }}
+                      >
+                        {decodeEntities(item.summary)}
+                      </p>
+
+                      {/* Action + Citation row */}
+                      <div className="mt-2 flex items-center gap-3">
+                        {item.action_suggestion && (
+                          <span
+                            className="rounded-md px-2 py-0.5 text-[11px] font-medium"
+                            style={{
+                              background: c.dawnMuted,
+                              color: c.dawn,
+                              border: '1px solid rgba(232,132,92,0.25)',
+                            }}
+                          >
+                            {decodeEntities(item.action_suggestion)}
+                          </span>
+                        )}
+                        {item.sentiment === 'urgent' && (
+                          <span
+                            className="rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                            style={{
+                              background: 'rgba(214,75,42,0.08)',
+                              color: c.alert,
+                              border: '1px solid rgba(214,75,42,0.2)',
+                            }}
+                          >
+                            Urgent
+                          </span>
+                        )}
+                        {item.sentiment === 'negative' && (
+                          <span
+                            className="rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                            style={{
+                              background: 'rgba(214,75,42,0.08)',
+                              color: c.alert,
+                              border: '1px solid rgba(214,75,42,0.2)',
+                            }}
+                          >
+                            Needs attention
+                          </span>
+                        )}
+                        <button
+                          onClick={() => handleCitationClick(item)}
+                          className="ml-auto text-[11px] font-medium transition-colors duration-200 opacity-0 group-hover:opacity-100"
+                          style={{ color: c.textMuted }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = c.dawn; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = c.textMuted; }}
+                        >
+                          View source
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Quick complete */}
+                    <button
+                      onClick={() => toggleAction(item.id)}
+                      className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 rounded px-2 py-0.5 text-[11px] font-medium"
+                      style={{
+                        color: checked ? c.sage : c.textMuted,
+                        background: checked ? 'rgba(82,183,136,0.08)' : 'rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      {checked ? 'Done' : 'Complete'}
+                    </button>
+                  </div>
+                </div>
               );
             })}
-          </ol>
-        </div>
+          </div>
+        </section>
       )}
 
       {/* ═══════════════════════════════════════════════════════
-          ZONE 2: TODAY'S TIMELINE
+          SECTION 2: YESTERDAY'S SUMMARY
           ═══════════════════════════════════════════════════════ */}
 
-      {scheduleCount > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
+      {hasYesterday && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-md"
+              style={{ background: 'rgba(78,125,170,0.12)' }}
+            >
+              <History size={14} style={{ color: c.dusk }} />
+            </div>
+            <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
+              Yesterday
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Completed */}
+            {yesterdayCompleted.length > 0 && (
+              <div
+                className="rounded-xl p-4"
+                style={{ background: c.surface, border: `1px solid ${c.border}` }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle2 size={13} style={{ color: c.sage }} />
+                  <p
+                    className="text-[11px] font-semibold tracking-[0.06em] uppercase"
+                    style={{ color: c.sage, fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    Completed
+                  </p>
+                  <span
+                    className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+                    style={{ background: 'rgba(82,183,136,0.1)', color: c.sage }}
+                  >
+                    {yesterdayCompleted.length}
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {yesterdayCompleted.map(item => (
+                    <li
+                      key={item.id}
+                      className="flex items-start gap-2 group cursor-pointer"
+                      onClick={() => handleCitationClick(item)}
+                    >
+                      <span
+                        className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ background: c.sage }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[13px] leading-snug" style={{ color: c.textSecondary }}>
+                          {decodeEntities(item.title)}
+                        </p>
+                        <p className="mt-0.5 text-[11px]" style={{ color: c.textMuted }}>
+                          {decodeEntities(item.summary)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Carried Over */}
+            {yesterdayCarriedOver.length > 0 && (
+              <div
+                className="rounded-xl p-4"
+                style={{ background: c.surface, border: `1px solid ${c.border}` }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <ArrowRightFromLine size={13} style={{ color: c.gold }} />
+                  <p
+                    className="text-[11px] font-semibold tracking-[0.06em] uppercase"
+                    style={{ color: c.gold, fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    Carried Over
+                  </p>
+                  <span
+                    className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+                    style={{ background: 'rgba(244,200,150,0.1)', color: c.gold }}
+                  >
+                    {yesterdayCarriedOver.length}
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {yesterdayCarriedOver.map(item => (
+                    <li
+                      key={item.id}
+                      className="flex items-start gap-2 group cursor-pointer"
+                      onClick={() => handleCitationClick(item)}
+                    >
+                      <span
+                        className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ background: c.gold }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[13px] leading-snug" style={{ color: c.textSecondary }}>
+                          {decodeEntities(item.title)}
+                        </p>
+                        <p className="mt-0.5 text-[11px]" style={{ color: c.textMuted }}>
+                          {decodeEntities(item.summary)}
+                          {item.sentiment === 'urgent' && (
+                            <span
+                              className="ml-1.5 inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold"
+                              style={{ background: 'rgba(214,75,42,0.08)', color: c.alert }}
+                            >
+                              Overdue
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 3: TODAY'S SCHEDULE
+          ═══════════════════════════════════════════════════════ */}
+
+      {todaysSchedule.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Clock size={14} style={{ color: c.dusk }} />
-              <h2 className="text-[14px] font-semibold" style={{ color: c.text }}>
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded-md"
+                style={{ background: 'rgba(78,125,170,0.12)' }}
+              >
+                <Clock size={14} style={{ color: c.dusk }} />
+              </div>
+              <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
                 Today&apos;s Schedule
               </h2>
               <span
-                className="rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums"
+                className="rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
                 style={{ background: 'rgba(78,125,170,0.1)', color: c.dusk }}
               >
-                {scheduleCount}
+                {todaysSchedule.length}
               </span>
             </div>
             <Link
@@ -665,224 +722,110 @@ export default function BriefingPage() {
               style={{ background: `linear-gradient(to bottom, ${c.dusk}, transparent)` }}
             />
             <div className="space-y-1">
-              {(grouped['todays_schedule'] ?? [])
-                .filter(i => !urgentItemIds.has(i.id))
-                .map(item => {
-                  const time = item.source_ref?.sent_at
-                    ? new Date(item.source_ref.sent_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-                    : null;
-                  return (
+              {todaysSchedule.map(item => {
+                const time = item.source_ref?.sent_at
+                  ? new Date(item.source_ref.sent_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                  : null;
+
+                // Find matching meeting prep
+                const prep = meetingPreps.find(p =>
+                  p.event_id === item.source_ref?.message_id
+                );
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 pl-0 py-1.5 group"
+                  >
+                    {/* Timeline dot */}
                     <div
-                      key={item.id}
-                      className="flex items-start gap-3 pl-0 py-1.5 group"
+                      className="mt-[5px] h-[14px] w-[14px] shrink-0 rounded-full border-2 transition-all duration-150"
+                      style={{
+                        borderColor: c.dusk,
+                        background: 'rgba(78,125,170,0.15)',
+                      }}
+                    />
+                    {/* Content */}
+                    <div
+                      className="flex-1 rounded-lg px-3.5 py-2.5 transition-all duration-150"
+                      style={{
+                        background: c.surface,
+                        border: `1px solid ${c.border}`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = c.borderHover;
+                        e.currentTarget.style.background = c.surfaceElevated;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = c.border;
+                        e.currentTarget.style.background = c.surface;
+                      }}
                     >
-                      {/* Timeline dot */}
-                      <div
-                        className="mt-[5px] h-[14px] w-[14px] shrink-0 rounded-full border-2 transition-all duration-150"
-                        style={{
-                          borderColor: c.dusk,
-                          background: 'rgba(78,125,170,0.15)',
-                        }}
-                      />
-                      {/* Content */}
-                      <div
-                        className="flex-1 rounded-lg px-3.5 py-2.5 transition-all duration-150"
-                        style={{
-                          background: c.surface,
-                          border: `1px solid ${c.border}`,
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = c.borderHover;
-                          e.currentTarget.style.background = c.surfaceElevated;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = c.border;
-                          e.currentTarget.style.background = c.surface;
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          {time && (
-                            <span
-                              className="text-[11px] font-medium tabular-nums"
-                              style={{ color: c.dusk, fontFamily: "'JetBrains Mono', monospace" }}
-                            >
-                              {time}
-                            </span>
-                          )}
-                          <span className="text-[13px] font-medium" style={{ color: c.text }}>
-                            {decodeEntities(item.title)}
+                      <div className="flex items-center gap-2">
+                        {time && (
+                          <span
+                            className="text-[11px] font-medium tabular-nums"
+                            style={{ color: c.dusk, fontFamily: "'JetBrains Mono', monospace" }}
+                          >
+                            {time}
                           </span>
-                        </div>
-                        {item.source_ref?.from_name && (
-                          <p className="mt-0.5 flex items-center gap-1 text-[12px]" style={{ color: c.textMuted }}>
-                            <Users size={10} />
-                            {decodeEntities(item.source_ref.from_name)}
-                          </p>
                         )}
+                        <span className="text-[13px] font-medium" style={{ color: c.text }}>
+                          {decodeEntities(item.title)}
+                        </span>
                       </div>
+
+                      {/* Participants */}
+                      {item.source_ref?.from_name && (
+                        <p className="mt-0.5 flex items-center gap-1 text-[12px]" style={{ color: c.textMuted }}>
+                          <Users size={10} />
+                          {decodeEntities(item.source_ref.from_name)}
+                        </p>
+                      )}
+
+                      {/* Prep note from summary */}
+                      {item.summary && !item.summary.includes(item.title) && (
+                        <p className="mt-1 text-[11px] leading-relaxed" style={{ color: c.textTertiary }}>
+                          {decodeEntities(item.summary)}
+                        </p>
+                      )}
+
+                      {/* Inline meeting prep context */}
+                      {prep && (
+                        <div
+                          className="mt-2 rounded-md px-3 py-2 text-[11px] leading-relaxed"
+                          style={{ background: 'rgba(78,125,170,0.06)', color: c.textTertiary }}
+                        >
+                          <MeetingPrepCard
+                            prep={prep}
+                            onCitationClick={handlePrepCitationClick}
+                          />
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Meeting preps */}
-          {meetingPreps.length > 0 && (
+          {/* Standalone meeting preps for events without matching schedule items */}
+          {meetingPreps.filter(p => !todaysSchedule.some(s => s.source_ref?.message_id === p.event_id)).length > 0 && (
             <div className="mt-3 space-y-2">
-              {meetingPreps.map(prep => (
-                <MeetingPrepCard
-                  key={prep.event_id}
-                  prep={prep}
-                  onCitationClick={handlePrepCitationClick}
-                />
-              ))}
+              {meetingPreps
+                .filter(p => !todaysSchedule.some(s => s.source_ref?.message_id === p.event_id))
+                .map(prep => (
+                  <MeetingPrepCard
+                    key={prep.event_id}
+                    prep={prep}
+                    onCitationClick={handlePrepCitationClick}
+                  />
+                ))
+              }
             </div>
           )}
-        </div>
+        </section>
       )}
-
-      {/* ═══════════════════════════════════════════════════════
-          OPERATIONS — AM Sweep + Time Blocker
-          ═══════════════════════════════════════════════════════ */}
-
-      <div>
-        <button
-          onClick={() => setOpsExpanded(!opsExpanded)}
-          className="flex w-full items-center justify-between rounded-xl px-5 py-3.5 transition-all duration-150"
-          style={{
-            background: c.surfaceElevated,
-            border: `1px solid ${c.border}`,
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = c.borderHover; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = c.border; }}
-        >
-          <div className="flex items-center gap-2.5">
-            <Zap size={14} style={{ color: c.dawn }} />
-            <span className="text-[13px] font-semibold" style={{ color: c.text }}>
-              Operations
-            </span>
-            <span
-              className="rounded-md px-2 py-0.5 text-[10px] font-medium"
-              style={{ background: c.dawnMuted, color: c.dawn }}
-            >
-              Sweep & Schedule
-            </span>
-          </div>
-          <ChevronDown
-            size={14}
-            className="transition-transform duration-200"
-            style={{
-              color: c.textMuted,
-              transform: opsExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-            }}
-          />
-        </button>
-
-        {opsExpanded && (
-          <div className="mt-3 space-y-4">
-            <AMSweepPanel />
-            <TimeBlockPanel />
-          </div>
-        )}
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════
-          ZONE 3: INTELLIGENCE FEED
-          ═══════════════════════════════════════════════════════ */}
-
-      <div className="space-y-6">
-        {INTENT_ORDER.map(intentKey => {
-          const items = intentGroups[intentKey];
-          if (items.length === 0) return null;
-
-          const meta = INTENT_META[intentKey];
-          const Icon = meta.icon;
-          const isFyi = intentKey === 'fyi';
-          const showItems = isFyi ? fyiExpanded : true;
-
-          // 2-column layout
-          const columns: BriefingItem[][] = [[], []];
-          items.forEach((item, i) => {
-            columns[i % 2].push(item);
-          });
-
-          return (
-            <section key={intentKey} id={`section-${intentKey}`}>
-              {/* Section header */}
-              <div className="flex items-center gap-2 mb-3">
-                <div
-                  className="flex h-5 w-5 items-center justify-center rounded"
-                  style={{ background: meta.accentBg }}
-                >
-                  <Icon size={12} style={{ color: meta.accent }} />
-                </div>
-                <h2
-                  className="text-[13px] font-semibold"
-                  style={{ color: c.text }}
-                >
-                  {meta.label}
-                </h2>
-                <span
-                  className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
-                  style={{ background: meta.accentBg, color: meta.accent }}
-                >
-                  {items.length}
-                </span>
-                {isFyi && (
-                  <button
-                    onClick={() => setFyiExpanded(!fyiExpanded)}
-                    className="ml-auto flex items-center gap-1 text-[12px] font-medium transition-colors duration-150"
-                    style={{ color: c.textTertiary }}
-                  >
-                    {fyiExpanded ? 'Collapse' : 'Expand'}
-                    <ChevronDown
-                      size={12}
-                      className="transition-transform duration-200"
-                      style={{ transform: fyiExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    />
-                  </button>
-                )}
-              </div>
-
-              {/* FYI collapsed preview */}
-              {isFyi && !showItems && (
-                <div
-                  className="rounded-lg px-4 py-2.5 cursor-pointer transition-all duration-150"
-                  style={{ background: c.surface, border: `1px solid ${c.border}` }}
-                  onClick={() => setFyiExpanded(true)}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = c.borderHover; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = c.border; }}
-                >
-                  <p className="text-[12px]" style={{ color: c.textMuted }}>
-                    {items.length} informational item{items.length !== 1 ? 's' : ''} — click to expand
-                  </p>
-                </div>
-              )}
-
-              {/* 2-column grid */}
-              {showItems && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
-                  {columns.map((colItems, colIdx) => (
-                    <div key={colIdx} className="space-y-3">
-                      {colItems.map(item => (
-                        <BriefingItemComponent
-                          key={item.id}
-                          item={item}
-                          onFeedback={handleFeedback}
-                          onCitationClick={handleCitationClick}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
-
-      {/* Yesterday's Recap — minimal footer */}
-      <YesterdayRecap />
 
       <CitationDrawer
         open={drawerItem !== null}
