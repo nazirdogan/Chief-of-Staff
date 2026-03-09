@@ -1,0 +1,29 @@
+Fix UX performance issues, chat loading states, and broken calendar route
+
+Chat:
+- Add separate historyLoading flag so thinking dots only appear during AI response, not history fetch
+- Show message skeleton while loading conversation history instead of greeting screen
+- Add chat/loading.tsx route-level Suspense skeleton for instant navigation feedback
+
+Dashboard shell:
+- Remove 300ms opacity fade-in — content visible immediately on load
+- Replace 500ms dialog-detection polling with MutationObserver (instant + zero CPU)
+- Skip Zustand re-render when worker poll returns unchanged catch-up state
+
+Inbox / People:
+- Clear stale data atomically with setLoading(true) to eliminate old-data flash on filter change
+
+Reflections:
+- Move CompletionReportPanel inside !loading && !error guard to prevent rendering over skeleton
+
+Calendar:
+- Create /calendar/page.tsx with day navigation, event list, empty/error states
+  (fixes 404 from the "Full calendar" link on the daily briefing)
+
+Integrations (OAuth popup fix):
+- Pre-fetch Nango session token when consent screen opens so nango.auth() fires
+  synchronously from the Proceed click, preventing browser popup blocking
+- OAuthConsentScreen now shows "Preparing..." while token is loading
+- Applied to all three connect flows: settings, onboarding, desktop onboarding
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

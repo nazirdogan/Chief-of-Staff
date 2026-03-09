@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Settings2, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { BackButton } from '@/components/shared/BackButton';
 
 const c = {
   text: '#FFFFFF',
@@ -86,6 +87,7 @@ export default function OperationsSettingsPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px' }}>
+      <BackButton href="/settings" />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Settings2 size={20} color={c.dawn} />

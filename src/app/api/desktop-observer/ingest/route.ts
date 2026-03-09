@@ -27,12 +27,29 @@ export const POST = withAuth(
       }
 
       // Limit batch size to prevent abuse
-      const capped = contexts.slice(0, 50) as DesktopContextSnapshot[];
       const supabase = createServiceClient();
       const userId = req.user.id;
 
+      // Fetch blocked apps from user profile to filter out blocked contexts
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: profileData } = await (supabase as any)
+        .from('profiles')
+        .select('blocked_apps')
+        .eq('id', userId)
+        .single();
+      const blockedApps: string[] = profileData?.blocked_apps ?? [];
+
+      // Filter out snapshots from blocked apps before processing
+      const filtered = contexts.slice(0, 50).filter(
+        (ctx: DesktopContextSnapshot) =>
+          !blockedApps.some(
+            (blocked) =>
+              ctx.active_app.toLowerCase().includes(blocked.toLowerCase())
+          )
+      ) as DesktopContextSnapshot[];
+
       // Process through the session manager (app-aware parsing + session tracking)
-      const result = await processSnapshots(supabase, userId, capped);
+      const result = await processSnapshots(supabase, userId, filtered);
 
       // Trigger AI session summarisation in background (non-blocking)
       summariseActiveSession(userId).catch(err =>

@@ -45,6 +45,53 @@ const userSessions = new Map<string, ActiveSessionState>();
 // Track last narrative update time per user
 const lastNarrativeUpdate = new Map<string, number>();
 
+// Blocked apps cache per user (invalidated from privacy settings route)
+const blockedAppsCache = new Map<string, { apps: string[]; fetchedAt: number }>();
+
+/** Cache TTL for blocked apps (5 minutes) */
+const BLOCKED_APPS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Invalidate the blocked apps cache for a user.
+ * Called from the privacy settings PATCH route.
+ */
+export function invalidateBlockedAppsCache(userId: string): void {
+  blockedAppsCache.delete(userId);
+}
+
+/**
+ * Get blocked apps for a user, using an in-memory cache.
+ */
+async function getBlockedApps(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<string[]> {
+  const cached = blockedAppsCache.get(userId);
+  if (cached && Date.now() - cached.fetchedAt < BLOCKED_APPS_CACHE_TTL_MS) {
+    return cached.apps;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .from('profiles')
+    .select('blocked_apps')
+    .eq('id', userId)
+    .single();
+
+  const apps: string[] = data?.blocked_apps ?? [];
+  blockedAppsCache.set(userId, { apps, fetchedAt: Date.now() });
+  return apps;
+}
+
+/**
+ * Check if a given app name matches any blocked app ID.
+ */
+function isAppBlocked(appName: string, blockedApps: string[]): boolean {
+  if (blockedApps.length === 0) return false;
+  const lower = appName.toLowerCase();
+  return blockedApps.some((blocked) => lower.includes(blocked.toLowerCase()));
+}
+
 /** How long without a snapshot before we close the session (5 minutes) */
 const SESSION_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -177,7 +224,15 @@ export async function processSnapshots(
     }
   }
 
+  // Fetch blocked apps (cached) to skip blocked snapshots at session level
+  const blockedApps = await getBlockedApps(supabase, userId);
+
   for (const snapshot of snapshots) {
+    // Skip snapshots from blocked apps
+    if (isAppBlocked(snapshot.active_app, blockedApps)) {
+      continue;
+    }
+
     const parsed = parseScreenContent(snapshot);
     const current = userSessions.get(userId);
 

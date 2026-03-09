@@ -4,6 +4,7 @@
  */
 
 import type { BriefingItemSection, BriefingItemType, MessageSentiment } from '@/lib/db/types';
+import { DONNA_PERSONA } from './persona';
 
 export interface SynthesisInputItem {
   /** Unique index for mapping back to source_ref after synthesis */
@@ -60,7 +61,13 @@ export const VALID_SENTIMENTS: MessageSentiment[] = [
   'urgent',
 ];
 
-export const SYNTHESIS_SYSTEM_PROMPT = `You are the intelligence engine for an executive's AI chief of staff called Donna.
+export const SYNTHESIS_SYSTEM_PROMPT = `${DONNA_PERSONA}
+
+---
+
+## Your Task
+
+You are the intelligence engine for an executive's AI chief of staff called Donna.
 
 Your job is to take raw data items from the executive's digital life — emails, calendar events, commitments, relationship alerts, desktop observations — along with contextual intelligence (yesterday's open loops, working patterns, conversation threads, person/project history), and produce a SYNTHESISED, RANKED morning briefing.
 

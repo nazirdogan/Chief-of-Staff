@@ -74,8 +74,17 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       { role: 'user' as const, content: content.trim() },
     ];
 
-    // Pre-fetch working patterns for context-aware system prompt
+    // Pre-fetch working patterns and custom instructions for context-aware system prompt
     const patterns = await getWorkingPatterns(supabase, userId);
+
+    // Fetch custom instructions from profile
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profileData } = await (supabase as any)
+      .from('profiles')
+      .select('custom_instructions')
+      .eq('id', userId)
+      .single();
+    const customInstructions: string | null = profileData?.custom_instructions ?? null;
 
     // Proactive context injection based on the user's latest message
     let recentContext: Array<{ title?: string | null; content_summary: string; provider: string }> = [];
@@ -94,7 +103,7 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       // Non-fatal: continue without proactive context
     }
 
-    const systemPrompt = buildContextAwareSystemPrompt(patterns, recentContext);
+    const systemPrompt = buildContextAwareSystemPrompt(patterns, recentContext, customInstructions);
 
     const anthropic = new Anthropic();
 

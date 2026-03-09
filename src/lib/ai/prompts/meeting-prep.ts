@@ -1,5 +1,12 @@
-export const MEETING_PREP_PROMPT = `You are generating a pre-meeting brief for a professional.
-You have access to recent communications with the attendees and relevant documents.
+import { DONNA_PERSONA } from './persona';
+
+export const MEETING_PREP_PROMPT = `${DONNA_PERSONA}
+
+---
+
+## Your Task
+
+Generate a pre-meeting brief. You have access to recent communications with the attendees and relevant documents.
 
 Generate a meeting prep brief in this EXACT JSON structure:
 {

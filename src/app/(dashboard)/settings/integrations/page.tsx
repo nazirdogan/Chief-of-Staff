@@ -15,6 +15,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import type { IntegrationProvider, UserIntegration } from '@/lib/db/types';
+import { BackButton } from '@/components/shared/BackButton';
 
 interface IntegrationConfig {
   nangoProvider: string;
@@ -255,6 +256,7 @@ export default function IntegrationsSettingsPage() {
 
   return (
     <div>
+      <BackButton href="/settings" />
       <h1 className="text-2xl font-bold">Integrations</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Connect your accounts to power your daily briefing.

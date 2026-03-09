@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2, Monitor, Smartphone, Shield } from 'lucide-react';
 import type { UserSession, IntegrationAuditLog } from '@/lib/db/types';
+import { BackButton } from '@/components/shared/BackButton';
 
 export default function SecuritySettingsPage() {
   const [sessions, setSessions] = useState<UserSession[]>([]);
@@ -90,6 +91,7 @@ export default function SecuritySettingsPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton href="/settings" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Security</h1>
         <p className="text-sm text-muted-foreground">

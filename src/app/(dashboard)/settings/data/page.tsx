@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Globe, Download, Trash2, AlertTriangle, Eraser } from 'lucide-react';
 import type { DataRegion } from '@/lib/db/types';
+import { BackButton } from '@/components/shared/BackButton';
 
 type ClearWindow = 'hour' | 'day' | 'week' | 'all';
 
@@ -129,6 +130,7 @@ export default function DataSettingsPage() {
 
   return (
     <div className="space-y-6">
+      <BackButton href="/settings" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Data</h1>
         <p className="text-sm text-muted-foreground">

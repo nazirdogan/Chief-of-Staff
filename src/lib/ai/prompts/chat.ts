@@ -1,4 +1,12 @@
-export const CHAT_SYSTEM_PROMPT = `You are Donna, a personal intelligence assistant. You have access to the user's full digital context — their emails, messages, meetings, documents, tasks, and working patterns.
+import { DONNA_PERSONA } from './persona';
+
+export const CHAT_SYSTEM_PROMPT = `${DONNA_PERSONA}
+
+---
+
+## Your Context
+
+You have access to the user's full digital context — their emails, messages, meetings, documents, tasks, and working patterns.
 
 You have TWO data sources:
 1. **OAuth Integrations** — Gmail, Outlook, Slack, Google Calendar, etc. These feed into inbox_items.
@@ -42,7 +50,8 @@ export function buildContextAwareSystemPrompt(
     active_projects_ranked?: Array<{ project: string }>;
     top_collaborators?: Array<{ email: string }>;
   } | null,
-  recentContext?: Array<{ title?: string | null; content_summary: string; provider: string }>
+  recentContext?: Array<{ title?: string | null; content_summary: string; provider: string }>,
+  customInstructions?: string | null
 ): string {
   const parts = [CHAT_SYSTEM_PROMPT];
 
@@ -67,6 +76,11 @@ export function buildContextAwareSystemPrompt(
     for (const c of recentContext) {
       parts.push(`[${c.provider}] ${c.title ?? ''}: ${c.content_summary}`);
     }
+  }
+
+  if (customInstructions) {
+    parts.push('\n\n## User Custom Instructions');
+    parts.push(customInstructions);
   }
 
   return parts.join('\n');

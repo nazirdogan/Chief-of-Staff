@@ -133,6 +133,8 @@ export interface Profile {
   onboarding_completed: boolean;
   privacy_mode: boolean;
   two_factor_enabled: boolean;
+  custom_instructions: string | null;
+  blocked_apps: string[];
   is_admin: boolean;
   created_at: string;
   updated_at: string;

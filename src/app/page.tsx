@@ -595,9 +595,9 @@ export default function LandingPage() {
                   marginBottom: 24,
                 }}
               >
-                Your morning
+                See everything.
                 <br />
-                <span style={{ color: c.dawn }}>edge.</span>
+                <span style={{ color: c.dawn }}>Miss nothing.</span>
               </h1>
 
               <p
