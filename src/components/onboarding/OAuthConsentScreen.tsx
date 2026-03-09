@@ -23,6 +23,11 @@ interface OAuthConsentScreenProps {
   onConsent: () => void;
   onCancel: () => void;
   loading?: boolean;
+  /** True while the session token is being pre-fetched. Disables the Proceed
+   *  button to ensure it can only be clicked once the token is ready — preventing
+   *  an async gap between the click and window.open() which would trigger popup
+   *  blockers. */
+  tokenLoading?: boolean;
 }
 
 export function OAuthConsentScreen({
@@ -31,6 +36,7 @@ export function OAuthConsentScreen({
   onConsent,
   onCancel,
   loading,
+  tokenLoading,
 }: OAuthConsentScreenProps) {
   return (
     <Card className="mx-auto max-w-lg">
@@ -96,8 +102,8 @@ export function OAuthConsentScreen({
         <Button variant="outline" className="flex-1" onClick={onCancel}>
           Cancel
         </Button>
-        <Button className="flex-1" onClick={onConsent} disabled={loading}>
-          {loading ? 'Connecting...' : `Connect ${providerLabel}`}
+        <Button className="flex-1" onClick={onConsent} disabled={loading || tokenLoading}>
+          {loading ? 'Connecting...' : tokenLoading ? 'Preparing...' : `Connect ${providerLabel}`}
         </Button>
       </CardFooter>
     </Card>

@@ -83,7 +83,6 @@ function NavItem({ href, label, icon: Icon, pathname }: { href: string; label: s
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -135,7 +134,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               if (!statusRes.ok || cancelled) return;
               const statusData = await statusRes.json();
               if (statusData.state && !cancelled) {
-                setCatchUpState(statusData.state);
+                const prev = useCatchUpStore.getState().state;
+                if (JSON.stringify(prev) !== JSON.stringify(statusData.state)) {
+                  setCatchUpState(statusData.state);
+                }
               }
               if (statusData.staleWarnings && !cancelled) {
                 setStaleWarnings(statusData.staleWarnings);
@@ -224,10 +226,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   // Check if a Tier 3 dialog is open — defer toast rendering
   useEffect(() => {
-    const check = setInterval(() => {
+    const observer = new MutationObserver(() => {
       setDialogOpen(!!document.querySelector('[role=dialog]'));
-    }, 500);
-    return () => clearInterval(check);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -241,9 +244,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -259,8 +259,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           fontFamily: "'Inter', sans-serif",
           background: t.bg,
           color: t.text,
-          opacity: mounted ? 1 : 0,
-          transition: 'opacity 0.3s ease',
         }}
       >
         {/* ── Sidebar ── */}

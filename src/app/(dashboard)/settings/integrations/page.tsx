@@ -50,6 +50,11 @@ export default function IntegrationsSettingsPage() {
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [consentProvider, setConsentProvider] = useState<IntegrationConfig | null>(null);
+  // Pre-fetched session token — obtained eagerly when the consent screen opens
+  // so nango.auth() fires synchronously from the "Proceed" click with no async gap,
+  // avoiding the browser popup blocker.
+  const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
+  const [tokenFetching, setTokenFetching] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
@@ -165,43 +170,61 @@ export default function IntegrationsSettingsPage() {
     return integrations.find((i) => i.provider === dbProvider);
   }
 
-  async function handleConnect(config: IntegrationConfig) {
-    setConnecting(true);
-    setConnectError(null);
-
+  /**
+   * Open the consent screen AND eagerly fetch the Nango session token in the background.
+   * By the time the user reads the consent screen and clicks "Proceed", the token is
+   * already in state, so nango.auth() fires synchronously from the click event and the
+   * browser popup blocker never triggers.
+   */
+  async function openConsent(config: IntegrationConfig) {
+    setConsentProvider(config);
+    setPendingSessionToken(null);
+    setTokenFetching(true);
     try {
-      // 1. Get a connect session token from our backend (creates Nango session)
       const res = await fetch('/api/integrations/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider: config.nangoProvider }),
       });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Failed to start connection' }));
-        throw new Error(err.error || 'Failed to start connection');
+      if (res.ok) {
+        const data = await res.json();
+        setPendingSessionToken(data.sessionToken ?? null);
       }
-
-      const { sessionToken } = await res.json();
-
-      // 2. Create a Nango frontend instance with the session token
-      const nango = new Nango({ connectSessionToken: sessionToken });
-
-      // 3. This opens the real OAuth login page in a popup
-      await nango.auth(config.nangoProvider);
-
-      // 4. OAuth completed — sync connection to our DB
-      await syncIntegrations();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Connection failed';
-      // Don't show error if user simply closed the popup
-      if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
-        setConnectError(`Failed to connect ${config.label}: ${message}`);
-      }
+    } catch {
+      // Token will be fetched again inside handleConnect as a fallback
     } finally {
-      setConnecting(false);
-      setConsentProvider(null);
+      setTokenFetching(false);
     }
+  }
+
+  // MUST be a plain (non-async) function — Safari/WKWebView blocks window.open()
+  // when called from an async function even with no awaits before it.
+  // nango.auth() calls window.open() synchronously; async boundaries break gesture propagation.
+  // The button is disabled via tokenLoading until pendingSessionToken is set, so the
+  // token is guaranteed to be available here.
+  function handleConnect(config: IntegrationConfig) {
+    const token = pendingSessionToken;
+    if (!token) return; // should not happen — button is disabled while token is loading
+
+    setConnecting(true);
+    setConnectError(null);
+    setPendingSessionToken(null);
+
+    // nango.auth() calls window.open() synchronously as its very first action.
+    // Everything after this is async (WebSocket + OAuth redirect) and happens in the popup.
+    new Nango({ connectSessionToken: token })
+      .auth(config.nangoProvider)
+      .then(() => syncIntegrations())
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : 'Connection failed';
+        if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
+          setConnectError(`Failed to connect ${config.label}: ${message}`);
+        }
+      })
+      .finally(() => {
+        setConnecting(false);
+        setConsentProvider(null);
+      });
   }
 
   async function handleDisconnect(config: IntegrationConfig) {
@@ -224,6 +247,7 @@ export default function IntegrationsSettingsPage() {
           onConsent={() => handleConnect(consentProvider)}
           onCancel={() => setConsentProvider(null)}
           loading={connecting}
+          tokenLoading={tokenFetching}
         />
       </div>
     );
@@ -365,11 +389,10 @@ export default function IntegrationsSettingsPage() {
                         key={config.dbProvider}
                         onClick={() => {
                           if (!isAvailable && !isConnected) return;
-                          if (isConnected || hasError) {
-                            if (isConnected) handleDisconnect(config);
-                            else setConsentProvider(config);
+                          if (isConnected) {
+                            handleDisconnect(config);
                           } else {
-                            setConsentProvider(config);
+                            void openConsent(config);
                           }
                         }}
                         disabled={isDisconnecting || (!isAvailable && !isConnected)}

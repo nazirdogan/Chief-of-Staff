@@ -48,6 +48,10 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [consentProvider, setConsentProvider] = useState<ProviderConfig | null>(null);
+  // Pre-fetched session token — obtained eagerly when the consent screen opens so
+  // nango.auth() fires synchronously from the "Proceed" click, avoiding popup blocking.
+  const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
+  const [tokenFetching, setTokenFetching] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -81,21 +85,37 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
   function isAvailable(p: string) { return availableProviders.includes(p); }
   const connectedCount = ESSENTIAL_PROVIDERS.filter((p) => isConnected(p.dbProvider)).length;
 
-  async function handleConnect(config: ProviderConfig) {
-    setConnecting(true); setConnectError(null);
+  async function openConsent(config: ProviderConfig) {
+    setConsentProvider(config);
+    setPendingSessionToken(null);
+    setTokenFetching(true);
     try {
       const res = await fetch('/api/integrations/connect', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider: config.nangoProvider }),
       });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed');
-      const { sessionToken } = await res.json();
-      await new Nango({ connectSessionToken: sessionToken }).auth(config.nangoProvider);
-      await syncIntegrations();
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Connection failed';
-      if (!msg.includes('closed') && !msg.includes('cancel')) setConnectError(`${config.label}: ${msg}`);
-    } finally { setConnecting(false); setConsentProvider(null); }
+      if (res.ok) setPendingSessionToken(((await res.json()) as { sessionToken?: string }).sessionToken ?? null);
+    } catch { /* token will be re-fetched inside handleConnect as fallback */ }
+    finally { setTokenFetching(false); }
+  }
+
+  // MUST be a plain (non-async) function — see settings/integrations/page.tsx for explanation.
+  function handleConnect(config: ProviderConfig) {
+    const token = pendingSessionToken;
+    if (!token) return;
+
+    setConnecting(true);
+    setConnectError(null);
+    setPendingSessionToken(null);
+
+    new Nango({ connectSessionToken: token })
+      .auth(config.nangoProvider)
+      .then(() => syncIntegrations())
+      .catch((error: unknown) => {
+        const msg = error instanceof Error ? error.message : 'Connection failed';
+        if (!msg.includes('closed') && !msg.includes('cancel')) setConnectError(`${config.label}: ${msg}`);
+      })
+      .finally(() => { setConnecting(false); setConsentProvider(null); });
   }
 
   if (consentProvider) {
@@ -107,6 +127,7 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
         onConsent={() => handleConnect(consentProvider)}
         onCancel={() => setConsentProvider(null)}
         loading={connecting}
+        tokenLoading={tokenFetching}
       />
     );
   }
@@ -165,7 +186,7 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
             return (
               <button
                 key={config.dbProvider}
-                onClick={() => !connected && available && setConsentProvider(config)}
+                onClick={() => !connected && available && void openConsent(config)}
                 disabled={connected || !available}
                 className="group flex w-full items-center gap-4 rounded-xl p-4 text-left transition-all duration-300"
                 style={{

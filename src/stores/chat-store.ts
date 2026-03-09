@@ -16,7 +16,8 @@ interface ConversationSummary {
 interface ChatStore {
   // Messages for the currently active conversation (in-memory)
   messages: ChatMessage[];
-  isLoading: boolean;
+  isLoading: boolean;       // true while waiting for AI response
+  historyLoading: boolean;  // true while fetching conversation history
   memoryPanelOpen: boolean;
 
   // Conversation state
@@ -38,6 +39,7 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   isLoading: false,
+  historyLoading: false,
   memoryPanelOpen: false,
 
   currentConversationId: null,
@@ -62,7 +64,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   loadConversation: async (id: string) => {
-    set({ isLoading: true });
+    set({ historyLoading: true, messages: [] });
     try {
       const res = await fetch(`/api/chat/conversations/${id}`);
       if (!res.ok) throw new Error(`Failed to load conversation: ${res.status}`);
@@ -80,10 +82,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       set({
         currentConversationId: id,
         messages,
-        isLoading: false,
+        historyLoading: false,
       });
     } catch {
-      set({ isLoading: false });
+      set({ historyLoading: false });
     }
   },
 

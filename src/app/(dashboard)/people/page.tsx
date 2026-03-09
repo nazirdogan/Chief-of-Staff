@@ -28,6 +28,7 @@ export default function PeoplePage() {
 
   const fetchContacts = useCallback(async () => {
     setLoading(true);
+    setContacts([]);
     setError(null);
 
     try {

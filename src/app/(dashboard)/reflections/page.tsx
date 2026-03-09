@@ -425,16 +425,18 @@ export default function ReflectionsPage() {
         </div>
       )}
 
-      {/* Today's Completion Report */}
-      <CompletionReportPanel />
-
-      {/* Reflections list */}
-      {!loading && !error && reflections.length > 0 && (
-        <div className="space-y-3">
-          {reflections.map(reflection => (
-            <ReflectionCard key={reflection.id} reflection={reflection} />
-          ))}
-        </div>
+      {/* Reflections list + completion report (only after load) */}
+      {!loading && !error && (
+        <>
+          <CompletionReportPanel />
+          {reflections.length > 0 && (
+            <div className="space-y-3">
+              {reflections.map(reflection => (
+                <ReflectionCard key={reflection.id} reflection={reflection} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

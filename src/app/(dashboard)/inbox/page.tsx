@@ -54,6 +54,8 @@ export default function InboxPage() {
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
+    setItems([]);
+    setArchivedItems([]);
     try {
       if (filter === 'archived_by_donna') {
         const res = await fetch('/api/inbox?filter=archived_by_donna');

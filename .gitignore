@@ -48,3 +48,5 @@ next-env.d.ts
 /src-tauri/target
 /src-tauri/gen
 
+# Claude Code local settings (contains session data - never commit)
+.claude/

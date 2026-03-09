@@ -39,6 +39,8 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [consentProvider, setConsentProvider] = useState<IntegrationConfig | null>(null);
+  const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
+  const [tokenFetching, setTokenFetching] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
 
@@ -87,42 +89,46 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
 
   const connectedCount = INTEGRATIONS.filter((c) => isConnected(c.dbProvider)).length;
 
-  async function handleConnect(config: IntegrationConfig) {
-    setConnecting(true);
-    setConnectError(null);
-
+  async function openConsent(config: IntegrationConfig) {
+    setConsentProvider(config);
+    setPendingSessionToken(null);
+    setTokenFetching(true);
     try {
-      // 1. Get a connect session token from our backend
       const res = await fetch('/api/integrations/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider: config.nangoProvider }),
       });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Failed to start connection' }));
-        throw new Error(err.error || 'Failed to start connection');
+      if (res.ok) {
+        const data = await res.json() as { sessionToken?: string };
+        setPendingSessionToken(data.sessionToken ?? null);
       }
+    } catch { /* token will be re-fetched inside handleConnect as fallback */ }
+    finally { setTokenFetching(false); }
+  }
 
-      const { sessionToken } = await res.json();
+  // MUST be a plain (non-async) function — see settings/integrations/page.tsx for explanation.
+  function handleConnect(config: IntegrationConfig) {
+    const token = pendingSessionToken;
+    if (!token) return;
 
-      // 2. Create a Nango frontend instance with the session token
-      const nango = new Nango({ connectSessionToken: sessionToken });
+    setConnecting(true);
+    setConnectError(null);
+    setPendingSessionToken(null);
 
-      // 3. This opens the real OAuth login page in a popup
-      await nango.auth(config.nangoProvider);
-
-      // 4. OAuth completed — sync to DB
-      await syncIntegrations();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Connection failed';
-      if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
-        setConnectError(`Failed to connect ${config.label}: ${message}`);
-      }
-    } finally {
-      setConnecting(false);
-      setConsentProvider(null);
-    }
+    new Nango({ connectSessionToken: token })
+      .auth(config.nangoProvider)
+      .then(() => syncIntegrations())
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : 'Connection failed';
+        if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
+          setConnectError(`Failed to connect ${config.label}: ${message}`);
+        }
+      })
+      .finally(() => {
+        setConnecting(false);
+        setConsentProvider(null);
+      });
   }
 
   if (consentProvider) {
@@ -135,6 +141,7 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
           onConsent={() => handleConnect(consentProvider)}
           onCancel={() => setConsentProvider(null)}
           loading={connecting}
+          tokenLoading={tokenFetching}
         />
       </div>
     );
@@ -150,7 +157,7 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
     return (
       <button
         key={config.dbProvider}
-        onClick={() => available && setConsentProvider(config)}
+        onClick={() => available && void openConsent(config)}
         disabled={!available}
         className={`relative flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-colors ${
           connected
