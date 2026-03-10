@@ -559,7 +559,6 @@ export default function LandingPage() {
             <span
               style={{
                 fontFamily: fonts.display,
-                fontStyle: "italic",
                 fontSize: 24,
                 fontWeight: 700,
                 color: c.charcoal,
@@ -1514,7 +1513,7 @@ export default function LandingPage() {
           }}
         >
           <div>
-            <span style={{ fontFamily: fonts.display, fontStyle: "italic", fontSize: 20, fontWeight: 700, color: c.charcoal, letterSpacing: "-0.01em" }}>
+            <span style={{ fontFamily: fonts.display, fontSize: 20, fontWeight: 700, color: c.charcoal, letterSpacing: "-0.01em" }}>
               Donna<span style={{ color: c.dawn }}>.</span>
             </span>
             <p style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.12em", color: c.slate, marginTop: 6, textTransform: "uppercase" }}>

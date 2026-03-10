@@ -34,7 +34,6 @@ export default function AuthLayout({
               style={{
                 fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                 fontWeight: 700,
-                fontStyle: 'italic',
                 color: '#FAF9F6',
               }}
             >
@@ -63,7 +62,6 @@ export default function AuthLayout({
             style={{
               fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
               fontWeight: 700,
-              fontStyle: 'italic',
               color: '#2D2D2D',
             }}
           >

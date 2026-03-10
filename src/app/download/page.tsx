@@ -86,13 +86,13 @@ export default function DownloadPage() {
           style={{
             fontFamily: fonts.display,
             fontSize: 44,
-            fontWeight: 400,
+            fontWeight: 700,
             color: c.charcoal,
-            letterSpacing: "0.02em",
+            letterSpacing: "-0.01em",
             margin: "0 0 8px",
           }}
         >
-          Donna
+          Donna<span style={{ color: c.dawn }}>.</span>
         </h1>
         <p
           style={{

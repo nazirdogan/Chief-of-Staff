@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — The Editor — Logo Downloads</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: #FAF9F6; color: #2D2D2D; padding: 48px 24px; }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 6px; }
+  h1 span { color: #E8845C; }
+  .subtitle { color: #8D99AE; font-size: 15px; margin-bottom: 48px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .preview { display: flex; align-items: center; justify-content: center; padding: 48px 32px; min-height: 200px; }
+  .preview.light { background: #FAF9F6; border: 1px solid #e8e5e0; border-bottom: none; border-radius: 12px 12px 0 0; }
+  .preview.dark { background: #2D2D2D; border-radius: 12px 12px 0 0; }
+
+  .actions { background: #fff; border: 1px solid #e8e5e0; border-top: none; border-radius: 0 0 12px 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .label { font-size: 14px; font-weight: 500; color: #2D2D2D; }
+  .label small { display: block; font-weight: 400; color: #8D99AE; font-size: 12px; margin-top: 2px; }
+  .btn-group { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    text-decoration: none; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s ease;
+  }
+  .btn-svg { background: #2D2D2D; color: #FAF9F6; }
+  .btn-svg:hover { background: #444; }
+  .btn-png { background: #E8845C; color: #fff; }
+  .btn-png:hover { background: #d4753e; }
+
+  .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #e8e5e0; color: #8D99AE; font-size: 13px; text-align: center; }
+
+  /* Hidden canvases for PNG export */
+  canvas { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Donna<span>.</span> Logos</h1>
+  <p class="subtitle">Option D — The Editor. Click to download SVG or PNG.</p>
+
+  <div class="grid">
+
+    <!-- Wordmark Light -->
+    <div class="card">
+      <div class="preview light">
+        <svg id="svg-wordmark-light" viewBox="0 0 360 80" width="320" xmlns="http://www.w3.org/2000/svg">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna</text>
+          <circle cx="305" cy="58" r="7" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Wordmark — Light<small>Parchment background</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-wordmark-light', 'donna-wordmark-light')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-wordmark-light', 'donna-wordmark-light', 1440, 320)">PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wordmark Dark -->
+    <div class="card">
+      <div class="preview dark">
+        <svg id="svg-wordmark-dark" viewBox="0 0 360 80" width="320" xmlns="http://www.w3.org/2000/svg">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna</text>
+          <circle cx="305" cy="58" r="7" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Wordmark — Dark<small>Charcoal background</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-wordmark-dark', 'donna-wordmark-dark')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-wordmark-dark', 'donna-wordmark-dark', 1440, 320, '#2D2D2D')">PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monogram Light -->
+    <div class="card">
+      <div class="preview light">
+        <svg id="svg-monogram-light" viewBox="0 0 100 100" width="96" xmlns="http://www.w3.org/2000/svg">
+          <text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#2D2D2D">D</text>
+          <circle cx="80" cy="76" r="6" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Monogram — Light<small>App icon / favicon</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-monogram-light', 'donna-monogram-light')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-monogram-light', 'donna-monogram-light', 512, 512)">PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monogram Dark -->
+    <div class="card">
+      <div class="preview dark">
+        <svg id="svg-monogram-dark" viewBox="0 0 100 100" width="96" xmlns="http://www.w3.org/2000/svg">
+          <text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#FAF9F6">D</text>
+          <circle cx="80" cy="76" r="6" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Monogram — Dark<small>App icon / favicon</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-monogram-dark', 'donna-monogram-dark')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-monogram-dark', 'donna-monogram-dark', 512, 512, '#2D2D2D')">PNG</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer">PNGs export at high resolution (wordmarks 1440px wide, monograms 512×512). SVGs are infinitely scalable.</p>
+</div>
+
+<script>
+function downloadSVG(svgId, filename) {
+  const svg = document.getElementById(svgId);
+  const clone = svg.cloneNode(true);
+  clone.removeAttribute('id');
+  // Ensure xmlns is set
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(clone);
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename + '.svg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadPNG(svgId, filename, width, height, bgColor) {
+  const svg = document.getElementById(svgId);
+  const clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', width);
+  clone.setAttribute('height', height);
+
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(clone);
+  const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  img.onload = function () {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (bgColor) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, width, height);
+    }
+
+    ctx.drawImage(img, 0, 0, width, height);
+    URL.revokeObjectURL(url);
+
+    canvas.toBlob(function (blob) {
+      const pngUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = filename + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(pngUrl);
+    }, 'image/png');
+  };
+  img.src = url;
+}
+</script>
+</body>
+</html>

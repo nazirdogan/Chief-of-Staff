@@ -251,20 +251,24 @@ export default function SignalLanding() {
                 {/* Logo mark */}
                 <div className="relative">
                   <div
-                    className="h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-black tracking-tight"
-                    style={{
-                      background: c.text,
-                      color: c.bg,
-                    }}
+                    className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden"
+                    style={{ background: '#2D2D2D' }}
                   >
-                    CS
+                    <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                      <text x="8" y="78" fontFamily="'Playfair Display', Georgia, serif" fontSize="88" fontWeight="700" fill="#FAF9F6">D</text>
+                      <circle cx="80" cy="76" r="6" fill="#E8845C"/>
+                    </svg>
                   </div>
                 </div>
                 <span
-                  className="text-[15px] font-bold tracking-[-0.02em]"
-                  style={{ color: c.text }}
+                  className="text-[15px] tracking-[-0.02em]"
+                  style={{
+                    color: c.text,
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontWeight: 700,
+                  }}
                 >
-                  Donna
+                  Donna<span style={{ color: '#E8845C' }}>.</span>
                 </span>
               </div>
               <div className="hidden lg:flex items-center gap-1">

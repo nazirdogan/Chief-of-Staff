@@ -178,34 +178,13 @@ export function GettingReadyScreen() {
             <div
               className="relative flex h-20 w-20 items-center justify-center rounded-2xl"
               style={{
-                background: '#F1EDEA',
+                background: '#2D2D2D',
                 border: '1px solid rgba(232, 132, 92, 0.2)',
               }}
             >
-              <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
-                  fill="none"
-                  stroke="#2D2D2D"
-                  strokeWidth="3.5"
-                  strokeLinejoin="round"
-                  style={{ opacity: 0.6 }}
-                />
-                <line
-                  x1="26" y1="50" x2="72" y2="50"
-                  stroke="#E8845C"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  style={{
-                    strokeDasharray: 50,
-                    animation: 'meridian-draw 1.5s cubic-bezier(0.16,1,0.3,1) 0.5s both',
-                  }}
-                />
-                <circle
-                  cx="26" cy="50" r="3.5"
-                  fill="#E8845C"
-                  style={{ animation: 'check-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) 1.2s both' }}
-                />
+              <svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <text x="8" y="78" fontFamily="'Playfair Display', Georgia, serif" fontSize="88" fontWeight="700" fill="#FAF9F6">D</text>
+                <circle cx="80" cy="76" r="6" fill="#E8845C"/>
               </svg>
             </div>
           </div>

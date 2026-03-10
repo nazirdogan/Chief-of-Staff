@@ -277,7 +277,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 color: t.text,
                 fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                 fontWeight: 700,
-                fontStyle: 'italic',
               }}
             >
               Donna<span style={{ color: t.dawn }}>.</span>
