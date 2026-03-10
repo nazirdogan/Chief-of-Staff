@@ -3,11 +3,7 @@
 import { useEffect, useRef } from 'react';
 import ChatMessage from './ChatMessage';
 import type { ChatMessageData } from './ChatMessage';
-
-const c = {
-  borderActive: 'rgba(232,132,92,0.25)',
-  dawn: '#E8845C',
-};
+import DonnaThinkingIndicator from './DonnaThinkingIndicator';
 
 interface ChatMessageListProps {
   messages: ChatMessageData[];
@@ -33,44 +29,13 @@ export default function ChatMessageList({
 
         {isLoading && (
           <div className="flex justify-start">
-            <div
-              className="pl-4"
-              style={{ borderLeft: `2px solid ${c.borderActive}` }}
-            >
-              <div className="flex items-center gap-1.5 py-2">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="inline-block h-2 w-2 rounded-full"
-                    style={{
-                      background: c.dawn,
-                      animation: 'chatDotPulse 1.2s ease-in-out infinite',
-                      animationDelay: `${i * 0.2}s`,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
+            <DonnaThinkingIndicator />
           </div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
-      <style jsx>{`
-        @keyframes chatDotPulse {
-          0%,
-          60%,
-          100% {
-            opacity: 0.25;
-            transform: scale(0.85);
-          }
-          30% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-      `}</style>
     </div>
   );
 }

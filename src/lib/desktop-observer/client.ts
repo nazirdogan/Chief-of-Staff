@@ -208,7 +208,8 @@ async function flushBuffer() {
   const items = contextBuffer.splice(0); // take all items
 
   try {
-    const response = await fetch('/api/desktop-observer/ingest', {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://imdonna.app';
+    const response = await fetch(`${base}/api/desktop-observer/ingest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include', // Send auth cookies from Tauri webview

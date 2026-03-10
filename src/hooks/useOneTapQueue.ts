@@ -40,41 +40,47 @@ export function useOneTapQueue(): {
       }
 
       // Subscribe to new Tier 2 inserts via Realtime
-      channel = supabase
-        .channel('tier2-actions')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'pending_actions',
-            filter: 'autonomy_tier=eq.2',
-          },
-          (payload) => {
-            const row = payload.new as Record<string, unknown>;
-            // Only add if it belongs to this user and isn't expired
-            if (row.user_id !== user.id) return;
-            if (new Date(row.expires_at as string) < new Date()) return;
+      // Falls back silently if WebSocket is unavailable (e.g. HTTP in local dev)
+      try {
+        channel = supabase
+          .channel('tier2-actions')
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'pending_actions',
+              filter: 'autonomy_tier=eq.2',
+            },
+            (payload) => {
+              const row = payload.new as Record<string, unknown>;
+              // Only add if it belongs to this user and isn't expired
+              if (row.user_id !== user.id) return;
+              if (new Date(row.expires_at as string) < new Date()) return;
 
-            const action: OneTapAction = {
-              id: row.id as string,
-              action_type: row.action_type as OneTapAction['action_type'],
-              payload: (row.payload as Record<string, unknown>) ?? {},
-              created_at: row.created_at as string,
-              expires_at: row.expires_at as string,
-            };
+              const action: OneTapAction = {
+                id: row.id as string,
+                action_type: row.action_type as OneTapAction['action_type'],
+                payload: (row.payload as Record<string, unknown>) ?? {},
+                created_at: row.created_at as string,
+                expires_at: row.expires_at as string,
+              };
 
-            setQueue((prev) => {
-              if (prev.some((a) => a.id === action.id)) return prev;
-              return [...prev, action];
-            });
-          }
-        )
-        .subscribe((status, err) => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-            console.warn('Supabase Realtime unavailable — one-tap actions will load on mount only', err);
-          }
-        });
+              setQueue((prev) => {
+                if (prev.some((a) => a.id === action.id)) return prev;
+                return [...prev, action];
+              });
+            }
+          )
+          .subscribe((status, err) => {
+            if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              console.warn('Supabase Realtime unavailable — one-tap actions will load on mount only', err);
+            }
+          });
+      } catch (err) {
+        console.warn('Supabase Realtime unavailable — one-tap actions will load on mount only', err);
+        channel = null;
+      }
     }
 
     init();

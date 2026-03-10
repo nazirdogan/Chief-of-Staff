@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Nango from '@nangohq/frontend';
-import { OAuthConsentScreen } from '@/components/onboarding/OAuthConsentScreen';
 import { BrandIcon } from '@/components/shared/BrandIcon';
 import {
   Loader2,
@@ -82,11 +81,13 @@ export default function IntegrationsSettingsPage() {
   const [integrations, setIntegrations] = useState<UserIntegration[]>([]);
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [consentProvider, setConsentProvider] = useState<IntegrationConfig | null>(null);
-  const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
-  const [tokenFetching, setTokenFetching] = useState(false);
-  const [tokenError, setTokenError] = useState<string | null>(null);
-  const [connecting, setConnecting] = useState(false);
+  // Session tokens keyed by nangoProvider, pre-fetched as soon as providers are known
+  const sessionTokens = useRef<Record<string, string>>({});
+  const fetchingTokens = useRef<Set<string>>(new Set());
+  const [tokenReady, setTokenReady] = useState<Record<string, boolean>>({});
+  const [tokenErrors, setTokenErrors] = useState<Record<string, string>>({});
+  // Which provider is actively connecting (OAuth popup open)
+  const [connecting, setConnecting] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
   // Tracks which integration row UUID is being disconnected
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
@@ -156,7 +157,7 @@ export default function IntegrationsSettingsPage() {
         setIntegrations(data.integrations);
       }
       if (availRes.ok) {
-        const data = await availRes.json();
+        const data = await availRes.json() as { available: string[] };
         setAvailableProviders(data.available);
       }
     } finally {
@@ -174,12 +175,51 @@ export default function IntegrationsSettingsPage() {
     } catch { /* Silently fail */ }
   }, []);
 
-  useEffect(() => { fetchIntegrations(); }, [fetchIntegrations]);
+  useEffect(() => { void fetchIntegrations(); }, [fetchIntegrations]);
 
   useEffect(() => {
-    const interval = setInterval(syncIntegrations, 4000);
+    const interval = setInterval(() => { void syncIntegrations(); }, 4000);
     return () => clearInterval(interval);
   }, [syncIntegrations]);
+
+  /**
+   * Pre-fetch a session token for a provider in the background.
+   * Stores it in a ref so reads are always synchronous — no state-read delay.
+   */
+  async function prefetchToken(nangoProvider: string) {
+    if (sessionTokens.current[nangoProvider]) return;
+    if (fetchingTokens.current.has(nangoProvider)) return;
+    fetchingTokens.current.add(nangoProvider);
+    try {
+      const res = await fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: nangoProvider }),
+      });
+      if (res.ok) {
+        const data = await res.json() as { sessionToken?: string };
+        if (data.sessionToken) {
+          sessionTokens.current[nangoProvider] = data.sessionToken;
+          setTokenReady((prev) => ({ ...prev, [nangoProvider]: true }));
+        }
+      } else {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        setTokenErrors((prev) => ({ ...prev, [nangoProvider]: data.error ?? 'Failed to prepare connection' }));
+      }
+    } catch {
+      setTokenErrors((prev) => ({ ...prev, [nangoProvider]: 'Could not reach the server' }));
+    } finally {
+      fetchingTokens.current.delete(nangoProvider);
+    }
+  }
+
+  // Pre-fetch tokens for all available providers as soon as we know what's available
+  useEffect(() => {
+    for (const provider of availableProviders) {
+      void prefetchToken(provider);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableProviders]);
 
   /** Returns all connected rows for a provider */
   function getConnections(dbProvider: IntegrationProvider): UserIntegration[] {
@@ -191,42 +231,29 @@ export default function IntegrationsSettingsPage() {
     return integrations.find((i) => i.provider === dbProvider);
   }
 
-  async function openConsent(config: IntegrationConfig) {
-    setConsentProvider(config);
-    setPendingSessionToken(null);
-    setTokenError(null);
-    setTokenFetching(true);
-    try {
-      const res = await fetch('/api/integrations/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: config.nangoProvider }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPendingSessionToken(data.sessionToken ?? null);
-      } else {
-        const data = await res.json().catch(() => ({})) as { error?: string };
-        setTokenError(data.error ?? `Failed to start ${config.label} connection. Check that the integration is configured in Nango.`);
-      }
-    } catch {
-      setTokenError(`Could not reach the server. Please try again.`);
-    } finally {
-      setTokenFetching(false);
+  /**
+   * Called directly from onClick — no async gap before .auth().
+   * Token is read synchronously from the ref so popup blockers can't fire.
+   */
+  function connectProvider(config: IntegrationConfig) {
+    const token = sessionTokens.current[config.nangoProvider];
+    if (!token) {
+      // Token not ready yet — start fetching and tell the user
+      void prefetchToken(config.nangoProvider);
+      setConnectError(`Still preparing ${config.label} — please try again in a moment.`);
+      return;
     }
-  }
 
-  function handleConnect(config: IntegrationConfig) {
-    const token = pendingSessionToken;
-    if (!token) return;
-
-    setConnecting(true);
+    // Consume immediately so it can't be reused
+    delete sessionTokens.current[config.nangoProvider];
+    setTokenReady((prev) => ({ ...prev, [config.nangoProvider]: false }));
+    setConnecting(config.nangoProvider);
     setConnectError(null);
-    setPendingSessionToken(null);
 
+    // .auth() must be called here, synchronously within the click handler
     new Nango({ connectSessionToken: token })
       .auth(config.nangoProvider)
-      .then(() => syncIntegrations())
+      .then(() => { void syncIntegrations(); })
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : 'Connection failed';
         if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
@@ -234,8 +261,9 @@ export default function IntegrationsSettingsPage() {
         }
       })
       .finally(() => {
-        setConnecting(false);
-        setConsentProvider(null);
+        setConnecting(null);
+        // Re-fetch a fresh token for next time
+        void prefetchToken(config.nangoProvider);
       });
   }
 
@@ -272,23 +300,6 @@ export default function IntegrationsSettingsPage() {
     } catch { /* ignore */ } finally {
       setEditingAlias(null);
     }
-  }
-
-  if (consentProvider) {
-    return (
-      <div className="py-8">
-        <OAuthConsentScreen
-          provider={consentProvider.nangoProvider}
-          providerLabel={consentProvider.label}
-          permissions={consentProvider.permissions}
-          onConsent={() => handleConnect(consentProvider)}
-          onCancel={() => { setConsentProvider(null); setTokenError(null); }}
-          loading={connecting}
-          tokenLoading={tokenFetching}
-          tokenError={tokenError}
-        />
-      </div>
-    );
   }
 
   return (
@@ -438,11 +449,14 @@ export default function IntegrationsSettingsPage() {
                             </div>
                             {isAvailable && (
                               <button
-                                onClick={() => void openConsent(config)}
-                                className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+                                onClick={() => connectProvider(config)}
+                                disabled={connecting === config.nangoProvider}
+                                className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground disabled:opacity-50"
                               >
-                                <Plus className="h-3 w-3" />
-                                {hasConnections ? 'Add account' : 'Connect'}
+                                {connecting === config.nangoProvider
+                                  ? <Loader2 className="h-3 w-3 animate-spin" />
+                                  : <Plus className="h-3 w-3" />}
+                                {connecting === config.nangoProvider ? 'Connecting...' : hasConnections ? 'Add account' : 'Connect'}
                               </button>
                             )}
                             {!isAvailable && !hasConnections && (
@@ -532,10 +546,10 @@ export default function IntegrationsSettingsPage() {
                           if (isConnected && integration) {
                             void handleDisconnect(integration.id);
                           } else {
-                            void openConsent(config);
+                            connectProvider(config);
                           }
                         }}
-                        disabled={isDisconnecting || (!isAvailable && !isConnected)}
+                        disabled={isDisconnecting || connecting === config.nangoProvider || (!isAvailable && !isConnected)}
                         className={`group relative flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                           isConnected
                             ? 'border-green-300 bg-green-50/60 dark:border-green-800 dark:bg-green-950/30 hover:bg-muted/50'

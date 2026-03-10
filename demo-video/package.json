@@ -1,0 +1,36 @@
+{
+  "name": "donna-demo-video",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts DonnaDemo out/donna-demo.mp4",
+    "build": "remotion render src/index.ts DonnaDemo out/donna-demo.mp4 --codec h264",
+    "render:v2": "remotion render src/index.ts DonnaDemoV2 out/donna-demo-v2.mp4",
+    "build:v2": "remotion render src/index.ts DonnaDemoV2 out/donna-demo-v2.mp4 --codec h264",
+    "render:v3": "remotion render src/index.ts DonnaDemoV3 out/donna-demo-v3.mp4",
+    "build:v3": "remotion render src/index.ts DonnaDemoV3 out/donna-demo-v3.mp4 --codec h264",
+    "render:v4": "remotion render src/index.ts DonnaDemoV4 out/donna-demo-v4.mp4",
+    "build:v4": "remotion render src/index.ts DonnaDemoV4 out/donna-demo-v4.mp4 --codec h264",
+    "render:v5": "remotion render src/index.ts DonnaDemoV5 out/donna-demo-v5.mp4",
+    "build:v5": "remotion render src/index.ts DonnaDemoV5 out/donna-demo-v5.mp4 --codec h264",
+    "render:v6": "remotion render src/index.ts DonnaDemoV6 out/donna-demo-v6.mp4",
+    "build:v6": "remotion render src/index.ts DonnaDemoV6 out/donna-demo-v6.mp4 --codec h264",
+    "render:v7": "remotion render src/index.ts DonnaDemoV7 out/donna-demo-v7-vertical.mp4",
+    "build:v7": "remotion render src/index.ts DonnaDemoV7 out/donna-demo-v7-vertical.mp4 --codec h264"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.428",
+    "@remotion/google-fonts": "4.0.428",
+    "@remotion/transitions": "4.0.428",
+    "@remotion/media-utils": "4.0.428",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.428"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.0"
+  }
+}

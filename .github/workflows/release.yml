@@ -1,0 +1,113 @@
+name: Release Donna
+
+# Triggers when you push a version tag like: git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags:
+      - 'v*'
+  # Also allows manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. v0.1.0)'
+        required: true
+
+jobs:
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js ─────────────────────────────────────────────────────────
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Rust (required by Tauri) ────────────────────────────────────────
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Cache Rust build artifacts
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      # ── 4. Install JS dependencies ─────────────────────────────────────────
+      - name: Install Node dependencies
+        run: npm ci
+
+      # ── 5. Build Next.js + Tauri → produces .dmg ──────────────────────────
+      #
+      # OPTIONAL CODE SIGNING: If you later get an Apple Developer account,
+      # add these secrets in GitHub → Settings → Secrets and variables → Actions:
+      #   APPLE_CERTIFICATE          (base64-encoded .p12 file)
+      #   APPLE_CERTIFICATE_PASSWORD (password for the .p12)
+      #   APPLE_SIGNING_IDENTITY     (e.g. "Developer ID Application: Your Name (TEAMID)")
+      #   APPLE_ID                   (your Apple ID email)
+      #   APPLE_PASSWORD             (app-specific password from appleid.apple.com)
+      #   APPLE_TEAM_ID              (10-character team ID)
+      #
+      # When those secrets are present, Tauri auto-signs and notarizes.
+      # Without them, it builds an unsigned DMG — totally fine for early distribution.
+      #
+      - name: Build Tauri app (unsigned DMG)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Next.js build needs these — add to GitHub Secrets if your build requires them
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # Uncomment when you have Apple Developer certs:
+          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          # APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Donna ${{ github.ref_name }}'
+          releaseBody: |
+            ## What's new in ${{ github.ref_name }}
+
+            Download **Donna.dmg** below, open it, and drag Donna to your Applications folder.
+
+            > **First time opening?** If macOS warns about an unidentified developer,
+            > right-click the app → Open → Open. You only need to do this once.
+          releaseDraft: true        # Creates a draft — you review before publishing
+          prerelease: false
+          includeDebug: false
+          # Build for both Apple Silicon and Intel
+          args: --target universal-apple-darwin
+
+  # ── Optional: Windows build (uncomment when ready) ──────────────────────
+  # build-windows:
+  #   name: Build Windows installer
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #         cache: 'npm'
+  #     - uses: dtolnay/rust-toolchain@stable
+  #     - uses: swatinem/rust-cache@v2
+  #       with:
+  #         workspaces: './src-tauri -> target'
+  #     - run: npm ci
+  #     - uses: tauri-apps/tauri-action@v0
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         tagName: ${{ github.ref_name }}
+  #         releaseName: 'Donna ${{ github.ref_name }}'
+  #         releaseDraft: true
+  #         prerelease: false

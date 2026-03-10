@@ -1,5 +1,7 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 const c = {
   surface: 'rgba(45,45,45,0.04)',
   surfaceElevated: 'rgba(45,45,45,0.06)',
@@ -141,7 +143,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div className="flex justify-start">
-      <div className="w-full">
+      <motion.div
+        className="w-full"
+        initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }}
+        animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }}
+        transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
+      >
         <div
           className="pl-4 text-[15px] leading-relaxed"
           style={{
@@ -156,7 +163,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         >
           {formatTimestamp(message.timestamp)}
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

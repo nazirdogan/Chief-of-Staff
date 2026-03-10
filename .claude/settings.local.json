@@ -77,7 +77,19 @@
       "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/layout.tsx\" | head -50)",
       "Bash(ls /Users/nazir/donna/supabase/migrations/ | sort | xargs -I{} grep -l \"storage\\\\|bucket\" /Users/nazir/donna/supabase/migrations/{} 2>/dev/null | head -5; grep -r \"bucket\\\\|storage\" /Users/nazir/donna/supabase/migrations/ --include=\"*.sql\" -l 2>/dev/null | head -5)",
       "Bash(which convert:*)",
-      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/ | grep -E \"\\\\.tsx$\")"
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/ | grep -E \"\\\\.tsx$\")",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/ | grep page)",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/)",
+      "WebSearch",
+      "WebFetch(domain:mixkit.co)",
+      "Bash(ffprobe -v quiet -show_streams out/donna-demo.mp4 2>&1 | grep -E \"codec_type|codec_name|channels|sample_rate\")",
+      "Bash(ffprobe out/donna-demo.mp4 2>&1)",
+      "Bash(ffprobe -v quiet -show_streams -print_format json out/donna-demo.mp4 2>&1 | grep -E '\"codec_type\"|\"codec_name\"|\"channels\"|\"nb_streams\"')",
+      "Bash(ls -lh out/donna-demo.mp4 && ffprobe -v quiet -show_format out/donna-demo.mp4 2>&1 | grep -E \"duration|size|nb_streams\")",
+      "Bash(say -v '?' 2>&1 | grep -iE \"samantha|alex|karen|daniel|moira|tessa\" | head -10)",
+      "Bash(ffprobe -v quiet -show_format out/donna-demo-v2.mp4 2>&1 | grep -E \"duration|nb_streams|size\" && ffprobe -v quiet -show_streams out/donna-demo-v2.mp4 2>&1 | grep -E \"codec_type|codec_name|channels\")",
+      "Bash(mkdir -p public/vo && say -v Samantha -r 185 \"Meet Donna.\" -o public/vo/v4-01-intro.aiff && ffmpeg -y -i public/vo/v4-01-intro.aiff public/vo/v4-01-intro.mp3 2>/dev/null && say -v Samantha -r 185 \"One briefing. Everything that matters.\" -o public/vo/v4-02-briefing.aiff && ffmpeg -y -i public/vo/v4-02-briefing.aiff public/vo/v4-02-briefing.mp3 2>/dev/null && say -v Samantha -r 185 \"Ask anything. She already knows.\" -o public/vo/v4-03-chat.aiff && ffmpeg -y -i public/vo/v4-03-chat.aiff public/vo/v4-03-chat.mp3 2>/dev/null && say -v Samantha -r 185 \"Inbox. Commitments. Relationships. All covered.\" -o public/vo/v4-04-montage.aiff && ffmpeg -y -i public/vo/v4-04-montage.aiff public/vo/v4-04-montage.mp3 2>/dev/null && say -v Samantha -r 185 \"She acts. You approve.\" -o public/vo/v4-05-autonomy.aiff && ffmpeg -y -i public/vo/v4-05-autonomy.aiff public/vo/v4-05-autonomy.mp3 2>/dev/null && say -v Samantha -r 185 \"See everything. Miss nothing.\" -o public/vo/v4-06-tagline.aiff && ffmpeg -y -i public/vo/v4-06-tagline.aiff public/vo/v4-06-tagline.mp3 2>/dev/null && say -v Samantha -r 185 \"Request early access.\" -o public/vo/v4-07-cta.aiff && ffmpeg -y -i public/vo/v4-07-cta.aiff public/vo/v4-07-cta.mp3 2>/dev/null && rm -f public/vo/v4-*.aiff && echo \"All V4 VO clips generated\")",
+      "Bash(say -v Samantha -r 185 \"Inbox. Commitments. All covered.\" -o public/vo/v4-04-montage.aiff && ffmpeg -y -i public/vo/v4-04-montage.aiff public/vo/v4-04-montage.mp3 2>/dev/null && rm -f public/vo/v4-04-montage.aiff && echo \"VO regenerated\")"
     ]
   }
 }
