@@ -11,6 +11,7 @@ interface ConversationSummary {
   id: string;
   title: string | null;
   updated_at: string;
+  is_favorite: boolean;
 }
 
 interface ChatStore {
@@ -26,7 +27,7 @@ interface ChatStore {
   conversationsLoading: boolean;
 
   // Actions
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, files?: File[]) => Promise<void>;
   clearMessages: () => void;
   toggleMemoryPanel: () => void;
 
@@ -34,6 +35,9 @@ interface ChatStore {
   loadConversations: () => Promise<void>;
   loadConversation: (id: string) => Promise<void>;
   startNewConversation: () => void;
+  renameConversation: (id: string, title: string) => Promise<void>;
+  toggleFavorite: (id: string) => Promise<void>;
+  deleteConversation: (id: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -95,12 +99,15 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   // ── Message sending ──────────────────────────────────────────────────────
 
-  sendMessage: async (content: string) => {
-    // Optimistically add the user message to the local state
+  sendMessage: async (content: string, files?: File[]) => {
+    // Build display content for the optimistic message
+    const displayContent = content.trim()
+      || (files && files.length > 0 ? `📎 ${files.map((f) => f.name).join(', ')}` : '');
+
     const optimisticUserMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content,
+      content: displayContent,
       timestamp: new Date().toISOString(),
     };
 
@@ -129,11 +136,25 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         set({ currentConversationId: conversationId });
       }
 
-      const response = await fetch(`/api/chat/conversations/${conversationId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
-      });
+      // Build request — FormData when files are attached, JSON otherwise
+      let fetchInit: RequestInit;
+      if (files && files.length > 0) {
+        const form = new FormData();
+        form.append('content', content.trim());
+        files.forEach((file) => form.append('files', file, file.name));
+        fetchInit = { method: 'POST', body: form };
+      } else {
+        fetchInit = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content }),
+        };
+      }
+
+      const response = await fetch(
+        `/api/chat/conversations/${conversationId}/messages`,
+        fetchInit,
+      );
 
       if (!response.ok) {
         throw new Error(`Chat request failed with status ${response.status}`);
@@ -184,6 +205,51 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         isLoading: false,
       }));
     }
+  },
+
+  renameConversation: async (id: string, title: string) => {
+    // Optimistic update
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === id ? { ...c, title } : c
+      ),
+    }));
+    await fetch(`/api/chat/conversations/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+    });
+  },
+
+  toggleFavorite: async (id: string) => {
+    const current = get().conversations.find((c) => c.id === id);
+    if (!current) return;
+    const newVal = !current.is_favorite;
+    // Optimistic update + re-sort
+    set((state) => {
+      const updated = state.conversations.map((c) =>
+        c.id === id ? { ...c, is_favorite: newVal } : c
+      );
+      return {
+        conversations: updated.sort((a, b) => {
+          if (a.is_favorite !== b.is_favorite) return a.is_favorite ? -1 : 1;
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        }),
+      };
+    });
+    await fetch(`/api/chat/conversations/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_favorite: newVal }),
+    });
+  },
+
+  deleteConversation: async (id: string) => {
+    // Optimistic remove
+    set((state) => ({
+      conversations: state.conversations.filter((c) => c.id !== id),
+    }));
+    await fetch(`/api/chat/conversations/${id}`, { method: 'DELETE' });
   },
 
   clearMessages: () => set({ messages: [] }),

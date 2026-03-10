@@ -12,6 +12,7 @@ export async function listConversations(
     .from('chat_conversations')
     .select('*')
     .eq('user_id', userId)
+    .order('is_favorite', { ascending: false })
     .order('updated_at', { ascending: false })
     .limit(50);
 
@@ -100,6 +101,22 @@ export async function updateConversationTitle(
     .from('chat_conversations')
     .update({ title })
     .eq('id', conversationId);
+
+  if (error) throw error;
+}
+
+export async function updateConversation(
+  supabase: Client,
+  conversationId: string,
+  userId: string,
+  updates: { title?: string; is_favorite?: boolean }
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase as any)
+    .from('chat_conversations')
+    .update(updates)
+    .eq('id', conversationId)
+    .eq('user_id', userId);
 
   if (error) throw error;
 }

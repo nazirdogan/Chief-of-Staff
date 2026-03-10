@@ -31,12 +31,23 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       );
     }
 
-    const body = await req.json();
-    const { content } = body as { content: string };
+    // Accept both JSON (no files) and multipart/form-data (with files)
+    const contentType = req.headers.get('content-type') ?? '';
+    let content = '';
+    let attachedFiles: File[] = [];
 
-    if (!content || typeof content !== 'string' || content.trim().length === 0) {
+    if (contentType.includes('multipart/form-data')) {
+      const form = await req.formData();
+      content = (form.get('content') as string | null) ?? '';
+      attachedFiles = form.getAll('files') as File[];
+    } else {
+      const body = await req.json() as { content: string };
+      content = body.content ?? '';
+    }
+
+    if ((!content || content.trim().length === 0) && attachedFiles.length === 0) {
       return NextResponse.json(
-        { error: 'content is required', code: 'VALIDATION_ERROR' },
+        { error: 'content or files are required', code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
@@ -53,14 +64,54 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       );
     }
 
+    // Build display content for DB (text-only summary of what was sent)
+    const fileNames = attachedFiles.map((f) => f.name);
+    const dbContent = [
+      content.trim(),
+      fileNames.length > 0 ? `📎 ${fileNames.join(', ')}` : '',
+    ].filter(Boolean).join('\n\n') || '📎 ' + fileNames.join(', ');
+
     // Persist the user's message
-    const userMessage = await addMessage(supabase, conversationId, 'user', content.trim());
+    const userMessage = await addMessage(supabase, conversationId, 'user', dbContent);
 
     // Auto-generate title from the first user message if the conversation has no title yet
     const isFirstMessage = conversation.messages.length === 0;
     if (isFirstMessage && !conversation.title) {
-      const autoTitle = content.trim().slice(0, 60);
+      const autoTitle = (content.trim() || fileNames[0] || 'Attachment').slice(0, 60);
       await updateConversationTitle(supabase, conversationId, autoTitle);
+    }
+
+    // Build rich user content for Claude (vision blocks for images, text for others)
+    type VisionMediaType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+    const SUPPORTED_VISION: VisionMediaType[] = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const TEXT_LIKE = ['text/plain', 'text/csv', 'text/markdown', 'application/json', 'application/xml'];
+
+    const attachmentBlocks: Anthropic.Messages.ContentBlockParam[] = [];
+    for (const file of attachedFiles) {
+      const mimeType = file.type || 'application/octet-stream';
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      if (SUPPORTED_VISION.includes(mimeType as VisionMediaType)) {
+        attachmentBlocks.push({
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: mimeType as VisionMediaType,
+            data: buffer.toString('base64'),
+          },
+        });
+      } else if (TEXT_LIKE.some((t) => mimeType.startsWith(t)) || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.md')) {
+        const text = buffer.toString('utf-8').slice(0, 50_000); // cap at 50K chars
+        attachmentBlocks.push({
+          type: 'text',
+          text: `📎 File: ${file.name}\n\`\`\`\n${text}\n\`\`\``,
+        });
+      } else {
+        attachmentBlocks.push({
+          type: 'text',
+          text: `📎 Attached: ${file.name} (${mimeType}, ${(buffer.length / 1024).toFixed(0)} KB) — binary file, cannot read contents directly.`,
+        });
+      }
     }
 
     // Build the message history for the AI, windowed to prevent context overflow.
@@ -69,9 +120,21 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
     const recentMessages = conversation.messages.length > MAX_HISTORY
       ? conversation.messages.slice(-MAX_HISTORY)
       : conversation.messages;
-    const allMessages = [
-      ...recentMessages,
-      { role: 'user' as const, content: content.trim() },
+
+    // Construct the current user turn with optional attachment blocks
+    const currentUserContent: Anthropic.Messages.ContentBlockParam[] = [
+      ...attachmentBlocks,
+      ...(content.trim() ? [{ type: 'text' as const, text: content.trim() }] : []),
+    ];
+
+    const allMessages: { role: 'user' | 'assistant'; content: string | Anthropic.Messages.ContentBlockParam[] }[] = [
+      ...recentMessages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      {
+        role: 'user' as const,
+        content: currentUserContent.length === 1 && currentUserContent[0].type === 'text'
+          ? (currentUserContent[0] as Anthropic.Messages.TextBlockParam).text
+          : currentUserContent,
+      },
     ];
 
     // Pre-fetch working patterns and custom instructions for context-aware system prompt
@@ -109,7 +172,7 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
 
     let anthropicMessages: Anthropic.Messages.MessageParam[] = allMessages.map((m) => ({
       role: m.role,
-      content: m.content,
+      content: m.content as string | Anthropic.Messages.ContentBlockParam[],
     }));
 
     // Agentic loop: call the model, execute tools, repeat until we get a final text response

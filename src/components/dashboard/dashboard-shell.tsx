@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
@@ -16,6 +16,8 @@ import {
   Plus,
   Trash2,
   BookOpen,
+  Star,
+  Pencil,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
@@ -88,6 +90,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const conversations = useChatStore((s) => s.conversations);
   const loadConversations = useChatStore((s) => s.loadConversations);
+  const renameConversation = useChatStore((s) => s.renameConversation);
+  const toggleFavorite = useChatStore((s) => s.toggleFavorite);
+  const deleteConversationFromStore = useChatStore((s) => s.deleteConversation);
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const { current: currentToast, resolve: resolveToast } = useOneTapQueue();
   const setCatchUpState = useCatchUpStore((s) => s.setState);
@@ -239,11 +250,47 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         e.preventDefault();
         setCmdkOpen((prev) => !prev);
       }
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+        setRenamingId(null);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Close context menu on any click
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, [contextMenu]);
+
+  // Focus rename input when it appears
+  useEffect(() => {
+    if (renamingId) {
+      setTimeout(() => renameInputRef.current?.focus(), 0);
+    }
+  }, [renamingId]);
+
+
+  async function handleDeleteConversation(id: string) {
+    await deleteConversationFromStore(id);
+    if (pathname === `/chat/${id}`) router.push('/chat');
+  }
+
+  function handleStartRename(conv: { id: string; title: string | null }) {
+    setContextMenu(null);
+    setRenamingId(conv.id);
+    setRenameValue(conv.title ?? '');
+  }
+
+  async function handleRenameSubmit(id: string) {
+    const trimmed = renameValue.trim();
+    if (trimmed) await renameConversation(id, trimmed);
+    setRenamingId(null);
+  }
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -326,50 +373,71 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   {conversations.slice(0, 15).map((conv) => {
                     const href = `/chat/${conv.id}`;
                     const active = pathname === href;
+                    const isRenaming = renamingId === conv.id;
                     return (
-                      <Link
+                      <div
                         key={conv.id}
-                        href={href}
-                        className="group flex items-center gap-2 rounded-lg px-3 py-[7px] text-[12px] transition-all duration-150"
-                        style={{
-                          background: active ? t.activeAccent : 'transparent',
-                          border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
-                          color: active ? t.text : t.textQuaternary,
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!active) {
-                            e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
-                            e.currentTarget.style.color = t.textTertiary;
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!active) {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = t.textQuaternary;
-                          }
+                        className="group relative"
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setContextMenu({ convId: conv.id, x: e.clientX, y: e.clientY });
                         }}
                       >
-                        <MessageCircle size={12} style={{ opacity: 0.4, flexShrink: 0 }} />
-                        <span className="truncate">
-                          {conv.title || 'New conversation'}
-                        </span>
-                        {active && (
-                          <button
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              await fetch(`/api/chat/conversations/${conv.id}`, { method: 'DELETE' });
-                              loadConversations();
-                              router.push('/chat');
+                        {isRenaming ? (
+                          <div
+                            className="flex items-center gap-2 rounded-lg px-3 py-[7px]"
+                            style={{
+                              background: t.activeAccent,
+                              border: `1px solid ${t.activeBorder}`,
                             }}
-                            className="ml-auto opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5 rounded"
-                            style={{ color: t.textQuaternary }}
-                            title="Delete conversation"
                           >
-                            <Trash2 size={11} />
-                          </button>
+                            <MessageCircle size={12} style={{ opacity: 0.4, flexShrink: 0 }} />
+                            <input
+                              ref={renameInputRef}
+                              value={renameValue}
+                              onChange={(e) => setRenameValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleRenameSubmit(conv.id);
+                                if (e.key === 'Escape') setRenamingId(null);
+                              }}
+                              onBlur={() => handleRenameSubmit(conv.id)}
+                              className="min-w-0 flex-1 bg-transparent text-[12px] outline-none"
+                              style={{ color: t.text }}
+                            />
+                          </div>
+                        ) : (
+                          <Link
+                            href={href}
+                            className="flex items-center gap-2 rounded-lg px-3 py-[7px] text-[12px] transition-all duration-150"
+                            style={{
+                              background: active ? t.activeAccent : 'transparent',
+                              border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
+                              color: active ? t.text : t.textQuaternary,
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!active) {
+                                e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
+                                e.currentTarget.style.color = t.textTertiary;
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!active) {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = t.textQuaternary;
+                              }
+                            }}
+                          >
+                            {conv.is_favorite ? (
+                              <Star size={11} style={{ color: t.dawn, flexShrink: 0, fill: t.dawn }} />
+                            ) : (
+                              <MessageCircle size={12} style={{ opacity: 0.4, flexShrink: 0 }} />
+                            )}
+                            <span className="truncate flex-1">
+                              {conv.title || 'New conversation'}
+                            </span>
+                          </Link>
                         )}
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>
@@ -439,6 +507,81 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         {currentToast && !dialogOpen && (
           <OneTapConfirmToast action={currentToast} onResolve={resolveToast} />
         )}
+
+        {/* Right-click context menu for chat items */}
+        {contextMenu && (() => {
+          const conv = conversations.find((c) => c.id === contextMenu.convId);
+          if (!conv) return null;
+          return (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'fixed',
+                top: contextMenu.y,
+                left: contextMenu.x,
+                zIndex: 9999,
+                background: '#FFFFFF',
+                border: `1px solid ${t.border}`,
+                borderRadius: 10,
+                boxShadow: '0 8px 24px rgba(45,45,45,0.12), 0 2px 6px rgba(45,45,45,0.06)',
+                minWidth: 160,
+                padding: '4px',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Favorite */}
+              <button
+                onClick={async () => {
+                  setContextMenu(null);
+                  await toggleFavorite(conv.id);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-[12px] transition-colors"
+                style={{ color: t.text }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = t.surface; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Star
+                  size={13}
+                  style={{
+                    color: conv.is_favorite ? t.dawn : t.textTertiary,
+                    fill: conv.is_favorite ? t.dawn : 'none',
+                  }}
+                />
+                {conv.is_favorite ? 'Remove from favourites' : 'Add to favourites'}
+              </button>
+
+              {/* Rename */}
+              <button
+                onClick={() => handleStartRename(conv)}
+                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-[12px] transition-colors"
+                style={{ color: t.text }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = t.surface; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Pencil size={13} style={{ color: t.textTertiary }} />
+                Rename
+              </button>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: t.border, margin: '4px 0' }} />
+
+              {/* Delete */}
+              <button
+                onClick={async () => {
+                  setContextMenu(null);
+                  await handleDeleteConversation(conv.id);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-[12px] transition-colors"
+                style={{ color: '#D64B2A' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(214,75,42,0.06)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Trash2 size={13} />
+                Delete chat
+              </button>
+            </div>
+          );
+        })()}
       </div>
     </>
   );
