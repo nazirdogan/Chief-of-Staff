@@ -19,6 +19,28 @@
   .preview { display: flex; align-items: center; justify-content: center; padding: 48px 32px; min-height: 200px; }
   .preview.light { background: #FAF9F6; border: 1px solid #e8e5e0; border-bottom: none; border-radius: 12px 12px 0 0; }
   .preview.dark { background: #2D2D2D; border-radius: 12px 12px 0 0; }
+  .preview.transparent-light {
+    background-image: linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+                      linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+                      linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    background-color: #f8f8f8;
+    border: 1px solid #e8e5e0; border-bottom: none; border-radius: 12px 12px 0 0;
+  }
+  .preview.transparent-dark {
+    background-image: linear-gradient(45deg, #3a3a3a 25%, transparent 25%),
+                      linear-gradient(-45deg, #3a3a3a 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, #3a3a3a 75%),
+                      linear-gradient(-45deg, transparent 75%, #3a3a3a 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    background-color: #2a2a2a;
+    border-radius: 12px 12px 0 0;
+  }
+  .section-divider { margin: 48px 0 32px; border: none; border-top: 1px solid #e8e5e0; }
+  .section-label { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8D99AE; margin-bottom: 24px; }
 
   .actions { background: #fff; border: 1px solid #e8e5e0; border-top: none; border-radius: 0 0 12px 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .label { font-size: 14px; font-weight: 500; color: #2D2D2D; }
@@ -46,14 +68,14 @@
   <h1>Donna<span>.</span> Logos</h1>
   <p class="subtitle">Option D — The Editor. Click to download SVG or PNG.</p>
 
+  <p class="section-label">Solid backgrounds</p>
   <div class="grid">
 
     <!-- Wordmark Light -->
     <div class="card">
       <div class="preview light">
-        <svg id="svg-wordmark-light" viewBox="0 0 360 80" width="320" xmlns="http://www.w3.org/2000/svg">
-          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna</text>
-          <circle cx="305" cy="58" r="7" fill="#E8845C"/>
+        <svg id="svg-wordmark-light" viewBox="0 0 260 80" width="260" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna<tspan fill="#E8845C" letter-spacing="0">.</tspan></text>
         </svg>
       </div>
       <div class="actions">
@@ -68,9 +90,8 @@
     <!-- Wordmark Dark -->
     <div class="card">
       <div class="preview dark">
-        <svg id="svg-wordmark-dark" viewBox="0 0 360 80" width="320" xmlns="http://www.w3.org/2000/svg">
-          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna</text>
-          <circle cx="305" cy="58" r="7" fill="#E8845C"/>
+        <svg id="svg-wordmark-dark" viewBox="0 0 260 80" width="260" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna<tspan fill="#E8845C" letter-spacing="0">.</tspan></text>
         </svg>
       </div>
       <div class="actions">
@@ -118,7 +139,79 @@
 
   </div>
 
-  <p class="footer">PNGs export at high resolution (wordmarks 1440px wide, monograms 512×512). SVGs are infinitely scalable.</p>
+  <hr class="section-divider">
+  <p class="section-label">Transparent backgrounds</p>
+  <div class="grid">
+
+    <!-- Wordmark Transparent — Dark text (for light surfaces) -->
+    <div class="card">
+      <div class="preview transparent-light">
+        <svg id="svg-wordmark-transparent-dark" viewBox="0 0 260 80" width="260" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna<tspan fill="#E8845C" letter-spacing="0">.</tspan></text>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Wordmark — Transparent<small>Dark text · For light surfaces</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-wordmark-transparent-dark', 'donna-wordmark-transparent-dark')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-wordmark-transparent-dark', 'donna-wordmark-transparent-dark', 1440, 320)">PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wordmark Transparent — Light text (for dark surfaces) -->
+    <div class="card">
+      <div class="preview transparent-dark">
+        <svg id="svg-wordmark-transparent-light" viewBox="0 0 260 80" width="260" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna<tspan fill="#E8845C" letter-spacing="0">.</tspan></text>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Wordmark — Transparent<small>Light text · For dark surfaces</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-wordmark-transparent-light', 'donna-wordmark-transparent-light')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-wordmark-transparent-light', 'donna-wordmark-transparent-light', 1440, 320)">PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monogram Transparent — Dark text (for light surfaces) -->
+    <div class="card">
+      <div class="preview transparent-light">
+        <svg id="svg-monogram-transparent-dark" viewBox="0 0 100 100" width="96" xmlns="http://www.w3.org/2000/svg">
+          <text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#2D2D2D">D</text>
+          <circle cx="80" cy="76" r="6" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Monogram — Transparent<small>Dark text · For light surfaces</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-monogram-transparent-dark', 'donna-monogram-transparent-dark')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-monogram-transparent-dark', 'donna-monogram-transparent-dark', 512, 512)">PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monogram Transparent — Light text (for dark surfaces) -->
+    <div class="card">
+      <div class="preview transparent-dark">
+        <svg id="svg-monogram-transparent-light" viewBox="0 0 100 100" width="96" xmlns="http://www.w3.org/2000/svg">
+          <text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#FAF9F6">D</text>
+          <circle cx="80" cy="76" r="6" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="actions">
+        <div class="label">Monogram — Transparent<small>Light text · For dark surfaces</small></div>
+        <div class="btn-group">
+          <button class="btn btn-svg" onclick="downloadSVG('svg-monogram-transparent-light', 'donna-monogram-transparent-light')">SVG</button>
+          <button class="btn btn-png" onclick="downloadPNG('svg-monogram-transparent-light', 'donna-monogram-transparent-light', 512, 512)">PNG</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer">Solid PNGs have filled backgrounds. Transparent PNGs have no background — suitable for overlays, app icons, and any coloured surface. Wordmarks export at 1440px wide, monograms at 512×512. SVGs are infinitely scalable.</p>
 </div>
 
 <script>

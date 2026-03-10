@@ -134,6 +134,17 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         const createData = await createRes.json();
         conversationId = createData.conversation.id as string;
         set({ currentConversationId: conversationId });
+
+        // Optimistically add the new conversation to the sidebar immediately
+        const newConv: ConversationSummary = {
+          id: conversationId,
+          title: content.trim().slice(0, 60) || 'New conversation',
+          updated_at: new Date().toISOString(),
+          is_favorite: false,
+        };
+        set((state) => ({
+          conversations: [newConv, ...state.conversations],
+        }));
       }
 
       // Build request — FormData when files are attached, JSON otherwise
