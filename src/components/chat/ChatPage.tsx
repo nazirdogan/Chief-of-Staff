@@ -59,9 +59,6 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
   const containerRef   = useRef<HTMLDivElement>(null);
   const inputWrapperRef = useRef<HTMLDivElement>(null);
   const navigatedRef   = useRef<string | null>(null);
-  // Track whether the reset effect has run — prevents the URL mirror from
-  // redirecting back to a stale conversationId on mount.
-  const resetDoneRef   = useRef(false);
 
   /* ── Load / reset on route change ─────────────────────────── */
   useEffect(() => {
@@ -69,21 +66,20 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
       loadConversation(conversationId);
       setPhase('chat');
     } else {
+      // Mark any stale conversationId as already-navigated so the mirror
+      // effect (which runs in the same cycle) won't redirect back to it.
+      const staleId = useChatStore.getState().currentConversationId;
+      if (staleId) navigatedRef.current = staleId;
       startNewConversation();
       setPhase('greeting');
       setSlideOffset(0);
     }
-    // Mark reset as done so the URL mirror effect knows it's safe
-    resetDoneRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
   /* ── Mirror new conversationId into URL ────────────────────── */
   useEffect(() => {
-    // Only mirror after the reset effect has run at least once, so we never
-    // redirect back to a stale conversation from a previous page.
     if (
-      resetDoneRef.current &&
       currentConversationId &&
       !conversationId &&
       navigatedRef.current !== currentConversationId
