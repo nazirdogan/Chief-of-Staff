@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — Brand Identity 04: Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FDF6EE;
+    --warm-white: #FFFBF5;
+    --terra: #C4603C;
+    --terra-deep: #9A3E22;
+    --terra-light: #F5E6DF;
+    --brown: #2D2013;
+    --warm-gray: #8A7A6E;
+    --sand: #E8D9C8;
+    --olive: #7A8A5E;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--warm-white); color: var(--brown); line-height: 1.6; }
+
+  /* NAV */
+  .nav { padding: 20px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .logo-oval { width: 40px; height: 40px; background: var(--terra); border-radius: 50%; display: flex; align-items:center; justify-content:center; }
+  .logo-oval span { font-family: 'Lora', serif; font-size: 20px; color: white; font-style: italic; }
+  .logo-word { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--brown); }
+  .nav-tag { font-size: 12px; color: var(--warm-gray); font-style: italic; }
+
+  /* HERO */
+  .hero { padding: 48px 52px 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; border-bottom: 1px solid var(--sand); }
+  .hero-left { }
+  .handnote { font-family: 'Caveat', cursive; font-size: 22px; color: var(--terra); margin-bottom: 20px; transform: rotate(-1deg); display: inline-block; }
+  .hero h1 { font-family: 'Lora', serif; font-size: clamp(38px, 4.5vw, 58px); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 24px; }
+  .hero h1 em { font-style: italic; color: var(--terra); }
+  .hero p { font-size: 16px; color: var(--warm-gray); line-height: 1.85; max-width: 440px; }
+  .terra-line { width: 40px; height: 3px; background: var(--terra); border-radius: 2px; margin: 28px 0; }
+
+  /* CARD MOCK — a beautiful note card */
+  .card-mock { background: var(--cream); border-radius: 16px; padding: 32px; border: 1px solid var(--sand); box-shadow: 0 20px 60px rgba(44,32,19,.08), 0 4px 16px rgba(44,32,19,.04); position: relative; }
+  .card-mock::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--terra); border-radius: 16px 16px 0 0; }
+  .card-date { font-family: 'Lora', serif; font-size: 12px; font-style: italic; color: var(--warm-gray); margin-bottom: 20px; }
+  .card-greeting { font-family: 'Lora', serif; font-size: 22px; font-style: italic; color: var(--brown); margin-bottom: 6px; }
+  .card-sub { font-size: 13px; color: var(--warm-gray); margin-bottom: 24px; }
+  .card-note { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 3px solid var(--sand); }
+  .card-note.hot { border-color: var(--terra); background: var(--terra-light); }
+  .cn-cat { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--warm-gray); margin-bottom: 4px; font-weight: 500; }
+  .card-note.hot .cn-cat { color: var(--terra); }
+  .cn-text { font-size: 14px; color: var(--brown); line-height: 1.5; }
+  .card-sign { margin-top: 24px; font-family: 'Caveat', cursive; font-size: 20px; color: var(--terra); text-align: right; }
+
+  /* COLORS */
+  .sec { padding: 64px 52px; border-bottom: 1px solid var(--sand); }
+  .sec-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--warm-gray); font-weight: 500; margin-bottom: 32px; }
+  .color-row { display: flex; gap: 20px; flex-wrap: wrap; }
+  .cr-swatch { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 160px; background: white; padding: 16px; border-radius: 10px; border: 1px solid var(--sand); }
+  .cr-blob { width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0; }
+  .cr-hex { font-size: 14px; font-weight: 500; color: var(--brown); }
+  .cr-name { font-size: 12px; color: var(--warm-gray); margin-top: 2px; }
+
+  /* TYPOGRAPHY */
+  .type-samples { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .ts-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--warm-gray); margin-bottom: 14px; }
+  .ts-display { font-family: 'Lora', serif; font-size: 50px; font-weight: 600; line-height: 1.1; color: var(--brown); }
+  .ts-display em { font-style: italic; color: var(--terra); }
+  .ts-hand { font-family: 'Caveat', cursive; font-size: 28px; color: var(--terra); line-height: 1.4; margin-bottom: 12px; }
+  .ts-body { font-size: 15px; color: var(--warm-gray); line-height: 1.85; }
+
+  /* VOICE */
+  .voice-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .vc { background: var(--cream); padding: 28px; border-radius: 12px; border: 1px solid var(--sand); }
+  .vc-trait { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--terra); font-weight: 600; margin-bottom: 10px; }
+  .vc-title { font-family: 'Lora', serif; font-size: 18px; font-weight: 600; color: var(--brown); margin-bottom: 10px; line-height: 1.3; }
+  .vc-desc { font-size: 13px; color: var(--warm-gray); line-height: 1.7; }
+  .vc-example { margin-top: 16px; padding: 12px 14px; background: white; border-radius: 8px; font-family: 'Lora', serif; font-style: italic; font-size: 14px; color: var(--brown); line-height: 1.6; border: 1px solid var(--sand); }
+
+  /* PHILOSOPHY */
+  .phil { padding: 64px 52px; background: var(--terra); }
+  .phil-title { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; font-style: italic; color: white; margin-bottom: 24px; max-width: 700px; line-height: 1.3; }
+  .phil-body { font-size: 16px; color: rgba(255,255,255,.8); line-height: 1.8; max-width: 640px; }
+  .phil-handnote { font-family: 'Caveat', cursive; font-size: 24px; color: rgba(255,255,255,.6); margin-top: 24px; }
+
+  .footer { padding: 28px 52px; display: flex; justify-content: space-between; }
+  .ft { font-size: 13px; color: var(--warm-gray); font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">
+    <div class="logo-oval"><span>D</span></div>
+    <span class="logo-word">Donna</span>
+  </div>
+  <span class="nav-tag">Brand Identity 04 · Personal</span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="handnote">Good morning —</div>
+    <h1>The assistant who<br>reads everything<br>so <em>you don't</em> have to.</h1>
+    <div class="terra-line"></div>
+    <p>Donna is like having a brilliant, tireless personal assistant who went through every message while you slept — and only woke you up for the three things that actually matter today.</p>
+  </div>
+  <div class="card-mock">
+    <div class="card-date">Tuesday, 10 March · Morning Briefing</div>
+    <div class="card-greeting">Good morning, Nazir.</div>
+    <div class="card-sub">I've been through everything. Here's what matters.</div>
+    <div class="card-note hot">
+      <div class="cn-cat">Needs you today</div>
+      <div class="cn-text">Laith is still waiting on the term sheet. He followed up three times. I've drafted a reply — just needs your eyes.</div>
+    </div>
+    <div class="card-note">
+      <div class="cn-cat">Worth knowing</div>
+      <div class="cn-text">Rania sent the revised deck at 11pm. You mentioned feedback "this week" — it's Tuesday, so you have time.</div>
+    </div>
+    <div class="card-note">
+      <div class="cn-cat">Heads up</div>
+      <div class="cn-text">Sarah Chen — you haven't spoken in 47 days. She closes her fund this month.</div>
+    </div>
+    <div class="card-sign">— Donna</div>
+  </div>
+</div>
+
+<!-- COLORS -->
+<div class="sec">
+  <div class="sec-label">Colour Palette</div>
+  <div class="color-row">
+    <div class="cr-swatch">
+      <div class="cr-blob" style="background:#C4603C;"></div>
+      <div><div class="cr-hex">#C4603C</div><div class="cr-name">Terra Cotta — Warmth</div></div>
+    </div>
+    <div class="cr-swatch">
+      <div class="cr-blob" style="background:#FDF6EE;"></div>
+      <div><div class="cr-hex">#FDF6EE</div><div class="cr-name">Cream — Ground</div></div>
+    </div>
+    <div class="cr-swatch">
+      <div class="cr-blob" style="background:#2D2013;"></div>
+      <div><div class="cr-hex">#2D2013</div><div class="cr-name">Dark Brown — Ink</div></div>
+    </div>
+    <div class="cr-swatch">
+      <div class="cr-blob" style="background:#E8D9C8;"></div>
+      <div><div class="cr-hex">#E8D9C8</div><div class="cr-name">Sand — Borders</div></div>
+    </div>
+    <div class="cr-swatch">
+      <div class="cr-blob" style="background:#7A8A5E;"></div>
+      <div><div class="cr-hex">#7A8A5E</div><div class="cr-name">Olive — Tertiary</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="sec">
+  <div class="sec-label">Typography</div>
+  <div class="type-samples">
+    <div>
+      <div class="ts-label">Display — Lora 600 / Italic</div>
+      <div class="ts-display">Warm,<br><em>human</em><br>intelligence.</div>
+    </div>
+    <div>
+      <div class="ts-label">Accent — Caveat 500 (handwritten feel)</div>
+      <div class="ts-hand">I've been through your inbox.<br>You only need to see three things.</div>
+      <div class="ts-label" style="margin-top: 20px;">Body — Inter 400 / 15px</div>
+      <div class="ts-body">Donna isn't a dashboard. It's the feeling of arriving at your desk and finding a thoughtful note from someone who cares — someone who already did the work.</div>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE -->
+<div class="sec">
+  <div class="sec-label">Brand Voice</div>
+  <div class="voice-cards">
+    <div class="vc">
+      <div class="vc-trait">Warm</div>
+      <div class="vc-title">Feels like someone who has your back.</div>
+      <div class="vc-desc">Donna's tone is caring, not clinical. It's the difference between a report and a conversation with a trusted colleague.</div>
+      <div class="vc-example">"I noticed you haven't replied to Ahmed in two weeks. He mentioned his timeline is tight. Want me to draft something?"</div>
+    </div>
+    <div class="vc">
+      <div class="vc-trait">Attentive</div>
+      <div class="vc-title">Notices things you'd miss in the rush.</div>
+      <div class="vc-desc">Small details matter. Donna catches the context that falls through the cracks — the tone shift, the missed follow-up, the quiet deadline.</div>
+      <div class="vc-example">"Rania's emails have been shorter lately. Could be nothing — but her last three replies were half the length of usual."</div>
+    </div>
+    <div class="vc">
+      <div class="vc-trait">Never naggy</div>
+      <div class="vc-title">Says it once, then trusts you.</div>
+      <div class="vc-desc">Donna surfaces the fact, makes its suggestion, and then steps back. No reminders every hour. No guilt. Just gentle clarity.</div>
+      <div class="vc-example">"The commitment to Laith is still open. I'll leave it with you — just wanted you to know it's there."</div>
+    </div>
+  </div>
+</div>
+
+<!-- PHILOSOPHY -->
+<div class="phil">
+  <div class="phil-title">"The most valuable thing isn't information. It's knowing what you can safely ignore."</div>
+  <div class="phil-body">Donna is designed for people who care deeply about relationships and responsibilities — but are being buried by the volume of modern communication. It doesn't replace your judgement. It gives you the space to use it.</div>
+  <div class="phil-handnote">— Donna's design philosophy</div>
+</div>
+
+<div class="footer">
+  <div class="ft">Donna — Brand Identity 04: Personal</div>
+  <div class="ft">Concept 4 of 8</div>
+</div>
+
+</body>
+</html>

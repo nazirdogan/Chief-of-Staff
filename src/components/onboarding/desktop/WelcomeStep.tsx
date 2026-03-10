@@ -55,14 +55,14 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <rect width="100" height="100" rx="22" fill="#1B1F3A" />
+            <rect width="100" height="100" rx="22" fill="#F1EDEA" />
             <path
               d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
               fill="none"
-              stroke="#FBF7F4"
+              stroke="#2D2D2D"
               strokeWidth="4"
               strokeLinejoin="round"
-              style={{ opacity: 0.9 }}
+              style={{ opacity: 0.7 }}
             />
             <line
               x1="26" y1="50" x2="72" y2="50"
@@ -87,24 +87,26 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           style={{
             fontSize: '36px',
             lineHeight: 1.15,
+            fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
             fontStyle: 'italic',
-            color: '#FBF7F4',
+            fontWeight: 700,
+            color: '#2D2D2D',
             opacity: mounted ? 1 : 0,
             transform: mounted ? 'translateY(0)' : 'translateY(12px)',
             transitionDelay: '200ms',
             transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
-          See everything.
+          Before you ask.
           <br />
-          <span style={{ color: '#E8845C' }}>Miss nothing.</span>
+          <span style={{ color: '#E8845C' }}>Donna already knows.</span>
         </h1>
 
         {/* Subtitle */}
         <p
           className="mt-4 max-w-[320px] text-[14px] leading-[1.7] transition-all duration-700"
           style={{
-            color: '#9BAFC4',
+            color: '#8D99AE',
             opacity: mounted ? 1 : 0,
             transform: mounted ? 'translateY(0)' : 'translateY(12px)',
             transitionDelay: '350ms',
@@ -127,20 +129,13 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           }}
         >
           <div
-            className="relative overflow-hidden rounded-xl px-6 py-3.5 text-center text-[14px] font-medium tracking-wide transition-all duration-300 group-hover:shadow-lg"
+            className="relative overflow-hidden rounded-lg px-6 py-3.5 text-center text-[14px] font-medium tracking-wide transition-all duration-300 group-hover:shadow-md"
             style={{
-              background: 'linear-gradient(135deg, #E8845C 0%, #D4704A 100%)',
-              color: '#FBF7F4',
-              boxShadow: '0 0 24px rgba(232, 132, 92, 0.15)',
+              background: '#E8845C',
+              color: '#FAF9F6',
             }}
           >
             Get Started
-            <div
-              className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
-              }}
-            />
           </div>
         </button>
 
@@ -148,7 +143,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           className="mt-3 text-[11px] transition-all duration-700"
           style={{
             fontFamily: 'var(--font-mono)',
-            color: 'rgba(155, 175, 196, 0.3)',
+            color: 'rgba(141, 153, 174, 0.6)',
             letterSpacing: '0.05em',
             opacity: mounted ? 1 : 0,
             transitionDelay: '650ms',
@@ -161,7 +156,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       {/* Right column — sample briefing preview */}
       <div
         className="flex items-center justify-center border-l px-8 py-10"
-        style={{ borderColor: 'rgba(251, 247, 244, 0.04)' }}
+        style={{ borderColor: 'rgba(45,45,45,0.06)', background: '#F1EDEA' }}
       >
         <div
           className="w-full transition-all duration-700"
@@ -175,8 +170,8 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
           <div
             className="rounded-xl p-6 text-left"
             style={{
-              background: 'rgba(14, 18, 37, 0.6)',
-              border: '1px solid rgba(251, 247, 244, 0.05)',
+              background: '#FFFFFF',
+              border: '1px solid rgba(45,45,45,0.08)',
             }}
           >
             <div className="mb-5 flex items-center gap-2">
@@ -188,7 +183,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
                 className="text-[9px] font-medium tracking-[0.15em]"
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  color: 'rgba(232, 132, 92, 0.5)',
+                  color: 'rgba(232, 132, 92, 0.7)',
                   textTransform: 'uppercase',
                 }}
               >
@@ -223,7 +218,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
                     </span>
                     <span
                       className="text-[13px] leading-[1.6]"
-                      style={{ color: 'rgba(251, 247, 244, 0.7)' }}
+                      style={{ color: 'rgba(45,45,45,0.7)' }}
                     >
                       {item.text}
                     </span>
@@ -248,7 +243,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
                 className="text-[9px] font-medium tracking-[0.1em]"
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  color: 'rgba(155, 175, 196, 0.25)',
+                  color: 'rgba(141,153,174,0.5)',
                   textTransform: 'uppercase',
                 }}
               >

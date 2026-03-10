@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Cormorant_Garamond } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegistration } from "@/components/shared/ServiceWorkerRegistration";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -14,10 +15,10 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "600", "700", "900"],
   style: ["normal", "italic"],
 });
 
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1B1F3A",
+  themeColor: "#FAF9F6",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -60,8 +61,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${cormorant.variable} antialiased`}
-        style={{ fontFamily: "'Inter', sans-serif" }}
+        className={`${dmSans.variable} ${jetbrainsMono.variable} ${playfair.variable} antialiased`}
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         {children}
         <Toaster />

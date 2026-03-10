@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — Brand Identity 05: Reserve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --forest: #1B3A2D;
+    --forest-deep: #142D22;
+    --forest-mid: #244F3C;
+    --champagne: #E8D5A3;
+    --champagne-deep: #C9A84C;
+    --ivory: #FAFAF5;
+    --parchment: #F2EDE0;
+    --sage: #6B8C7A;
+    --rule: rgba(27,58,45,.12);
+  }
+  body { font-family: 'Montserrat', sans-serif; background: var(--ivory); color: var(--forest); line-height: 1.6; }
+
+  /* TOP RULE */
+  .top-rule { height: 3px; background: linear-gradient(90deg, var(--forest), var(--champagne-deep), var(--forest)); }
+
+  /* NAV */
+  .nav { padding: 24px 56px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--rule); }
+  .logo-r { display: flex; align-items: center; gap: 16px; }
+  .logo-emblem {
+    width: 44px; height: 44px; border: 1.5px solid var(--forest);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 2px;
+  }
+  .logo-emblem span { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--forest); font-weight: 300; }
+  .logo-wordmark { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--forest); font-weight: 300; letter-spacing: .1em; text-transform: uppercase; }
+  .logo-wordmark strong { font-weight: 600; }
+  .nav-tag { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--sage); }
+
+  /* HERO */
+  .hero { background: var(--forest); padding: 96px 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+  .h-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .h-line { height: 1px; width: 32px; background: var(--champagne); }
+  .h-eye-text { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--champagne); font-weight: 500; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(42px, 5vw, 68px); font-weight: 300; line-height: 1.12; color: var(--champagne); letter-spacing: -0.01em; margin-bottom: 28px; }
+  .hero h1 em { font-style: italic; }
+  .hero p { font-size: 14px; color: rgba(232,213,163,.65); line-height: 2; font-weight: 300; max-width: 420px; letter-spacing: .02em; }
+  .h-rule { height: 1px; background: rgba(232,213,163,.2); margin: 36px 0; }
+  .h-stats { display: flex; gap: 36px; }
+  .hs-num { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; color: var(--champagne); }
+  .hs-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(232,213,163,.5); margin-top: 2px; }
+
+  /* MOCK CARD */
+  .reserve-mock { background: var(--parchment); border: 1px solid var(--champagne); border-radius: 4px; overflow: hidden; }
+  .rm-header { background: var(--forest-mid); padding: 20px 28px; border-bottom: 1px solid rgba(232,213,163,.2); }
+  .rm-h-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .rm-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--champagne); letter-spacing: .06em; font-weight: 300; }
+  .rm-date { font-size: 10px; color: rgba(232,213,163,.5); letter-spacing: .1em; }
+  .rm-body { padding: 24px 28px; }
+  .rm-greeting { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; color: var(--forest); margin-bottom: 20px; }
+  .rm-item { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .rm-item:last-of-type { border: none; }
+  .rm-cat { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px; }
+  .rm-text { font-size: 13px; color: var(--forest); line-height: 1.6; font-weight: 400; }
+  .rm-action { font-size: 11px; color: var(--champagne-deep); margin-top: 4px; font-weight: 500; }
+  .rm-footer { margin-top: 20px; padding: 14px 28px; background: var(--forest); text-align: center; }
+  .rm-footer span { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--champagne); letter-spacing: .1em; }
+
+  /* PALETTE */
+  .sec { padding: 72px 56px; border-bottom: 1px solid var(--rule); }
+  .sec-label { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--sage); font-weight: 600; margin-bottom: 36px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+  .pal-grid { display: flex; gap: 0; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+  .pal-sw { flex: 1; }
+  .pal-color { height: 100px; }
+  .pal-info { padding: 16px; border-top: 1px solid var(--rule); }
+  .pal-hex { font-size: 12px; font-weight: 500; color: var(--forest); }
+  .pal-name { font-size: 10px; color: var(--sage); margin-top: 2px; letter-spacing: .06em; }
+
+  /* TYPOGRAPHY */
+  .type-split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+  .t-label { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--sage); margin-bottom: 16px; }
+  .t-display { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 300; line-height: 1.1; color: var(--forest); }
+  .t-display em { font-style: italic; color: var(--champagne-deep); }
+  .t-body { font-size: 14px; color: var(--sage); line-height: 2; letter-spacing: .02em; }
+  .t-caps { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--forest); font-weight: 600; margin-top: 20px; }
+
+  /* VOICE */
+  .voice-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .vc { border: 1px solid var(--rule); padding: 28px; }
+  .vc-trait { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--champagne-deep); margin-bottom: 12px; }
+  .vc-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--forest); margin-bottom: 12px; line-height: 1.35; }
+  .vc-desc { font-size: 12px; color: var(--sage); line-height: 1.8; letter-spacing: .02em; }
+  .vc-eg { margin-top: 18px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: var(--forest); line-height: 1.6; }
+
+  /* MANIFESTO */
+  .manifesto { background: var(--forest); padding: 80px 56px; }
+  .m-header { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(232,213,163,.5); margin-bottom: 32px; }
+  .m-body { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--champagne); line-height: 1.7; max-width: 780px; }
+  .m-body em { font-style: italic; }
+  .m-credit { margin-top: 40px; display: flex; align-items: center; gap: 16px; }
+  .m-line { height: 1px; width: 32px; background: rgba(232,213,163,.3); }
+  .m-credit-text { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(232,213,163,.5); }
+
+  .footer { padding: 24px 56px; display: flex; justify-content: space-between; border-top: 1px solid var(--rule); }
+  .ft { font-size: 11px; color: var(--sage); letter-spacing: .06em; }
+</style>
+</head>
+<body>
+
+<div class="top-rule"></div>
+
+<div class="nav">
+  <div class="logo-r">
+    <div class="logo-emblem"><span>D</span></div>
+    <span class="logo-wordmark"><strong>Donna</strong></span>
+  </div>
+  <span class="nav-tag">Brand Identity 05 · Reserve</span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="h-eyebrow"><div class="h-line"></div><div class="h-eye-text">Private intelligence · Est. 2026</div></div>
+    <h1>For people who<br>cannot afford to<br><em>miss things.</em></h1>
+    <div class="h-rule"></div>
+    <p>Donna is reserved for those whose responsibilities are significant enough that a missed email or a forgotten commitment has real consequences. Discreet, precise, and deeply private.</p>
+    <div style="margin-top: 36px;">
+      <div class="h-stats">
+        <div><div class="hs-num">847</div><div class="hs-label">items reviewed</div></div>
+        <div><div class="hs-num">3</div><div class="hs-label">require you</div></div>
+        <div><div class="hs-num">06:30</div><div class="hs-label">delivered</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="reserve-mock">
+    <div class="rm-header">
+      <div class="rm-h-top">
+        <div class="rm-title">Morning Intelligence</div>
+        <div class="rm-date">10 March 2026</div>
+      </div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-greeting">Good morning, Nazir.</div>
+      <div class="rm-item">
+        <div class="rm-cat">Commitment · Overdue · Priority I</div>
+        <div class="rm-text">Term sheet response to Laith Al-Rashid — 72 hours outstanding. Three follow-ups received. Reply drafted and ready for review.</div>
+        <div class="rm-action">Review draft →</div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-cat">Calendar · Today · 14:00</div>
+        <div class="rm-text">Board call — no agenda has been circulated. Donna has prepared a suggested agenda based on last quarter's open items.</div>
+        <div class="rm-action">Approve agenda →</div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-cat">Relationship Signal · Attention</div>
+        <div class="rm-text">Sarah Chen — 47 days of silence. Her fund closes this month. History suggests this relationship warrants a brief note.</div>
+        <div class="rm-action">Draft message →</div>
+      </div>
+    </div>
+    <div class="rm-footer"><span>Open Full Briefing</span></div>
+  </div>
+</div>
+
+<!-- COLORS -->
+<div class="sec">
+  <div class="sec-label">Colour System</div>
+  <div class="pal-grid">
+    <div class="pal-sw"><div class="pal-color" style="background:#1B3A2D;"></div><div class="pal-info"><div class="pal-hex">#1B3A2D</div><div class="pal-name">Forest · Primary</div></div></div>
+    <div class="pal-sw"><div class="pal-color" style="background:#E8D5A3;"></div><div class="pal-info"><div class="pal-hex">#E8D5A3</div><div class="pal-name">Champagne · Accent</div></div></div>
+    <div class="pal-sw"><div class="pal-color" style="background:#C9A84C;"></div><div class="pal-info"><div class="pal-hex">#C9A84C</div><div class="pal-name">Gold · Signal</div></div></div>
+    <div class="pal-sw"><div class="pal-color" style="background:#FAFAF5;"></div><div class="pal-info"><div class="pal-hex">#FAFAF5</div><div class="pal-name">Ivory · Ground</div></div></div>
+    <div class="pal-sw"><div class="pal-color" style="background:#6B8C7A;"></div><div class="pal-info"><div class="pal-hex">#6B8C7A</div><div class="pal-name">Sage · Muted</div></div></div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="sec">
+  <div class="sec-label">Typography</div>
+  <div class="type-split">
+    <div>
+      <div class="t-label">Display — Cormorant Garamond 300 / Italic</div>
+      <div class="t-display">Quiet<br><em>authority.</em></div>
+    </div>
+    <div>
+      <div class="t-label">Body — Montserrat 300 / 14px / 2.0</div>
+      <div class="t-body">In a world of noise, the most valuable gift is silence. Donna delivers only what requires your attention — nothing more, nothing extraneous. The interface is as considered as the intelligence behind it.</div>
+      <div class="t-caps">Priority I · Commitment · Overdue</div>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE -->
+<div class="sec">
+  <div class="sec-label">Brand Voice</div>
+  <div class="voice-cols">
+    <div class="vc">
+      <div class="vc-trait">Restrained</div>
+      <div class="vc-title">Speaks only when it has something worth saying.</div>
+      <div class="vc-desc">Donna never fills silence for the sake of it. Every message is considered. The economy of language signals the quality of thought.</div>
+      <div class="vc-eg">"Three items. One requires you today. The rest are context."</div>
+    </div>
+    <div class="vc">
+      <div class="vc-trait">Discreet</div>
+      <div class="vc-title">Handles sensitive matters with complete discretion.</div>
+      <div class="vc-desc">Board tensions, investor dynamics, compensation matters — Donna addresses these with the tact of a trusted counsel, not the bluntness of software.</div>
+      <div class="vc-eg">"The board correspondence this week follows an unusual pattern. I've summarised for your private review."</div>
+    </div>
+    <div class="vc">
+      <div class="vc-trait">Deferential</div>
+      <div class="vc-title">Prepares the ground. Never presumes to decide.</div>
+      <div class="vc-desc">Donna curates, drafts, and recommends — but always defers to your judgement. It is an adviser, not an actor.</div>
+      <div class="vc-eg">"Draft prepared. I'd suggest reviewing paragraph two before sending."</div>
+    </div>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<div class="manifesto">
+  <div class="m-header">On Intelligence</div>
+  <div class="m-body">"The truly important decisions in business are rarely urgent. And the truly urgent ones rarely require much thought. The problem is that everything appears urgent — and nothing appears important — when you're drowning in messages. <em>Donna changes that.</em>"</div>
+  <div class="m-credit"><div class="m-line"></div><div class="m-credit-text">Donna Design Principles · 2026</div></div>
+</div>
+
+<div class="footer">
+  <div class="ft">Donna — Brand Identity 05: Reserve</div>
+  <div class="ft">Concept 5 / 8</div>
+</div>
+
+</body>
+</html>

@@ -12,9 +12,9 @@ interface ChatPageProps {
 }
 
 const c = {
-  text: '#FFFFFF',
-  textMuted: 'rgba(255,255,255,0.35)',
-  border: 'rgba(255,255,255,0.07)',
+  text: '#2D2D2D',
+  textMuted: 'rgba(45,45,45,0.5)',
+  border: 'rgba(45,45,45,0.08)',
 };
 
 export default function ChatPage({ conversationId }: ChatPageProps) {
@@ -96,7 +96,7 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
                     width: `${w}%`,
                     background: i % 2 === 0
                       ? 'rgba(232,132,92,0.12)'
-                      : 'rgba(255,255,255,0.06)',
+                      : 'rgba(45,45,45,0.06)',
                   }}
                 />
               </div>

@@ -4,8 +4,8 @@ import { Activity } from 'lucide-react';
 import { HeartbeatMonitor } from '@/components/heartbeat/HeartbeatMonitor';
 
 const c = {
-  text: '#FFFFFF',
-  textTertiary: 'rgba(255,255,255,0.55)',
+  text: '#2D2D2D',
+  textTertiary: 'rgba(45,45,45,0.6)',
   dawn: '#E8845C',
 };
 

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — Brand Identity Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #0A0A0A; color: #E2E8F0; line-height: 1.6; min-height: 100vh; }
+
+  .topbar { padding: 24px 48px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-between; align-items: center; }
+  .topbar h1 { font-family: 'Playfair Display', serif; font-size: 22px; color: white; }
+  .topbar span { font-size: 12px; color: #64748B; }
+
+  .hero { padding: 72px 48px 56px; max-width: 800px; }
+  .hero p { font-size: 18px; color: #94A3B8; line-height: 1.8; font-weight: 300; }
+  .hero p strong { color: white; font-weight: 500; }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 0 48px 72px; max-width: 1100px; }
+
+  .card { background: #111827; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; transition: transform .2s, border-color .2s; display: block; }
+  .card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,.18); }
+  .card-preview { height: 180px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .card-num { position: absolute; top: 12px; left: 16px; font-size: 11px; color: rgba(255,255,255,.3); letter-spacing: .1em; font-weight: 500; }
+  .card-logo { text-align: center; }
+  .card-info { padding: 20px 24px; border-top: 1px solid rgba(255,255,255,.06); }
+  .card-name { font-size: 17px; font-weight: 600; color: white; margin-bottom: 4px; }
+  .card-desc { font-size: 13px; color: #64748B; line-height: 1.6; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+  .card-arrow { float: right; color: #374151; font-size: 16px; margin-top: -4px; }
+
+  .footer { padding: 28px 48px; border-top: 1px solid rgba(255,255,255,.06); font-size: 13px; color: #374151; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Donna — Brand Identity Options</h1>
+  <span>4 concepts · For review</span>
+</div>
+
+<div class="hero">
+  <p>Four shortlisted brand identities for Donna. Each takes a different emotional angle — <strong>editorial precision, warm humanity, understated luxury, or organic calm</strong>. Click any concept to explore the full system.</p>
+</div>
+
+<div class="grid">
+
+  <!-- 01 CLARITY -->
+  <a href="01-clarity.html" class="card">
+    <div class="card-preview" style="background: #FAFAF8;">
+      <span class="card-num">01</span>
+      <div class="card-logo">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;background:#111;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:20px;color:#FAFAF8;font-weight:700;">D</span>
+          </div>
+          <span style="font-family:'Playfair Display',serif;font-size:24px;color:#111;font-weight:700;">Donna</span>
+        </div>
+        <div style="margin-top:10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#E8523A;text-align:center;">Signal · Not Noise</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="card-name">Clarity <span class="card-arrow">→</span></div>
+      <div class="card-desc">Minimalist editorial. Ink on paper. Inspired by The Economist and Bloomberg. Serif headings, tight grid, single signal colour.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(232,82,58,.15);color:#E8523A;">Minimalist</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Editorial</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Executives</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 04 PERSONAL -->
+  <a href="04-personal.html" class="card">
+    <div class="card-preview" style="background: #FDF6EE;">
+      <span class="card-num" style="color:rgba(196,96,60,.4);">04</span>
+      <div class="card-logo" style="text-align:center;">
+        <div style="display:inline-flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;background:#C4603C;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <span style="font-family:Georgia,serif;font-size:20px;color:white;font-style:italic;">D</span>
+          </div>
+          <span style="font-family:Georgia,serif;font-size:24px;color:#2D2013;font-weight:600;">Donna</span>
+        </div>
+        <div style="margin-top:12px;font-family:cursive;font-size:16px;color:#C4603C;">Good morning —</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="card-name">Personal <span class="card-arrow">→</span></div>
+      <div class="card-desc">Terra cotta warmth. Lora serif + Caveat handwriting accent. Like a note from someone who cares. Human, attentive.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(196,96,60,.15);color:#C4603C;">Warm</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Human</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Relationship-first</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 05 RESERVE -->
+  <a href="05-reserve.html" class="card">
+    <div class="card-preview" style="background: #1B3A2D;">
+      <span class="card-num" style="color:rgba(232,213,163,.3);">05</span>
+      <div class="card-logo" style="text-align:center;">
+        <div style="display:inline-flex;align-items:center;gap:14px;">
+          <div style="width:40px;height:40px;border:1.5px solid #E8D5A3;display:flex;align-items:center;justify-content:center;border-radius:2px;">
+            <span style="font-family:Georgia,serif;font-size:22px;color:#E8D5A3;font-weight:300;">D</span>
+          </div>
+          <span style="font-family:Georgia,serif;font-size:22px;color:#E8D5A3;font-weight:300;letter-spacing:.12em;text-transform:uppercase;">Donna</span>
+        </div>
+        <div style="margin-top:12px;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(232,213,163,.5);">Private Intelligence · Est. 2026</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="card-name">Reserve <span class="card-arrow">→</span></div>
+      <div class="card-desc">Forest green and champagne. Cormorant Garamond 300. Understated luxury. For high-stakes professionals who value discretion.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(27,58,45,.4);color:#6B8C7A;">Understated</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Ultra-premium</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Discreet</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 07 THE EDITOR -->
+  <a href="07-the-editor.html" class="card">
+    <div class="card-preview" style="background: #FAF9F6;">
+      <span class="card-num" style="color:rgba(45,45,45,.2);">07</span>
+      <div class="card-logo" style="text-align:center;">
+        <svg viewBox="0 0 340 68" width="280" height="56">
+          <text x="0" y="52" font-family="'Playfair Display', serif" font-size="54" font-weight="700" fill="#2D2D2D" letter-spacing="-1.5">Donna</text>
+          <circle cx="286" cy="48" r="6" fill="#E8845C"/>
+        </svg>
+        <div style="margin-top:10px;font-size:12px;color:#8D99AE;letter-spacing:.06em;">Before you ask.</div>
+      </div>
+    </div>
+    <div class="card-info">
+      <div class="card-name">The Editor <span class="card-arrow">→</span></div>
+      <div class="card-desc">Almost monochrome with a single Dawn accent. Playfair Display wordmark + DM Sans body. Luxury editorial — stripped back, every element earned.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(232,132,92,.15);color:#E8845C;">Editorial</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Restrained</span>
+        <span class="tag" style="background:rgba(255,255,255,.06);color:#94A3B8;">Luxury</span>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<div class="footer">Donna Brand Identity System · 4 Shortlisted Concepts · For review and selection · 2026</div>
+
+</body>
+</html>

@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { CheckCircle2, Mail, AlertCircle, Search, Calendar, AlertTriangle, Loader2 } from 'lucide-react';
 
 const c = {
-  text: '#FFFFFF',
-  textSecondary: 'rgba(255,255,255,0.85)',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  border: 'rgba(255,255,255,0.07)',
+  text: '#2D2D2D',
+  textSecondary: 'rgba(45,45,45,0.8)',
+  textTertiary: 'rgba(45,45,45,0.6)',
+  border: 'rgba(45,45,45,0.08)',
   dawnSubtle: 'rgba(232,132,92,0.15)',
   dawn: '#E8845C',
   green: '#52B788',
@@ -112,7 +112,7 @@ export function CompletionReportPanel({ runId }: { runId?: string }) {
                 {section.items.map((item, j) => (
                   <div key={j} style={{
                     padding: '8px 12px', borderRadius: 6,
-                    border: `1px solid ${c.border}`, background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${c.border}`, background: 'rgba(45,45,45,0.04)',
                   }}>
                     <div style={{ fontSize: 13, fontWeight: 500, color: c.text }}>{item.label}</div>
                     {item.detail && (

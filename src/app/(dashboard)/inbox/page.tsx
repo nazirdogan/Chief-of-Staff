@@ -14,15 +14,15 @@ import type { InboxItem } from '@/lib/db/types';
 import { decodeEntities } from '@/lib/utils/decode-entities';
 
 const c = {
-  surface: 'rgba(255,255,255,0.04)',
-  border: 'rgba(255,255,255,0.07)',
-  borderHover: 'rgba(255,255,255,0.14)',
+  surface: 'rgba(45,45,45,0.04)',
+  border: 'rgba(45,45,45,0.08)',
+  borderHover: 'rgba(45,45,45,0.16)',
   dawn: '#E8845C',
   dawnMuted: 'rgba(232,132,92,0.15)',
-  text: '#FFFFFF',
-  textSecondary: 'rgba(255,255,255,0.85)',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  textMuted: 'rgba(255,255,255,0.35)',
+  text: '#2D2D2D',
+  textSecondary: 'rgba(45,45,45,0.8)',
+  textTertiary: 'rgba(45,45,45,0.6)',
+  textMuted: 'rgba(45,45,45,0.5)',
   green: '#52B788',
   red: '#D64B2A',
   blue: '#4E7DAA',

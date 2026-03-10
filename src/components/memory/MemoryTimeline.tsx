@@ -4,7 +4,7 @@ import { MemoryItem, type MemoryChunk } from './MemoryItem';
 import { MemoryDaySnapshot, type MemorySnapshot } from './MemoryDaySnapshot';
 
 const c = {
-  textMuted: 'rgba(255,255,255,0.35)',
+  textMuted: 'rgba(45,45,45,0.5)',
 };
 
 function formatDateKey(dateStr: string): string {

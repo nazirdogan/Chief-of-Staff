@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Clock, CalendarPlus, Loader2, MapPin, AlertCircle } from 'lucide-react';
 
 const c = {
-  text: '#FFFFFF',
-  textSecondary: 'rgba(255,255,255,0.85)',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  border: 'rgba(255,255,255,0.07)',
+  text: '#2D2D2D',
+  textSecondary: 'rgba(45,45,45,0.8)',
+  textTertiary: 'rgba(45,45,45,0.6)',
+  border: 'rgba(45,45,45,0.08)',
   dawnSubtle: 'rgba(232,132,92,0.15)',
   dawn: '#E8845C',
   green: '#52B788',
@@ -134,7 +134,7 @@ export function TimeBlockPanel() {
                 style={{
                   display: 'flex', alignItems: 'stretch', gap: 12,
                   padding: '10px 14px', borderRadius: 8,
-                  border: `1px solid ${c.border}`, background: 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${c.border}`, background: 'rgba(45,45,45,0.04)',
                 }}
               >
                 <div style={{

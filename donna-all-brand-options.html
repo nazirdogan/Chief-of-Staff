@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — All Brand Identity Options (A–F)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; background: #fafafa; color: #222; }
+
+  /* ── NAV ─────────────────────────────────────────────────────────────── */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 6px;
+    background: #0a0a0a; padding: 14px 32px;
+    border-bottom: 1px solid #333;
+    flex-wrap: wrap;
+  }
+  .top-nav .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700; color: #fff; font-size: 20px;
+    margin-right: 24px; letter-spacing: -0.5px;
+  }
+  .nav-group-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: #555; margin: 0 8px 0 16px;
+    align-self: center;
+  }
+  .nav-btn {
+    background: none; border: 1px solid #333; color: #888;
+    padding: 7px 16px; border-radius: 100px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-btn:hover { border-color: #666; color: #ccc; }
+  .nav-btn.active { background: #fff; color: #111; border-color: #fff; }
+
+  /* ── PANELS ──────────────────────────────────────────────────────────── */
+  .option-panel { display: none; }
+  .option-panel.active { display: block; }
+
+  /* ── SHARED ──────────────────────────────────────────────────────────── */
+  .hero-section {
+    padding: 100px 80px 80px;
+    min-height: 65vh;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .hero-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 24px; opacity: 0.6;
+  }
+  .hero-title { font-size: clamp(48px, 7vw, 96px); line-height: 1.05; margin-bottom: 32px; }
+  .hero-tagline { font-size: clamp(17px, 2vw, 26px); line-height: 1.5; max-width: 620px; }
+
+  .section { padding: 72px 80px; }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 36px; opacity: 0.4;
+  }
+  .section-title { font-size: 32px; font-weight: 700; margin-bottom: 14px; }
+  .section-subtitle { font-size: 17px; line-height: 1.6; max-width: 580px; margin-bottom: 44px; opacity: 0.7; }
+
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .color-card { border-radius: 14px; overflow: hidden; }
+  .color-swatch { height: 100px; }
+  .color-info { padding: 14px; background: #fff; }
+  .color-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+  .color-hex { font-size: 12px; opacity: 0.5; font-family: 'JetBrains Mono', monospace; }
+
+  .type-specimen { margin-bottom: 44px; }
+  .type-role { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.4; margin-bottom: 10px; }
+
+  .logo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .logo-card {
+    border-radius: 18px; padding: 44px; display: flex;
+    align-items: center; justify-content: center; min-height: 180px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .tagline-block { margin-bottom: 36px; }
+  .tagline-primary { font-size: clamp(26px, 3.5vw, 48px); line-height: 1.15; margin-bottom: 10px; }
+  .tagline-alt { font-size: 16px; opacity: 0.45; }
+
+  .voice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .voice-card { padding: 28px; border-radius: 14px; }
+  .voice-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+  .voice-example { font-size: 15px; line-height: 1.6; font-style: italic; }
+
+  .mockup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .mockup-card { border-radius: 18px; overflow: hidden; }
+
+  .divider { height: 1px; margin: 0 80px; }
+
+  @media (max-width: 768px) {
+    .hero-section, .section { padding: 48px 20px; }
+    .divider { margin: 0 20px; }
+    .top-nav { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     NAV
+     ═══════════════════════════════════════════════════════════════════════ -->
+<nav class="top-nav">
+  <span class="logo-text">Donna</span>
+  <span class="nav-group-label">Original</span>
+  <button class="nav-btn active" onclick="show('meridian',this)">A — Meridian</button>
+  <button class="nav-btn" onclick="show('italic',this)">B — Italic</button>
+  <button class="nav-btn" onclick="show('signal',this)">C — Signal</button>
+  <span class="nav-group-label">New</span>
+  <button class="nav-btn" onclick="show('editor',this)">D — Editor</button>
+  <button class="nav-btn" onclick="show('operator',this)">E — Operator</button>
+  <button class="nav-btn" onclick="show('confidant',this)">F — Confidant</button>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     OPTION A — THE MERIDIAN
+     Serif D mark with dawn accent. The original concept.
+     Palette: Midnight / Dawn / Dusk / Paper / Sage / Gold
+     Type: Cormorant Garamond + Inter + JetBrains Mono
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-meridian" class="option-panel active">
+
+  <div class="hero-section" style="background: #FBF7F4; color: #1B1F3A;">
+    <div class="hero-label" style="color: #E8845C;">Option A — The Meridian</div>
+    <h1 class="hero-title" style="font-family: 'Cormorant Garamond', serif; font-weight: 700; letter-spacing: -2px;">
+      Donna
+    </h1>
+    <p class="hero-tagline" style="font-family: 'Inter', sans-serif; color: #555;">
+      The original. A serif D mark with a single dawn-coloured accent line — the meridian — cutting through the letterform.
+      Elegant, authoritative, and unmistakably Donna Paulsen.
+    </p>
+  </div>
+
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Logo -->
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Cormorant Garamond', serif; color: #1B1F3A;">The Meridian Mark</div>
+    <p class="section-subtitle" style="color: #666;">
+      A serif D with an accent line bisecting it at the midpoint — the meridian. The dawn circle anchors the start of the line. It's a small gesture that carries enormous personality: precise, deliberate, and impossible to ignore.
+    </p>
+    <div class="logo-grid">
+      <div class="logo-card" style="background: #FBF7F4;">
+        <svg viewBox="0 0 100 100" width="80">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#1B1F3A" stroke-width="7"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #1B1F3A;">
+        <svg viewBox="0 0 100 100" width="80">
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="7"/>
+          <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3"/>
+          <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #FBF7F4;">
+        <svg viewBox="0 0 400 80" width="340">
+          <path d="M16 12 L16 68 L30 68 C56 68 62 56 62 40 C62 24 56 12 30 12 Z" fill="none" stroke="#1B1F3A" stroke-width="5.5"/>
+          <line x1="16" y1="40" x2="56" y2="40" stroke="#E8845C" stroke-width="2.5"/>
+          <circle cx="16" cy="40" r="4" fill="#E8845C"/>
+          <text x="78" y="60" font-family="'Cormorant Garamond', serif" font-size="54" font-weight="600" fill="#1B1F3A" letter-spacing="-1">onna</text>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #1B1F3A;">
+        <svg viewBox="0 0 400 80" width="340">
+          <path d="M16 12 L16 68 L30 68 C56 68 62 56 62 40 C62 24 56 12 30 12 Z" fill="none" stroke="#FBF7F4" stroke-width="5.5"/>
+          <line x1="16" y1="40" x2="56" y2="40" stroke="#E8845C" stroke-width="2.5"/>
+          <circle cx="16" cy="40" r="4" fill="#E8845C"/>
+          <text x="78" y="60" font-family="'Cormorant Garamond', serif" font-size="54" font-weight="600" fill="#FBF7F4" letter-spacing="-1">onna</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Colours -->
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">02 — Colour</div>
+    <div class="section-title" style="font-family: 'Cormorant Garamond', serif; color: #1B1F3A;">The Original Palette</div>
+    <p class="section-subtitle" style="color: #666;">
+      Midnight grounds. Dawn acts. Dusk informs. Paper breathes. Sage confirms. Gold celebrates. Every colour has a job.
+    </p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:#1B1F3A;"></div><div class="color-info"><div class="color-name">Midnight</div><div class="color-hex">#1B1F3A</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#E8845C;"></div><div class="color-info"><div class="color-name">Dawn</div><div class="color-hex">#E8845C</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#4E7DAA;"></div><div class="color-info"><div class="color-name">Dusk</div><div class="color-hex">#4E7DAA</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#FBF7F4;"></div><div class="color-info"><div class="color-name">Paper</div><div class="color-hex">#FBF7F4</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#52B788;"></div><div class="color-info"><div class="color-name">Sage</div><div class="color-hex">#52B788</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#F4C896;"></div><div class="color-info"><div class="color-name">Gold</div><div class="color-hex">#F4C896</div></div></div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Typography -->
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #4E7DAA;">Display / Headlines</div>
+      <p style="font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:700; color:#1B1F3A; letter-spacing:-1.5px; line-height:1.1;">Cormorant Garamond</p>
+      <p style="font-family:'Cormorant Garamond',serif; font-size:22px; color:#555; margin-top:8px; font-style:italic;">Elegant high-contrast serif. Editorial authority with warmth.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #4E7DAA;">Body / Interface</div>
+      <p style="font-family:'Inter',sans-serif; font-size:40px; font-weight:500; color:#1B1F3A;">Inter</p>
+      <p style="font-family:'Inter',sans-serif; font-size:16px; color:#555; margin-top:8px; line-height:1.7; max-width:540px;">The modern system font. Crisp, legible, and engineered for screens. Pairs beautifully with the editorial weight of Cormorant.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #4E7DAA;">Data / Monospace</div>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:500; color:#1B1F3A;">JetBrains Mono</p>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#555; margin-top:8px;">Timestamps, confidence scores, source references — precision where it matters.</p>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Taglines & Voice -->
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">04 — Voice</div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">See everything<span style="color:#E8845C;">.</span> Miss nothing<span style="color:#E8845C;">.</span></p>
+      <p class="tagline-alt" style="font-family:'Inter'; color:#4E7DAA;">Primary tagline</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A; font-size:32px;">I'm Donna.</p>
+      <p class="tagline-alt" style="font-family:'Inter'; color:#4E7DAA; font-size:15px;">Signature — inspired by Donna Paulsen</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A; font-size:32px;">I read<span style="color:#E8845C;">.</span> I analyse<span style="color:#E8845C;">.</span> I fix<span style="color:#E8845C;">.</span></p>
+      <p class="tagline-alt" style="font-family:'Inter'; color:#4E7DAA; font-size:15px;">Campaign / long-form</p>
+    </div>
+    <div style="margin-top:48px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"You told Mark you'd send the deck by Friday. It's Wednesday and you haven't started. I've pulled your notes and drafted an outline. — I'm Donna."</p>
+        </div>
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"You haven't spoken to Sarah in 18 days. She usually hears from you weekly. Might want to check in."</p>
+        </div>
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"7 emails scanned. 4 archived. 1 commitment found: client demo next Tuesday. I've blocked prep time on Monday."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Mockups -->
+  <div class="section" style="background: #F0ECE6;">
+    <div class="section-label" style="color: #1B1F3A;">05 — Mockups</div>
+    <div class="mockup-grid">
+      <div class="mockup-card" style="background:#FBF7F4; padding:44px; display:flex; align-items:center; justify-content:center; border-radius:18px;">
+        <div style="width:110px; height:110px; background:#1B1F3A; border-radius:26px; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 36px rgba(27,31,58,0.2);">
+          <svg viewBox="0 0 100 100" width="64">
+            <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="7"/>
+            <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3"/>
+            <circle cx="26" cy="50" r="5" fill="#E8845C"/>
+          </svg>
+        </div>
+        <p style="font-family:'Inter'; font-size:13px; color:#999; margin-left:20px;">App Icon<br><span style="color:#1B1F3A; font-weight:600;">macOS / iOS</span></p>
+      </div>
+      <div class="mockup-card" style="background:#FBF7F4; padding:44px; border-radius:18px;">
+        <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 16px rgba(0,0,0,0.05); border-left:4px solid #E8845C;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+            <div style="width:28px; height:28px; background:#1B1F3A; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 100 100" width="16"><path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="8"/></svg>
+            </div>
+            <span style="font-family:'Inter'; font-size:13px; font-weight:600; color:#1B1F3A;">Donna</span>
+            <span style="font-family:'Inter'; font-size:12px; color:#999; margin-left:auto;">8:02 AM</span>
+          </div>
+          <p style="font-family:'Inter'; font-size:14px; color:#1B1F3A; line-height:1.5;">
+            <strong>3 things today:</strong> Reply to Mark's deck request, board meeting prep at 2pm, and Sarah's birthday is tomorrow.
+          </p>
+        </div>
+        <p style="font-family:'Inter'; font-size:13px; color:#999; margin-top:14px;">Push Notification</p>
+      </div>
+      <div class="mockup-card" style="background:#1B1F3A; padding:44px; border-radius:18px;">
+        <div style="background:rgba(255,255,255,0.08); border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:12px; max-width:380px;">
+          <div style="width:5px; height:38px; background:#E8845C; border-radius:3px; flex-shrink:0;"></div>
+          <div style="flex:1; min-width:0;">
+            <p style="font-family:'Inter'; font-size:13px; color:#FBF7F4;">Create follow-up task: reply to Mark</p>
+            <p style="font-family:'JetBrains Mono'; font-size:11px; color:#4E7DAA; margin-top:2px;">source: email · 0.91 confidence</p>
+          </div>
+          <button style="background:#52B788; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-family:'Inter'; font-size:12px; font-weight:600; cursor:pointer;">OK</button>
+        </div>
+        <div style="background:rgba(255,255,255,0.06); height:3px; border-radius:2px; margin-top:3px; max-width:380px; overflow:hidden;">
+          <div style="width:55%; height:100%; background:#E8845C; border-radius:2px;"></div>
+        </div>
+        <p style="font-family:'Inter'; font-size:12px; color:rgba(255,255,255,0.2); margin-top:14px;">Tier 2 — One-tap Toast</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     OPTION B — THE ITALIC
+     Same palette as A. Italic Cormorant wordmark. More editorial.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-italic" class="option-panel">
+
+  <div class="hero-section" style="background: #FBF7F4; color: #1B1F3A;">
+    <div class="hero-label" style="color: #E8845C;">Option B — The Italic</div>
+    <h1 class="hero-title" style="font-family: 'Cormorant Garamond', serif; font-weight: 600; font-style: italic; letter-spacing: -2px;">
+      Donna
+    </h1>
+    <p class="hero-tagline" style="font-family: 'Inter', sans-serif; color: #555;">
+      Same palette as The Meridian, but the logo leans forward — literally. The italic wordmark suggests momentum, forward motion, someone who's already three steps ahead of you.
+    </p>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Cormorant Garamond', serif; color: #1B1F3A;">The Italic Wordmark</div>
+    <p class="section-subtitle" style="color: #666;">
+      No icon. No symbol. Just the name set in Cormorant Garamond italic. The lean of the letterforms carries all the personality — confident, in motion, never standing still. An underline in Dawn grounds it.
+    </p>
+    <div class="logo-grid">
+      <div class="logo-card" style="background: #FBF7F4;">
+        <svg viewBox="0 0 340 80" width="320">
+          <text x="10" y="62" font-family="'Cormorant Garamond', serif" font-size="60" font-weight="600" font-style="italic" fill="#1B1F3A" letter-spacing="-1">Donna</text>
+          <line x1="10" y1="72" x2="200" y2="72" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #1B1F3A;">
+        <svg viewBox="0 0 340 80" width="320">
+          <text x="10" y="62" font-family="'Cormorant Garamond', serif" font-size="60" font-weight="600" font-style="italic" fill="#FBF7F4" letter-spacing="-1">Donna</text>
+          <line x1="10" y1="72" x2="200" y2="72" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #FBF7F4;">
+        <svg viewBox="0 0 80 80" width="64">
+          <text x="6" y="68" font-family="'Cormorant Garamond', serif" font-size="78" font-weight="600" font-style="italic" fill="#1B1F3A">D</text>
+          <line x1="6" y1="74" x2="56" y2="74" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #1B1F3A;">
+        <svg viewBox="0 0 80 80" width="64">
+          <text x="6" y="68" font-family="'Cormorant Garamond', serif" font-size="78" font-weight="600" font-style="italic" fill="#FBF7F4">D</text>
+          <line x1="6" y1="74" x2="56" y2="74" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">02 — Colour & Type</div>
+    <p class="section-subtitle" style="color: #666; margin-bottom: 32px;">
+      Shares the full Meridian palette (Midnight, Dawn, Dusk, Paper, Sage, Gold) and typography stack (Cormorant Garamond, Inter, JetBrains Mono). The difference is purely in the logo treatment — italic vs upright, wordmark vs D-mark.
+    </p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:#1B1F3A;"></div><div class="color-info"><div class="color-name">Midnight</div><div class="color-hex">#1B1F3A</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#E8845C;"></div><div class="color-info"><div class="color-name">Dawn</div><div class="color-hex">#E8845C</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#4E7DAA;"></div><div class="color-info"><div class="color-name">Dusk</div><div class="color-hex">#4E7DAA</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#FBF7F4;"></div><div class="color-info"><div class="color-name">Paper</div><div class="color-hex">#FBF7F4</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#52B788;"></div><div class="color-info"><div class="color-name">Sage</div><div class="color-hex">#52B788</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#F4C896;"></div><div class="color-info"><div class="color-name">Gold</div><div class="color-hex">#F4C896</div></div></div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">03 — Voice</div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#1B1F3A;">See everything<span style="color:#E8845C;">.</span> Miss nothing<span style="color:#E8845C;">.</span></p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#1B1F3A; font-size:32px;">I'm Donna.</p>
+    </div>
+    <div style="margin-top:40px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"You've got 14 minutes before the call. Chen Wei mentioned 'timeline concerns' in his last two messages. I've flagged the specific quotes."</p>
+        </div>
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"Two commitments due today. One is done. One needs 20 minutes. I've rearranged your afternoon to make room."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #F0ECE6;">
+    <div class="section-label" style="color: #1B1F3A;">04 — Mockups</div>
+    <div class="mockup-grid">
+      <div class="mockup-card" style="background:#FBF7F4; padding:44px; display:flex; align-items:center; justify-content:center; border-radius:18px;">
+        <div style="width:110px; height:110px; background:#1B1F3A; border-radius:26px; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 36px rgba(27,31,58,0.2);">
+          <svg viewBox="0 0 80 80" width="52">
+            <text x="4" y="66" font-family="'Cormorant Garamond', serif" font-size="76" font-weight="600" font-style="italic" fill="#FBF7F4">D</text>
+            <line x1="4" y1="72" x2="52" y2="72" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p style="font-family:'Inter'; font-size:13px; color:#999; margin-left:20px;">App Icon<br><span style="color:#1B1F3A; font-weight:600;">macOS / iOS</span></p>
+      </div>
+      <div class="mockup-card" style="background:#FBF7F4; padding:44px; border-radius:18px;">
+        <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 16px rgba(0,0,0,0.05);">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <div style="width:28px; height:28px; background:#1B1F3A; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 80 80" width="16"><text x="8" y="62" font-family="'Cormorant Garamond',serif" font-size="68" font-weight="600" font-style="italic" fill="#FBF7F4">D</text></svg>
+            </div>
+            <span style="font-family:'Cormorant Garamond'; font-size:16px; font-weight:600; font-style:italic; color:#1B1F3A;">Donna</span>
+            <span style="font-family:'Inter'; font-size:11px; color:#999; margin-left:auto;">8:15 AM</span>
+          </div>
+          <p style="font-family:'Inter'; font-size:14px; color:#1B1F3A; line-height:1.5; border-left:3px solid #E8845C; padding-left:12px;">
+            Your morning is lighter than it looks. Two emails need replies, one can wait. I've drafted the urgent one. — <em style="font-family:'Cormorant Garamond';">I'm Donna.</em>
+          </p>
+        </div>
+        <p style="font-family:'Inter'; font-size:12px; color:#999; margin-top:14px;">Morning Briefing Card</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     OPTION C — THE SIGNAL
+     Same palette as A & B. Abstract mark: radiating pulse.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-signal" class="option-panel">
+
+  <div class="hero-section" style="background: #FBF7F4; color: #1B1F3A;">
+    <div class="hero-label" style="color: #E8845C;">Option C — The Signal</div>
+    <h1 class="hero-title" style="font-family: 'Cormorant Garamond', serif; font-weight: 700; letter-spacing: -2px;">
+      Donna
+    </h1>
+    <p class="hero-tagline" style="font-family: 'Inter', sans-serif; color: #555;">
+      An abstract mark: three concentric arcs radiating from a single point — the signal. Always broadcasting, always listening. This is Donna as an intelligence layer, not a person. Pure function.
+    </p>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Cormorant Garamond', serif; color: #1B1F3A;">The Signal Mark</div>
+    <p class="section-subtitle" style="color: #666;">
+      Three arcs radiate from a central dawn point. Each arc represents a layer: ingestion, analysis, action. The mark works as both a standalone icon and paired with the Cormorant wordmark.
+    </p>
+    <div class="logo-grid">
+      <div class="logo-card" style="background: #FBF7F4;">
+        <svg viewBox="0 0 100 100" width="80">
+          <circle cx="30" cy="50" r="6" fill="#E8845C"/>
+          <path d="M36 30 A26 26 0 0 1 36 70" fill="none" stroke="#1B1F3A" stroke-width="5" stroke-linecap="round"/>
+          <path d="M46 20 A36 36 0 0 1 46 80" fill="none" stroke="#1B1F3A" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+          <path d="M56 12 A44 44 0 0 1 56 88" fill="none" stroke="#1B1F3A" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #1B1F3A;">
+        <svg viewBox="0 0 100 100" width="80">
+          <circle cx="30" cy="50" r="6" fill="#E8845C"/>
+          <path d="M36 30 A26 26 0 0 1 36 70" fill="none" stroke="#FBF7F4" stroke-width="5" stroke-linecap="round"/>
+          <path d="M46 20 A36 36 0 0 1 46 80" fill="none" stroke="#FBF7F4" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+          <path d="M56 12 A44 44 0 0 1 56 88" fill="none" stroke="#FBF7F4" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #FBF7F4;">
+        <svg viewBox="0 0 420 80" width="380">
+          <circle cx="24" cy="40" r="5" fill="#E8845C"/>
+          <path d="M29 24 A20 20 0 0 1 29 56" fill="none" stroke="#1B1F3A" stroke-width="4" stroke-linecap="round"/>
+          <path d="M37 16 A28 28 0 0 1 37 64" fill="none" stroke="#1B1F3A" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+          <path d="M45 10 A34 34 0 0 1 45 70" fill="none" stroke="#1B1F3A" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+          <text x="68" y="58" font-family="'Cormorant Garamond', serif" font-size="52" font-weight="600" fill="#1B1F3A" letter-spacing="-1">Donna</text>
+        </svg>
+      </div>
+      <div class="logo-card" style="background: #1B1F3A;">
+        <svg viewBox="0 0 420 80" width="380">
+          <circle cx="24" cy="40" r="5" fill="#E8845C"/>
+          <path d="M29 24 A20 20 0 0 1 29 56" fill="none" stroke="#FBF7F4" stroke-width="4" stroke-linecap="round"/>
+          <path d="M37 16 A28 28 0 0 1 37 64" fill="none" stroke="#FBF7F4" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+          <path d="M45 10 A34 34 0 0 1 45 70" fill="none" stroke="#FBF7F4" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+          <text x="68" y="58" font-family="'Cormorant Garamond', serif" font-size="52" font-weight="600" fill="#FBF7F4" letter-spacing="-1">Donna</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">02 — Colour & Type</div>
+    <p class="section-subtitle" style="color: #666; margin-bottom: 32px;">
+      Same palette and type stack as Options A and B. The Signal uses fewer colours in practice — Midnight, Dawn, and Paper dominate. The arcs use opacity variations of Midnight rather than multiple colours, keeping the mark clean at small sizes.
+    </p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:#1B1F3A;"></div><div class="color-info"><div class="color-name">Midnight</div><div class="color-hex">#1B1F3A</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#E8845C;"></div><div class="color-info"><div class="color-name">Dawn</div><div class="color-hex">#E8845C</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#4E7DAA;"></div><div class="color-info"><div class="color-name">Dusk</div><div class="color-hex">#4E7DAA</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#FBF7F4;"></div><div class="color-info"><div class="color-name">Paper</div><div class="color-hex">#FBF7F4</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#52B788;"></div><div class="color-info"><div class="color-name">Sage</div><div class="color-hex">#52B788</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#F4C896;"></div><div class="color-info"><div class="color-name">Gold</div><div class="color-hex">#F4C896</div></div></div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FBF7F4;">
+    <div class="section-label" style="color: #1B1F3A;">03 — Voice</div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">See everything<span style="color:#E8845C;">.</span> Miss nothing<span style="color:#E8845C;">.</span></p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A; font-size:32px;">Always listening. Always ahead.</p>
+      <p class="tagline-alt" style="font-family:'Inter'; color:#4E7DAA; font-size:15px;">Signal-specific alternate</p>
+    </div>
+    <div style="margin-top:40px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"Signal detected: your investor mentioned 'runway' three times in yesterday's thread. That's twice more than usual. Might want to get ahead of it."</p>
+        </div>
+        <div class="voice-card" style="background:#F0ECE6;">
+          <div class="voice-label" style="color:#E8845C;">Donna says</div>
+          <p class="voice-example" style="font-family:'Cormorant Garamond',serif; color:#1B1F3A;">"5 signals this morning. 2 commitments. 1 relationship cooling. The rest is noise — already archived."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #F0ECE6;">
+    <div class="section-label" style="color: #1B1F3A;">04 — Mockups</div>
+    <div class="mockup-grid">
+      <div class="mockup-card" style="background:#FBF7F4; padding:44px; display:flex; align-items:center; justify-content:center; border-radius:18px;">
+        <div style="width:110px; height:110px; background:#1B1F3A; border-radius:26px; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 36px rgba(27,31,58,0.2);">
+          <svg viewBox="0 0 100 100" width="56">
+            <circle cx="30" cy="50" r="6" fill="#E8845C"/>
+            <path d="M36 30 A26 26 0 0 1 36 70" fill="none" stroke="#FBF7F4" stroke-width="5" stroke-linecap="round"/>
+            <path d="M46 20 A36 36 0 0 1 46 80" fill="none" stroke="#FBF7F4" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+            <path d="M56 12 A44 44 0 0 1 56 88" fill="none" stroke="#FBF7F4" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+          </svg>
+        </div>
+        <p style="font-family:'Inter'; font-size:13px; color:#999; margin-left:20px;">App Icon<br><span style="color:#1B1F3A; font-weight:600;">macOS / iOS</span></p>
+      </div>
+      <div class="mockup-card" style="background:#1B1F3A; padding:32px; border-radius:18px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
+          <svg viewBox="0 0 100 100" width="20"><circle cx="30" cy="50" r="6" fill="#E8845C"/><path d="M36 30 A26 26 0 0 1 36 70" fill="none" stroke="#FBF7F4" stroke-width="5" stroke-linecap="round"/></svg>
+          <span style="font-family:'JetBrains Mono'; font-size:11px; color:#4E7DAA;">TUE 10 MAR · 07:45</span>
+        </div>
+        <p style="font-family:'Cormorant Garamond'; font-size:22px; font-weight:600; color:#FBF7F4; margin-bottom:20px;">Daily Signal</p>
+        <div style="border-left:3px solid #E8845C; padding-left:14px; margin-bottom:14px;">
+          <p style="font-family:'Inter'; font-size:13px; color:#FBF7F4; font-weight:500;">Board deck feedback due Thursday</p>
+          <p style="font-family:'JetBrains Mono'; font-size:11px; color:#4E7DAA; margin-top:3px;">slack · #exec-team · 0.94</p>
+        </div>
+        <div style="border-left:3px solid #52B788; padding-left:14px; margin-bottom:14px;">
+          <p style="font-family:'Inter'; font-size:13px; color:rgba(255,255,255,0.5); text-decoration:line-through;">6 newsletters archived</p>
+          <p style="font-family:'JetBrains Mono'; font-size:11px; color:#52B788; margin-top:3px;">auto · Tier 1</p>
+        </div>
+        <div style="border-left:3px solid #F4C896; padding-left:14px;">
+          <p style="font-family:'Inter'; font-size:13px; color:#FBF7F4; font-weight:500;">Sarah — 18 days silent (usually 7)</p>
+          <p style="font-family:'JetBrains Mono'; font-size:11px; color:#F4C896; margin-top:3px;">relationship · cooling</p>
+        </div>
+        <p style="font-family:'Inter'; font-size:12px; color:rgba(255,255,255,0.15); margin-top:20px;">Briefing Screen</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     OPTION D — THE EDITOR
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-editor" class="option-panel">
+
+  <div class="hero-section" style="background: #FAF9F6; color: #2D2D2D;">
+    <div class="hero-label" style="color: #E8845C;">Option D — The Editor</div>
+    <h1 class="hero-title" style="font-family: 'Playfair Display', serif; font-weight: 700; letter-spacing: -2px;">Donna</h1>
+    <p class="hero-tagline" style="font-family: 'DM Sans', sans-serif; color: #555;">
+      Stripped back. Considered. Every element earns its place.<br>
+      This is Donna as a luxury editorial — clean lines, sharp type, and a single warm accent that says <em>pay attention</em>. The Dawn colour ties back to Donna Paulsen herself.
+    </p>
+  </div>
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">The Wordmark</div>
+    <p class="section-subtitle" style="color: #777;">No symbol. No icon. Just the name, set in Playfair Display with a single Dawn full stop. The warm terracotta period is the brand — a nod to Donna Paulsen's signature presence. A statement, not a question.</p>
+    <div class="logo-grid">
+      <div class="logo-card" style="background: #FAF9F6;">
+        <svg viewBox="0 0 360 80" width="320"><text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna</text><circle cx="305" cy="58" r="7" fill="#E8845C"/></svg>
+      </div>
+      <div class="logo-card" style="background: #2D2D2D;">
+        <svg viewBox="0 0 360 80" width="320"><text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna</text><circle cx="305" cy="58" r="7" fill="#E8845C"/></svg>
+      </div>
+      <div class="logo-card" style="background: #FAF9F6;">
+        <svg viewBox="0 0 100 100" width="64"><text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#2D2D2D">D</text><circle cx="80" cy="76" r="6" fill="#E8845C"/></svg>
+      </div>
+      <div class="logo-card" style="background: #2D2D2D;">
+        <svg viewBox="0 0 100 100" width="64"><text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#FAF9F6">D</text><circle cx="80" cy="76" r="6" fill="#E8845C"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">02 — Colour</div>
+    <div class="section-title" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">Restrained Palette</div>
+    <p class="section-subtitle" style="color: #777;">Almost monochrome. The warm Dawn accent is the only colour — a nod to Donna's signature red, used sparingly for moments that matter.</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background: #2D2D2D;"></div><div class="color-info"><div class="color-name">Charcoal</div><div class="color-hex">#2D2D2D</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #E8845C;"></div><div class="color-info"><div class="color-name">Dawn</div><div class="color-hex">#E8845C</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #FAF9F6;"></div><div class="color-info"><div class="color-name">Parchment</div><div class="color-hex">#FAF9F6</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #8D99AE;"></div><div class="color-info"><div class="color-name">Slate</div><div class="color-hex">#8D99AE</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #457B9D;"></div><div class="color-info"><div class="color-name">Steel Blue</div><div class="color-hex">#457B9D</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #F1EDEA;"></div><div class="color-info"><div class="color-name">Linen</div><div class="color-hex">#F1EDEA</div></div></div>
+    </div>
+  </div>
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #8D99AE;">Display</div>
+      <p style="font-family:'Playfair Display',serif; font-size:48px; font-weight:700; color:#2D2D2D; letter-spacing:-1.5px;">Playfair Display</p>
+      <p style="font-family:'Playfair Display',serif; font-size:22px; color:#555; margin-top:8px; font-style:italic;">Sharp serif details. Editorial authority.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #8D99AE;">Body</div>
+      <p style="font-family:'DM Sans',sans-serif; font-size:40px; font-weight:500; color:#2D2D2D;">DM Sans</p>
+      <p style="font-family:'DM Sans',sans-serif; font-size:16px; color:#555; margin-top:8px; line-height:1.7; max-width:540px;">Geometric warmth. Clean without being sterile.</p>
+    </div>
+  </div>
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">04 — Voice</div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Playfair Display',serif; color:#2D2D2D;">Before you ask<span style="color:#E8845C;">.</span></p><p class="tagline-alt" style="font-family:'DM Sans'; color:#8D99AE;">Primary tagline</p></div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Playfair Display',serif; color:#2D2D2D; font-size:32px;">Consider it done<span style="color:#E8845C;">.</span></p><p class="tagline-alt" style="font-family:'DM Sans'; color:#8D99AE; font-size:15px;">Alternate</p></div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Playfair Display',serif; color:#2D2D2D; font-size:32px;">I read the room<span style="color:#E8845C;">.</span> Then I read the emails<span style="color:#E8845C;">.</span></p><p class="tagline-alt" style="font-family:'DM Sans'; color:#8D99AE; font-size:15px;">Campaign</p></div>
+    <div style="margin-top:48px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background:#F1EDEA;"><div class="voice-label" style="color:#E8845C;">Donna says</div><p class="voice-example" style="font-family:'Playfair Display',serif; color:#2D2D2D;">"You promised Sarah a proposal by Friday. It's Thursday. I've drafted one."</p></div>
+        <div class="voice-card" style="background:#F1EDEA;"><div class="voice-label" style="color:#E8845C;">Donna says</div><p class="voice-example" style="font-family:'Playfair Display',serif; color:#2D2D2D;">"Three newsletters. Zero action items. Archived."</p></div>
+        <div class="voice-card" style="background:#F1EDEA;"><div class="voice-label" style="color:#E8845C;">Donna says</div><p class="voice-example" style="font-family:'Playfair Display',serif; color:#2D2D2D;">"Your 2pm cancelled. I've moved your 3pm forward and blocked time for the report you owe James."</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     OPTION E — THE OPERATOR
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-operator" class="option-panel">
+
+  <div class="hero-section" style="background: #0D1117; color: #E6EDF3;">
+    <div class="hero-label" style="color: #FFB627;">Option E — The Operator</div>
+    <h1 class="hero-title" style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -3px;">DONNA</h1>
+    <p class="hero-tagline" style="font-family: 'IBM Plex Sans', sans-serif; color: #8B949E;">
+      Dark mode first. Bold presence. The amber cuts through like a signal flare.<br>
+      Donna as an operator — decisive, always on, running the show from behind the glass.
+    </p>
+  </div>
+  <div class="divider" style="background: #30363D;"></div>
+
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Space Grotesk', sans-serif; color: #E6EDF3;">The Monogram</div>
+    <p class="section-subtitle" style="color: #8B949E;">A geometric D built from two shapes: a half-circle and a vertical bar. The amber bar is the signal — always active, always watching.</p>
+    <div class="logo-grid">
+      <div class="logo-card" style="background: #0D1117; border-color: #30363D;">
+        <svg viewBox="0 0 280 80" width="260"><rect x="0" y="8" width="8" height="64" rx="4" fill="#FFB627"/><path d="M8 8 H30 C60 8 72 24 72 40 C72 56 60 72 30 72 H8" fill="none" stroke="#E6EDF3" stroke-width="7" stroke-linecap="round"/><text x="92" y="60" font-family="'Space Grotesk', sans-serif" font-size="46" font-weight="700" fill="#E6EDF3" letter-spacing="6">DONNA</text></svg>
+      </div>
+      <div class="logo-card" style="background: #F6F8FA;">
+        <svg viewBox="0 0 280 80" width="260"><rect x="0" y="8" width="8" height="64" rx="4" fill="#FFB627"/><path d="M8 8 H30 C60 8 72 24 72 40 C72 56 60 72 30 72 H8" fill="none" stroke="#0D1117" stroke-width="7" stroke-linecap="round"/><text x="92" y="60" font-family="'Space Grotesk', sans-serif" font-size="46" font-weight="700" fill="#0D1117" letter-spacing="6">DONNA</text></svg>
+      </div>
+      <div class="logo-card" style="background: #0D1117; border-color: #30363D;">
+        <svg viewBox="0 0 80 80" width="64"><rect x="8" y="8" width="8" height="64" rx="4" fill="#FFB627"/><path d="M16 8 H34 C60 8 72 24 72 40 C72 56 60 72 34 72 H16" fill="none" stroke="#E6EDF3" stroke-width="7" stroke-linecap="round"/></svg>
+      </div>
+      <div class="logo-card" style="background: #FFB627;">
+        <svg viewBox="0 0 80 80" width="64"><rect x="8" y="8" width="8" height="64" rx="4" fill="#0D1117"/><path d="M16 8 H34 C60 8 72 24 72 40 C72 56 60 72 34 72 H16" fill="none" stroke="#0D1117" stroke-width="7" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #30363D;"></div>
+
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">02 — Colour</div>
+    <div class="section-title" style="font-family:'Space Grotesk',sans-serif; color:#E6EDF3;">Dark-First Palette</div>
+    <p class="section-subtitle" style="color:#8B949E;">Built for the interface Donna lives in — dark, focused, always-on.</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:#0D1117;"></div><div class="color-info" style="background:#161B22;"><div class="color-name" style="color:#E6EDF3;">Obsidian</div><div class="color-hex" style="color:#8B949E;">#0D1117</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#FFB627;"></div><div class="color-info" style="background:#161B22;"><div class="color-name" style="color:#E6EDF3;">Amber Signal</div><div class="color-hex" style="color:#8B949E;">#FFB627</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#161B22;"></div><div class="color-info" style="background:#161B22;"><div class="color-name" style="color:#E6EDF3;">Carbon</div><div class="color-hex" style="color:#8B949E;">#161B22</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#30363D;"></div><div class="color-info" style="background:#161B22;"><div class="color-name" style="color:#E6EDF3;">Steel</div><div class="color-hex" style="color:#8B949E;">#30363D</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#2EA043;"></div><div class="color-info" style="background:#161B22;"><div class="color-name" style="color:#E6EDF3;">Executed</div><div class="color-hex" style="color:#8B949E;">#2EA043</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#E6EDF3;"></div><div class="color-info" style="background:#161B22;"><div class="color-name" style="color:#E6EDF3;">Platinum</div><div class="color-hex" style="color:#8B949E;">#E6EDF3</div></div></div>
+    </div>
+  </div>
+  <div class="divider" style="background: #30363D;"></div>
+
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color:#FFB627;">Display</div>
+      <p style="font-family:'Space Grotesk',sans-serif; font-size:48px; font-weight:700; color:#E6EDF3; letter-spacing:-1px;">Space Grotesk</p>
+      <p style="font-family:'IBM Plex Sans',sans-serif; font-size:16px; color:#8B949E; margin-top:8px;">Geometric. Decisive. Built for authority.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color:#FFB627;">Body</div>
+      <p style="font-family:'IBM Plex Sans',sans-serif; font-size:40px; font-weight:500; color:#E6EDF3;">IBM Plex Sans</p>
+      <p style="font-family:'IBM Plex Sans',sans-serif; font-size:16px; color:#8B949E; margin-top:8px; line-height:1.7; max-width:540px;">Technical precision with human warmth.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color:#FFB627;">Data</div>
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:32px; font-weight:500; color:#E6EDF3;">IBM Plex Mono</p>
+      <p style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:#8B949E; margin-top:8px;">Timestamps, scores, metadata.</p>
+    </div>
+  </div>
+  <div class="divider" style="background: #30363D;"></div>
+
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">04 — Voice</div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Space Grotesk',sans-serif; color:#E6EDF3;">Already handled<span style="color:#FFB627;">.</span></p><p class="tagline-alt" style="font-family:'IBM Plex Sans'; color:#8B949E;">Primary tagline</p></div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Space Grotesk',sans-serif; color:#E6EDF3; font-size:32px;">Your move. I'll handle the rest.</p><p class="tagline-alt" style="font-family:'IBM Plex Sans'; color:#8B949E; font-size:15px;">Alternate</p></div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Space Grotesk',sans-serif; color:#E6EDF3; font-size:32px;">I don't wait for instructions.</p><p class="tagline-alt" style="font-family:'IBM Plex Sans'; color:#8B949E; font-size:15px;">Campaign / bold</p></div>
+    <div style="margin-top:48px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background:#161B22;"><div class="voice-label" style="color:#FFB627;">Donna says</div><p class="voice-example" style="font-family:'IBM Plex Sans'; color:#E6EDF3;">"12 emails processed. 3 archived. 1 commitment flagged. Your morning is clear until 10:30."</p></div>
+        <div class="voice-card" style="background:#161B22;"><div class="voice-label" style="color:#FFB627;">Donna says</div><p class="voice-example" style="font-family:'IBM Plex Sans'; color:#E6EDF3;">"James hasn't responded in 6 days. He usually replies within 24 hours. Flagging."</p></div>
+        <div class="voice-card" style="background:#161B22;"><div class="voice-label" style="color:#FFB627;">Donna says</div><p class="voice-example" style="font-family:'IBM Plex Sans'; color:#E6EDF3;">"Meeting with Chen Wei in 45 minutes. He mentioned 'regulatory concerns' twice last week. I've pulled the context."</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     OPTION F — THE CONFIDANT
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="panel-confidant" class="option-panel">
+
+  <div class="hero-section" style="background: linear-gradient(170deg, #FFF8F0 0%, #F5EDE4 100%); color: #3C1642;">
+    <div class="hero-label" style="color: #FF6B6B;">Option F — The Confidant</div>
+    <h1 class="hero-title" style="font-family: 'Lora', serif; font-weight: 600; letter-spacing: -1px;">donna</h1>
+    <p class="hero-tagline" style="font-family: 'Source Sans 3', sans-serif; color: #6B5B6E;">
+      Warm. Personal. Quietly brilliant.<br>
+      Donna as a confidant — the trusted friend who knows your life better than you do and never makes you feel bad about it.
+    </p>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">01 — Logo</div>
+    <div class="section-title" style="font-family:'Lora',serif; color:#3C1642;">The Lowercase</div>
+    <p class="section-subtitle" style="color:#6B5B6E;">All lowercase. Intentionally soft. The coral dot above the icon mark is a small warmth that makes the whole mark feel alive.</p>
+    <div class="logo-grid">
+      <div class="logo-card" style="background:#FFF8F0;">
+        <svg viewBox="0 0 300 70" width="280"><text x="0" y="55" font-family="'Lora', serif" font-size="56" font-weight="600" fill="#3C1642" letter-spacing="-1">donna</text></svg>
+      </div>
+      <div class="logo-card" style="background:#3C1642;">
+        <svg viewBox="0 0 300 70" width="280"><text x="0" y="55" font-family="'Lora', serif" font-size="56" font-weight="600" fill="#FFF8F0" letter-spacing="-1">donna</text></svg>
+      </div>
+      <div class="logo-card" style="background:#FFF8F0;">
+        <svg viewBox="0 0 100 100" width="72"><path d="M25 20 L25 80" stroke="#3C1642" stroke-width="9" stroke-linecap="round"/><path d="M25 20 C60 20 75 35 75 50 C75 65 60 80 25 80" fill="none" stroke="#3C1642" stroke-width="9" stroke-linecap="round"/><circle cx="72" cy="26" r="7" fill="#FF6B6B"/></svg>
+      </div>
+      <div class="logo-card" style="background:#3C1642;">
+        <svg viewBox="0 0 100 100" width="72"><path d="M25 20 L25 80" stroke="#FFF8F0" stroke-width="9" stroke-linecap="round"/><path d="M25 20 C60 20 75 35 75 50 C75 65 60 80 25 80" fill="none" stroke="#FFF8F0" stroke-width="9" stroke-linecap="round"/><circle cx="72" cy="26" r="7" fill="#FF6B6B"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">02 — Colour</div>
+    <div class="section-title" style="font-family:'Lora',serif; color:#3C1642;">Warm Palette</div>
+    <p class="section-subtitle" style="color:#6B5B6E;">Built around warmth and trust. Deep plum grounds. Coral draws the eye. Sage confirms. Cream wraps everything in comfort.</p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background:#3C1642;"></div><div class="color-info"><div class="color-name">Deep Plum</div><div class="color-hex">#3C1642</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#FF6B6B;"></div><div class="color-info"><div class="color-name">Coral</div><div class="color-hex">#FF6B6B</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#A7C4A0;"></div><div class="color-info"><div class="color-name">Sage</div><div class="color-hex">#A7C4A0</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#FFF8F0;"></div><div class="color-info"><div class="color-name">Cream</div><div class="color-hex">#FFF8F0</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#C9ADA7;"></div><div class="color-info"><div class="color-name">Dusty Rose</div><div class="color-hex">#C9ADA7</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#5C4B6E;"></div><div class="color-info"><div class="color-name">Twilight</div><div class="color-hex">#5C4B6E</div></div></div>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color:#C9ADA7;">Display</div>
+      <p style="font-family:'Lora',serif; font-size:48px; font-weight:600; color:#3C1642;">Lora</p>
+      <p style="font-family:'Lora',serif; font-size:22px; color:#6B5B6E; margin-top:8px; font-style:italic;">Calligraphic warmth. Feels handwritten at a distance.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color:#C9ADA7;">Body</div>
+      <p style="font-family:'Source Sans 3',sans-serif; font-size:40px; font-weight:500; color:#3C1642;">Source Sans 3</p>
+      <p style="font-family:'Source Sans 3',sans-serif; font-size:16px; color:#6B5B6E; margin-top:8px; line-height:1.7; max-width:540px;">Exceptional readability, friendly counters, warm without sacrificing clarity.</p>
+    </div>
+  </div>
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">04 — Voice</div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Lora',serif; color:#3C1642;">She remembered<span style="color:#FF6B6B;">.</span><br>So you don't have to<span style="color:#FF6B6B;">.</span></p><p class="tagline-alt" style="font-family:'Source Sans 3'; color:#C9ADA7;">Primary tagline</p></div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Lora',serif; color:#3C1642; font-size:32px;">Your second brain has better social skills<span style="color:#FF6B6B;">.</span></p><p class="tagline-alt" style="font-family:'Source Sans 3'; color:#C9ADA7; font-size:15px;">Alternate</p></div>
+    <div class="tagline-block"><p class="tagline-primary" style="font-family:'Lora',serif; color:#3C1642; font-size:32px;">I know what you need before your coffee does<span style="color:#FF6B6B;">.</span></p><p class="tagline-alt" style="font-family:'Source Sans 3'; color:#C9ADA7; font-size:15px;">Campaign / playful</p></div>
+    <div style="margin-top:48px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background:#F5EDE4;"><div class="voice-label" style="color:#FF6B6B;">Donna says</div><p class="voice-example" style="font-family:'Lora',serif; color:#3C1642;">"Hey — you mentioned grabbing coffee with Priya last month but never followed up. She posted about being in town next week. Might be worth reaching out?"</p></div>
+        <div class="voice-card" style="background:#F5EDE4;"><div class="voice-label" style="color:#FF6B6B;">Donna says</div><p class="voice-example" style="font-family:'Lora',serif; color:#3C1642;">"Quiet morning. I've tidied up your inbox — 6 newsletters archived, 2 receipts filed. The only thing that needs you is the reply to Tom."</p></div>
+        <div class="voice-card" style="background:#F5EDE4;"><div class="voice-label" style="color:#FF6B6B;">Donna says</div><p class="voice-example" style="font-family:'Lora',serif; color:#3C1642;">"Your meeting with the board is in an hour. Last time, they asked about Q1 pipeline. I've pulled the updated numbers — they look good."</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.option-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

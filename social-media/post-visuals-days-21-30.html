@@ -5,42 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>donna — Post Visuals Days 21–30</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --midnight: #1B1F3A; --dawn: #E8845C; --dusk: #4E7DAA;
-      --paper: #FBF7F4; --sage: #52B788; --gold: #F4C896;
-      --deep: #0E1225; --charcoal: #2D3154; --mist: #9BAFC4;
-      --stone: #F0EDE9; --alert: #D64B2A;
+      --parchment: #FAF9F6; --dawn: #E8845C; --steel: #457B9D;
+      --linen: #F1EDEA; --sage: #52B788; --gold: #F4C896;
+      --charcoal: #2D2D2D; --slate: #8D99AE; --alert: #D64B2A;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--stone); font-family: 'Inter', sans-serif; padding: 48px 56px; }
+    body { background: var(--linen); font-family: 'DM Sans', sans-serif; padding: 48px 56px; }
 
     .header {
-      background: var(--midnight);
+      background: var(--charcoal);
       padding: 28px 40px;
       display: flex; justify-content: space-between; align-items: center;
       border-bottom: 1px solid rgba(232,132,92,.25);
       margin: -48px -56px 48px;
     }
     .header-left { display: flex; align-items: center; gap: 16px; }
-    .header-brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-style: italic; color: var(--paper); }
-    .header-sub { font-size: 12px; color: var(--mist); border-left: 1px solid rgba(155,175,196,.25); padding-left: 16px; letter-spacing: .04em; }
-    .header-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(155,175,196,.4); letter-spacing: .1em; text-align: right; line-height: 1.9; }
+    .header-brand { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700; font-style: normal; color: var(--parchment); }
+    .header-brand .dot { color: #E8845C; }
+    .header-sub { font-size: 12px; color: var(--slate); border-left: 1px solid rgba(141,153,174,.25); padding-left: 16px; letter-spacing: .04em; }
+    .header-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(141,153,174,.4); letter-spacing: .1em; text-align: right; line-height: 1.9; }
 
     .day-block { margin-bottom: 56px; }
     .day-label {
       font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .18em;
-      text-transform: uppercase; color: var(--mist); margin-bottom: 12px;
+      text-transform: uppercase; color: var(--slate); margin-bottom: 12px;
       display: flex; align-items: center; gap: 12px;
     }
-    .day-label-title { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--midnight); letter-spacing: 0; }
+    .day-label-title { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--charcoal); letter-spacing: 0; }
     .day-label-plat {
       font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 8px;
       border-radius: 100px; margin-left: auto;
     }
-    .plat-li { background: rgba(78,125,170,.1); color: var(--dusk); }
-    .plat-tw { background: rgba(27,31,58,.07); color: var(--charcoal); }
+    .plat-li { background: rgba(69,123,157,.1); color: var(--steel); }
+    .plat-tw { background: rgba(45,45,45,.07); color: var(--charcoal); }
     .plat-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
     .plat-all { background: rgba(82,183,136,.1); color: var(--sage); }
 
@@ -56,8 +56,8 @@
     }
     .btn-dawn { background: var(--dawn); color: white; }
     .btn-dawn:hover { background: #d4724c; }
-    .btn-ghost { background: white; color: var(--midnight); border: 1px solid rgba(27,31,58,.12); }
-    .btn-ghost:hover { background: var(--midnight); color: var(--paper); }
+    .btn-ghost { background: white; color: var(--charcoal); border: 1px solid rgba(45,45,45,.12); }
+    .btn-ghost:hover { background: var(--charcoal); color: var(--parchment); }
 
     .card-info {
       background: white; border-radius: 6px; padding: 16px 18px;
@@ -66,15 +66,15 @@
     }
     .card-info strong { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--dawn); display: block; margin-bottom: 4px; letter-spacing: .1em; }
 
-    .divider { border: none; border-top: 1px solid rgba(27,31,58,.08); margin: 40px 0; }
-    svg.card { display: block; border-radius: 8px; box-shadow: 0 8px 40px rgba(27,31,58,.18); }
+    .divider { border: none; border-top: 1px solid rgba(45,45,45,.08); margin: 40px 0; }
+    svg.card { display: block; border-radius: 8px; box-shadow: 0 8px 40px rgba(45,45,45,.18); }
   </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <div class="header-brand">donna</div>
+    <div class="header-brand">Donna<span class="dot">.</span></div>
     <div class="header-sub">Post Visuals · Days 21–30 · 1080×1080px</div>
   </div>
   <div class="header-meta">DOWNLOAD EACH CARD AS PNG<br>READY FOR INSTAGRAM · LINKEDIN · TWITTER</div>
@@ -93,38 +93,38 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d21" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#FBF7F4"/>
+        <rect width="1080" height="1080" fill="#FAF9F6"/>
         <!-- subtle texture lines -->
-        <line x1="0" y1="0" x2="1080" y2="0" stroke="#1B1F3A" stroke-width="6" opacity="1"/>
+        <line x1="0" y1="0" x2="1080" y2="0" stroke="#2D2D2D" stroke-width="6" opacity="1"/>
         <rect x="0" y="0" width="6" height="1080" fill="#E8845C"/>
         <!-- large open quote mark background -->
-        <text x="60" y="420" font-family="Georgia,'Times New Roman',serif" font-size="560" fill="#1B1F3A" opacity="0.04">"</text>
+        <text x="60" y="420" font-family="'Playfair Display',Georgia,serif" font-size="560" fill="#2D2D2D" opacity="0.04">"</text>
         <!-- eyebrow -->
-        <text x="80" y="120" font-family="'Courier New',monospace" font-size="16" fill="#9BAFC4" letter-spacing="4">BETA USER · WEEK 2</text>
+        <text x="80" y="120" font-family="'JetBrains Mono',monospace" font-size="16" fill="#8D99AE" letter-spacing="4">BETA USER · WEEK 2</text>
         <!-- quote text -->
-        <text x="80" y="232" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="66" font-weight="300" fill="#1B1F3A" letter-spacing="-1">"I used to start every</text>
-        <text x="80" y="316" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="66" font-weight="300" fill="#1B1F3A" letter-spacing="-1">morning in reactive mode.</text>
-        <text x="80" y="400" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="66" font-weight="300" fill="#1B1F3A" letter-spacing="-1">Now I start with a plan.</text>
-        <text x="80" y="500" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="66" font-weight="300" fill="#E8845C" letter-spacing="-1">Donna changed that."</text>
+        <text x="80" y="232" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="66" font-weight="300" fill="#2D2D2D" letter-spacing="-1">"I used to start every</text>
+        <text x="80" y="316" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="66" font-weight="300" fill="#2D2D2D" letter-spacing="-1">morning in reactive mode.</text>
+        <text x="80" y="400" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="66" font-weight="300" fill="#2D2D2D" letter-spacing="-1">Now I start with a plan.</text>
+        <text x="80" y="500" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="66" font-weight="300" fill="#E8845C" letter-spacing="-1">Donna changed that."</text>
         <!-- divider -->
         <line x1="80" y1="548" x2="480" y2="548" stroke="#E8845C" stroke-width="2" opacity="0.4"/>
         <!-- attribution -->
-        <text x="80" y="594" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#1B1F3A" font-weight="600">Alex M. · Founder, Series A</text>
-        <text x="80" y="624" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#9BAFC4">Beta cohort member · Day 14 of using donna</text>
+        <text x="80" y="594" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#2D2D2D" font-weight="600">Alex M. · Founder, Series A</text>
+        <text x="80" y="624" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#8D99AE">Beta cohort member · Day 14 of using donna</text>
         <!-- separator -->
-        <line x1="80" y1="680" x2="1000" y2="680" stroke="#1B1F3A" stroke-width="1" opacity="0.08"/>
+        <line x1="80" y1="680" x2="1000" y2="680" stroke="#2D2D2D" stroke-width="1" opacity="0.08"/>
         <!-- donna context -->
-        <text x="80" y="736" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#9BAFC4">From inbox chaos to a ranked, cited morning briefing.</text>
-        <text x="80" y="770" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#9BAFC4">Every day. Before the first meeting.</text>
+        <text x="80" y="736" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#8D99AE">From inbox chaos to a ranked, cited morning briefing.</text>
+        <text x="80" y="770" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#8D99AE">Every day. Before the first meeting.</text>
         <!-- bottom donna branding on paper -->
         <g transform="translate(80,852) scale(0.55)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#1B1F3A" stroke-width="4.5" stroke-linejoin="round" opacity="0.4"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#2D2D2D" stroke-width="4.5" stroke-linejoin="round" opacity="0.4"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C"/>
         </g>
-        <text x="140" y="886" font-family="Georgia,serif" font-style="italic" font-size="28" fill="#1B1F3A" opacity="0.4">donna</text>
-        <text x="1000" y="886" text-anchor="end" font-family="'Courier New',monospace" font-size="16" fill="#E8845C" opacity="0.6" letter-spacing="3">DONNA.APP</text>
-        <line x1="0" y1="1074" x2="1080" y2="1074" stroke="#1B1F3A" stroke-width="6" opacity="1"/>
+        <text x="140" y="886" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-weight="700" font-size="28" fill="#2D2D2D" opacity="0.4">Donna<tspan fill="#E8845C">.</tspan></text>
+        <text x="1000" y="886" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="16" fill="#E8845C" opacity="0.6" letter-spacing="3">DONNA.APP</text>
+        <line x1="0" y1="1074" x2="1080" y2="1074" stroke="#2D2D2D" stroke-width="6" opacity="1"/>
         <rect x="0" y="1074" width="1080" height="6" fill="#E8845C"/>
       </svg>
     </div>
@@ -153,37 +153,37 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d22" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#0E1225"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- eyebrow -->
-        <text x="540" y="96" text-anchor="middle" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4" opacity="0.4" letter-spacing="4">LET'S BE HONEST</text>
+        <text x="540" y="96" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE" opacity="0.4" letter-spacing="4">LET'S BE HONEST</text>
         <!-- headline -->
-        <text x="540" y="206" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="88" fill="#FBF7F4" letter-spacing="-2">donna is</text>
-        <text x="540" y="308" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="88" fill="#FBF7F4" letter-spacing="-2">not for everyone.</text>
-        <line x1="200" y1="344" x2="880" y2="344" stroke="#9BAFC4" stroke-width="1" opacity="0.12"/>
+        <text x="540" y="206" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="88" fill="#FAF9F6" letter-spacing="-2">donna is</text>
+        <text x="540" y="308" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="88" fill="#FAF9F6" letter-spacing="-2">not for everyone.</text>
+        <line x1="200" y1="344" x2="880" y2="344" stroke="#8D99AE" stroke-width="1" opacity="0.12"/>
         <!-- WHO IT IS NOT FOR -->
-        <text x="120" y="400" font-family="'Courier New',monospace" font-size="14" fill="#9BAFC4" opacity="0.5" letter-spacing="3">NOT FOR YOU IF...</text>
-        <text x="120" y="440" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#9BAFC4" opacity="0.6">✗ You enjoy checking five apps before 9 AM</text>
-        <text x="120" y="476" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#9BAFC4" opacity="0.6">✗ Your inbox is perfectly under control</text>
-        <text x="120" y="512" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#9BAFC4" opacity="0.6">✗ You never miss a commitment or deadline</text>
-        <text x="120" y="548" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#9BAFC4" opacity="0.6">✗ You already know who to call back first</text>
-        <line x1="120" y1="580" x2="960" y2="580" stroke="#9BAFC4" stroke-width="1" opacity="0.1"/>
+        <text x="120" y="400" font-family="'JetBrains Mono',monospace" font-size="14" fill="#8D99AE" opacity="0.5" letter-spacing="3">NOT FOR YOU IF...</text>
+        <text x="120" y="440" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#8D99AE" opacity="0.6">✗ You enjoy checking five apps before 9 AM</text>
+        <text x="120" y="476" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#8D99AE" opacity="0.6">✗ Your inbox is perfectly under control</text>
+        <text x="120" y="512" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#8D99AE" opacity="0.6">✗ You never miss a commitment or deadline</text>
+        <text x="120" y="548" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#8D99AE" opacity="0.6">✗ You already know who to call back first</text>
+        <line x1="120" y1="580" x2="960" y2="580" stroke="#8D99AE" stroke-width="1" opacity="0.1"/>
         <!-- WHO IT IS FOR -->
-        <text x="120" y="626" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" letter-spacing="3">BUILT FOR YOU IF...</text>
-        <text x="120" y="668" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FBF7F4">✓ You run fast and hate dropping balls</text>
-        <text x="120" y="706" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FBF7F4">✓ You want your AI to work while you sleep</text>
-        <text x="120" y="744" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FBF7F4">✓ You want to walk into every day prepared</text>
+        <text x="120" y="626" font-family="'JetBrains Mono',monospace" font-size="14" fill="#E8845C" letter-spacing="3">BUILT FOR YOU IF...</text>
+        <text x="120" y="668" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FAF9F6">✓ You run fast and hate dropping balls</text>
+        <text x="120" y="706" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FAF9F6">✓ You want your AI to work while you sleep</text>
+        <text x="120" y="744" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FAF9F6">✓ You want to walk into every day prepared</text>
         <!-- CTA bottom -->
-        <rect x="120" y="808" width="840" height="80" rx="10" fill="#1B1F3A"/>
-        <text x="540" y="844" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="#E8845C" letter-spacing="3">EARLY ACCESS OPEN NOW</text>
-        <text x="540" y="872" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#9BAFC4">donna.app — first 500 users only</text>
+        <rect x="120" y="808" width="840" height="80" rx="10" fill="#2D2D2D"/>
+        <text x="540" y="844" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="14" fill="#E8845C" letter-spacing="3">EARLY ACCESS OPEN NOW</text>
+        <text x="540" y="872" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#8D99AE">donna.app — first 500 users only</text>
         <!-- bottom brand -->
         <g transform="translate(68,960) scale(0.52)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.3"/>
         </g>
-        <text x="120" y="994" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.25">donna</text>
-        <text x="1012" y="994" text-anchor="end" font-family="'Courier New',monospace" font-size="18" fill="#E8845C" opacity="0.55" letter-spacing="3">DONNA.APP</text>
+        <text x="120" y="994" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-weight="700" font-size="26" fill="#FAF9F6" opacity="0.25">Donna<tspan fill="#E8845C">.</tspan></text>
+        <text x="1012" y="994" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="18" fill="#E8845C" opacity="0.55" letter-spacing="3">DONNA.APP</text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#E8845C" stroke-width="3" opacity="0.4"/>
       </svg>
     </div>
@@ -212,57 +212,57 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d23" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- radial glow -->
         <radialGradient id="g23" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#E8845C" stop-opacity="0.07"/>
-          <stop offset="100%" stop-color="#1B1F3A" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#2D2D2D" stop-opacity="0"/>
         </radialGradient>
         <rect width="1080" height="1080" fill="url(#g23)"/>
         <!-- eyebrow -->
-        <text x="540" y="96" text-anchor="middle" font-family="'Courier New',monospace" font-size="18" fill="#E8845C" opacity="0.6" letter-spacing="4">FOUNDING COHORT UPDATE</text>
+        <text x="540" y="96" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="18" fill="#E8845C" opacity="0.6" letter-spacing="4">FOUNDING COHORT UPDATE</text>
         <!-- headline -->
-        <text x="540" y="196" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">430 of 500 spots</text>
-        <text x="540" y="276" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="72" fill="#E8845C" letter-spacing="-1">claimed.</text>
+        <text x="540" y="196" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="72" fill="#FAF9F6" letter-spacing="-1">430 of 500 spots</text>
+        <text x="540" y="276" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="72" fill="#E8845C" letter-spacing="-1">claimed.</text>
         <!-- progress bar track -->
-        <rect x="120" y="320" width="840" height="44" rx="22" fill="#2D3154"/>
+        <rect x="120" y="320" width="840" height="44" rx="22" fill="#2D2D2D"/>
         <!-- progress bar fill — 86% -->
         <rect x="120" y="320" width="722" height="44" rx="22" fill="#E8845C"/>
         <!-- pulse dot at end of bar -->
         <circle cx="842" cy="342" r="16" fill="#E8845C"/>
         <circle cx="842" cy="342" r="24" fill="#E8845C" fill-opacity="0.25"/>
         <!-- percent label -->
-        <text x="842" y="348" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="white">86%</text>
+        <text x="842" y="348" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="14" fill="white">86%</text>
         <!-- milestone markers -->
-        <text x="120" y="398" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.5">0</text>
-        <text x="540" y="398" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.5">250</text>
-        <text x="960" y="398" text-anchor="end" font-family="'Courier New',monospace" font-size="13" fill="#9BAFC4" opacity="0.5">500</text>
+        <text x="120" y="398" font-family="'JetBrains Mono',monospace" font-size="13" fill="#8D99AE" opacity="0.5">0</text>
+        <text x="540" y="398" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="13" fill="#8D99AE" opacity="0.5">250</text>
+        <text x="960" y="398" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="13" fill="#8D99AE" opacity="0.5">500</text>
         <!-- stat cards row -->
-        <rect x="120" y="444" width="248" height="112" rx="10" fill="#2D3154"/>
-        <text x="244" y="500" text-anchor="middle" font-family="Georgia,serif" font-size="56" font-weight="700" fill="#E8845C">430</text>
-        <text x="244" y="534" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#9BAFC4">joined</text>
-        <rect x="416" y="444" width="248" height="112" rx="10" fill="#2D3154"/>
-        <text x="540" y="500" text-anchor="middle" font-family="Georgia,serif" font-size="56" font-weight="700" fill="#52B788">70</text>
-        <text x="540" y="534" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#9BAFC4">spots left</text>
-        <rect x="712" y="444" width="248" height="112" rx="10" fill="#2D3154"/>
-        <text x="836" y="500" text-anchor="middle" font-family="Georgia,serif" font-size="56" font-weight="700" fill="#F4C896">∞</text>
-        <text x="836" y="534" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#9BAFC4">founding tier</text>
+        <rect x="120" y="444" width="248" height="112" rx="10" fill="#2D2D2D"/>
+        <text x="244" y="500" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="56" font-weight="700" fill="#E8845C">430</text>
+        <text x="244" y="534" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#8D99AE">joined</text>
+        <rect x="416" y="444" width="248" height="112" rx="10" fill="#2D2D2D"/>
+        <text x="540" y="500" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="56" font-weight="700" fill="#52B788">70</text>
+        <text x="540" y="534" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#8D99AE">spots left</text>
+        <rect x="712" y="444" width="248" height="112" rx="10" fill="#2D2D2D"/>
+        <text x="836" y="500" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="56" font-weight="700" fill="#F4C896">∞</text>
+        <text x="836" y="534" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#8D99AE">founding tier</text>
         <!-- what founding means -->
-        <text x="540" y="624" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="#9BAFC4" opacity="0.5" letter-spacing="3">FOUNDING COHORT GETS</text>
-        <text x="540" y="672" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FBF7F4">Free access · Priority feature requests</text>
-        <text x="540" y="710" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FBF7F4">Direct line to the team · Locked pricing forever</text>
+        <text x="540" y="624" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="14" fill="#8D99AE" opacity="0.5" letter-spacing="3">FOUNDING COHORT GETS</text>
+        <text x="540" y="672" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FAF9F6">Free access · Priority feature requests</text>
+        <text x="540" y="710" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#FAF9F6">Direct line to the team · Locked pricing forever</text>
         <!-- cta -->
         <rect x="280" y="772" width="520" height="76" rx="10" fill="#E8845C"/>
-        <text x="540" y="808" text-anchor="middle" font-family="'Courier New',monospace" font-size="15" fill="white" letter-spacing="3">JOIN BEFORE IT FILLS</text>
+        <text x="540" y="808" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="15" fill="white" letter-spacing="3">JOIN BEFORE IT FILLS</text>
         <text x="540" y="832" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="rgba(255,255,255,.7)">donna.app · link in bio</text>
         <!-- bottom brand -->
         <g transform="translate(68,928) scale(0.52)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.3"/>
         </g>
-        <text x="120" y="962" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.25">donna</text>
-        <text x="1012" y="962" text-anchor="end" font-family="'Courier New',monospace" font-size="18" fill="#E8845C" opacity="0.55" letter-spacing="3">DONNA.APP</text>
+        <text x="120" y="962" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-weight="700" font-size="26" fill="#FAF9F6" opacity="0.25">Donna<tspan fill="#E8845C">.</tspan></text>
+        <text x="1012" y="962" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="18" fill="#E8845C" opacity="0.55" letter-spacing="3">DONNA.APP</text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#E8845C" stroke-width="3" opacity="0.4"/>
       </svg>
     </div>
@@ -291,12 +291,12 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d24" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#0E1225"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- dramatic radial burst -->
         <radialGradient id="g24a" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#E8845C" stop-opacity="0.22"/>
           <stop offset="60%" stop-color="#E8845C" stop-opacity="0.04"/>
-          <stop offset="100%" stop-color="#0E1225" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#2D2D2D" stop-opacity="0"/>
         </radialGradient>
         <rect width="1080" height="1080" fill="url(#g24a)"/>
         <!-- outer rings -->
@@ -306,29 +306,29 @@
         <circle cx="540" cy="540" r="200" fill="none" stroke="#E8845C" stroke-width="1.5" opacity="0.2"/>
         <!-- top banner strip -->
         <rect x="0" y="0" width="1080" height="68" fill="#E8845C"/>
-        <text x="540" y="46" text-anchor="middle" font-family="'Courier New',monospace" font-size="22" fill="white" letter-spacing="6">SHE'S LIVE.</text>
+        <text x="540" y="46" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="22" fill="white" letter-spacing="6">SHE'S LIVE.</text>
         <!-- logo mark large -->
         <g transform="translate(397,180) scale(4.5)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="4" stroke-linejoin="round"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C"/>
         </g>
         <!-- donna wordmark -->
-        <text x="540" y="668" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="140" font-weight="300" fill="#FBF7F4" letter-spacing="-3">donna</text>
+        <text x="540" y="668" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-size="140" font-weight="700" fill="#FAF9F6" letter-spacing="-3">Donna</text><text x="740" y="668" font-family="'Playfair Display',Georgia,serif" font-size="140" font-weight="700" fill="#E8845C">.</text>
         <!-- tagline -->
-        <text x="540" y="734" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="34" fill="#E8845C" letter-spacing="1">See everything. Miss nothing.</text>
+        <text x="540" y="734" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="34" fill="#E8845C" letter-spacing="1">See everything. Miss nothing.</text>
         <!-- launch stats row -->
-        <line x1="120" y1="772" x2="960" y2="772" stroke="#9BAFC4" stroke-width="1" opacity="0.15"/>
-        <text x="270" y="826" text-anchor="middle" font-family="Georgia,serif" font-size="52" fill="#E8845C">500</text>
-        <text x="270" y="858" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#9BAFC4">founding members</text>
-        <line x1="540" y1="792" x2="540" y2="868" stroke="#9BAFC4" stroke-width="1" opacity="0.15"/>
-        <text x="540" y="826" text-anchor="middle" font-family="Georgia,serif" font-size="52" fill="#52B788">Day 1</text>
-        <text x="540" y="858" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#9BAFC4">of the rest</text>
-        <line x1="810" y1="792" x2="810" y2="868" stroke="#9BAFC4" stroke-width="1" opacity="0.15"/>
-        <text x="810" y="826" text-anchor="middle" font-family="Georgia,serif" font-size="52" fill="#F4C896">7:30</text>
-        <text x="810" y="858" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#9BAFC4">first briefing</text>
+        <line x1="120" y1="772" x2="960" y2="772" stroke="#8D99AE" stroke-width="1" opacity="0.15"/>
+        <text x="270" y="826" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="52" fill="#E8845C">500</text>
+        <text x="270" y="858" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#8D99AE">founding members</text>
+        <line x1="540" y1="792" x2="540" y2="868" stroke="#8D99AE" stroke-width="1" opacity="0.15"/>
+        <text x="540" y="826" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="52" fill="#52B788">Day 1</text>
+        <text x="540" y="858" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#8D99AE">of the rest</text>
+        <line x1="810" y1="792" x2="810" y2="868" stroke="#8D99AE" stroke-width="1" opacity="0.15"/>
+        <text x="810" y="826" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="52" fill="#F4C896">7:30</text>
+        <text x="810" y="858" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#8D99AE">first briefing</text>
         <!-- cta -->
-        <text x="540" y="944" text-anchor="middle" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4" opacity="0.6" letter-spacing="4">DONNA.APP · LINK IN BIO</text>
+        <text x="540" y="944" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE" opacity="0.6" letter-spacing="4">DONNA.APP · LINK IN BIO</text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#E8845C" stroke-width="3" opacity="0.5"/>
       </svg>
     </div>
@@ -357,47 +357,47 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d25" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- top rule -->
-        <line x1="0" y1="3" x2="600" y2="3" stroke="#4E7DAA" stroke-width="3" opacity="0.5"/>
+        <line x1="0" y1="3" x2="600" y2="3" stroke="#457B9D" stroke-width="3" opacity="0.5"/>
         <!-- eyebrow -->
-        <text x="80" y="76" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA" opacity="0.6" letter-spacing="4">EVERYTHING YOU ASKED ABOUT DONNA</text>
+        <text x="80" y="76" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D" opacity="0.6" letter-spacing="4">EVERYTHING YOU ASKED ABOUT DONNA</text>
         <!-- headline -->
-        <text x="80" y="150" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">Answering your</text>
-        <text x="80" y="230" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="72" fill="#FBF7F4" letter-spacing="-1">top questions.</text>
-        <line x1="80" y1="258" x2="1000" y2="258" stroke="#9BAFC4" stroke-width="1" opacity="0.1"/>
+        <text x="80" y="150" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="72" fill="#FAF9F6" letter-spacing="-1">Answering your</text>
+        <text x="80" y="230" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="72" fill="#FAF9F6" letter-spacing="-1">top questions.</text>
+        <line x1="80" y1="258" x2="1000" y2="258" stroke="#8D99AE" stroke-width="1" opacity="0.1"/>
         <!-- Q1 -->
-        <text x="80" y="314" font-family="'Courier New',monospace" font-size="14" fill="#4E7DAA" letter-spacing="2">Q1 · DOES DONNA READ MY EMAILS?</text>
-        <text x="80" y="346" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FBF7F4">Yes — to extract commitments and flag what matters.</text>
-        <text x="80" y="372" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#9BAFC4">Content never leaves your account without permission.</text>
-        <line x1="80" y1="396" x2="1000" y2="396" stroke="#9BAFC4" stroke-width="1" opacity="0.08"/>
+        <text x="80" y="314" font-family="'JetBrains Mono',monospace" font-size="14" fill="#457B9D" letter-spacing="2">Q1 · DOES DONNA READ MY EMAILS?</text>
+        <text x="80" y="346" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FAF9F6">Yes — to extract commitments and flag what matters.</text>
+        <text x="80" y="372" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#8D99AE">Content never leaves your account without permission.</text>
+        <line x1="80" y1="396" x2="1000" y2="396" stroke="#8D99AE" stroke-width="1" opacity="0.08"/>
         <!-- Q2 -->
-        <text x="80" y="436" font-family="'Courier New',monospace" font-size="14" fill="#4E7DAA" letter-spacing="2">Q2 · IS IT ALWAYS RUNNING?</text>
-        <text x="80" y="468" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FBF7F4">The pipeline runs overnight. One briefing per morning.</text>
-        <text x="80" y="494" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#9BAFC4">No constant monitoring. No background drain.</text>
-        <line x1="80" y1="518" x2="1000" y2="518" stroke="#9BAFC4" stroke-width="1" opacity="0.08"/>
+        <text x="80" y="436" font-family="'JetBrains Mono',monospace" font-size="14" fill="#457B9D" letter-spacing="2">Q2 · IS IT ALWAYS RUNNING?</text>
+        <text x="80" y="468" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FAF9F6">The pipeline runs overnight. One briefing per morning.</text>
+        <text x="80" y="494" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#8D99AE">No constant monitoring. No background drain.</text>
+        <line x1="80" y1="518" x2="1000" y2="518" stroke="#8D99AE" stroke-width="1" opacity="0.08"/>
         <!-- Q3 -->
-        <text x="80" y="558" font-family="'Courier New',monospace" font-size="14" fill="#4E7DAA" letter-spacing="2">Q3 · WHAT INTEGRATIONS DO YOU SUPPORT?</text>
-        <text x="80" y="590" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FBF7F4">Gmail, Google Calendar, Outlook, Slack, Notion.</text>
-        <text x="80" y="616" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#9BAFC4">HubSpot, Linear, Dropbox — on the roadmap.</text>
-        <line x1="80" y1="640" x2="1000" y2="640" stroke="#9BAFC4" stroke-width="1" opacity="0.08"/>
+        <text x="80" y="558" font-family="'JetBrains Mono',monospace" font-size="14" fill="#457B9D" letter-spacing="2">Q3 · WHAT INTEGRATIONS DO YOU SUPPORT?</text>
+        <text x="80" y="590" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FAF9F6">Gmail, Google Calendar, Outlook, Slack, Notion.</text>
+        <text x="80" y="616" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#8D99AE">HubSpot, Linear, Dropbox — on the roadmap.</text>
+        <line x1="80" y1="640" x2="1000" y2="640" stroke="#8D99AE" stroke-width="1" opacity="0.08"/>
         <!-- Q4 -->
-        <text x="80" y="680" font-family="'Courier New',monospace" font-size="14" fill="#4E7DAA" letter-spacing="2">Q4 · HOW MUCH DOES IT COST?</text>
-        <text x="80" y="712" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FBF7F4">Beta is free. Founding cohort locks in founder pricing.</text>
-        <text x="80" y="738" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#9BAFC4">Paid tiers planned for post-beta. No surprise charges.</text>
+        <text x="80" y="680" font-family="'JetBrains Mono',monospace" font-size="14" fill="#457B9D" letter-spacing="2">Q4 · HOW MUCH DOES IT COST?</text>
+        <text x="80" y="712" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#FAF9F6">Beta is free. Founding cohort locks in founder pricing.</text>
+        <text x="80" y="738" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#8D99AE">Paid tiers planned for post-beta. No surprise charges.</text>
         <!-- bottom cta area -->
-        <rect x="80" y="796" width="920" height="72" rx="10" fill="#2D3154"/>
-        <text x="540" y="829" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" fill="#4E7DAA" letter-spacing="3">MORE QUESTIONS? DROP THEM BELOW</text>
-        <text x="540" y="853" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" fill="#9BAFC4">Every question answered in the next 24 hours.</text>
+        <rect x="80" y="796" width="920" height="72" rx="10" fill="#2D2D2D"/>
+        <text x="540" y="829" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="13" fill="#457B9D" letter-spacing="3">MORE QUESTIONS? DROP THEM BELOW</text>
+        <text x="540" y="853" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" fill="#8D99AE">Every question answered in the next 24 hours.</text>
         <!-- bottom brand -->
         <g transform="translate(68,938) scale(0.52)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.3"/>
         </g>
-        <text x="120" y="972" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.25">donna</text>
-        <text x="1012" y="972" text-anchor="end" font-family="'Courier New',monospace" font-size="18" fill="#4E7DAA" opacity="0.55" letter-spacing="3">DONNA.APP</text>
-        <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#4E7DAA" stroke-width="3" opacity="0.3"/>
+        <text x="120" y="972" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-weight="700" font-size="26" fill="#FAF9F6" opacity="0.25">Donna<tspan fill="#E8845C">.</tspan></text>
+        <text x="1012" y="972" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="18" fill="#457B9D" opacity="0.55" letter-spacing="3">DONNA.APP</text>
+        <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#457B9D" stroke-width="3" opacity="0.3"/>
       </svg>
     </div>
     <div class="card-side">
@@ -425,35 +425,35 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d26" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#0E1225"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- sage radial burst -->
         <radialGradient id="g26" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#52B788" stop-opacity="0.15"/>
-          <stop offset="100%" stop-color="#0E1225" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#2D2D2D" stop-opacity="0"/>
         </radialGradient>
         <rect width="1080" height="1080" fill="url(#g26)"/>
         <!-- number background ghost -->
-        <text x="540" y="580" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="520" font-weight="400" fill="#52B788" opacity="0.05">200</text>
+        <text x="540" y="580" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="520" font-weight="400" fill="#52B788" opacity="0.05">200</text>
         <!-- number overlay -->
-        <text x="540" y="548" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="420" font-weight="300" fill="#52B788">200</text>
+        <text x="540" y="548" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="420" font-weight="300" fill="#52B788">200</text>
         <!-- label -->
-        <text x="540" y="648" text-anchor="middle" font-family="'Courier New',monospace" font-size="34" fill="#FBF7F4" letter-spacing="10">USERS</text>
+        <text x="540" y="648" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="34" fill="#FAF9F6" letter-spacing="10">USERS</text>
         <line x1="280" y1="682" x2="800" y2="682" stroke="#52B788" stroke-width="1.5" opacity="0.3"/>
         <!-- context -->
-        <text x="540" y="734" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="42" fill="#FBF7F4">receiving their first briefing.</text>
-        <text x="540" y="796" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#9BAFC4">200 mornings that started differently today.</text>
+        <text x="540" y="734" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="42" fill="#FAF9F6">receiving their first briefing.</text>
+        <text x="540" y="796" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#8D99AE">200 mornings that started differently today.</text>
         <!-- metric sub-row -->
-        <rect x="120" y="854" width="248" height="80" rx="8" fill="#1B1F3A" stroke="#52B788" stroke-width="1" stroke-opacity="0.3"/>
-        <text x="244" y="896" text-anchor="middle" font-family="Georgia,serif" font-size="36" fill="#52B788">7:30</text>
-        <text x="244" y="920" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#9BAFC4">delivery time</text>
-        <rect x="416" y="854" width="248" height="80" rx="8" fill="#1B1F3A" stroke="#52B788" stroke-width="1" stroke-opacity="0.3"/>
-        <text x="540" y="896" text-anchor="middle" font-family="Georgia,serif" font-size="36" fill="#52B788">1</text>
-        <text x="540" y="920" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#9BAFC4">briefing per day</text>
-        <rect x="712" y="854" width="248" height="80" rx="8" fill="#1B1F3A" stroke="#52B788" stroke-width="1" stroke-opacity="0.3"/>
-        <text x="836" y="896" text-anchor="middle" font-family="Georgia,serif" font-size="36" fill="#52B788">0</text>
-        <text x="836" y="920" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#9BAFC4">missed mornings</text>
+        <rect x="120" y="854" width="248" height="80" rx="8" fill="#2D2D2D" stroke="#52B788" stroke-width="1" stroke-opacity="0.3"/>
+        <text x="244" y="896" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="36" fill="#52B788">7:30</text>
+        <text x="244" y="920" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#8D99AE">delivery time</text>
+        <rect x="416" y="854" width="248" height="80" rx="8" fill="#2D2D2D" stroke="#52B788" stroke-width="1" stroke-opacity="0.3"/>
+        <text x="540" y="896" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="36" fill="#52B788">1</text>
+        <text x="540" y="920" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#8D99AE">briefing per day</text>
+        <rect x="712" y="854" width="248" height="80" rx="8" fill="#2D2D2D" stroke="#52B788" stroke-width="1" stroke-opacity="0.3"/>
+        <text x="836" y="896" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="36" fill="#52B788">0</text>
+        <text x="836" y="920" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#8D99AE">missed mornings</text>
         <!-- thank you line -->
-        <text x="540" y="990" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="28" fill="#9BAFC4" opacity="0.6">Thank you for trusting us with your morning.</text>
+        <text x="540" y="990" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="28" fill="#8D99AE" opacity="0.6">Thank you for trusting us with your morning.</text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#52B788" stroke-width="3" opacity="0.3"/>
       </svg>
     </div>
@@ -482,56 +482,56 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d27" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- code terminal feel -->
-        <rect x="80" y="80" width="920" height="680" rx="12" fill="#0E1225"/>
+        <rect x="80" y="80" width="920" height="680" rx="12" fill="#2D2D2D"/>
         <!-- terminal title bar -->
-        <rect x="80" y="80" width="920" height="44" rx="0" fill="#2D3154"/>
-        <rect x="80" y="80" width="920" height="44" rx="12" fill="#2D3154"/>
-        <rect x="80" y="108" width="920" height="16" fill="#2D3154"/>
+        <rect x="80" y="80" width="920" height="44" rx="0" fill="#2D2D2D"/>
+        <rect x="80" y="80" width="920" height="44" rx="12" fill="#2D2D2D"/>
+        <rect x="80" y="108" width="920" height="16" fill="#2D2D2D"/>
         <!-- traffic lights -->
         <circle cx="116" cy="102" r="8" fill="#D64B2A" opacity="0.7"/>
         <circle cx="144" cy="102" r="8" fill="#F4C896" opacity="0.7"/>
         <circle cx="172" cy="102" r="8" fill="#52B788" opacity="0.7"/>
         <!-- terminal title -->
-        <text x="540" y="108" text-anchor="middle" font-family="'Courier New',monospace" font-size="15" fill="#9BAFC4" opacity="0.5">donna — build log</text>
+        <text x="540" y="108" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="15" fill="#8D99AE" opacity="0.5">donna — build log</text>
         <!-- terminal content -->
-        <text x="112" y="176" font-family="'Courier New',monospace" font-size="18" fill="#52B788">$</text>
-        <text x="136" y="176" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4"> git log --oneline --since="30 days ago"</text>
-        <text x="112" y="216" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">a3f91c2</text>
-        <text x="220" y="216" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> feat: two-pass commitment pipeline</text>
-        <text x="112" y="248" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">88d2e01</text>
-        <text x="220" y="248" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> feat: meeting prep brief generation</text>
-        <text x="112" y="280" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">5c7a931</text>
-        <text x="220" y="280" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> fix: heartbeat false positive — contact scoring</text>
-        <text x="112" y="312" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">f1209aa</text>
-        <text x="220" y="312" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> feat: reply draft — 4-second generation</text>
-        <text x="112" y="344" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">c8e5512</text>
-        <text x="220" y="344" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> feat: telegram delivery pipeline</text>
-        <text x="112" y="376" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">9b3d77e</text>
-        <text x="220" y="376" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> perf: reduce briefing latency by 40%</text>
-        <text x="112" y="408" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">2a1f66c</text>
-        <text x="220" y="408" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> feat: autonomy tier settings — silent/tap/modal</text>
-        <text x="112" y="440" font-family="'Courier New',monospace" font-size="17" fill="#4E7DAA">e70b220</text>
-        <text x="220" y="440" font-family="'Courier New',monospace" font-size="17" fill="#FBF7F4"> feat: privacy mode — local LLM via Ollama</text>
-        <text x="112" y="472" font-family="'Courier New',monospace" font-size="17" fill="#52B788">→</text>
-        <text x="136" y="472" font-family="'Courier New',monospace" font-size="17" fill="#52B788"> 47 commits in 30 days. Ship velocity: high.</text>
+        <text x="112" y="176" font-family="'JetBrains Mono',monospace" font-size="18" fill="#52B788">$</text>
+        <text x="136" y="176" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE"> git log --oneline --since="30 days ago"</text>
+        <text x="112" y="216" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">a3f91c2</text>
+        <text x="220" y="216" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> feat: two-pass commitment pipeline</text>
+        <text x="112" y="248" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">88d2e01</text>
+        <text x="220" y="248" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> feat: meeting prep brief generation</text>
+        <text x="112" y="280" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">5c7a931</text>
+        <text x="220" y="280" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> fix: heartbeat false positive — contact scoring</text>
+        <text x="112" y="312" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">f1209aa</text>
+        <text x="220" y="312" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> feat: reply draft — 4-second generation</text>
+        <text x="112" y="344" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">c8e5512</text>
+        <text x="220" y="344" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> feat: telegram delivery pipeline</text>
+        <text x="112" y="376" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">9b3d77e</text>
+        <text x="220" y="376" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> perf: reduce briefing latency by 40%</text>
+        <text x="112" y="408" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">2a1f66c</text>
+        <text x="220" y="408" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> feat: autonomy tier settings — silent/tap/modal</text>
+        <text x="112" y="440" font-family="'JetBrains Mono',monospace" font-size="17" fill="#457B9D">e70b220</text>
+        <text x="220" y="440" font-family="'JetBrains Mono',monospace" font-size="17" fill="#FAF9F6"> feat: privacy mode — local LLM via Ollama</text>
+        <text x="112" y="472" font-family="'JetBrains Mono',monospace" font-size="17" fill="#52B788">→</text>
+        <text x="136" y="472" font-family="'JetBrains Mono',monospace" font-size="17" fill="#52B788"> 47 commits in 30 days. Ship velocity: high.</text>
         <!-- blinking cursor -->
         <rect x="112" y="510" width="14" height="24" fill="#E8845C" opacity="0.8"/>
-        <text x="112" y="560" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4">$</text>
-        <text x="136" y="560" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4" opacity="0.4"> _</text>
+        <text x="112" y="560" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE">$</text>
+        <text x="136" y="560" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE" opacity="0.4"> _</text>
         <!-- headline below terminal -->
-        <text x="540" y="848" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="52" fill="#FBF7F4" letter-spacing="-0.5">47 commits in 30 days.</text>
-        <text x="540" y="918" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#9BAFC4">We're building fast because your mornings matter.</text>
+        <text x="540" y="848" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="52" fill="#FAF9F6" letter-spacing="-0.5">47 commits in 30 days.</text>
+        <text x="540" y="918" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#8D99AE">We're building fast because your mornings matter.</text>
         <!-- bottom brand -->
         <g transform="translate(68,952) scale(0.52)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="4.5" stroke-linejoin="round" opacity="0.3"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.3"/>
         </g>
-        <text x="120" y="986" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.25">donna</text>
-        <text x="1012" y="986" text-anchor="end" font-family="'Courier New',monospace" font-size="18" fill="#4E7DAA" opacity="0.55" letter-spacing="3">DONNA.APP</text>
-        <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#4E7DAA" stroke-width="3" opacity="0.3"/>
+        <text x="120" y="986" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-weight="700" font-size="26" fill="#FAF9F6" opacity="0.25">Donna<tspan fill="#E8845C">.</tspan></text>
+        <text x="1012" y="986" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="18" fill="#457B9D" opacity="0.55" letter-spacing="3">DONNA.APP</text>
+        <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#457B9D" stroke-width="3" opacity="0.3"/>
       </svg>
     </div>
     <div class="card-side">
@@ -560,29 +560,29 @@
     <div class="card-preview">
       <svg id="card-d28" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
         <!-- top half: before (cold) -->
-        <rect x="0" y="0" width="1080" height="480" fill="#2D3154"/>
+        <rect x="0" y="0" width="1080" height="480" fill="#2D2D2D"/>
         <!-- bottom half: after (warm) -->
-        <rect x="0" y="480" width="1080" height="600" fill="#1B1F3A"/>
+        <rect x="0" y="480" width="1080" height="600" fill="#2D2D2D"/>
         <!-- divider with arrow -->
         <rect x="0" y="466" width="1080" height="28" fill="#E8845C"/>
         <polygon points="540,440 570,466 510,466" fill="#E8845C"/>
         <!-- BEFORE label -->
-        <text x="80" y="80" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4" opacity="0.5" letter-spacing="5">BEFORE DONNA</text>
-        <text x="80" y="148" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="48" fill="#FBF7F4">6:58 AM. Three apps open.</text>
-        <text x="80" y="210" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#9BAFC4">84 unread. Slack pinging. Calendar empty.</text>
-        <text x="80" y="254" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#9BAFC4">You start scrolling instead of deciding.</text>
-        <text x="80" y="312" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="36" fill="#9BAFC4" opacity="0.6">Two hours in, you've replied to things</text>
-        <text x="80" y="356" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="36" fill="#9BAFC4" opacity="0.6">that didn't matter. And missed the one that did.</text>
+        <text x="80" y="80" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE" opacity="0.5" letter-spacing="5">BEFORE DONNA</text>
+        <text x="80" y="148" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="48" fill="#FAF9F6">6:58 AM. Three apps open.</text>
+        <text x="80" y="210" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#8D99AE">84 unread. Slack pinging. Calendar empty.</text>
+        <text x="80" y="254" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#8D99AE">You start scrolling instead of deciding.</text>
+        <text x="80" y="312" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="36" fill="#8D99AE" opacity="0.6">Two hours in, you've replied to things</text>
+        <text x="80" y="356" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="36" fill="#8D99AE" opacity="0.6">that didn't matter. And missed the one that did.</text>
         <!-- AFTER label -->
-        <text x="80" y="556" font-family="'Courier New',monospace" font-size="18" fill="#E8845C" opacity="0.7" letter-spacing="5">AFTER DONNA</text>
-        <text x="80" y="624" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="48" fill="#FBF7F4">7:30 AM. One message. One plan.</text>
-        <text x="80" y="686" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#9BAFC4">Donna already read everything. Ranked it.</text>
-        <text x="80" y="730" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#9BAFC4">Flagged what you promised. Drafted your reply.</text>
-        <text x="80" y="790" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="36" fill="#E8845C">You walk into your first meeting</text>
-        <text x="80" y="834" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="36" fill="#E8845C">already knowing what to do.</text>
+        <text x="80" y="556" font-family="'JetBrains Mono',monospace" font-size="18" fill="#E8845C" opacity="0.7" letter-spacing="5">AFTER DONNA</text>
+        <text x="80" y="624" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="48" fill="#FAF9F6">7:30 AM. One message. One plan.</text>
+        <text x="80" y="686" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#8D99AE">Donna already read everything. Ranked it.</text>
+        <text x="80" y="730" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#8D99AE">Flagged what you promised. Drafted your reply.</text>
+        <text x="80" y="790" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="36" fill="#E8845C">You walk into your first meeting</text>
+        <text x="80" y="834" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="36" fill="#E8845C">already knowing what to do.</text>
         <!-- bottom cta -->
         <line x1="80" y1="878" x2="1000" y2="878" stroke="#E8845C" stroke-width="1" opacity="0.2"/>
-        <text x="540" y="928" text-anchor="middle" font-family="'Courier New',monospace" font-size="18" fill="#9BAFC4" opacity="0.6" letter-spacing="4">JOIN THE FOUNDING COHORT · DONNA.APP</text>
+        <text x="540" y="928" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="18" fill="#8D99AE" opacity="0.6" letter-spacing="4">JOIN THE FOUNDING COHORT · DONNA.APP</text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#E8845C" stroke-width="3" opacity="0.4"/>
       </svg>
     </div>
@@ -611,11 +611,11 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d29" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#0E1225"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- alert red tint -->
         <radialGradient id="g29" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#D64B2A" stop-opacity="0.1"/>
-          <stop offset="100%" stop-color="#0E1225" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#2D2D2D" stop-opacity="0"/>
         </radialGradient>
         <rect width="1080" height="1080" fill="url(#g29)"/>
         <!-- pulsing ring -->
@@ -623,27 +623,27 @@
         <circle cx="540" cy="400" r="170" fill="none" stroke="#D64B2A" stroke-width="2" opacity="0.18"/>
         <circle cx="540" cy="400" r="110" fill="none" stroke="#D64B2A" stroke-width="2.5" opacity="0.3"/>
         <!-- big number -->
-        <text x="540" y="456" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="200" font-weight="300" fill="#D64B2A">24</text>
+        <text x="540" y="456" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="200" font-weight="300" fill="#D64B2A">24</text>
         <!-- label -->
-        <text x="540" y="534" text-anchor="middle" font-family="'Courier New',monospace" font-size="32" fill="#FBF7F4" letter-spacing="8">HOURS LEFT</text>
+        <text x="540" y="534" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="32" fill="#FAF9F6" letter-spacing="8">HOURS LEFT</text>
         <line x1="240" y1="568" x2="840" y2="568" stroke="#D64B2A" stroke-width="1.5" opacity="0.3"/>
         <!-- context -->
-        <text x="540" y="624" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="44" fill="#FBF7F4">Founding cohort closes</text>
-        <text x="540" y="678" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="44" fill="#FBF7F4">at midnight tomorrow.</text>
+        <text x="540" y="624" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="44" fill="#FAF9F6">Founding cohort closes</text>
+        <text x="540" y="678" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="44" fill="#FAF9F6">at midnight tomorrow.</text>
         <!-- what they lose -->
-        <text x="540" y="742" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#9BAFC4">After that: no founder pricing. No priority access.</text>
-        <text x="540" y="778" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#9BAFC4">No direct line to the team.</text>
+        <text x="540" y="742" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#8D99AE">After that: no founder pricing. No priority access.</text>
+        <text x="540" y="778" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#8D99AE">No direct line to the team.</text>
         <!-- cta button -->
         <rect x="240" y="828" width="600" height="80" rx="10" fill="#D64B2A"/>
-        <text x="540" y="864" text-anchor="middle" font-family="'Courier New',monospace" font-size="15" fill="white" letter-spacing="4">CLAIM YOUR SPOT NOW</text>
+        <text x="540" y="864" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="15" fill="white" letter-spacing="4">CLAIM YOUR SPOT NOW</text>
         <text x="540" y="890" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="rgba(255,255,255,.65)">donna.app · link in bio</text>
         <!-- bottom brand -->
         <g transform="translate(68,966) scale(0.52)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="4.5" stroke-linejoin="round" opacity="0.25"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="4.5" stroke-linejoin="round" opacity="0.25"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round" opacity="0.25"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C" opacity="0.25"/>
         </g>
-        <text x="120" y="1000" font-family="Georgia,serif" font-style="italic" font-size="26" fill="#FBF7F4" opacity="0.2">donna</text>
+        <text x="120" y="1000" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-weight="700" font-size="26" fill="#FAF9F6" opacity="0.2">Donna<tspan fill="#E8845C">.</tspan></text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#D64B2A" stroke-width="3" opacity="0.4"/>
       </svg>
     </div>
@@ -672,39 +672,39 @@
   <div class="card-wrap">
     <div class="card-preview">
       <svg id="card-d30" class="card" width="540" height="540" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#1B1F3A"/>
+        <rect width="1080" height="1080" fill="#2D2D2D"/>
         <!-- dawn horizon gradient from bottom -->
         <linearGradient id="g30" x1="0%" y1="100%" x2="0%" y2="0%">
           <stop offset="0%" stop-color="#E8845C" stop-opacity="0.18"/>
           <stop offset="50%" stop-color="#E8845C" stop-opacity="0.03"/>
-          <stop offset="100%" stop-color="#1B1F3A" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#2D2D2D" stop-opacity="0"/>
         </linearGradient>
         <rect width="1080" height="1080" fill="url(#g30)"/>
         <!-- horizon line -->
         <line x1="0" y1="740" x2="1080" y2="740" stroke="#E8845C" stroke-width="2" opacity="0.25"/>
         <!-- dawn logo large -->
         <g transform="translate(382,134) scale(4.8)">
-          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FBF7F4" stroke-width="3.5" stroke-linejoin="round" opacity="0.9"/>
+          <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z" fill="none" stroke="#FAF9F6" stroke-width="3.5" stroke-linejoin="round" opacity="0.9"/>
           <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" stroke-width="3" stroke-linecap="round"/>
           <circle cx="26" cy="50" r="5" fill="#E8845C"/>
         </g>
         <!-- donna wordmark -->
-        <text x="540" y="544" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="112" font-weight="300" fill="#FBF7F4" letter-spacing="-2">donna</text>
+        <text x="540" y="544" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="normal" font-size="112" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna</text><text x="710" y="544" font-family="'Playfair Display',Georgia,serif" font-size="112" font-weight="700" fill="#E8845C">.</text>
         <!-- divider -->
         <line x1="280" y1="578" x2="800" y2="578" stroke="#E8845C" stroke-width="1.5" opacity="0.3"/>
         <!-- tagline -->
-        <text x="540" y="630" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="34" fill="#9BAFC4" letter-spacing="0.5">See everything. Miss nothing.</text>
+        <text x="540" y="630" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="34" fill="#8D99AE" letter-spacing="0.5">See everything. Miss nothing.</text>
         <!-- closing statement -->
-        <text x="540" y="712" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="28" fill="#FBF7F4" font-weight="500">30 days of posts. 330 more mornings ahead.</text>
+        <text x="540" y="712" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="28" fill="#FAF9F6" font-weight="500">30 days of posts. 330 more mornings ahead.</text>
         <!-- sub lines -->
-        <text x="540" y="790" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="32" fill="#9BAFC4">Thank you for following the build.</text>
-        <text x="540" y="836" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-style="italic" font-size="32" fill="#9BAFC4">Now let donna work for your morning.</text>
+        <text x="540" y="790" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="32" fill="#8D99AE">Thank you for following the build.</text>
+        <text x="540" y="836" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-style="italic" font-size="32" fill="#8D99AE">Now let donna work for your morning.</text>
         <!-- CTA -->
         <rect x="320" y="882" width="440" height="64" rx="8" fill="#E8845C"/>
-        <text x="540" y="911" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="white" letter-spacing="4">GET EARLY ACCESS</text>
+        <text x="540" y="911" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="14" fill="white" letter-spacing="4">GET EARLY ACCESS</text>
         <text x="540" y="933" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="rgba(255,255,255,.65)">donna.app</text>
         <!-- bottom small donna watermark -->
-        <text x="540" y="1020" text-anchor="middle" font-family="'Courier New',monospace" font-size="14" fill="#9BAFC4" opacity="0.25" letter-spacing="4">DONNA.APP · SEE EVERYTHING. MISS NOTHING.</text>
+        <text x="540" y="1020" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="14" fill="#8D99AE" opacity="0.25" letter-spacing="4">DONNA.APP · SEE EVERYTHING. MISS NOTHING.</text>
         <line x1="0" y1="1077" x2="1080" y2="1077" stroke="#E8845C" stroke-width="3" opacity="0.45"/>
       </svg>
     </div>
@@ -721,12 +721,12 @@
 
 
 <!-- ─── FOOTER ─── -->
-<div style="margin-top:72px;padding:32px 0;border-top:1px solid rgba(27,31,58,.1);display:flex;justify-content:space-between;align-items:center;">
+<div style="margin-top:72px;padding:32px 0;border-top:1px solid rgba(45,45,45,.1);display:flex;justify-content:space-between;align-items:center;">
   <div>
-    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-style:italic;color:var(--midnight);">donna</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(27,31,58,.35);letter-spacing:.08em;margin-top:4px;">POST VISUALS · DAYS 21–30 · 1080×1080PX · CAMPAIGN COMPLETE</div>
+    <div style="font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:700;font-style:normal;color:var(--charcoal);">Donna<span style="color:#E8845C;">.</span></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(45,45,45,.35);letter-spacing:.08em;margin-top:4px;">POST VISUALS · DAYS 21–30 · 1080×1080PX · CAMPAIGN COMPLETE</div>
   </div>
-  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(27,31,58,.35);letter-spacing:.1em;text-align:right;line-height:1.9;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(45,45,45,.35);letter-spacing:.1em;text-align:right;line-height:1.9;">
     Days 01–10 → post-visuals-days-01-10.html<br>
     Days 11–20 → post-visuals-days-11-20.html<br>
     Full calendar → campaign-calendar.html

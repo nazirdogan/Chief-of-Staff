@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — Brand Identity Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nav-bg: #111;
+    --nav-text: #999;
+    --nav-active: #fff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: #fafafa; color: #222; }
+
+  /* ── NAV ────────────────────────────────────────────────────────────────── */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 8px;
+    background: var(--nav-bg); padding: 16px 40px;
+    border-bottom: 1px solid #333;
+  }
+  .top-nav .logo-text { font-weight: 700; color: #fff; font-size: 18px; margin-right: 32px; letter-spacing: -0.5px; }
+  .nav-btn {
+    background: none; border: 1px solid #333; color: var(--nav-text);
+    padding: 8px 20px; border-radius: 100px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { border-color: #666; color: #ccc; }
+  .nav-btn.active { background: #fff; color: #111; border-color: #fff; }
+
+  /* ── OPTION PANELS ─────────────────────────────────────────────────────── */
+  .option-panel { display: none; }
+  .option-panel.active { display: block; }
+
+  /* ── SHARED SECTION STYLES ─────────────────────────────────────────────── */
+  .hero-section {
+    padding: 120px 80px 80px;
+    min-height: 70vh;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .hero-label {
+    font-size: 13px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 24px; opacity: 0.5;
+  }
+  .hero-title { font-size: clamp(48px, 7vw, 96px); line-height: 1.05; margin-bottom: 32px; }
+  .hero-tagline { font-size: clamp(18px, 2.2vw, 28px); line-height: 1.5; max-width: 640px; }
+
+  .section { padding: 80px; }
+  .section-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 40px; opacity: 0.4;
+  }
+  .section-title { font-size: 36px; font-weight: 700; margin-bottom: 16px; }
+  .section-subtitle { font-size: 18px; line-height: 1.6; max-width: 600px; margin-bottom: 48px; opacity: 0.7; }
+
+  .color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .color-card { border-radius: 16px; overflow: hidden; }
+  .color-swatch { height: 120px; }
+  .color-info { padding: 16px; background: #fff; }
+  .color-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .color-hex { font-size: 13px; opacity: 0.5; font-family: 'JetBrains Mono', monospace; }
+
+  .type-specimen { margin-bottom: 48px; }
+  .type-role { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.4; margin-bottom: 12px; }
+
+  .logo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .logo-card {
+    border-radius: 20px; padding: 48px; display: flex;
+    align-items: center; justify-content: center; min-height: 200px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .tagline-block { margin-bottom: 40px; }
+  .tagline-primary { font-size: clamp(28px, 4vw, 52px); line-height: 1.15; margin-bottom: 12px; }
+  .tagline-alt { font-size: 20px; opacity: 0.5; }
+
+  .mockup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+  .mockup-card { border-radius: 20px; overflow: hidden; }
+  .mockup-header { padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+  .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-body { padding: 32px; }
+
+  .voice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .voice-card { padding: 32px; border-radius: 16px; }
+  .voice-label { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+  .voice-example { font-size: 16px; line-height: 1.6; font-style: italic; }
+
+  .divider { height: 1px; margin: 0 80px; }
+
+  /* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .hero-section, .section { padding: 60px 24px; }
+    .divider { margin: 0 24px; }
+    .top-nav { padding: 12px 16px; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<nav class="top-nav">
+  <span class="logo-text">Donna</span>
+  <button class="nav-btn active" onclick="showOption('editor')">Option D — The Editor</button>
+  <button class="nav-btn" onclick="showOption('operator')">Option E — The Operator</button>
+  <button class="nav-btn" onclick="showOption('confidant')">Option F — The Confidant</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     OPTION D — THE EDITOR
+     Ultra-clean, editorial, restrained. High-end magazine meets technology.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="panel-editor" class="option-panel active">
+
+  <!-- Hero -->
+  <div class="hero-section" style="background: #FAF9F6; color: #2D2D2D;">
+    <div class="hero-label" style="color: #E63946;">Option D — The Editor</div>
+    <h1 class="hero-title" style="font-family: 'Playfair Display', serif; font-weight: 700; letter-spacing: -2px;">
+      Donna
+    </h1>
+    <p class="hero-tagline" style="font-family: 'DM Sans', sans-serif; color: #555;">
+      Stripped back. Considered. Every element earns its place.<br>
+      This is Donna as a luxury editorial — clean lines, sharp type, and a single red accent that says
+      <em>pay attention</em>.
+    </p>
+  </div>
+
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <!-- Logo -->
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">The Wordmark</div>
+    <p class="section-subtitle" style="color: #777;">
+      No symbol. No icon. Just the name, set in Playfair Display with a single vermillion full stop. The period is the brand — a statement, not a question. Donna doesn't ask. She tells.
+    </p>
+    <div class="logo-grid">
+      <!-- Light -->
+      <div class="logo-card" style="background: #FAF9F6;">
+        <svg viewBox="0 0 360 80" width="320" style="display:block;">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna</text>
+          <circle cx="305" cy="58" r="7" fill="#E63946"/>
+        </svg>
+      </div>
+      <!-- Dark -->
+      <div class="logo-card" style="background: #2D2D2D;">
+        <svg viewBox="0 0 360 80" width="320" style="display:block;">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#FAF9F6" letter-spacing="-2">Donna</text>
+          <circle cx="305" cy="58" r="7" fill="#E63946"/>
+        </svg>
+      </div>
+      <!-- Monochrome -->
+      <div class="logo-card" style="background: #FAF9F6;">
+        <svg viewBox="0 0 360 80" width="320" style="display:block;">
+          <text x="0" y="62" font-family="'Playfair Display', serif" font-size="64" font-weight="700" fill="#2D2D2D" letter-spacing="-2">Donna</text>
+          <circle cx="305" cy="58" r="7" fill="#2D2D2D"/>
+        </svg>
+      </div>
+      <!-- Icon Mark -->
+      <div class="logo-card" style="background: #2D2D2D;">
+        <svg viewBox="0 0 100 100" width="80" style="display:block;">
+          <text x="8" y="78" font-family="'Playfair Display', serif" font-size="88" font-weight="700" fill="#FAF9F6" letter-spacing="-3">D</text>
+          <circle cx="80" cy="76" r="6" fill="#E63946"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <!-- Colours -->
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">02 — Colour</div>
+    <div class="section-title" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">Restrained Palette</div>
+    <p class="section-subtitle" style="color: #777;">
+      Almost monochrome. The red is the only colour — used sparingly for moments that matter: notifications, commitments, actions. Everything else is charcoal, slate, and warm white.
+    </p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background: #2D2D2D;"></div><div class="color-info"><div class="color-name">Charcoal</div><div class="color-hex">#2D2D2D</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #E63946;"></div><div class="color-info"><div class="color-name">Vermillion</div><div class="color-hex">#E63946</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #FAF9F6;"></div><div class="color-info"><div class="color-name">Parchment</div><div class="color-hex">#FAF9F6</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #8D99AE;"></div><div class="color-info"><div class="color-name">Slate</div><div class="color-hex">#8D99AE</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #457B9D;"></div><div class="color-info"><div class="color-name">Steel Blue</div><div class="color-hex">#457B9D</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #F1EDEA;"></div><div class="color-info"><div class="color-name">Linen</div><div class="color-hex">#F1EDEA</div></div></div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <!-- Typography -->
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #8D99AE;">Display / Headlines</div>
+      <p style="font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; color: #2D2D2D; letter-spacing: -1.5px; line-height: 1.1;">
+        Playfair Display
+      </p>
+      <p style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 400; color: #555; margin-top: 8px; font-style: italic;">
+        Sharp serif details. Editorial authority. Timeless.
+      </p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #8D99AE;">Body / Interface</div>
+      <p style="font-family: 'DM Sans', sans-serif; font-size: 40px; font-weight: 500; color: #2D2D2D;">
+        DM Sans
+      </p>
+      <p style="font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 400; color: #555; margin-top: 8px; line-height: 1.7; max-width: 560px;">
+        Geometric sans-serif with a warm personality. Excellent readability at small sizes. Clean without being sterile.
+      </p>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <!-- Taglines -->
+  <div class="section" style="background: #FAF9F6;">
+    <div class="section-label" style="color: #2D2D2D;">04 — Voice</div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">Before you ask<span style="color:#E63946;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'DM Sans', sans-serif; color: #8D99AE;">Primary tagline</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Playfair Display', serif; color: #2D2D2D; font-size: 32px;">Consider it done<span style="color:#E63946;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'DM Sans', sans-serif; color: #8D99AE; font-size: 16px;">Alternate</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Playfair Display', serif; color: #2D2D2D; font-size: 32px;">I read the room<span style="color:#E63946;">.</span> Then I read the emails<span style="color:#E63946;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'DM Sans', sans-serif; color: #8D99AE; font-size: 16px;">Campaign / long-form</p>
+    </div>
+
+    <div style="margin-top: 56px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background: #F1EDEA;">
+          <div class="voice-label" style="color: #E63946;">Donna says</div>
+          <p class="voice-example" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">
+            "You promised Sarah a proposal by Friday. It's Thursday. I've drafted one."
+          </p>
+        </div>
+        <div class="voice-card" style="background: #F1EDEA;">
+          <div class="voice-label" style="color: #E63946;">Donna says</div>
+          <p class="voice-example" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">
+            "Three newsletters. Zero action items. Archived."
+          </p>
+        </div>
+        <div class="voice-card" style="background: #F1EDEA;">
+          <div class="voice-label" style="color: #E63946;">Donna says</div>
+          <p class="voice-example" style="font-family: 'Playfair Display', serif; color: #2D2D2D;">
+            "Your 2pm cancelled. I've moved your 3pm forward and blocked time for the report you owe James."
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #e0ddd8;"></div>
+
+  <!-- Mockups -->
+  <div class="section" style="background: #F1EDEA;">
+    <div class="section-label" style="color: #2D2D2D;">05 — Mockups</div>
+    <div class="mockup-grid">
+      <!-- App Icon -->
+      <div class="mockup-card" style="background: #FAF9F6; padding: 48px; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 120px; height: 120px; background: #2D2D2D; border-radius: 28px; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 12px 40px rgba(0,0,0,0.15);">
+          <svg viewBox="0 0 100 100" width="72">
+            <text x="12" y="76" font-family="'Playfair Display', serif" font-size="80" font-weight="700" fill="#FAF9F6">D</text>
+            <circle cx="78" cy="73" r="5.5" fill="#E63946"/>
+          </svg>
+        </div>
+        <p style="font-family: 'DM Sans'; font-size: 13px; color: #8D99AE; margin-left: 24px;">App Icon<br><span style="color: #2D2D2D; font-weight: 600;">iOS / macOS</span></p>
+      </div>
+      <!-- Notification -->
+      <div class="mockup-card" style="background: #FAF9F6; padding: 48px;">
+        <div style="background: #fff; border-radius: 16px; padding: 20px 24px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border-left: 4px solid #E63946;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <div style="width: 28px; height: 28px; background: #2D2D2D; border-radius: 8px; display:flex; align-items:center; justify-content:center;">
+              <svg viewBox="0 0 100 100" width="18"><text x="14" y="76" font-family="'Playfair Display',serif" font-size="80" font-weight="700" fill="#FAF9F6">D</text></svg>
+            </div>
+            <span style="font-family: 'DM Sans'; font-size: 13px; font-weight: 600; color: #2D2D2D;">Donna</span>
+            <span style="font-family: 'DM Sans'; font-size: 12px; color: #8D99AE; margin-left: auto;">2m ago</span>
+          </div>
+          <p style="font-family: 'DM Sans'; font-size: 15px; color: #2D2D2D; line-height: 1.5;">
+            <strong>Your 10am prep:</strong> Alex mentioned budget concerns in yesterday's Slack thread. I've pulled the relevant messages and the latest forecast.
+          </p>
+        </div>
+        <p style="font-family: 'DM Sans'; font-size: 13px; color: #8D99AE; margin-top: 16px;">Push Notification</p>
+      </div>
+      <!-- One-tap toast -->
+      <div class="mockup-card" style="background: #2D2D2D; padding: 48px;">
+        <div style="background: #3a3a3a; border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+          <div style="width: 6px; height: 40px; background: #E63946; border-radius: 3px; flex-shrink: 0;"></div>
+          <div style="flex: 1; min-width: 0;">
+            <p style="font-family: 'DM Sans'; font-size: 14px; color: #FAF9F6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Archive 3 newsletters from substack.com</p>
+            <p style="font-family: 'DM Sans'; font-size: 12px; color: #8D99AE; margin-top: 2px;">Low engagement · No action items</p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-shrink: 0;">
+            <button style="background: #E63946; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-family: 'DM Sans'; font-size: 13px; font-weight: 600; cursor: pointer;">OK</button>
+            <button style="background: none; color: #8D99AE; border: 1px solid #555; padding: 8px 12px; border-radius: 8px; font-family: 'DM Sans'; font-size: 13px; cursor: pointer;">No</button>
+          </div>
+        </div>
+        <div style="background: #E63946; height: 3px; border-radius: 2px; margin-top: 4px; max-width: 400px; width: 65%; transition: width 30s linear;"></div>
+        <p style="font-family: 'DM Sans'; font-size: 13px; color: #666; margin-top: 16px;">Tier 2 — One-tap Toast</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     OPTION E — THE OPERATOR
+     Bold, dark-first, confident. Tech-forward with warm amber accent.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="panel-operator" class="option-panel">
+
+  <!-- Hero -->
+  <div class="hero-section" style="background: #0D1117; color: #E6EDF3;">
+    <div class="hero-label" style="color: #FFB627;">Option E — The Operator</div>
+    <h1 class="hero-title" style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; letter-spacing: -3px;">
+      DONNA
+    </h1>
+    <p class="hero-tagline" style="font-family: 'IBM Plex Sans', sans-serif; color: #8B949E;">
+      Dark mode first. Bold presence. The amber cuts through like a signal flare.<br>
+      This is Donna as an operator — decisive, always on, running the show from behind the glass.
+    </p>
+  </div>
+
+  <div class="divider" style="background: #30363D;"></div>
+
+  <!-- Logo -->
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Space Grotesk', sans-serif; color: #E6EDF3;">The Monogram</div>
+    <p class="section-subtitle" style="color: #8B949E;">
+      A geometric D built from two shapes: a half-circle and a vertical bar. The amber bar is the signal — always active, always watching. The wordmark uses Space Grotesk in all-caps with generous tracking.
+    </p>
+    <div class="logo-grid">
+      <!-- Dark primary -->
+      <div class="logo-card" style="background: #0D1117; border-color: #30363D;">
+        <svg viewBox="0 0 280 80" width="260" style="display:block;">
+          <rect x="0" y="8" width="8" height="64" rx="4" fill="#FFB627"/>
+          <path d="M8 8 H30 C60 8 72 24 72 40 C72 56 60 72 30 72 H8" fill="none" stroke="#E6EDF3" stroke-width="7" stroke-linecap="round"/>
+          <text x="92" y="60" font-family="'Space Grotesk', sans-serif" font-size="46" font-weight="700" fill="#E6EDF3" letter-spacing="6">DONNA</text>
+        </svg>
+      </div>
+      <!-- Light -->
+      <div class="logo-card" style="background: #F6F8FA;">
+        <svg viewBox="0 0 280 80" width="260" style="display:block;">
+          <rect x="0" y="8" width="8" height="64" rx="4" fill="#FFB627"/>
+          <path d="M8 8 H30 C60 8 72 24 72 40 C72 56 60 72 30 72 H8" fill="none" stroke="#0D1117" stroke-width="7" stroke-linecap="round"/>
+          <text x="92" y="60" font-family="'Space Grotesk', sans-serif" font-size="46" font-weight="700" fill="#0D1117" letter-spacing="6">DONNA</text>
+        </svg>
+      </div>
+      <!-- Icon only dark -->
+      <div class="logo-card" style="background: #0D1117; border-color: #30363D;">
+        <svg viewBox="0 0 80 80" width="72" style="display:block;">
+          <rect x="8" y="8" width="8" height="64" rx="4" fill="#FFB627"/>
+          <path d="M16 8 H34 C60 8 72 24 72 40 C72 56 60 72 34 72 H16" fill="none" stroke="#E6EDF3" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Icon only amber -->
+      <div class="logo-card" style="background: #FFB627;">
+        <svg viewBox="0 0 80 80" width="72" style="display:block;">
+          <rect x="8" y="8" width="8" height="64" rx="4" fill="#0D1117"/>
+          <path d="M16 8 H34 C60 8 72 24 72 40 C72 56 60 72 34 72 H16" fill="none" stroke="#0D1117" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #30363D;"></div>
+
+  <!-- Colours -->
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">02 — Colour</div>
+    <div class="section-title" style="font-family: 'Space Grotesk', sans-serif; color: #E6EDF3;">Dark-First Palette</div>
+    <p class="section-subtitle" style="color: #8B949E;">
+      Built for the interface Donna actually lives in — dark, focused, always-on. Amber is the signal colour. Green marks completed actions. Everything else recedes.
+    </p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background: #0D1117;"></div><div class="color-info" style="background: #161B22;"><div class="color-name" style="color:#E6EDF3;">Obsidian</div><div class="color-hex" style="color:#8B949E;">#0D1117</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #FFB627;"></div><div class="color-info" style="background: #161B22;"><div class="color-name" style="color:#E6EDF3;">Amber Signal</div><div class="color-hex" style="color:#8B949E;">#FFB627</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #161B22;"></div><div class="color-info" style="background: #161B22;"><div class="color-name" style="color:#E6EDF3;">Carbon</div><div class="color-hex" style="color:#8B949E;">#161B22</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #30363D;"></div><div class="color-info" style="background: #161B22;"><div class="color-name" style="color:#E6EDF3;">Steel</div><div class="color-hex" style="color:#8B949E;">#30363D</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #2EA043;"></div><div class="color-info" style="background: #161B22;"><div class="color-name" style="color:#E6EDF3;">Executed</div><div class="color-hex" style="color:#8B949E;">#2EA043</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #E6EDF3;"></div><div class="color-info" style="background: #161B22;"><div class="color-name" style="color:#E6EDF3;">Platinum</div><div class="color-hex" style="color:#8B949E;">#E6EDF3</div></div></div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #30363D;"></div>
+
+  <!-- Typography -->
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #FFB627;">Display / Headlines</div>
+      <p style="font-family: 'Space Grotesk', sans-serif; font-size: 48px; font-weight: 700; color: #E6EDF3; letter-spacing: -1px;">
+        Space Grotesk
+      </p>
+      <p style="font-family: 'IBM Plex Sans', sans-serif; font-size: 17px; color: #8B949E; margin-top: 8px;">
+        Geometric. Decisive. Built for interfaces that need authority without shouting.
+      </p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #FFB627;">Body / Interface</div>
+      <p style="font-family: 'IBM Plex Sans', sans-serif; font-size: 40px; font-weight: 500; color: #E6EDF3;">
+        IBM Plex Sans
+      </p>
+      <p style="font-family: 'IBM Plex Sans', sans-serif; font-size: 17px; color: #8B949E; margin-top: 8px; line-height: 1.7; max-width: 560px;">
+        Technical precision with human warmth. Designed for sustained reading in both light and dark contexts.
+      </p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #FFB627;">Data / Monospace</div>
+      <p style="font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 500; color: #E6EDF3;">
+        IBM Plex Mono
+      </p>
+      <p style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #8B949E; margin-top: 8px;">
+        Timestamps, scores, metadata — anything that needs to feel precise.
+      </p>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #30363D;"></div>
+
+  <!-- Taglines -->
+  <div class="section" style="background: #0D1117;">
+    <div class="section-label" style="color: #FFB627;">04 — Voice</div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Space Grotesk', sans-serif; color: #E6EDF3;">Already handled<span style="color:#FFB627;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'IBM Plex Sans'; color: #8B949E;">Primary tagline</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Space Grotesk', sans-serif; color: #E6EDF3; font-size: 32px;">Your move. I'll handle the rest.</p>
+      <p class="tagline-alt" style="font-family: 'IBM Plex Sans'; color: #8B949E; font-size: 16px;">Alternate</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Space Grotesk', sans-serif; color: #E6EDF3; font-size: 32px;">I don't wait for instructions.</p>
+      <p class="tagline-alt" style="font-family: 'IBM Plex Sans'; color: #8B949E; font-size: 16px;">Campaign / bold</p>
+    </div>
+
+    <div style="margin-top: 56px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background: #161B22;">
+          <div class="voice-label" style="color: #FFB627;">Donna says</div>
+          <p class="voice-example" style="font-family: 'IBM Plex Sans'; color: #E6EDF3;">
+            "12 emails processed. 3 archived. 1 commitment flagged. Your morning is clear until 10:30."
+          </p>
+        </div>
+        <div class="voice-card" style="background: #161B22;">
+          <div class="voice-label" style="color: #FFB627;">Donna says</div>
+          <p class="voice-example" style="font-family: 'IBM Plex Sans'; color: #E6EDF3;">
+            "James hasn't responded in 6 days. He usually replies within 24 hours. Flagging."
+          </p>
+        </div>
+        <div class="voice-card" style="background: #161B22;">
+          <div class="voice-label" style="color: #FFB627;">Donna says</div>
+          <p class="voice-example" style="font-family: 'IBM Plex Sans'; color: #E6EDF3;">
+            "Meeting with Chen Wei in 45 minutes. He mentioned 'regulatory concerns' twice last week. I've pulled the context."
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #30363D;"></div>
+
+  <!-- Mockups -->
+  <div class="section" style="background: #161B22;">
+    <div class="section-label" style="color: #FFB627;">05 — Mockups</div>
+    <div class="mockup-grid">
+      <!-- App Icon -->
+      <div class="mockup-card" style="background: #0D1117; padding: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid #30363D; border-radius: 20px;">
+        <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #161B22 0%, #0D1117 100%); border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 1px #30363D, 0 12px 40px rgba(0,0,0,0.4);">
+          <svg viewBox="0 0 80 80" width="56">
+            <rect x="14" y="12" width="7" height="56" rx="3.5" fill="#FFB627"/>
+            <path d="M21 12 H34 C56 12 66 26 66 40 C66 54 56 68 34 68 H21" fill="none" stroke="#E6EDF3" stroke-width="6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p style="font-family: 'IBM Plex Sans'; font-size: 13px; color: #8B949E; margin-left: 24px;">App Icon<br><span style="color: #E6EDF3; font-weight: 600;">macOS / iOS</span></p>
+      </div>
+      <!-- Briefing -->
+      <div class="mockup-card" style="background: #0D1117; padding: 32px; border: 1px solid #30363D; border-radius: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #FFB627;"></div>
+          <span style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #8B949E;">TUE 10 MAR · 07:45</span>
+        </div>
+        <p style="font-family: 'Space Grotesk'; font-size: 22px; font-weight: 600; color: #E6EDF3; margin-bottom: 20px;">Morning Briefing</p>
+        <div style="border-left: 3px solid #FFB627; padding-left: 16px; margin-bottom: 16px;">
+          <p style="font-family: 'IBM Plex Sans'; font-size: 14px; color: #E6EDF3; font-weight: 500;">You owe Sarah a proposal by EOD Friday</p>
+          <p style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #8B949E; margin-top: 4px;">Source: email · 3 Mar · 0.94 confidence</p>
+        </div>
+        <div style="border-left: 3px solid #30363D; padding-left: 16px; margin-bottom: 16px;">
+          <p style="font-family: 'IBM Plex Sans'; font-size: 14px; color: #E6EDF3; font-weight: 500;">Board deck feedback due Thursday</p>
+          <p style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #8B949E; margin-top: 4px;">Source: slack · #exec-team · 7 Mar</p>
+        </div>
+        <div style="border-left: 3px solid #2EA043; padding-left: 16px;">
+          <p style="font-family: 'IBM Plex Sans'; font-size: 14px; color: #8B949E; text-decoration: line-through;">Archived 4 newsletters</p>
+          <p style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #2EA043; margin-top: 4px;">auto-executed · Tier 1</p>
+        </div>
+        <p style="font-family: 'IBM Plex Sans'; font-size: 13px; color: #30363D; margin-top: 20px;">Briefing Screen Preview</p>
+      </div>
+      <!-- Toast -->
+      <div class="mockup-card" style="background: #0D1117; padding: 48px; border: 1px solid #30363D; border-radius: 20px;">
+        <div style="background: #161B22; border: 1px solid #30363D; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; max-width: 380px;">
+          <div style="width: 36px; height: 36px; background: #FFB627; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0D1117" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <p style="font-family: 'IBM Plex Sans'; font-size: 14px; color: #E6EDF3; font-weight: 500;">Reschedule standup → 11:00</p>
+            <p style="font-family: 'IBM Plex Mono'; font-size: 11px; color: #8B949E; margin-top: 2px;">2 attendees · internal</p>
+          </div>
+          <button style="background: #FFB627; color: #0D1117; border: none; padding: 7px 14px; border-radius: 8px; font-family: 'Space Grotesk'; font-size: 13px; font-weight: 600; cursor: pointer;">Go</button>
+        </div>
+        <div style="height: 3px; background: #30363D; border-radius: 2px; margin-top: 3px; max-width: 380px; overflow: hidden;">
+          <div style="width: 40%; height: 100%; background: #FFB627; border-radius: 2px;"></div>
+        </div>
+        <p style="font-family: 'IBM Plex Sans'; font-size: 13px; color: #30363D; margin-top: 16px;">Tier 2 — One-tap Toast</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     OPTION F — THE CONFIDANT
+     Warm, personal, human. Softer palette. Feels like a trusted friend.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="panel-confidant" class="option-panel">
+
+  <!-- Hero -->
+  <div class="hero-section" style="background: linear-gradient(170deg, #FFF8F0 0%, #F5EDE4 100%); color: #3C1642;">
+    <div class="hero-label" style="color: #FF6B6B;">Option F — The Confidant</div>
+    <h1 class="hero-title" style="font-family: 'Lora', serif; font-weight: 600; letter-spacing: -1px;">
+      donna
+    </h1>
+    <p class="hero-tagline" style="font-family: 'Source Sans 3', sans-serif; color: #6B5B6E;">
+      Warm. Personal. Quietly brilliant.<br>
+      This is Donna as a confidant — the trusted friend who knows your life better than you do and never makes you feel bad about it.
+    </p>
+  </div>
+
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Logo -->
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">01 — Logo</div>
+    <div class="section-title" style="font-family: 'Lora', serif; color: #3C1642;">The Lowercase</div>
+    <p class="section-subtitle" style="color: #6B5B6E;">
+      All lowercase. Intentionally soft. The 'd' is custom — its bowl is slightly open, like a listening ear. The coral dot replaces the tittle on the 'i', a small warmth that makes the whole mark feel alive.
+    </p>
+    <div class="logo-grid">
+      <!-- Warm bg -->
+      <div class="logo-card" style="background: #FFF8F0;">
+        <svg viewBox="0 0 300 70" width="280" style="display:block;">
+          <text x="0" y="55" font-family="'Lora', serif" font-size="56" font-weight="600" fill="#3C1642" letter-spacing="-1">donna</text>
+          <!-- coral dot replacing the 'i' would go here conceptually — we'll use the period -->
+        </svg>
+      </div>
+      <!-- Plum bg -->
+      <div class="logo-card" style="background: #3C1642;">
+        <svg viewBox="0 0 300 70" width="280" style="display:block;">
+          <text x="0" y="55" font-family="'Lora', serif" font-size="56" font-weight="600" fill="#FFF8F0" letter-spacing="-1">donna</text>
+        </svg>
+      </div>
+      <!-- Icon: open D -->
+      <div class="logo-card" style="background: #FFF8F0;">
+        <svg viewBox="0 0 100 100" width="80" style="display:block;">
+          <path d="M25 20 L25 80" stroke="#3C1642" stroke-width="9" stroke-linecap="round"/>
+          <path d="M25 20 C60 20 75 35 75 50 C75 65 60 80 25 80" fill="none" stroke="#3C1642" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="72" cy="26" r="7" fill="#FF6B6B"/>
+        </svg>
+      </div>
+      <!-- Icon reversed -->
+      <div class="logo-card" style="background: #3C1642;">
+        <svg viewBox="0 0 100 100" width="80" style="display:block;">
+          <path d="M25 20 L25 80" stroke="#FFF8F0" stroke-width="9" stroke-linecap="round"/>
+          <path d="M25 20 C60 20 75 35 75 50 C75 65 60 80 25 80" fill="none" stroke="#FFF8F0" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="72" cy="26" r="7" fill="#FF6B6B"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Colours -->
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">02 — Colour</div>
+    <div class="section-title" style="font-family: 'Lora', serif; color: #3C1642;">Warm Palette</div>
+    <p class="section-subtitle" style="color: #6B5B6E;">
+      Built around warmth and trust. Deep plum grounds the interface. Coral draws the eye. Sage says "this is handled." Dusty rose softens transitions. Cream wraps everything in comfort.
+    </p>
+    <div class="color-grid">
+      <div class="color-card"><div class="color-swatch" style="background: #3C1642;"></div><div class="color-info"><div class="color-name">Deep Plum</div><div class="color-hex">#3C1642</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #FF6B6B;"></div><div class="color-info"><div class="color-name">Coral</div><div class="color-hex">#FF6B6B</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #A7C4A0;"></div><div class="color-info"><div class="color-name">Sage</div><div class="color-hex">#A7C4A0</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #FFF8F0;"></div><div class="color-info"><div class="color-name">Cream</div><div class="color-hex">#FFF8F0</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #C9ADA7;"></div><div class="color-info"><div class="color-name">Dusty Rose</div><div class="color-hex">#C9ADA7</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background: #5C4B6E;"></div><div class="color-info"><div class="color-name">Twilight</div><div class="color-hex">#5C4B6E</div></div></div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Typography -->
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">03 — Typography</div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #C9ADA7;">Display / Headlines</div>
+      <p style="font-family: 'Lora', serif; font-size: 48px; font-weight: 600; color: #3C1642; line-height: 1.1;">
+        Lora
+      </p>
+      <p style="font-family: 'Lora', serif; font-size: 22px; font-weight: 400; color: #6B5B6E; margin-top: 8px; font-style: italic;">
+        Calligraphic warmth. Feels handwritten at a distance, precise up close.
+      </p>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role" style="color: #C9ADA7;">Body / Interface</div>
+      <p style="font-family: 'Source Sans 3', sans-serif; font-size: 40px; font-weight: 500; color: #3C1642;">
+        Source Sans 3
+      </p>
+      <p style="font-family: 'Source Sans 3', sans-serif; font-size: 17px; font-weight: 400; color: #6B5B6E; margin-top: 8px; line-height: 1.7; max-width: 560px;">
+        Adobe's workhorse. Exceptional readability, friendly counters, and enough character to feel warm without sacrificing clarity.
+      </p>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Taglines -->
+  <div class="section" style="background: #FFF8F0;">
+    <div class="section-label" style="color: #3C1642;">04 — Voice</div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Lora', serif; color: #3C1642;">She remembered<span style="color: #FF6B6B;">.</span><br>So you don't have to<span style="color: #FF6B6B;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'Source Sans 3'; color: #C9ADA7;">Primary tagline</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Lora', serif; color: #3C1642; font-size: 32px;">Your second brain has better social skills<span style="color: #FF6B6B;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'Source Sans 3'; color: #C9ADA7; font-size: 16px;">Alternate</p>
+    </div>
+    <div class="tagline-block">
+      <p class="tagline-primary" style="font-family: 'Lora', serif; color: #3C1642; font-size: 32px;">I know what you need before your coffee does<span style="color: #FF6B6B;">.</span></p>
+      <p class="tagline-alt" style="font-family: 'Source Sans 3'; color: #C9ADA7; font-size: 16px;">Campaign / playful</p>
+    </div>
+
+    <div style="margin-top: 56px;">
+      <div class="voice-grid">
+        <div class="voice-card" style="background: #F5EDE4;">
+          <div class="voice-label" style="color: #FF6B6B;">Donna says</div>
+          <p class="voice-example" style="font-family: 'Lora', serif; color: #3C1642;">
+            "Hey — you mentioned grabbing coffee with Priya last month but never followed up. She posted about being in town next week. Might be worth reaching out?"
+          </p>
+        </div>
+        <div class="voice-card" style="background: #F5EDE4;">
+          <div class="voice-label" style="color: #FF6B6B;">Donna says</div>
+          <p class="voice-example" style="font-family: 'Lora', serif; color: #3C1642;">
+            "Quiet morning. I've tidied up your inbox — 6 newsletters archived, 2 receipts filed. The only thing that needs you is the reply to Tom."
+          </p>
+        </div>
+        <div class="voice-card" style="background: #F5EDE4;">
+          <div class="voice-label" style="color: #FF6B6B;">Donna says</div>
+          <p class="voice-example" style="font-family: 'Lora', serif; color: #3C1642;">
+            "Your meeting with the board is in an hour. Last time, they asked about Q1 pipeline. I've pulled the updated numbers — they look good."
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="background: #E8DDD4;"></div>
+
+  <!-- Mockups -->
+  <div class="section" style="background: #F5EDE4;">
+    <div class="section-label" style="color: #3C1642;">05 — Mockups</div>
+    <div class="mockup-grid">
+      <!-- App Icon -->
+      <div class="mockup-card" style="background: #FFF8F0; padding: 48px; display: flex; align-items: center; justify-content: center; border-radius: 20px;">
+        <div style="width: 120px; height: 120px; background: linear-gradient(145deg, #3C1642 0%, #5C4B6E 100%); border-radius: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 40px rgba(60,22,66,0.2);">
+          <svg viewBox="0 0 100 100" width="64">
+            <path d="M28 22 L28 78" stroke="#FFF8F0" stroke-width="8" stroke-linecap="round"/>
+            <path d="M28 22 C58 22 72 36 72 50 C72 64 58 78 28 78" fill="none" stroke="#FFF8F0" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="68" cy="28" r="6" fill="#FF6B6B"/>
+          </svg>
+        </div>
+        <p style="font-family: 'Source Sans 3'; font-size: 13px; color: #C9ADA7; margin-left: 24px;">App Icon<br><span style="color: #3C1642; font-weight: 600;">macOS / iOS</span></p>
+      </div>
+      <!-- Notification -->
+      <div class="mockup-card" style="background: #FFF8F0; padding: 48px; border-radius: 20px;">
+        <div style="background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(60,22,66,0.08);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(145deg, #3C1642, #5C4B6E); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 100 100" width="18"><path d="M28 22 L28 78" stroke="#FFF8F0" stroke-width="10" stroke-linecap="round"/><path d="M28 22 C58 22 72 36 72 50 C72 64 58 78 28 78" fill="none" stroke="#FFF8F0" stroke-width="10" stroke-linecap="round"/></svg>
+            </div>
+            <span style="font-family: 'Source Sans 3'; font-size: 14px; font-weight: 600; color: #3C1642;">donna</span>
+            <span style="font-family: 'Source Sans 3'; font-size: 12px; color: #C9ADA7; margin-left: auto;">just now</span>
+          </div>
+          <p style="font-family: 'Source Sans 3'; font-size: 15px; color: #3C1642; line-height: 1.6;">
+            Good morning! You've got a clear calendar until noon. I've drafted a reply to Tom and archived 4 newsletters. The only thing on your plate is the Q1 review prep — want me to pull the latest numbers?
+          </p>
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <button style="background: #3C1642; color: #FFF8F0; border: none; padding: 10px 20px; border-radius: 12px; font-family: 'Source Sans 3'; font-size: 14px; font-weight: 600; cursor: pointer;">Yes, pull them</button>
+            <button style="background: none; color: #6B5B6E; border: 1px solid #C9ADA7; padding: 10px 16px; border-radius: 12px; font-family: 'Source Sans 3'; font-size: 14px; cursor: pointer;">Later</button>
+          </div>
+        </div>
+        <p style="font-family: 'Source Sans 3'; font-size: 13px; color: #C9ADA7; margin-top: 16px;">Morning Briefing Card</p>
+      </div>
+      <!-- Archive toast -->
+      <div class="mockup-card" style="background: #3C1642; padding: 48px; border-radius: 20px;">
+        <div style="background: #5C4B6E; border-radius: 16px; padding: 16px 20px; max-width: 380px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: #A7C4A0; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg viewBox="0 0 24 24" width="16" fill="none" stroke="#3C1642" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div style="flex: 1;">
+              <p style="font-family: 'Source Sans 3'; font-size: 14px; color: #FFF8F0; font-weight: 500;">Archived 3 newsletters</p>
+              <p style="font-family: 'Source Sans 3'; font-size: 12px; color: #C9ADA7;">substack.com · morning brew · techcrunch</p>
+            </div>
+            <button style="background: none; color: #FF6B6B; border: none; font-family: 'Source Sans 3'; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline;">Undo</button>
+          </div>
+        </div>
+        <p style="font-family: 'Source Sans 3'; font-size: 13px; color: #5C4B6E; margin-top: 16px;">Tier 1 — Silent Execution Confirmation</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showOption(id) {
+  document.querySelectorAll('.option-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

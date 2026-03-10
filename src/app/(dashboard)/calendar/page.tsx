@@ -5,16 +5,16 @@ import Link from 'next/link';
 import { Calendar, ChevronLeft, ChevronRight, Clock, MapPin, Users } from 'lucide-react';
 
 const c = {
-  surface: 'rgba(255,255,255,0.04)',
-  surfaceHover: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
-  borderHover: 'rgba(255,255,255,0.14)',
+  surface: 'rgba(45,45,45,0.04)',
+  surfaceHover: 'rgba(45,45,45,0.06)',
+  border: 'rgba(45,45,45,0.08)',
+  borderHover: 'rgba(45,45,45,0.16)',
   dawn: '#E8845C',
   dawnMuted: 'rgba(232,132,92,0.15)',
-  text: '#FBF7F4',
-  textSecondary: 'rgba(251,247,244,0.85)',
-  textTertiary: 'rgba(155,175,196,0.85)',
-  textMuted: 'rgba(155,175,196,0.55)',
+  text: '#2D2D2D',
+  textSecondary: 'rgba(45,45,45,0.8)',
+  textTertiary: 'rgba(45,45,45,0.6)',
+  textMuted: 'rgba(45,45,45,0.5)',
 };
 
 interface CalendarEvent {

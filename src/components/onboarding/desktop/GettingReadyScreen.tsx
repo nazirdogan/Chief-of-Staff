@@ -151,25 +151,16 @@ export function GettingReadyScreen() {
   return (
     <div
       className="relative flex min-h-screen items-center justify-center overflow-hidden"
-      style={{ background: '#0E1225' }}
+      style={{ background: '#FAF9F6' }}
     >
-      {/* Ambient glow */}
+      {/* Subtle dawn tint behind logo */}
       <div
-        className="animate-glow-pulse pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         style={{
-          width: 800,
-          height: 800,
+          width: 600,
+          height: 600,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(232,132,92,0.08) 0%, transparent 60%)',
-        }}
-      />
-
-      {/* Grain */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-          backgroundSize: '128px 128px',
+          background: 'radial-gradient(circle, rgba(232,132,92,0.04) 0%, transparent 60%)',
         }}
       />
 
@@ -184,30 +175,21 @@ export function GettingReadyScreen() {
           }}
         >
           <div className="relative">
-            {/* Glow ring */}
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(232,132,92,0.2) 0%, transparent 70%)',
-                transform: 'scale(4)',
-                animation: isRunning ? 'glow-pulse 3s ease-in-out infinite' : undefined,
-              }}
-            />
             <div
               className="relative flex h-20 w-20 items-center justify-center rounded-2xl"
               style={{
-                background: 'rgba(232, 132, 92, 0.06)',
-                border: '1px solid rgba(232, 132, 92, 0.12)',
+                background: '#F1EDEA',
+                border: '1px solid rgba(232, 132, 92, 0.2)',
               }}
             >
               <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
                   fill="none"
-                  stroke="#FBF7F4"
+                  stroke="#2D2D2D"
                   strokeWidth="3.5"
                   strokeLinejoin="round"
-                  style={{ opacity: 0.7 }}
+                  style={{ opacity: 0.6 }}
                 />
                 <line
                   x1="26" y1="50" x2="72" y2="50"
@@ -233,11 +215,11 @@ export function GettingReadyScreen() {
         <h1
           className="mt-8 transition-all duration-1000"
           style={{
-            fontFamily: 'var(--font-display), Georgia, serif',
+            fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
             fontSize: '28px',
             fontStyle: 'italic',
-            fontWeight: 400,
-            color: '#FBF7F4',
+            fontWeight: 700,
+            color: '#2D2D2D',
             opacity: mounted ? 1 : 0,
             transform: mounted ? 'translateY(0)' : 'translateY(12px)',
             transitionDelay: '300ms',
@@ -255,7 +237,7 @@ export function GettingReadyScreen() {
         <p
           className="mt-3 text-[14px] leading-[1.7] transition-all duration-500"
           style={{
-            color: '#9BAFC4',
+            color: '#8D99AE',
             opacity: mounted ? 1 : 0,
             transform: mounted ? 'translateY(0)' : 'translateY(8px)',
             transitionDelay: '500ms',
@@ -291,7 +273,7 @@ export function GettingReadyScreen() {
                     className="flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-500"
                     style={{
                       background: isCurrent
-                        ? 'rgba(232, 132, 92, 0.06)'
+                        ? 'rgba(232, 132, 92, 0.08)'
                         : 'transparent',
                     }}
                   >
@@ -316,7 +298,7 @@ export function GettingReadyScreen() {
                       ) : (
                         <div
                           className="h-1.5 w-1.5 rounded-full"
-                          style={{ background: 'rgba(155, 175, 196, 0.2)' }}
+                          style={{ background: 'rgba(141, 153, 174, 0.2)' }}
                         />
                       )}
                     </div>
@@ -326,10 +308,10 @@ export function GettingReadyScreen() {
                       className="text-[13px] font-medium transition-colors duration-300"
                       style={{
                         color: isCurrent
-                          ? 'rgba(251, 247, 244, 0.9)'
+                          ? '#2D2D2D'
                           : isDone
-                            ? 'rgba(82, 183, 136, 0.6)'
-                            : 'rgba(155, 175, 196, 0.25)',
+                            ? 'rgba(82, 183, 136, 0.8)'
+                            : 'rgba(141, 153, 174, 0.4)',
                       }}
                     >
                       {info.label}
@@ -374,17 +356,17 @@ export function GettingReadyScreen() {
           >
             <p
               className="mb-3 text-[12px]"
-              style={{ color: 'rgba(155, 175, 196, 0.5)' }}
+              style={{ color: 'rgba(141, 153, 174, 0.7)' }}
             >
               This is taking longer than expected. You can continue while we finish in the background.
             </p>
             <button
               onClick={enterDashboard}
-              className="rounded-lg px-5 py-2.5 text-[13px] font-medium transition-all duration-300 hover:brightness-110"
+              className="rounded-lg px-5 py-2.5 text-[13px] font-medium transition-all duration-300 hover:brightness-95"
               style={{
-                background: 'rgba(251, 247, 244, 0.08)',
-                color: '#FBF7F4',
-                border: '1px solid rgba(251, 247, 244, 0.1)',
+                background: '#F1EDEA',
+                color: '#2D2D2D',
+                border: '1px solid rgba(45,45,45,0.1)',
               }}
             >
               Continue to Donna
@@ -397,11 +379,10 @@ export function GettingReadyScreen() {
           <div className="mt-8 flex items-center gap-3">
             <button
               onClick={enterDashboard}
-              className="rounded-xl px-6 py-3 text-[14px] font-medium transition-all duration-300 hover:brightness-110"
+              className="rounded-lg px-6 py-3 text-[14px] font-medium transition-all duration-300 hover:brightness-95"
               style={{
-                background: 'linear-gradient(135deg, #E8845C, #D4704A)',
-                color: '#FBF7F4',
-                boxShadow: '0 0 24px rgba(232, 132, 92, 0.15)',
+                background: '#E8845C',
+                color: '#FAF9F6',
               }}
             >
               Enter Donna
@@ -417,11 +398,11 @@ export function GettingReadyScreen() {
                   startTimeRef.current = Date.now();
                   fetch('/api/backfill/trigger', { method: 'POST' }).catch(() => {});
                 }}
-                className="rounded-xl px-6 py-3 text-[14px] font-medium transition-all duration-300"
+                className="rounded-lg px-6 py-3 text-[14px] font-medium transition-all duration-300"
                 style={{
-                  background: 'rgba(251, 247, 244, 0.06)',
-                  color: 'rgba(251, 247, 244, 0.7)',
-                  border: '1px solid rgba(251, 247, 244, 0.08)',
+                  background: '#F1EDEA',
+                  color: '#2D2D2D',
+                  border: '1px solid rgba(45,45,45,0.1)',
                 }}
               >
                 Retry
@@ -438,18 +419,13 @@ export function GettingReadyScreen() {
             style={{ opacity: mounted ? 1 : 0, transitionDelay: '200ms' }}
           >
             <div
-              className="relative overflow-hidden rounded-xl px-8 py-3.5 text-[14px] font-medium tracking-wide transition-all duration-300"
+              className="relative overflow-hidden rounded-lg px-8 py-3.5 text-[14px] font-medium tracking-wide transition-all duration-300 group-hover:brightness-95"
               style={{
-                background: 'linear-gradient(135deg, #E8845C 0%, #D4704A 100%)',
-                color: '#FBF7F4',
-                boxShadow: '0 0 30px rgba(232,132,92,0.2)',
+                background: '#E8845C',
+                color: '#FAF9F6',
               }}
             >
               Enter Donna
-              <div
-                className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)' }}
-              />
             </div>
           </button>
         )}
@@ -459,7 +435,7 @@ export function GettingReadyScreen() {
           className="mt-12 text-[10px] tracking-wide"
           style={{
             fontFamily: 'var(--font-mono)',
-            color: 'rgba(155, 175, 196, 0.2)',
+            color: 'rgba(141, 153, 174, 0.5)',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
           }}

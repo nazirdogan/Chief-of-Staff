@@ -34,20 +34,20 @@ const navItems = [
   { href: '/reflections', label: 'Reflections', icon: BookOpen },
 ];
 
-/* Donna brand tokens */
+/* Donna brand tokens — The Editor */
 const t = {
-  bg: '#1B1F3A',
-  deep: '#0E1225',
-  surface: 'rgba(255,255,255,0.05)',
-  border: 'rgba(251,247,244,0.08)',
-  borderHover: 'rgba(251,247,244,0.16)',
-  text: '#FBF7F4',
-  textSecondary: 'rgba(251,247,244,0.85)',
-  textTertiary: 'rgba(155,175,196,0.85)',
-  textQuaternary: 'rgba(155,175,196,0.45)',
+  bg: '#FAF9F6',         // parchment — main content background
+  deep: '#F1EDEA',       // linen — sidebar background
+  surface: 'rgba(45,45,45,0.04)',
+  border: 'rgba(45,45,45,0.08)',
+  borderHover: 'rgba(45,45,45,0.16)',
+  text: '#2D2D2D',       // charcoal
+  textSecondary: 'rgba(45,45,45,0.8)',
+  textTertiary: 'rgba(141,153,174,0.85)',   // slate
+  textQuaternary: 'rgba(141,153,174,0.5)',
   dawn: '#E8845C',
-  activeAccent: 'rgba(232,132,92,0.12)',
-  activeBorder: 'rgba(232,132,92,0.30)',
+  activeAccent: 'rgba(232,132,92,0.1)',
+  activeBorder: 'rgba(232,132,92,0.25)',
 };
 
 function NavItem({ href, label, icon: Icon, pathname }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string }) {
@@ -63,7 +63,7 @@ function NavItem({ href, label, icon: Icon, pathname }: { href: string; label: s
       }}
       onMouseEnter={(e) => {
         if (!active) {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
           e.currentTarget.style.color = t.textSecondary;
         }
       }}
@@ -256,7 +256,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div
         className="flex min-h-screen"
         style={{
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
           background: t.bg,
           color: t.text,
         }}
@@ -270,24 +270,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           }}
         >
           {/* Brand lockup */}
-          <div className="flex h-14 items-center gap-3 px-5">
-            <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" rx="18" fill="#1B1F3A"/>
-              <path d="M26 18 L26 82 L44 82 C76 82 80 66 80 50 C80 34 76 18 44 18 Z"
-                    fill="none" stroke="#FBF7F4" strokeWidth="4.5" strokeLinejoin="round"/>
-              <line x1="26" y1="50" x2="72" y2="50" stroke="#E8845C" strokeWidth="3" strokeLinecap="round"/>
-              <circle cx="26" cy="50" r="5" fill="#E8845C"/>
-            </svg>
+          <div className="flex h-14 items-center px-5">
             <span
-              className="text-[17px] tracking-[0.01em]"
+              className="text-[20px] tracking-[-0.01em]"
               style={{
                 color: t.text,
-                fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
-                fontWeight: 300,
+                fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+                fontWeight: 700,
                 fontStyle: 'italic',
               }}
             >
-              donna
+              Donna<span style={{ color: t.dawn }}>.</span>
             </span>
           </div>
 
@@ -346,7 +339,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         }}
                         onMouseEnter={(e) => {
                           if (!active) {
-                            e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                            e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
                             e.currentTarget.style.color = t.textTertiary;
                           }
                         }}
@@ -395,7 +388,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <p className="text-[11px]" style={{ color: t.textQuaternary }}>
                 <kbd
                   className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium"
-                  style={{ background: 'rgba(255,255,255,0.06)', color: t.textTertiary }}
+                  style={{ background: 'rgba(45,45,45,0.06)', color: t.textTertiary }}
                 >
                   ⌘K
                 </kbd>
@@ -419,7 +412,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               style={{ color: t.textQuaternary }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = t.textSecondary;
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = t.textQuaternary;

@@ -7,14 +7,14 @@ import { CommitmentCard } from './CommitmentCard';
 import type { Commitment } from '@/lib/db/types';
 
 const c = {
-  surface: 'rgba(255,255,255,0.04)',
-  border: 'rgba(255,255,255,0.07)',
-  borderHover: 'rgba(255,255,255,0.14)',
+  surface: 'rgba(45,45,45,0.04)',
+  border: 'rgba(45,45,45,0.08)',
+  borderHover: 'rgba(45,45,45,0.16)',
   dawn: '#E8845C',
   dawnSubtle: 'rgba(232,132,92,0.15)',
-  text: '#FFFFFF',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  textQuaternary: 'rgba(255,255,255,0.35)',
+  text: '#2D2D2D',
+  textTertiary: 'rgba(45,45,45,0.6)',
+  textQuaternary: 'rgba(45,45,45,0.5)',
 };
 
 export function CommitmentQueue() {

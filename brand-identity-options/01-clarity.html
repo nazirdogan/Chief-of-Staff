@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donna — Brand Identity 01: Clarity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&family=Inter+Tight:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #111111;
+    --paper: #FAFAF8;
+    --mid: #6B6B6B;
+    --rule: #E2E2E0;
+    --accent: #E8523A;
+    --accent-light: #FDF0EE;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+  /* NAV */
+  .brand-label { display: flex; justify-content: space-between; align-items: center; padding: 20px 48px; border-bottom: 1px solid var(--rule); background: var(--paper); position: sticky; top: 0; z-index: 10; }
+  .brand-label span { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mid); font-weight: 500; }
+
+  /* HERO */
+  .hero { padding: 80px 48px 72px; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; max-width: 1200px; margin: 0 auto; }
+  .hero-left { }
+  .logo-mark { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .logo-d {
+    width: 48px; height: 48px;
+    background: var(--ink);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-d svg { width: 28px; height: 28px; fill: var(--paper); }
+  .logo-wordmark { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(42px, 5vw, 64px); font-weight: 900; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 24px; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p { font-size: 17px; color: var(--mid); line-height: 1.7; max-width: 460px; }
+  .tag { display: inline-block; background: var(--accent-light); color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; margin-bottom: 20px; }
+
+  /* APP MOCKUP */
+  .app-mock {
+    background: #FFFFFF;
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,.08);
+  }
+  .mock-topbar {
+    background: var(--ink);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mock-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+  .mock-date { font-size: 11px; color: #999; margin-left: auto; font-family: 'Inter Tight', sans-serif; }
+  .mock-body { padding: 20px; }
+  .mock-greeting { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 4px; }
+  .mock-sub { font-size: 12px; color: var(--mid); margin-bottom: 16px; }
+  .mock-item { border-left: 3px solid var(--rule); padding: 10px 12px; margin-bottom: 8px; }
+  .mock-item.urgent { border-color: var(--accent); background: var(--accent-light); }
+  .mock-item-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--mid); margin-bottom: 3px; }
+  .mock-item.urgent .mock-item-label { color: var(--accent); }
+  .mock-item-text { font-size: 13px; font-weight: 500; }
+  .mock-cta { margin-top: 14px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: 6px; text-align: center; letter-spacing: .04em; }
+
+  /* SECTIONS */
+  .section { padding: 72px 48px; border-bottom: 1px solid var(--rule); max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--mid); font-weight: 600; margin-bottom: 32px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+
+  /* COLORS */
+  .palette { display: flex; gap: 0; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  .swatch { flex: 1; padding: 28px 20px; }
+  .swatch-hex { font-family: 'Inter Tight', monospace; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .swatch-name { font-size: 11px; opacity: .7; }
+
+  /* TYPOGRAPHY */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .type-specimen { }
+  .type-meta { font-size: 11px; color: var(--mid); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+  .type-display { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+  .type-body-demo { font-size: 16px; line-height: 1.7; color: var(--mid); max-width: 400px; }
+
+  /* VOICE */
+  .voice-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .voice-card { border: 1px solid var(--rule); border-radius: 8px; padding: 24px; }
+  .voice-trait { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  .voice-headline { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; margin-bottom: 10px; }
+  .voice-body { font-size: 14px; color: var(--mid); line-height: 1.6; }
+  .voice-example { margin-top: 16px; padding: 12px; background: var(--accent-light); border-radius: 4px; font-size: 13px; font-style: italic; color: var(--ink); line-height: 1.5; }
+
+  /* PRINCIPLES */
+  .principles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 8px; }
+  .principle { }
+  .p-num { font-family: 'Playfair Display', serif; font-size: 36px; color: var(--rule); font-weight: 900; margin-bottom: -4px; }
+  .p-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .p-desc { font-size: 13px; color: var(--mid); line-height: 1.6; }
+
+  /* FOOTER */
+  .footer { padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-left { font-size: 13px; color: var(--mid); }
+  .footer-right { font-size: 11px; color: var(--rule); letter-spacing: .1em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div class="brand-label">
+  <span>Donna — Brand Identity System</span>
+  <span>01 / Clarity</span>
+</div>
+
+<!-- HERO -->
+<div style="border-bottom: 1px solid var(--rule);">
+<div class="hero">
+  <div class="hero-left">
+    <div class="logo-mark">
+      <div class="logo-d">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4h8c4.4 0 8 3.6 8 8s-3.6 8-8 8H4V4zm4 4v8h4c2.2 0 4-1.8 4-4s-1.8-4-4-4H8z"/>
+        </svg>
+      </div>
+      <span class="logo-wordmark">Donna</span>
+    </div>
+    <div class="tag">Brand 01 — Clarity</div>
+    <h1>Every morning,<br><em>exactly</em> what matters.</h1>
+    <p>One precise briefing. No noise, no backlog, no decision fatigue. Donna reads your entire digital life overnight so you don't have to.</p>
+  </div>
+  <div class="app-mock">
+    <div class="mock-topbar">
+      <div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div>
+      <span class="mock-date">Tuesday, 10 March</span>
+    </div>
+    <div class="mock-body">
+      <div class="mock-greeting">Good morning, Nazir.</div>
+      <div class="mock-sub">3 things need you today · 2 commitments due</div>
+      <div class="mock-item urgent">
+        <div class="mock-item-label">Urgent · Commitment</div>
+        <div class="mock-item-text">Series B term sheet response — Laith is waiting since Friday.</div>
+      </div>
+      <div class="mock-item">
+        <div class="mock-item-label">Action · Email</div>
+        <div class="mock-item-text">Rania sent revised deck at 11pm. You promised feedback "this week."</div>
+      </div>
+      <div class="mock-item">
+        <div class="mock-item-label">Heads up · Calendar</div>
+        <div class="mock-item-text">Board call at 14:00 — no agenda shared yet. Draft one?</div>
+      </div>
+      <div class="mock-cta">Open Today's Briefing →</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- COLOR PALETTE -->
+<div class="section">
+  <div class="section-label">Colour System</div>
+  <div class="palette">
+    <div class="swatch" style="background:#111111; color:#FAFAF8;">
+      <div class="swatch-hex">#111111</div>
+      <div class="swatch-name">Ink</div>
+    </div>
+    <div class="swatch" style="background:#FAFAF8; color:#111111; border-left:1px solid #E2E2E0;">
+      <div class="swatch-hex">#FAFAF8</div>
+      <div class="swatch-name">Paper</div>
+    </div>
+    <div class="swatch" style="background:#E8523A; color:#fff;">
+      <div class="swatch-hex">#E8523A</div>
+      <div class="swatch-name">Signal</div>
+    </div>
+    <div class="swatch" style="background:#6B6B6B; color:#fff;">
+      <div class="swatch-hex">#6B6B6B</div>
+      <div class="swatch-name">Mid</div>
+    </div>
+    <div class="swatch" style="background:#E2E2E0; color:#111;">
+      <div class="swatch-hex">#E2E2E0</div>
+      <div class="swatch-name">Rule</div>
+    </div>
+    <div class="swatch" style="background:#FDF0EE; color:#E8523A;">
+      <div class="swatch-hex">#FDF0EE</div>
+      <div class="swatch-name">Signal Light</div>
+    </div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="section" style="border-top: none;">
+  <div class="section-label">Typography</div>
+  <div class="type-grid">
+    <div class="type-specimen">
+      <div class="type-meta">Display — Playfair Display 900</div>
+      <div class="type-display">The signal<br>in the noise.</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-meta">Body — Inter 400 / 16px / 1.7</div>
+      <div class="type-body-demo">Donna processed 847 messages overnight. Three things actually need you today. The rest can wait — or has already been handled. Here is your morning.</div>
+      <div style="margin-top: 20px;">
+        <div class="type-meta">UI Labels — Inter 600 / 11px / Uppercase</div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; margin-top:8px;">Commitment · Due Today · 3 Actions</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE -->
+<div class="section" style="border-top: none;">
+  <div class="section-label">Brand Voice</div>
+  <div class="voice-grid">
+    <div class="voice-card">
+      <div class="voice-trait">Precise</div>
+      <div class="voice-headline">Say exactly what you mean.</div>
+      <div class="voice-body">No corporate softening. No filler. Donna speaks like a brilliant analyst who respects your time.</div>
+      <div class="voice-example">"You owe Laith a response. He followed up twice. You said Thursday."</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-trait">Calm</div>
+      <div class="voice-headline">Never alarmist. Always honest.</div>
+      <div class="voice-body">Donna doesn't manufacture urgency. When something matters, it says so plainly — and you know it's real.</div>
+      <div class="voice-example">"This week is lighter than usual. Two things on Tuesday, one call Wednesday. You're clear."</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-trait">Respectful</div>
+      <div class="voice-headline">Your intelligence, amplified.</div>
+      <div class="voice-body">Donna never condescends. It surfaces facts, not opinions — and defers to your judgement every time.</div>
+      <div class="voice-example">"The pattern across six threads suggests the partnership is stalling. You should decide how to proceed."</div>
+    </div>
+  </div>
+</div>
+
+<!-- DESIGN PRINCIPLES -->
+<div class="section" style="border-top: none;">
+  <div class="section-label">Design Principles</div>
+  <div class="principles">
+    <div class="principle">
+      <div class="p-num">01</div>
+      <div class="p-title">Legibility first</div>
+      <div class="p-desc">Every pixel earns its place. If it doesn't help you act faster, it goes.</div>
+    </div>
+    <div class="principle">
+      <div class="p-num">02</div>
+      <div class="p-title">Ink on paper</div>
+      <div class="p-desc">High contrast, editorial grid. The morning brief should feel like The Economist, not a dashboard.</div>
+    </div>
+    <div class="principle">
+      <div class="p-num">03</div>
+      <div class="p-title">Signal only</div>
+      <div class="p-desc">Colour is used exclusively for urgency. Red means act. Everything else is neutral.</div>
+    </div>
+    <div class="principle">
+      <div class="p-num">04</div>
+      <div class="p-title">Trust through restraint</div>
+      <div class="p-desc">The discipline in the design signals discipline in the AI. Sparse = trustworthy.</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-left">Donna — Brand Identity 01: Clarity · For review only</div>
+  <div class="footer-right">Concept / 8</div>
+</div>
+
+</body>
+</html>

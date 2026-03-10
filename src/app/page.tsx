@@ -18,26 +18,29 @@ import {
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
-   Brand tokens
+   Brand tokens — The Editor palette
 ───────────────────────────────────────────── */
 const c = {
-  midnight: "#1B1F3A",
+  parchment: "#FAF9F6",
+  linen: "#F1EDEA",
+  charcoal: "#2D2D2D",
   dawn: "#E8845C",
+  steel: "#457B9D",
   dusk: "#4E7DAA",
-  paper: "#FBF7F4",
+  slate: "#8D99AE",
   sage: "#52B788",
   gold: "#F4C896",
-  deep: "#0E1225",
-  charcoal: "#2D3154",
-  mist: "#9BAFC4",
-  stone: "#F0EDE9",
   alert: "#D64B2A",
+  // Keep these for backward-compat references in dark accent sections
+  paper: "#FAF9F6",
+  mist: "#8D99AE",
+  deep: "#FAF9F6",
 };
 
 /* Font stacks using CSS variables from root layout */
 const fonts = {
-  display: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
-  body: "var(--font-inter), 'Inter', system-ui, sans-serif",
+  display: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+  body: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
   mono: "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
 };
 
@@ -89,8 +92,8 @@ function FeedItem({ item }: { item: (typeof feedItems)[0] }) {
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "#FFFFFF",
+        border: "1px solid rgba(45,45,45,0.08)",
         borderRadius: 8,
         padding: "14px 18px",
         display: "flex",
@@ -127,7 +130,7 @@ function FeedItem({ item }: { item: (typeof feedItems)[0] }) {
             style={{
               fontFamily: fonts.mono,
               fontSize: 10,
-              color: "rgba(155,175,196,0.45)",
+              color: "rgba(45,45,45,0.4)",
               letterSpacing: "0.06em",
             }}
           >
@@ -138,7 +141,7 @@ function FeedItem({ item }: { item: (typeof feedItems)[0] }) {
           style={{
             fontFamily: fonts.body,
             fontSize: 13.5,
-            color: "rgba(251,247,244,0.82)",
+            color: "rgba(45,45,45,0.75)",
             lineHeight: 1.5,
             margin: 0,
           }}
@@ -361,8 +364,8 @@ export default function LandingPage() {
 
         .landing-grid-bg {
           background-image:
-            linear-gradient(rgba(155,175,196,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(155,175,196,0.03) 1px, transparent 1px);
+            linear-gradient(rgba(45,45,45,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(45,45,45,0.04) 1px, transparent 1px);
           background-size: 48px 48px;
           animation: gridPulse 8s ease-in-out infinite;
         }
@@ -383,7 +386,7 @@ export default function LandingPage() {
           border: none;
           cursor: pointer;
           padding: 8px;
-          color: #FBF7F4;
+          color: #2D2D2D;
           align-items: center;
           justify-content: center;
           min-width: 44px;
@@ -395,22 +398,20 @@ export default function LandingPage() {
           display: none;
           position: fixed;
           inset: 0;
-          background: rgba(14,18,37,0.97);
+          background: rgba(250,249,246,0.98);
           z-index: 98;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           gap: 40px;
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
         }
         .mobile-nav-overlay.open { display: flex; animation: heroFadeUp 0.25s ease both; }
         .mobile-nav-overlay a {
-          font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+          font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
           font-size: 34px;
-          font-weight: 400;
+          font-weight: 700;
           font-style: italic;
-          color: #FBF7F4;
+          color: #2D2D2D;
           text-decoration: none;
           letter-spacing: -0.01em;
           min-height: 44px;
@@ -419,12 +420,12 @@ export default function LandingPage() {
         }
         .mobile-nav-overlay a:hover { color: #E8845C; }
         .mobile-nav-overlay .mobile-nav-cta {
-          font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+          font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
           font-size: 15px;
           font-style: normal;
           font-weight: 600;
           background: #E8845C;
-          color: #0E1225;
+          color: #FAF9F6;
           padding: 14px 32px;
           border-radius: 8px;
           margin-top: 8px;
@@ -474,7 +475,7 @@ export default function LandingPage() {
 
           .stats-grid-4col { grid-template-columns: repeat(2, 1fr) !important; }
           .stat-cell { border-right: none !important; padding: 36px 20px !important; }
-          .stat-cell-border-right { border-right: 1px solid rgba(255,255,255,0.06) !important; }
+          .stat-cell-border-right { border-right: 1px solid rgba(45,45,45,0.08) !important; }
 
           .footer-bar {
             flex-direction: column !important;
@@ -490,7 +491,7 @@ export default function LandingPage() {
         @media (max-width: 480px) {
           .stats-grid-4col { grid-template-columns: 1fr !important; }
           .stat-cell-border-right { border-right: none !important; }
-          .stat-cell { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+          .stat-cell { border-bottom: 1px solid rgba(45,45,45,0.08) !important; }
         }
 
         /* iOS safe area insets */
@@ -524,9 +525,9 @@ export default function LandingPage() {
             left: 0,
             right: 0,
             zIndex: 100,
-            background: "rgba(14,18,37,0.85)",
+            background: "rgba(250,249,246,0.92)",
             backdropFilter: "blur(12px)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid rgba(45,45,45,0.08)",
           }}
         >
           <div
@@ -546,12 +547,12 @@ export default function LandingPage() {
                 fontFamily: fonts.display,
                 fontStyle: "italic",
                 fontSize: 24,
-                fontWeight: 600,
-                color: c.paper,
+                fontWeight: 700,
+                color: c.charcoal,
                 letterSpacing: "-0.01em",
               }}
             >
-              Donna
+              Donna<span style={{ color: c.dawn }}>.</span>
             </span>
 
             <div className="desktop-nav-links">
@@ -562,13 +563,13 @@ export default function LandingPage() {
                   style={{
                     fontFamily: fonts.body,
                     fontSize: 13,
-                    color: c.mist,
+                    color: c.slate,
                     textDecoration: "none",
                     letterSpacing: "0.02em",
                     transition: "color 0.15s",
                   }}
-                  onMouseEnter={(e) => ((e.target as HTMLElement).style.color = c.paper)}
-                  onMouseLeave={(e) => ((e.target as HTMLElement).style.color = c.mist)}
+                  onMouseEnter={(e) => ((e.target as HTMLElement).style.color = c.charcoal)}
+                  onMouseLeave={(e) => ((e.target as HTMLElement).style.color = c.slate)}
                 >
                   {item}
                 </a>
@@ -578,13 +579,13 @@ export default function LandingPage() {
                 style={{
                   fontFamily: fonts.body,
                   fontSize: 13,
-                  color: c.mist,
+                  color: c.slate,
                   textDecoration: "none",
                   letterSpacing: "0.02em",
                   transition: "color 0.15s",
                 }}
-                onMouseEnter={(e) => ((e.target as HTMLElement).style.color = c.paper)}
-                onMouseLeave={(e) => ((e.target as HTMLElement).style.color = c.mist)}
+                onMouseEnter={(e) => ((e.target as HTMLElement).style.color = c.charcoal)}
+                onMouseLeave={(e) => ((e.target as HTMLElement).style.color = c.slate)}
               >
                 Download
               </Link>
@@ -594,7 +595,7 @@ export default function LandingPage() {
                   fontFamily: fonts.body,
                   fontSize: 13,
                   fontWeight: 500,
-                  color: c.deep,
+                  color: c.parchment,
                   background: c.dawn,
                   padding: "7px 18px",
                   borderRadius: 6,
@@ -618,14 +619,14 @@ export default function LandingPage() {
             >
               {mobileNavOpen ? (
                 <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <line x1="4" y1="4" x2="18" y2="18" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
-                  <line x1="18" y1="4" x2="4" y2="18" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="4" y1="4" x2="18" y2="18" stroke="#2D2D2D" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="18" y1="4" x2="4" y2="18" stroke="#2D2D2D" strokeWidth="1.8" strokeLinecap="round"/>
                 </svg>
               ) : (
                 <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <line x1="3" y1="7" x2="19" y2="7" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
-                  <line x1="3" y1="11" x2="19" y2="11" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
-                  <line x1="3" y1="15" x2="19" y2="15" stroke="#FBF7F4" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="3" y1="7" x2="19" y2="7" stroke="#2D2D2D" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="3" y1="11" x2="19" y2="11" stroke="#2D2D2D" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1="3" y1="15" x2="19" y2="15" stroke="#2D2D2D" strokeWidth="1.8" strokeLinecap="round"/>
                 </svg>
               )}
             </button>
@@ -644,7 +645,7 @@ export default function LandingPage() {
             </a>
           ))}
           <Link href="/download" onClick={() => setMobileNavOpen(false)}
-            style={{ fontFamily: fonts.display, fontSize: 34, fontWeight: 400, fontStyle: "italic", color: c.paper, textDecoration: "none", minHeight: 44, display: "flex", alignItems: "center" }}
+            style={{ fontFamily: fonts.display, fontSize: 34, fontWeight: 700, fontStyle: "italic", color: c.charcoal, textDecoration: "none", minHeight: 44, display: "flex", alignItems: "center" }}
           >
             Download
           </Link>
@@ -667,7 +668,7 @@ export default function LandingPage() {
             display: "flex",
             alignItems: "center",
             overflow: "hidden",
-            background: c.deep,
+            background: c.parchment,
           }}
         >
           {/* Grid background */}
@@ -735,8 +736,8 @@ export default function LandingPage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "#F1EDEA",
+                  border: "1px solid rgba(45,45,45,0.1)",
                   borderRadius: 100,
                   padding: "6px 14px",
                   marginBottom: 36,
@@ -757,7 +758,7 @@ export default function LandingPage() {
                   style={{
                     fontFamily: fonts.mono,
                     fontSize: 11,
-                    color: c.mist,
+                    color: c.slate,
                     letterSpacing: "0.1em",
                     fontWeight: 500,
                   }}
@@ -772,16 +773,16 @@ export default function LandingPage() {
                   fontFamily: fonts.display,
                   fontStyle: "italic",
                   fontSize: "clamp(52px, 6vw, 76px)",
-                  fontWeight: 600,
-                  color: c.paper,
+                  fontWeight: 700,
+                  color: c.charcoal,
                   lineHeight: 1.05,
                   letterSpacing: "-0.02em",
                   marginBottom: 24,
                 }}
               >
-                See everything.
+                Before you ask.
                 <br />
-                <span style={{ color: c.dawn }}>Miss nothing.</span>
+                <span style={{ color: c.dawn }}>Donna already knows.</span>
               </h1>
 
               <p
@@ -789,11 +790,11 @@ export default function LandingPage() {
                 style={{
                   fontFamily: fonts.body,
                   fontSize: 17,
-                  color: c.mist,
+                  color: c.slate,
                   lineHeight: 1.7,
                   maxWidth: 480,
                   marginBottom: 44,
-                  fontWeight: 300,
+                  fontWeight: 400,
                 }}
               >
                 While you sleep, Donna reads every email, every calendar invite,
@@ -812,14 +813,14 @@ export default function LandingPage() {
                       onChange={(e) => setHeroEmail(e.target.value)}
                       style={{
                         flex: 1,
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        background: "#FFFFFF",
+                        border: "1px solid rgba(45,45,45,0.15)",
                         borderRight: "none",
                         borderRadius: "8px 0 0 8px",
                         padding: "14px 18px",
                         fontFamily: fonts.body,
                         fontSize: 14,
-                        color: c.paper,
+                        color: c.charcoal,
                         transition: "border-color 0.2s, box-shadow 0.2s",
                       }}
                       onKeyDown={(e) => {
@@ -866,7 +867,7 @@ export default function LandingPage() {
                   style={{
                     fontFamily: fonts.body,
                     fontSize: 12,
-                    color: "rgba(155,175,196,0.5)",
+                    color: "rgba(141,153,174,0.7)",
                     marginTop: 12,
                     letterSpacing: "0.02em",
                   }}
@@ -881,14 +882,14 @@ export default function LandingPage() {
               {/* Terminal header */}
               <div
                 style={{
-                  background: c.charcoal,
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "#F1EDEA",
+                  border: "1px solid rgba(45,45,45,0.1)",
                   borderRadius: "12px 12px 0 0",
                   padding: "12px 18px",
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(45,45,45,0.06)",
                 }}
               >
                 <div style={{ display: "flex", gap: 6 }}>
@@ -909,7 +910,7 @@ export default function LandingPage() {
                   style={{
                     fontFamily: fonts.mono,
                     fontSize: 11,
-                    color: "rgba(155,175,196,0.5)",
+                    color: "rgba(45,45,45,0.4)",
                     letterSpacing: "0.06em",
                     flex: 1,
                     textAlign: "center",
@@ -933,12 +934,11 @@ export default function LandingPage() {
               {/* Feed window */}
               <div
                 style={{
-                  background: "rgba(27,31,58,0.7)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "#FAF9F6",
+                  border: "1px solid rgba(45,45,45,0.08)",
                   borderTop: "none",
                   borderRadius: "0 0 12px 12px",
                   padding: "16px 16px",
-                  backdropFilter: "blur(8px)",
                 }}
               >
                 <AnimatedFeed />
@@ -1005,7 +1005,7 @@ export default function LandingPage() {
                     fontWeight: 400,
                     lineHeight: 1.15,
                     letterSpacing: "-0.01em",
-                    color: c.midnight,
+                    color: c.charcoal,
                     margin: 0,
                   }}
                 >
@@ -1027,7 +1027,7 @@ export default function LandingPage() {
                   </p>
                   <p style={{ fontSize: 17, lineHeight: 1.8, color: "#4a4a5a" }}>
                     You&apos;re not overwhelmed because you&apos;re disorganised. You&apos;re overwhelmed
-                    because <strong style={{ color: c.midnight, fontWeight: 600 }}>no one is watching it all for you.</strong>
+                    because <strong style={{ color: c.charcoal, fontWeight: 600 }}>no one is watching it all for you.</strong>
                   </p>
                 </div>
               </Reveal>
@@ -1044,7 +1044,7 @@ export default function LandingPage() {
                   <div
                     style={{
                       background: "#fff",
-                      border: `1px solid ${c.stone}`,
+                      border: `1px solid ${"#F1EDEA"}`,
                       borderRadius: 12,
                       padding: "32px 28px",
                       borderTop: `3px solid ${color}`,
@@ -1053,7 +1053,7 @@ export default function LandingPage() {
                     <div style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.2em", color, marginBottom: 16 }}>
                       {number}
                     </div>
-                    <h3 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 600, color: c.midnight, marginBottom: 12, lineHeight: 1.3 }}>
+                    <h3 style={{ fontFamily: fonts.display, fontSize: 22, fontWeight: 600, color: c.charcoal, marginBottom: 12, lineHeight: 1.3 }}>
                       {title}
                     </h3>
                     <p style={{ fontSize: 14, lineHeight: 1.7, color: "#5a5a6e" }}>{body}</p>
@@ -1067,14 +1067,14 @@ export default function LandingPage() {
         {/* ══════════════════════════════════════
             HOW IT WORKS
         ══════════════════════════════════════ */}
-        <section id="how-it-works" className="section-lg" style={{ background: c.stone, padding: "120px 24px" }}>
+        <section id="how-it-works" className="section-lg" style={{ background: "#F1EDEA", padding: "120px 24px" }}>
           <div style={{ maxWidth: 1080, margin: "0 auto" }}>
             <Reveal>
               <div style={{ marginBottom: 72, textAlign: "center" }}>
                 <div style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: c.dawn, marginBottom: 20 }}>
                   HOW IT WORKS
                 </div>
-                <h2 style={{ fontFamily: fonts.display, fontSize: "clamp(36px, 4vw, 52px)", fontWeight: 400, lineHeight: 1.15, color: c.midnight, margin: 0 }}>
+                <h2 style={{ fontFamily: fonts.display, fontSize: "clamp(36px, 4vw, 52px)", fontWeight: 400, lineHeight: 1.15, color: c.charcoal, margin: 0 }}>
                   Three steps. <em style={{ fontStyle: "italic", color: c.dusk }}>One morning ritual.</em>
                 </h2>
               </div>
@@ -1120,7 +1120,7 @@ export default function LandingPage() {
                   <div
                     style={{
                       background: "#fff",
-                      border: "1px solid rgba(27,31,58,0.08)",
+                      border: "1px solid rgba(45,45,45,0.08)",
                       borderRadius: 14,
                       padding: "40px 32px",
                       position: "relative",
@@ -1142,7 +1142,7 @@ export default function LandingPage() {
                     <div style={{ fontFamily: fonts.mono, fontSize: 9, letterSpacing: "0.28em", textTransform: "uppercase", color, marginBottom: 12 }}>
                       {verb}
                     </div>
-                    <h3 style={{ fontFamily: fonts.display, fontSize: 21, fontWeight: 600, color: c.midnight, lineHeight: 1.3, marginBottom: 16 }}>
+                    <h3 style={{ fontFamily: fonts.display, fontSize: 21, fontWeight: 600, color: c.charcoal, lineHeight: 1.3, marginBottom: 16 }}>
                       {headline}
                     </h3>
                     <p style={{ fontSize: 14, lineHeight: 1.75, color: "#5a5a6e", marginBottom: 24 }}>{body}</p>
@@ -1161,7 +1161,7 @@ export default function LandingPage() {
           id="briefing"
           className="section-lg"
           style={{
-            background: c.midnight,
+            background: "#1C2B38",
             padding: "120px 24px",
             position: "relative",
             overflow: "hidden",
@@ -1293,7 +1293,7 @@ export default function LandingPage() {
                 <div style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: c.dawn, marginBottom: 20 }}>
                   WHAT SHE TRACKS
                 </div>
-                <h2 style={{ fontFamily: fonts.display, fontSize: "clamp(36px, 4vw, 52px)", fontWeight: 400, lineHeight: 1.15, color: c.midnight, margin: 0 }}>
+                <h2 style={{ fontFamily: fonts.display, fontSize: "clamp(36px, 4vw, 52px)", fontWeight: 400, lineHeight: 1.15, color: c.charcoal, margin: 0 }}>
                   Four layers of <em style={{ fontStyle: "italic", color: c.dusk }}>intelligence.</em>
                 </h2>
               </div>
@@ -1310,7 +1310,7 @@ export default function LandingPage() {
                   <div
                     style={{
                       background: "#fff",
-                      border: `1px solid ${c.stone}`,
+                      border: `1px solid ${"#F1EDEA"}`,
                       borderRadius: 14,
                       padding: "40px 36px",
                       display: "flex",
@@ -1324,7 +1324,7 @@ export default function LandingPage() {
                     <div style={{ fontFamily: fonts.mono, fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: accent, marginBottom: 14 }}>
                       {label}
                     </div>
-                    <h3 style={{ fontFamily: fonts.display, fontSize: 23, fontWeight: 600, color: c.midnight, lineHeight: 1.25, marginBottom: 16 }}>
+                    <h3 style={{ fontFamily: fonts.display, fontSize: 23, fontWeight: 600, color: c.charcoal, lineHeight: 1.25, marginBottom: 16 }}>
                       {headline}
                     </h3>
                     <p style={{ fontSize: 14, lineHeight: 1.75, color: "#5a5a6e" }}>{body}</p>
@@ -1371,7 +1371,7 @@ export default function LandingPage() {
         {/* ══════════════════════════════════════
             MANIFESTO
         ══════════════════════════════════════ */}
-        <section className="section-md" style={{ background: c.paper, padding: "100px 24px", borderTop: `1px solid ${c.stone}`, borderBottom: `1px solid ${c.stone}` }}>
+        <section className="section-md" style={{ background: c.paper, padding: "100px 24px", borderTop: `1px solid ${"#F1EDEA"}`, borderBottom: `1px solid ${"#F1EDEA"}` }}>
           <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
             <Reveal>
               <blockquote
@@ -1381,7 +1381,7 @@ export default function LandingPage() {
                   fontWeight: 300,
                   fontStyle: "italic",
                   lineHeight: 1.5,
-                  color: c.midnight,
+                  color: c.charcoal,
                   margin: 0,
                   letterSpacing: "-0.005em",
                 }}
@@ -1403,7 +1403,7 @@ export default function LandingPage() {
           id="waitlist"
           className="section-lg"
           style={{
-            background: c.midnight,
+            background: "#1C2B38",
             padding: "120px 24px",
             textAlign: "center",
             position: "relative",
@@ -1488,32 +1488,32 @@ export default function LandingPage() {
         <footer
           className="footer-bar"
           style={{
-            background: c.deep,
+            background: "#F1EDEA",
             padding: "48px 40px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 24,
-            borderTop: "1px solid rgba(255,255,255,0.04)",
+            borderTop: "1px solid rgba(45,45,45,0.08)",
           }}
         >
           <div>
-            <span style={{ fontFamily: fonts.display, fontSize: 20, fontWeight: 500, color: "#fff", letterSpacing: "0.02em" }}>
-              Donna
+            <span style={{ fontFamily: fonts.display, fontStyle: "italic", fontSize: 20, fontWeight: 700, color: c.charcoal, letterSpacing: "-0.01em" }}>
+              Donna<span style={{ color: c.dawn }}>.</span>
             </span>
-            <p style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.12em", color: "#3a4060", marginTop: 6, textTransform: "uppercase" }}>
+            <p style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.12em", color: c.slate, marginTop: 6, textTransform: "uppercase" }}>
               PERSONAL INTELLIGENCE
             </p>
           </div>
           <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
             {["Privacy", "Terms", "Security"].map((item) => (
-              <a key={item} href="#" style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "#3a4060", textDecoration: "none" }}>
+              <a key={item} href="#" style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: c.slate, textDecoration: "none" }}>
                 {item}
               </a>
             ))}
           </div>
-          <p style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.08em", color: "#2a3050", textTransform: "uppercase" }}>
+          <p style={{ fontFamily: fonts.mono, fontSize: 10, letterSpacing: "0.08em", color: "rgba(141,153,174,0.6)", textTransform: "uppercase" }}>
             &copy; 2026 DONNA
           </p>
         </footer>

@@ -4,32 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>donna — 30-Day Social Media Launch Plan</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --midnight: #1B1F3A;
-      --dawn:     #E8845C;
-      --dusk:     #4E7DAA;
-      --paper:    #FBF7F4;
-      --sage:     #52B788;
-      --gold:     #F4C896;
-      --deep:     #0E1225;
-      --charcoal: #2D3154;
-      --mist:     #9BAFC4;
-      --stone:    #F0EDE9;
-      --alert:    #D64B2A;
+      --parchment: #FAF9F6;
+      --dawn:      #E8845C;
+      --steel:     #457B9D;
+      --linen:     #F1EDEA;
+      --sage:      #52B788;
+      --gold:      #F4C896;
+      --charcoal:  #2D2D2D;
+      --slate:     #8D99AE;
+      --alert:     #D64B2A;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: var(--paper);
-      color: var(--midnight);
-      font-family: 'Inter', sans-serif;
+      background: var(--parchment);
+      color: var(--charcoal);
+      font-family: 'DM Sans', sans-serif;
       line-height: 1.6;
     }
 
     /* ── HEADER ── */
     .header {
-      background: var(--midnight);
+      background: var(--charcoal);
       padding: 72px 80px 60px;
       position: relative;
       overflow: hidden;
@@ -51,19 +49,19 @@
       margin-bottom: 28px;
     }
     .header-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 72px;
       font-weight: 300;
       font-style: italic;
-      color: var(--paper);
+      color: var(--parchment);
       line-height: 1;
       margin-bottom: 12px;
     }
     .header-sub {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 24px;
       font-weight: 300;
-      color: var(--mist);
+      color: var(--slate);
       margin-bottom: 40px;
     }
     .header-meta {
@@ -71,15 +69,15 @@
       gap: 32px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: rgba(155,175,196,.45);
+      color: rgba(141,153,174,.45);
       letter-spacing: .1em;
     }
     .header-meta-sep { color: rgba(232,132,92,.4); }
 
     /* ── LAYOUT ── */
-    .section { padding: 64px 80px; border-bottom: 1px solid rgba(27,31,58,.07); }
-    .section-dark { background: var(--midnight); padding: 64px 80px; border-bottom: 1px solid rgba(255,255,255,.04); }
-    .section-alt { background: var(--stone); }
+    .section { padding: 64px 80px; border-bottom: 1px solid rgba(45,45,45,.07); }
+    .section-dark { background: var(--charcoal); padding: 64px 80px; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .section-alt { background: var(--linen); }
 
     .eyebrow {
       font-family: 'JetBrains Mono', monospace;
@@ -91,15 +89,15 @@
     }
     .eyebrow-light { color: rgba(232,132,92,.7); }
     .section-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 48px;
       font-weight: 300;
       letter-spacing: -.02em;
-      color: var(--midnight);
+      color: var(--charcoal);
       margin-bottom: 40px;
     }
     .section-title em { font-style: italic; color: var(--dawn); }
-    .section-title-light { color: var(--paper); }
+    .section-title-light { color: var(--parchment); }
 
     /* ── STRATEGY OVERVIEW ── */
     .phase-grid {
@@ -113,21 +111,21 @@
       background: white;
     }
     .phase-card:nth-child(1) { border-top: 3px solid var(--dawn); }
-    .phase-card:nth-child(2) { border-top: 3px solid var(--dusk); }
+    .phase-card:nth-child(2) { border-top: 3px solid var(--steel); }
     .phase-card:nth-child(3) { border-top: 3px solid var(--sage); }
     .phase-card:nth-child(4) { border-top: 3px solid var(--gold); }
     .phase-num {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: var(--mist);
+      color: var(--slate);
       margin-bottom: 10px;
       letter-spacing: .05em;
     }
     .phase-name {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 22px;
       font-weight: 600;
-      color: var(--midnight);
+      color: var(--charcoal);
       margin-bottom: 6px;
     }
     .phase-days {
@@ -151,8 +149,8 @@
       font-family: 'JetBrains Mono', monospace;
       letter-spacing: .05em;
     }
-    .pill-li { background: rgba(78,125,170,.12); color: var(--dusk); }
-    .pill-tw { background: rgba(27,31,58,.06); color: var(--midnight); }
+    .pill-li { background: rgba(69,123,157,.12); color: var(--steel); }
+    .pill-tw { background: rgba(45,45,45,.06); color: var(--charcoal); }
     .pill-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
 
     /* ── POST DAYS ── */
@@ -172,15 +170,15 @@
       color: var(--dawn);
     }
     .week-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 22px;
       font-weight: 400;
       font-style: italic;
-      color: var(--paper);
+      color: var(--parchment);
     }
     .week-objective {
       font-size: 12px;
-      color: var(--mist);
+      color: var(--slate);
       margin-left: auto;
       font-family: 'JetBrains Mono', monospace;
     }
@@ -191,8 +189,8 @@
       margin-bottom: 2px;
       border-left: 3px solid transparent;
     }
-    .post-card.linkedin { border-left-color: var(--dusk); }
-    .post-card.twitter { border-left-color: var(--midnight); }
+    .post-card.linkedin { border-left-color: var(--steel); }
+    .post-card.twitter { border-left-color: var(--charcoal); }
     .post-card.instagram { border-left-color: var(--dawn); }
     .post-card.multi { border-left-color: var(--sage); }
 
@@ -205,7 +203,7 @@
     .day-badge {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: var(--mist);
+      color: var(--slate);
       letter-spacing: .08em;
     }
     .platform-tag {
@@ -216,22 +214,22 @@
       border-radius: 100px;
       letter-spacing: .08em;
     }
-    .tag-li { background: rgba(78,125,170,.1); color: var(--dusk); }
-    .tag-tw { background: rgba(27,31,58,.06); color: var(--midnight); }
+    .tag-li { background: rgba(69,123,157,.1); color: var(--steel); }
+    .tag-tw { background: rgba(45,45,45,.06); color: var(--charcoal); }
     .tag-ig { background: rgba(232,132,92,.1); color: var(--dawn); }
     .tag-multi { background: rgba(82,183,136,.1); color: var(--sage); }
 
     .post-title {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 20px;
       font-weight: 600;
-      color: var(--midnight);
+      color: var(--charcoal);
       margin-bottom: 8px;
     }
     .post-theme {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: var(--mist);
+      color: var(--slate);
       margin-bottom: 20px;
       letter-spacing: .06em;
     }
@@ -240,28 +238,28 @@
       font-size: 14px;
       line-height: 1.8;
       color: #333;
-      background: var(--paper);
+      background: var(--parchment);
       padding: 24px 28px;
       border-radius: 4px;
-      border: 1px solid rgba(27,31,58,.07);
+      border: 1px solid rgba(45,45,45,.07);
       white-space: pre-wrap;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
     }
-    .post-copy .hook { font-weight: 600; color: var(--midnight); }
+    .post-copy .hook { font-weight: 600; color: var(--charcoal); }
     .post-copy .cta { color: var(--dawn); font-weight: 600; }
-    .post-copy .hashtags { color: var(--dusk); font-size: 13px; }
+    .post-copy .hashtags { color: var(--steel); font-size: 13px; }
 
     .post-visual {
       margin-top: 16px;
       padding: 16px 20px;
-      background: rgba(78,125,170,.05);
+      background: rgba(69,123,157,.05);
       border-radius: 4px;
-      border: 1px solid rgba(78,125,170,.12);
+      border: 1px solid rgba(69,123,157,.12);
     }
     .post-visual-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: var(--dusk);
+      color: var(--steel);
       letter-spacing: .12em;
       margin-bottom: 6px;
     }
@@ -283,10 +281,10 @@
       font-size: 10px;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: var(--mist);
+      color: var(--slate);
       padding: 10px 16px;
       text-align: left;
-      border-bottom: 1px solid rgba(27,31,58,.08);
+      border-bottom: 1px solid rgba(45,45,45,.08);
     }
     .cadence-table td {
       font-size: 13px;
@@ -294,7 +292,7 @@
       padding: 14px 16px;
       background: white;
     }
-    .cadence-table tr:hover td { background: var(--stone); }
+    .cadence-table tr:hover td { background: var(--linen); }
 
     /* ── VOICE GUIDE ── */
     .voice-grid {
@@ -321,7 +319,7 @@
       font-size: 13px;
       color: #444;
       padding: 8px 0;
-      border-bottom: 1px solid rgba(27,31,58,.05);
+      border-bottom: 1px solid rgba(45,45,45,.05);
       line-height: 1.5;
     }
     .voice-item:last-child { border-bottom: none; }
@@ -337,7 +335,7 @@
       background: rgba(255,255,255,.04);
     }
     .kpi-num {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 48px;
       font-weight: 300;
       color: var(--dawn);
@@ -347,38 +345,38 @@
     .kpi-label {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: var(--mist);
+      color: var(--slate);
       letter-spacing: .1em;
       text-transform: uppercase;
       margin-bottom: 8px;
     }
-    .kpi-desc { font-size: 13px; color: rgba(155,175,196,.7); line-height: 1.5; }
+    .kpi-desc { font-size: 13px; color: rgba(141,153,174,.7); line-height: 1.5; }
 
     /* ── FOOTER ── */
     .footer {
-      background: var(--deep);
+      background: var(--linen);
       padding: 48px 80px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .footer-name {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 28px;
-      color: var(--paper);
+      color: var(--parchment);
       font-style: italic;
     }
     .footer-tag {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: rgba(155,175,196,.38);
+      color: rgba(141,153,174,.38);
       letter-spacing: .08em;
       margin-top: 6px;
     }
     .footer-meta {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: rgba(155,175,196,.38);
+      color: rgba(141,153,174,.38);
       letter-spacing: .1em;
       text-align: right;
       line-height: 1.9;
@@ -461,7 +459,7 @@
 
   <div class="dawn-rule"></div>
 
-  <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--midnight);margin-bottom:24px;">Posting cadence</h3>
+  <h3 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:300;color:var(--charcoal);margin-bottom:24px;">Posting cadence</h3>
   <table class="cadence-table">
     <thead>
       <tr>
@@ -497,7 +495,7 @@
     </tbody>
   </table>
 
-  <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--midnight);margin-bottom:24px;">Brand voice on social</h3>
+  <h3 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:300;color:var(--charcoal);margin-bottom:24px;">Brand voice on social</h3>
   <div class="voice-grid">
     <div class="voice-card voice-do">
       <div class="voice-label do">✓ &nbsp;Donna says</div>
@@ -525,7 +523,7 @@
 <section class="section section-dark">
   <div class="eyebrow eyebrow-light">Phase 01 — Intrigue</div>
   <div class="section-title section-title-light">Days 1–7: <em>Who is she?</em></div>
-  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+  <p style="font-size:14px; color:var(--slate); max-width:620px; line-height:1.8; margin-bottom:40px;">
     We don't launch with a feature list. We launch with a feeling. The goal this week is to make people feel the pain of their current morning — the scattered inbox, the forgotten promise, the relationship they've let go cold — and then whisper that there's something different coming.
   </p>
 </section>
@@ -555,7 +553,7 @@ Early access is coming. The waitlist opens next week.
 <span class="hashtags">#donna #AIproductivity #futureofwork #chiefofstaff</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Dark midnight background. Donna logo (The Meridian mark) centred, reversed white/dawn. Single line below: <em>"See everything. Miss nothing."</em> in Cormorant Garamond italic. Bottom: donna.app in JetBrains Mono, dawn colour.</div>
+    <div class="post-visual-desc">Dark charcoal background. Donna logo (The Meridian mark) centred, reversed white/dawn. Single line below: <em>"See everything. Miss nothing."</em> in Playfair Display italic. Bottom: donna.app in JetBrains Mono, dawn colour.</div>
   </div>
 </div>
 
@@ -623,7 +621,7 @@ We named this product after her.
 <span class="hashtags">#donna #suits #ai #productivity #chiefofstaff</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Dark card, midnight background. Large italic quote in Cormorant Garamond: <em>"I read. I analyse. I fix."</em> Attributed below in JetBrains Mono: "— Donna Paulsen · Suits" Then bottom right: donna logo mark reversed.</div>
+    <div class="post-visual-desc">Dark card, charcoal background. Large italic quote in Playfair Display: <em>"I read. I analyse. I fix."</em> Attributed below in JetBrains Mono: "— Donna Paulsen · Suits" Then bottom right: donna logo mark reversed.</div>
   </div>
 </div>
 
@@ -725,7 +723,7 @@ donna.app → join the waitlist
 <section class="section section-dark">
   <div class="eyebrow eyebrow-light">Phase 02 — Education</div>
   <div class="section-title section-title-light">Days 8–16: <em>What does she do?</em></div>
-  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+  <p style="font-size:14px; color:var(--slate); max-width:620px; line-height:1.8; margin-bottom:40px;">
     Now we show the product. Feature by feature, but always through the lens of feeling — not spec sheets. Every post this week has a mockup or visual that makes people feel what it's like to use Donna. We're educating and building desire simultaneously.
   </p>
 </section>
@@ -830,7 +828,7 @@ Your intelligence layer. Your data. Your call.
 <span class="hashtags">#privacy #datasecurity #ai #trust</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Dark midnight card. Shield icon in dawn colour. Below it, a clean list of 5 security properties in JetBrains Mono. Understated, credible. Bottom: "Built for people who don't trust easily." Cormorant italic.</div>
+    <div class="post-visual-desc">Dark charcoal card. Shield icon in dawn colour. Below it, a clean list of 5 security properties in JetBrains Mono. Understated, credible. Bottom: "Built for people who don't trust easily." Playfair Display italic.</div>
   </div>
 </div>
 
@@ -950,7 +948,7 @@ The inbox that once took an hour takes ten minutes.
 <section class="section section-dark">
   <div class="eyebrow eyebrow-light">Phase 03 — Desire</div>
   <div class="section-title section-title-light">Days 17–23: <em>I need this.</em></div>
-  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+  <p style="font-size:14px; color:var(--slate); max-width:620px; line-height:1.8; margin-bottom:40px;">
     By now people know what Donna is. This week we make them feel they'd be wrong not to have it. Use cases, identity, FOMO, and social proof. Every post is designed to make the ideal user — a founder, exec, or ambitious professional — see themselves in the story.
   </p>
 </section>
@@ -1020,7 +1018,7 @@ donna — your intelligence layer.
 <span class="hashtags">#donna #productivitymindset #leadership #chiefofstaff</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Dark midnight card. Three lines of text, each in a slightly larger Cormorant Garamond italic, stacked with breathing room. "She reads everything you don't have time to." / "Delivers everything you need to know." / "Acts only when you say so." Each line punctuated by a small dawn dot. donna logo bottom right.</div>
+    <div class="post-visual-desc">Dark charcoal card. Three lines of text, each in a slightly larger Playfair Display italic, stacked with breathing room. "She reads everything you don't have time to." / "Delivers everything you need to know." / "Acts only when you say so." Each line punctuated by a small dawn dot. donna logo bottom right.</div>
   </div>
 </div>
 
@@ -1086,7 +1084,7 @@ If it does — you should probably be on the waitlist.
 <span class="hashtags">#donna #leadership #founders #executivetools</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Clean dark card. Text only: "donna isn't for everyone." Large Cormorant Garamond italic. Below, three lines in smaller Inter: "Founders. Executives. Investors." Each separated by a dawn rule. Confident, selective, premium.</div>
+    <div class="post-visual-desc">Clean dark card. Text only: "donna isn't for everyone." Large Playfair Display italic. Below, three lines in smaller Inter: "Founders. Executives. Investors." Each separated by a dawn rule. Confident, selective, premium.</div>
   </div>
 </div>
 
@@ -1121,7 +1119,7 @@ If you've been considering it: donna.app
 <section class="section section-dark">
   <div class="eyebrow eyebrow-light">Phase 04 — Launch</div>
   <div class="section-title section-title-light">Days 24–30: <em>She's live.</em></div>
-  <p style="font-size:14px; color:var(--mist); max-width:620px; line-height:1.8; margin-bottom:40px;">
+  <p style="font-size:14px; color:var(--slate); max-width:620px; line-height:1.8; margin-bottom:40px;">
     Early access is now open. Every post this week drives to sign-ups. We answer objections, celebrate milestones, and make the FOMO real. The tone shifts from mysterious to celebratory — Donna is here.
   </p>
 </section>
@@ -1152,7 +1150,7 @@ We built this for people who depend on their mornings. If that's you — come in
 <span class="hashtags">#launch #donna #ai #productivity #chiefofstaff</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">HERO LAUNCH IMAGE. Donna logo centred on dark midnight background. Below: "Early access is live." in Cormorant italic, large, dawn colour. Below that in JetBrains Mono: "donna.app". Subtle dawn gradient at bottom. Maximum visual impact.</div>
+    <div class="post-visual-desc">HERO LAUNCH IMAGE. Donna logo centred on dark charcoal background. Below: "Early access is live." in Playfair Display italic, large, dawn colour. Below that in JetBrains Mono: "donna.app". Subtle dawn gradient at bottom. Maximum visual impact.</div>
   </div>
 </div>
 
@@ -1218,7 +1216,7 @@ We hope she lives up to the name.
 <span class="hashtags">#buildinpublic #startup #founder #donna</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Warm, human photo or illustrated flat graphic. Build environment — notebooks, monitors, coffee. Overlaid text: "We built donna because we needed her." Cormorant italic. Feels personal, not corporate.</div>
+    <div class="post-visual-desc">Warm, human photo or illustrated flat graphic. Build environment — notebooks, monitors, coffee. Overlaid text: "We built donna because we needed her." Playfair Display italic. Feels personal, not corporate.</div>
   </div>
 </div>
 
@@ -1298,7 +1296,7 @@ See everything. Miss nothing.
 <span class="hashtags">#donna #launch #ai #productivity #chiefofstaff</span></div>
   <div class="post-visual">
     <div class="post-visual-label">🖼 VISUAL</div>
-    <div class="post-visual-desc">Full-bleed dark card. Large number "330" in Cormorant italic, dawn colour. Below: "people who don't drown in their inbox anymore." JetBrains Mono. donna logo bottom centre. This is the closing image of the campaign — make it count.</div>
+    <div class="post-visual-desc">Full-bleed dark card. Large number "330" in Playfair Display italic, dawn colour. Below: "people who don't drown in their inbox anymore." JetBrains Mono. donna logo bottom centre. This is the closing image of the campaign — make it count.</div>
   </div>
 </div>
 

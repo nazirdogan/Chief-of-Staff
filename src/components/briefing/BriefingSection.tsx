@@ -39,10 +39,10 @@ const SECTION_EMPTY_MESSAGES: Partial<Record<SectionType, string>> = {
 };
 
 const c = {
-  text: '#FFFFFF',
-  textTertiary: 'rgba(255,255,255,0.55)',
-  textQuaternary: 'rgba(255,255,255,0.35)',
-  border: 'rgba(255,255,255,0.07)',
+  text: '#2D2D2D',
+  textTertiary: 'rgba(45,45,45,0.6)',
+  textQuaternary: 'rgba(45,45,45,0.5)',
+  border: 'rgba(45,45,45,0.08)',
   dawnSubtle: 'rgba(232,132,92,0.15)',
 };
 

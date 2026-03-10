@@ -133,8 +133,15 @@ export function OnboardingFlow() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-2xl animate-slide-up">
         <CardHeader className="space-y-4">
-          <CardTitle className="text-2xl font-bold tracking-tight">
-            Welcome to Donna
+          <CardTitle
+            className="text-2xl tracking-tight"
+            style={{
+              fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+              fontWeight: 700,
+              fontStyle: 'italic',
+            }}
+          >
+            Welcome to Donna<span style={{ color: '#E8845C' }}>.</span>
           </CardTitle>
 
           {/* Step indicator dots */}
@@ -143,13 +150,19 @@ export function OnboardingFlow() {
               <div key={label} className="flex items-center gap-2">
                 <div className="flex flex-col items-center gap-1">
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
-                      i < step
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300`}
+                    style={{
+                      background: i < step
+                        ? 'rgba(82,183,136,0.12)'
                         : i === step
-                          ? 'bg-foreground text-background shadow-sm'
-                          : 'bg-muted text-muted-foreground'
-                    }`}
+                          ? '#E8845C'
+                          : '#F1EDEA',
+                      color: i < step
+                        ? '#2D6A4F'
+                        : i === step
+                          ? '#FAF9F6'
+                          : '#8D99AE',
+                    }}
                   >
                     {i < step ? '✓' : i + 1}
                   </div>
@@ -158,7 +171,10 @@ export function OnboardingFlow() {
                   </span>
                 </div>
                 {i < STEP_LABELS.length - 1 && (
-                  <div className={`mb-4 h-px w-6 ${i < step ? 'bg-green-300 dark:bg-green-700' : 'bg-muted'}`} />
+                  <div
+                    className="mb-4 h-px w-6"
+                    style={{ background: i < step ? 'rgba(82,183,136,0.4)' : '#F1EDEA' }}
+                  />
                 )}
               </div>
             ))}

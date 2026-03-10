@@ -67,7 +67,10 @@
       "Bash(tail:*)",
       "Bash(xargs -I {} basename {} .ts)",
       "Bash(/tmp/audit_notes.txt:*)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(supabase:*)",
+      "Bash(vercel:*)",
+      "Bash(mv /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/\\\\[id\\\\]/alias /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/alias && rm -rf /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/\\\\[id\\\\] && echo \"fixed\")"
     ]
   }
 }

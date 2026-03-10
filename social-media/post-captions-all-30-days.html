@@ -5,48 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>donna — Post Captions · All 30 Days · 3 Options Each</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --midnight: #1B1F3A; --dawn: #E8845C; --dusk: #4E7DAA;
-      --paper: #FBF7F4; --sage: #52B788; --gold: #F4C896;
-      --deep: #0E1225; --charcoal: #2D3154; --mist: #9BAFC4;
-      --stone: #F0EDE9; --alert: #D64B2A;
+      --parchment: #FAF9F6; --dawn: #E8845C; --steel: #457B9D;
+      --linen: #F1EDEA; --sage: #52B788; --gold: #F4C896;
+      --charcoal: #2D2D2D; --slate: #8D99AE; --alert: #D64B2A;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--stone); font-family: 'Inter', sans-serif; color: var(--midnight); }
+    body { background: var(--linen); font-family: 'DM Sans', sans-serif; color: var(--charcoal); }
 
     .header {
-      background: var(--midnight); padding: 32px 56px;
+      background: var(--charcoal); padding: 32px 56px;
       display: flex; justify-content: space-between; align-items: center;
       border-bottom: 1px solid rgba(232,132,92,.25);
       position: sticky; top: 0; z-index: 100;
     }
     .header-left { display: flex; align-items: center; gap: 20px; }
-    .header-brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-style: italic; color: var(--paper); }
-    .header-title { font-size: 12px; font-weight: 500; color: var(--mist); border-left: 1px solid rgba(155,175,196,.25); padding-left: 20px; letter-spacing: .06em; }
-    .header-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(155,175,196,.4); letter-spacing: .1em; text-align: right; line-height: 1.9; }
+    .header-brand { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; font-style: normal; color: var(--parchment); }
+    .header-brand .dot { color: #E8845C; }
+    .header-title { font-size: 12px; font-weight: 500; color: var(--slate); border-left: 1px solid rgba(141,153,174,.25); padding-left: 20px; letter-spacing: .06em; }
+    .header-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(141,153,174,.4); letter-spacing: .1em; text-align: right; line-height: 1.9; }
 
     /* JUMP NAV */
     .jump-nav {
-      background: white; padding: 14px 56px; border-bottom: 1px solid rgba(27,31,58,.07);
+      background: white; padding: 14px 56px; border-bottom: 1px solid rgba(45,45,45,.07);
       display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
     }
-    .jump-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--mist); letter-spacing: .12em; text-transform: uppercase; margin-right: 8px; }
+    .jump-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--slate); letter-spacing: .12em; text-transform: uppercase; margin-right: 8px; }
     .jump-btn {
       font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px;
-      border-radius: 4px; border: 1px solid rgba(27,31,58,.1); background: none;
-      color: var(--midnight); cursor: pointer; transition: all .15s; text-decoration: none;
+      border-radius: 4px; border: 1px solid rgba(45,45,45,.1); background: none;
+      color: var(--charcoal); cursor: pointer; transition: all .15s; text-decoration: none;
     }
-    .jump-btn:hover { background: var(--midnight); color: var(--paper); border-color: var(--midnight); }
+    .jump-btn:hover { background: var(--charcoal); color: var(--parchment); border-color: var(--charcoal); }
     .jump-btn.ph1 { border-color: rgba(232,132,92,.4); color: var(--dawn); }
-    .jump-btn.ph2 { border-color: rgba(78,125,170,.4); color: var(--dusk); }
+    .jump-btn.ph2 { border-color: rgba(69,123,157,.4); color: var(--steel); }
     .jump-btn.ph3 { border-color: rgba(82,183,136,.4); color: var(--sage); }
     .jump-btn.ph4 { border-color: rgba(244,200,150,.5); color: #b88a50; }
 
     /* PHASE HEADER */
     .phase-header {
-      background: var(--midnight); margin: 32px 0 0; padding: 18px 56px;
+      background: var(--charcoal); margin: 32px 0 0; padding: 18px 56px;
       display: flex; align-items: center; gap: 16px;
     }
     .ph-badge {
@@ -54,50 +54,50 @@
       border-radius: 100px; letter-spacing: .1em;
     }
     .p1 { background: rgba(232,132,92,.15); color: var(--dawn); }
-    .p2 { background: rgba(78,125,170,.15); color: var(--dusk); }
+    .p2 { background: rgba(69,123,157,.15); color: var(--steel); }
     .p3 { background: rgba(82,183,136,.15); color: var(--sage); }
     .p4 { background: rgba(244,200,150,.15); color: #b88a50; }
-    .ph-name { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 22px; color: var(--paper); }
-    .ph-desc { font-size: 12px; color: var(--mist); margin-left: auto; }
+    .ph-name { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 22px; color: var(--parchment); }
+    .ph-desc { font-size: 12px; color: var(--slate); margin-left: auto; }
 
     /* CONTENT */
     .content { padding: 0 56px 80px; }
 
     /* DAY CARD */
-    .day-card { margin: 28px 0; border-radius: 10px; background: white; overflow: hidden; box-shadow: 0 2px 16px rgba(27,31,58,.06); }
+    .day-card { margin: 28px 0; border-radius: 10px; background: white; overflow: hidden; box-shadow: 0 2px 16px rgba(45,45,45,.06); }
     .day-top {
-      background: var(--midnight); padding: 16px 24px;
+      background: var(--charcoal); padding: 16px 24px;
       display: flex; align-items: center; gap: 14px;
     }
     .day-num {
       font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;
       color: var(--dawn); letter-spacing: .12em; min-width: 36px;
     }
-    .day-title { font-size: 14px; font-weight: 600; color: var(--paper); flex: 1; }
+    .day-title { font-size: 14px; font-weight: 600; color: var(--parchment); flex: 1; }
     .day-platforms { display: flex; gap: 6px; }
     .plat { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; }
-    .plat-li { background: rgba(78,125,170,.2); color: var(--dusk); }
-    .plat-tw { background: rgba(255,255,255,.1); color: rgba(155,175,196,.8); }
+    .plat-li { background: rgba(69,123,157,.2); color: var(--steel); }
+    .plat-tw { background: rgba(255,255,255,.1); color: rgba(141,153,174,.8); }
     .plat-ig { background: rgba(232,132,92,.2); color: var(--dawn); }
     .plat-all { background: rgba(82,183,136,.15); color: var(--sage); }
-    .day-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(155,175,196,.45); letter-spacing: .08em; margin-left: auto; }
+    .day-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(141,153,174,.45); letter-spacing: .08em; margin-left: auto; }
 
     .day-body { padding: 24px 24px 8px; }
     .visual-context {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mist);
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--slate);
       letter-spacing: .06em; margin-bottom: 16px; padding: 8px 12px;
-      background: var(--stone); border-radius: 6px; border-left: 3px solid var(--dawn);
+      background: var(--linen); border-radius: 6px; border-left: 3px solid var(--dawn);
     }
 
     /* CAPTION OPTIONS */
     .options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-    .option-card { border-radius: 8px; overflow: hidden; border: 1px solid rgba(27,31,58,.08); }
+    .option-card { border-radius: 8px; overflow: hidden; border: 1px solid rgba(45,45,45,.08); }
     .option-header {
       padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;
       font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em;
     }
-    .opt-a .option-header { background: rgba(78,125,170,.07); color: var(--dusk); }
-    .opt-b .option-header { background: rgba(27,31,58,.05); color: var(--charcoal); }
+    .opt-a .option-header { background: rgba(69,123,157,.07); color: var(--steel); }
+    .opt-b .option-header { background: rgba(45,45,45,.05); color: var(--charcoal); }
     .opt-c .option-header { background: rgba(232,132,92,.07); color: var(--dawn); }
     .option-label { font-weight: 600; }
     .option-tag { font-size: 10px; opacity: .7; }
@@ -111,28 +111,29 @@
     .copy-btn-sm.copied { opacity: 1; border-color: var(--sage); color: var(--sage); }
     .caption-text {
       padding: 14px; font-size: 13px; line-height: 1.65; color: #444;
-      white-space: pre-wrap; font-family: 'Inter', sans-serif;
+      white-space: pre-wrap; font-family: 'DM Sans', sans-serif;
     }
     .hashtags {
       padding: 0 14px 14px; font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; color: var(--mist); letter-spacing: .04em;
+      font-size: 10px; color: var(--slate); letter-spacing: .04em;
     }
 
     /* FOOTER */
     .footer {
-      background: var(--midnight); padding: 32px 56px;
+      background: var(--charcoal); padding: 32px 56px;
       display: flex; justify-content: space-between; align-items: center;
       border-top: 1px solid rgba(232,132,92,.2);
     }
-    .footer-brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 24px; font-style: italic; color: var(--paper); }
-    .footer-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(155,175,196,.35); letter-spacing: .1em; text-align: right; line-height: 1.9; }
+    .footer-brand { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; font-style: normal; color: var(--parchment); }
+    .footer-brand .dot { color: #E8845C; }
+    .footer-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(141,153,174,.35); letter-spacing: .1em; text-align: right; line-height: 1.9; }
   </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-left">
-    <div class="header-brand">donna</div>
+    <div class="header-brand">Donna<span class="dot">.</span></div>
     <div class="header-title">POST CAPTIONS · ALL 30 DAYS · 3 OPTIONS EACH</div>
   </div>
   <div class="header-meta">OPTION A: STORYTELLING · OPTION B: PUNCHY · OPTION C: CONVERSATIONAL<br>CLICK COPY ON ANY CAPTION TO USE IT DIRECTLY</div>
@@ -169,7 +170,7 @@
     <span class="day-time">TUE–THU · 9AM</span>
   </div>
   <div class="day-body">
-    <div class="visual-context">🖼 VISUAL: Dark midnight card. donna logo centred with radial glow. "See everything. Miss nothing." tagline. donna.app in monospace at base.</div>
+    <div class="visual-context">🖼 VISUAL: Dark charcoal card. donna logo centred with radial glow. "See everything. Miss nothing." tagline. donna.app in monospace at base.</div>
     <div class="options-grid">
       <div class="option-card opt-a">
         <div class="option-header"><span class="option-label">A · STORYTELLING</span><span class="option-tag">LinkedIn</span><button class="copy-btn-sm" onclick="cp(this)">Copy</button></div>
@@ -1591,8 +1592,8 @@ See everything. Miss nothing. donna.app 👇</div>
 
 <div class="footer">
   <div>
-    <div class="footer-brand">donna</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(155,175,196,.35);letter-spacing:.08em;margin-top:6px;">POST CAPTIONS · 30 DAYS · 3 OPTIONS EACH · 90 TOTAL CAPTIONS</div>
+    <div class="footer-brand">Donna<span class="dot">.</span></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(141,153,174,.35);letter-spacing:.08em;margin-top:6px;">POST CAPTIONS · 30 DAYS · 3 OPTIONS EACH · 90 TOTAL CAPTIONS</div>
   </div>
   <div class="footer-meta">
     See everything. Miss nothing.<br>
