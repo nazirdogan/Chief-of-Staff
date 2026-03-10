@@ -12,14 +12,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { DesktopContextSnapshot, ParsedScreenContent } from './parsers/types';
 import { parseScreenContent } from './parsers/app-registry';
-import { createServiceClient } from '@/lib/db/client';
 import {
   createActivitySession,
   updateActivitySession,
   getActiveSession,
   logAppTransition,
 } from '@/lib/db/queries/activity-sessions';
-import type { ContextImportance } from '@/lib/context/types';
 
 // ── In-memory active session state ──────────────────────────────
 
@@ -41,9 +39,6 @@ interface ActiveSessionState {
 
 // Per-user session state (in memory)
 const userSessions = new Map<string, ActiveSessionState>();
-
-// Track last narrative update time per user
-const lastNarrativeUpdate = new Map<string, number>();
 
 // Blocked apps cache per user (invalidated from privacy settings route)
 const blockedAppsCache = new Map<string, { apps: string[]; fetchedAt: number }>();
@@ -94,9 +89,6 @@ function isAppBlocked(appName: string, blockedApps: string[]): boolean {
 
 /** How long without a snapshot before we close the session (5 minutes) */
 const SESSION_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
-
-/** Minimum time between narrative updates (15 minutes) */
-const NARRATIVE_UPDATE_INTERVAL_MS = 15 * 60 * 1000;
 
 // ── Session boundary detection ──────────────────────────────────
 
@@ -183,7 +175,6 @@ function mergeParsedData(
 export interface SessionManagerResult {
   sessionsProcessed: number;
   transitionsLogged: number;
-  shouldUpdateNarrative: boolean;
 }
 
 /**
@@ -344,47 +335,7 @@ export async function processSnapshots(
     }
   }
 
-  const lastUpdate = lastNarrativeUpdate.get(userId) ?? 0;
-  const shouldUpdateNarrative = Date.now() - lastUpdate > NARRATIVE_UPDATE_INTERVAL_MS;
-  if (shouldUpdateNarrative) {
-    lastNarrativeUpdate.set(userId, Date.now());
-  }
-
-  return { sessionsProcessed, transitionsLogged, shouldUpdateNarrative };
-}
-
-/**
- * Get the text buffer from the current active session for AI summarisation.
- */
-export function getSessionTextBuffer(userId: string): string[] {
-  return userSessions.get(userId)?.textBuffer ?? [];
-}
-
-/**
- * Update the active session with an AI-generated summary.
- */
-export async function updateSessionSummary(
-  userId: string,
-  summary: string,
-  importance: { level: string; score: number },
-  topics: string[],
-  projects: string[]
-): Promise<void> {
-  const state = userSessions.get(userId);
-  if (!state) return;
-
-  for (const t of topics) state.accumulatedTopics.add(t);
-  for (const p of projects) state.accumulatedProjects.add(p);
-  state.textBuffer = [];
-
-  const supabase = createServiceClient();
-  await updateActivitySession(supabase, state.sessionId, {
-    summary,
-    importance: importance.level as ContextImportance,
-    importanceScore: importance.score,
-    topics: [...state.accumulatedTopics],
-    projects: [...state.accumulatedProjects],
-  });
+  return { sessionsProcessed, transitionsLogged };
 }
 
 /**

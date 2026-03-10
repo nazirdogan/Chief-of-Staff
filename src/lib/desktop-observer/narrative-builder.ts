@@ -12,7 +12,6 @@ import { AI_MODELS } from '@/lib/ai/models';
 import { createServiceClient } from '@/lib/db/client';
 import { getSessionsInRange, getTodaySessionStats } from '@/lib/db/queries/activity-sessions';
 import { upsertDayNarrative, getDayNarrative } from '@/lib/db/queries/day-narratives';
-import { generateEmbedding } from '@/lib/ai/embeddings';
 import { redactPII } from '@/lib/ai/safety/sanitise';
 import type { ActivitySession } from '@/lib/context/types';
 
@@ -205,14 +204,6 @@ export async function buildDayNarrative(userId: string): Promise<void> {
     if (stats.projects.length > 0) narrative += ` Worked on: ${stats.projects.join(', ')}.`;
   }
 
-  // Generate embedding for semantic search
-  let embedding: number[] | undefined;
-  try {
-    embedding = await generateEmbedding(narrative);
-  } catch {
-    // Non-critical — skip embedding
-  }
-
   // Merge key events with existing
   const allKeyEvents = [
     ...(existingNarrative?.key_events ?? []),
@@ -244,7 +235,6 @@ export async function buildDayNarrative(userId: string): Promise<void> {
     keyEvents: allKeyEvents,
     peopleSeen: allPeople,
     projectsWorkedOn: allProjects,
-    embedding,
   });
 
   console.log(`[narrative-builder] Updated day narrative for ${todayStr}: ${sessions.length} sessions, ${Math.round(stats.totalActiveSeconds / 60)}min active`);

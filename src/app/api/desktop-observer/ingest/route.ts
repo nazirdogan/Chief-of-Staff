@@ -3,8 +3,6 @@ import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { createServiceClient } from '@/lib/db/client';
 import { processSnapshots } from '@/lib/desktop-observer/session-manager';
-import { buildDayNarrative } from '@/lib/desktop-observer/narrative-builder';
-import { summariseActiveSession } from '@/lib/desktop-observer/session-summariser';
 import { sanitiseWindowTitle } from '@/lib/ai/safety/sanitise';
 import type { DesktopContextSnapshot } from '@/lib/desktop-observer/parsers/types';
 
@@ -59,22 +57,9 @@ export const POST = withAuth(
       // Process through the session manager (app-aware parsing + session tracking)
       const result = await processSnapshots(supabase, userId, sanitisedContexts);
 
-      // Trigger AI session summarisation in background (non-blocking)
-      summariseActiveSession(userId).catch(err =>
-        console.error('[desktop-observer/ingest] Session summarisation failed:', err)
-      );
-
-      // Trigger narrative update if enough time has passed (non-blocking)
-      if (result.shouldUpdateNarrative) {
-        buildDayNarrative(userId).catch(err =>
-          console.error('[desktop-observer/ingest] Narrative update failed:', err)
-        );
-      }
-
       return NextResponse.json({
         sessionsProcessed: result.sessionsProcessed,
         transitionsLogged: result.transitionsLogged,
-        narrativeQueued: result.shouldUpdateNarrative,
       });
     } catch (error) {
       console.error('[desktop-observer/ingest] Error:', error);

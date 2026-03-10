@@ -3,7 +3,6 @@ import { AI_MODELS } from '@/lib/ai/models';
 import { sanitiseContent, buildSafeAIContext } from '@/lib/ai/safety/sanitise';
 import { validateCitations } from '@/lib/ai/safety/citation-validator';
 import { MEETING_PREP_PROMPT } from '@/lib/ai/prompts/meeting-prep';
-import { semanticSearch } from '@/lib/ai/embeddings';
 import { createServiceClient } from '@/lib/db/client';
 import { listInboxItems } from '@/lib/db/queries/inbox';
 import { listCommitments } from '@/lib/db/queries/commitments';
@@ -176,33 +175,6 @@ export async function generateMeetingPrep(
     }
   } catch {
     // Non-fatal: continue without context memory
-  }
-
-  // Semantic search for relevant documents (Notion pages, etc.)
-  try {
-    const searchQuery = `${event.summary} ${event.attendees.map(a => a.name).join(' ')}`;
-    const relevantDocs = await semanticSearch(userId, searchQuery, 5);
-
-    for (const doc of relevantDocs) {
-      const { content: safeContent } = sanitiseContent(
-        doc.content_summary,
-        `${doc.provider}:${doc.source_id}`
-      );
-      const metadata = doc.metadata as Record<string, string>;
-      contextParts.push({
-        label: 'relevant_document',
-        content: JSON.stringify({
-          provider: doc.provider,
-          title: metadata.title ?? 'Untitled',
-          url: metadata.url ?? '',
-          content: safeContent,
-          similarity: doc.similarity,
-        }),
-        source: `${doc.provider}:${doc.source_id}`,
-      });
-    }
-  } catch {
-    // Semantic search may fail if no embeddings exist yet — continue without docs
   }
 
   // If no context available, return a minimal prep

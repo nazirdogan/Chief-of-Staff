@@ -6,22 +6,10 @@ import { fetchInboxMessages, fetchMessageForProcessing, parseGmailMessage } from
 import { fetchRecentDMs } from '@/lib/integrations/slack';
 import { upsertInboxItem, getExistingInboxSummaries, deleteInboxItemsNotIn } from '@/lib/db/queries/inbox';
 import { createServiceClient } from '@/lib/db/client';
-import { processContextFromScan } from '@/lib/context/pipeline';
-import type { ContextPipelineInput } from '@/lib/context/types';
 import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
 import type { ParsedSlackMessage } from '@/lib/integrations/slack';
 
 const anthropic = new Anthropic();
-
-/** Feed processed items into the context memory pipeline (non-fatal on failure) */
-async function feedContext(userId: string, provider: string, items: ContextPipelineInput[]) {
-  if (items.length === 0) return;
-  try {
-    await processContextFromScan({ userId, provider, items });
-  } catch {
-    // Context enrichment is non-fatal — inbox ingestion still succeeds
-  }
-}
 
 interface IngestionResult {
   summary: string;
@@ -127,7 +115,6 @@ export async function ingestGmailMessages(
   }
 
   let processed = 0;
-  const contextItems: ContextPipelineInput[] = [];
   const scannedIds: string[] = [];
 
   for (const ref of messageRefs) {
@@ -143,16 +130,6 @@ export async function ingestGmailMessages(
 
     if (existingSummary != null) {
       // Already summarised — skip AI, row is already correct in DB
-      contextItems.push({
-        sourceId: parsed.id,
-        sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
-        title: parsed.subject ?? 'No subject',
-        rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
-        occurredAt: receivedAt,
-        people: [parsed.from].filter(Boolean),
-        threadId: parsed.threadId,
-        chunkType: 'email_thread',
-      });
       continue;
     }
 
@@ -179,25 +156,12 @@ export async function ingestGmailMessages(
       integration_id: integrationId ?? null,
     });
 
-    // Collect for context memory pipeline
-    contextItems.push({
-      sourceId: parsed.id,
-      sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
-      title: parsed.subject ?? 'No subject',
-      rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
-      occurredAt: receivedAt,
-      people: [parsed.from].filter(Boolean),
-      threadId: parsed.threadId,
-      chunkType: 'email_thread',
-    });
-
     processed++;
   }
 
   // Remove rows for messages no longer in the inbox (scoped to this account)
   await deleteInboxItemsNotIn(supabase, userId, 'gmail', scannedIds, integrationId);
 
-  await feedContext(userId, 'gmail', contextItems);
   return { processed, found };
 }
 
@@ -218,7 +182,6 @@ export async function ingestGmailMessageRefs(
   const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'gmail');
 
   let processed = 0;
-  const contextItems: ContextPipelineInput[] = [];
 
   for (const ref of messageRefs) {
     const fullMessage = await fetchMessageForProcessing(userId, ref.id, nangoConnectionId);
@@ -227,19 +190,7 @@ export async function ingestGmailMessageRefs(
     const existingSummary = existingSummaries.get(parsed.id);
     const receivedAt = parsed.date ? new Date(parsed.date).toISOString() : new Date().toISOString();
 
-    if (existingSummary != null) {
-      contextItems.push({
-        sourceId: parsed.id,
-        sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
-        title: parsed.subject ?? 'No subject',
-        rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
-        occurredAt: receivedAt,
-        people: [parsed.from].filter(Boolean),
-        threadId: parsed.threadId,
-        chunkType: 'email_thread',
-      });
-      continue;
-    }
+    if (existingSummary != null) continue;
 
     const result = await summariseGmailMessage(parsed);
     if (result.is_promotional) continue;
@@ -260,21 +211,9 @@ export async function ingestGmailMessageRefs(
       integration_id: integrationId ?? null,
     });
 
-    contextItems.push({
-      sourceId: parsed.id,
-      sourceRef: { provider: 'gmail', message_id: parsed.id, thread_id: parsed.threadId },
-      title: parsed.subject ?? 'No subject',
-      rawContent: `From: ${parsed.fromName ?? parsed.from}\nSubject: ${parsed.subject}\n\n${parsed.body || parsed.snippet}`,
-      occurredAt: receivedAt,
-      people: [parsed.from].filter(Boolean),
-      threadId: parsed.threadId,
-      chunkType: 'email_thread',
-    });
-
     processed++;
   }
 
-  await feedContext(userId, 'gmail', contextItems);
   return { processed };
 }
 
@@ -295,7 +234,6 @@ export async function ingestSlackDMs(
   }
 
   let processed = 0;
-  const contextItems: ContextPipelineInput[] = [];
   const scannedIds: string[] = [];
 
   for (const msg of messages) {
@@ -303,20 +241,7 @@ export async function ingestSlackDMs(
 
     const existingSummary = existingSummaries.get(msg.id);
 
-    if (existingSummary != null) {
-      // Already summarised — skip AI, row is already correct in DB
-      contextItems.push({
-        sourceId: msg.id,
-        sourceRef: { provider: 'slack', message_id: msg.id, thread_ts: msg.threadTs },
-        title: `Slack DM from ${msg.fromName}`,
-        rawContent: `From: ${msg.fromName}\n\n${msg.text}`,
-        occurredAt: msg.date,
-        people: [msg.from].filter(Boolean),
-        threadId: msg.threadTs ?? undefined,
-        chunkType: 'slack_conversation',
-      });
-      continue;
-    }
+    if (existingSummary != null) continue;
 
     // New message — run AI summarisation
     const result = await summariseSlackMessage(msg);
@@ -336,23 +261,11 @@ export async function ingestSlackDMs(
       received_at: msg.date,
     });
 
-    contextItems.push({
-      sourceId: msg.id,
-      sourceRef: { provider: 'slack', message_id: msg.id, thread_ts: msg.threadTs },
-      title: `Slack DM from ${msg.fromName}`,
-      rawContent: `From: ${msg.fromName}\n\n${msg.text}`,
-      occurredAt: msg.date,
-      people: [msg.from].filter(Boolean),
-      threadId: msg.threadTs ?? undefined,
-      chunkType: 'slack_conversation',
-    });
-
     processed++;
   }
 
   // Remove rows for messages no longer in the recent DM window
   await deleteInboxItemsNotIn(supabase, userId, 'slack', scannedIds);
 
-  await feedContext(userId, 'slack', contextItems);
   return { processed, found };
 }

@@ -11,7 +11,6 @@ import {
   mapDesktopObservationToCandidate,
 } from './prioritisation';
 import { fetchEnrichedContext } from './briefing-context';
-import { generateMeetingPrep } from './meeting-prep';
 import type { MeetingPrep } from './meeting-prep';
 import type { BriefingItemCandidate, RankedBriefingItem } from './prioritisation';
 import { createServiceClient } from '@/lib/db/client';
@@ -290,19 +289,18 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     ...yesterdaySummary,
   ];
 
-  // Fetch enriched context (memory snapshots, working patterns, threads, person/project context)
-  // This runs in parallel with meeting prep generation below
-  const [enrichedContext, ...meetingPreps] = await Promise.all([
-    fetchEnrichedContext(
-      supabase,
-      userId,
-      candidates,
-      userContext.vipEmails,
-      userContext.activeProjects,
-      timezone,
-    ),
-    ...todaysEvents.map(event => generateMeetingPrep(userId, event)),
-  ]);
+  // Meeting prep is now on-demand only (user taps "Prep for meeting" button).
+  // Removed from briefing generation to eliminate per-event Sonnet calls.
+  const meetingPreps: MeetingPrep[] = [];
+
+  const enrichedContext = await fetchEnrichedContext(
+    supabase,
+    userId,
+    candidates,
+    userContext.vipEmails,
+    userContext.activeProjects,
+    timezone,
+  );
 
   // AI synthesis: rank, group, and reason about all candidates using full context
   const ranked = await synthesiseBriefing(candidates, userContext, enrichedContext);

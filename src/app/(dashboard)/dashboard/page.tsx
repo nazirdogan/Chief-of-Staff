@@ -25,23 +25,23 @@ interface BriefingResponse {
   briefing: (Briefing & { items: BriefingItem[] }) | null;
 }
 
-/* Donna brand tokens */
+/* Donna brand tokens — The Editor */
 const c = {
-  surface: 'rgba(255,255,255,0.05)',
-  surfaceElevated: 'rgba(255,255,255,0.07)',
-  border: 'rgba(251,247,244,0.08)',
-  borderHover: 'rgba(251,247,244,0.16)',
+  surface: '#FFFFFF',
+  surfaceElevated: '#FFFFFF',
+  border: 'rgba(45,45,45,0.08)',
+  borderHover: 'rgba(45,45,45,0.16)',
   dawn: '#E8845C',
-  dawnMuted: 'rgba(232,132,92,0.15)',
-  text: '#FBF7F4',
-  textSecondary: 'rgba(251,247,244,0.85)',
-  textTertiary: 'rgba(155,175,196,0.85)',
-  textMuted: 'rgba(155,175,196,0.55)',
-  textGhost: 'rgba(155,175,196,0.3)',
+  dawnMuted: 'rgba(232,132,92,0.1)',
+  text: '#2D2D2D',
+  textSecondary: 'rgba(45,45,45,0.8)',
+  textTertiary: 'rgba(141,153,174,0.85)',
+  textMuted: 'rgba(141,153,174,0.6)',
+  textGhost: 'rgba(141,153,174,0.35)',
   sage: '#52B788',
   alert: '#D64B2A',
-  dusk: '#4E7DAA',
-  gold: '#F4C896',
+  dusk: '#457B9D',
+  gold: '#C9862A',
 };
 
 export default function BriefingPage() {
@@ -54,6 +54,8 @@ export default function BriefingPage() {
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set());
+  const [prepLoading, setPrepLoading] = useState<Record<string, boolean>>({});
+  const [generatedPreps, setGeneratedPreps] = useState<Record<string, MeetingPrepData>>({});
 
   const fetchBriefing = useCallback(async () => {
     try {
@@ -110,6 +112,36 @@ export default function BriefingPage() {
     setDrawerItem({ source_ref: sourceRef, title } as BriefingItem);
   }
 
+  async function handleGenerateMeetingPrep(item: BriefingItem) {
+    const eventId = item.source_ref?.message_id;
+    if (!eventId || prepLoading[eventId]) return;
+
+    setPrepLoading(prev => ({ ...prev, [eventId]: true }));
+    try {
+      const res = await fetch(`/api/meetings/${eventId}/prep`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_title: item.title,
+          start: item.source_ref?.sent_at ?? new Date().toISOString(),
+          end: item.source_ref?.sent_at ?? new Date().toISOString(),
+          attendees: item.source_ref?.from_name
+            ? [{ name: item.source_ref.from_name, email: '' }]
+            : [],
+          organizer: { email: '', name: '' },
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to generate prep');
+      const data = await res.json();
+      setGeneratedPreps(prev => ({ ...prev, [eventId]: data.prep }));
+      toast.success('Meeting prep ready');
+    } catch {
+      toast.error('Could not generate prep brief');
+    } finally {
+      setPrepLoading(prev => ({ ...prev, [eventId]: false }));
+    }
+  }
+
   function getGreeting() {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -135,7 +167,7 @@ export default function BriefingPage() {
             className="text-[28px] tracking-[-0.02em]"
             style={{
               color: c.text,
-              fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+              fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
               fontWeight: 300,
             }}
           >
@@ -166,7 +198,7 @@ export default function BriefingPage() {
           className="text-[28px] tracking-[-0.02em]"
           style={{
             color: c.text,
-            fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+            fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
             fontWeight: 300,
           }}
         >
@@ -202,7 +234,7 @@ export default function BriefingPage() {
           className="text-[28px] tracking-[-0.02em]"
           style={{
             color: c.text,
-            fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+            fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
             fontWeight: 300,
           }}
         >
@@ -264,7 +296,7 @@ export default function BriefingPage() {
               className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
               style={{
                 background: c.dawn,
-                color: '#FBF7F4',
+                color: '#FAF9F6',
                 opacity: generating ? 0.7 : 1,
                 cursor: generating ? 'not-allowed' : 'pointer',
               }}
@@ -276,7 +308,7 @@ export default function BriefingPage() {
             <Link
               href="/settings/integrations"
               className="mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[13px] font-semibold"
-              style={{ background: c.dawn, color: '#FBF7F4' }}
+              style={{ background: c.dawn, color: '#FAF9F6' }}
             >
               Connect integrations
             </Link>
@@ -360,7 +392,7 @@ export default function BriefingPage() {
             className="text-[28px] tracking-[-0.02em] leading-tight"
             style={{
               color: c.text,
-              fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
+              fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
               fontWeight: 300,
             }}
           >
@@ -545,7 +577,7 @@ export default function BriefingPage() {
                       className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 rounded px-2 py-0.5 text-[11px] font-medium"
                       style={{
                         color: checked ? c.sage : c.textMuted,
-                        background: checked ? 'rgba(82,183,136,0.08)' : 'rgba(255,255,255,0.05)',
+                        background: checked ? 'rgba(82,183,136,0.08)' : 'rgba(45,45,45,0.05)',
                       }}
                     >
                       {checked ? 'Done' : 'Complete'}
@@ -727,10 +759,11 @@ export default function BriefingPage() {
                   ? new Date(item.source_ref.sent_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
                   : null;
 
-                // Find matching meeting prep
-                const prep = meetingPreps.find(p =>
-                  p.event_id === item.source_ref?.message_id
-                );
+                // Find prep — either pre-generated (legacy) or on-demand generated
+                const eventId = item.source_ref?.message_id;
+                const prep = eventId
+                  ? (generatedPreps[eventId] ?? meetingPreps.find(p => p.event_id === eventId))
+                  : undefined;
 
                 return (
                   <div
@@ -790,8 +823,8 @@ export default function BriefingPage() {
                         </p>
                       )}
 
-                      {/* Inline meeting prep context */}
-                      {prep && (
+                      {/* Meeting prep — on-demand or pre-generated */}
+                      {prep ? (
                         <div
                           className="mt-2 rounded-md px-3 py-2 text-[11px] leading-relaxed"
                           style={{ background: 'rgba(78,125,170,0.06)', color: c.textTertiary }}
@@ -801,6 +834,20 @@ export default function BriefingPage() {
                             onCitationClick={handlePrepCitationClick}
                           />
                         </div>
+                      ) : eventId && (
+                        <button
+                          onClick={() => handleGenerateMeetingPrep(item)}
+                          disabled={!!prepLoading[eventId]}
+                          className="mt-1.5 flex items-center gap-1 text-[11px] font-medium opacity-60 hover:opacity-100 transition-opacity disabled:cursor-not-allowed"
+                          style={{ color: c.dusk }}
+                        >
+                          {prepLoading[eventId] ? (
+                            <Loader2 size={10} className="animate-spin" />
+                          ) : (
+                            <Zap size={10} />
+                          )}
+                          {prepLoading[eventId] ? 'Generating...' : 'Prep for this meeting'}
+                        </button>
                       )}
                     </div>
                   </div>

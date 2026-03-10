@@ -114,10 +114,10 @@ export const JOB_REGISTRY: JobDefinition[] = [
     category: 'heartbeat',
     provider: null,
     priority: 2,
-    intervalMs: HOUR_6,
+    intervalMs: HOUR_24,
     requiresIntegration: false,
     collapsible: true,
-    minGapMs: HOUR_4,
+    minGapMs: HOUR_12,
     timeoutMs: TIMEOUT_LONG,
     estimatedDurationMs: 30_000,
     label: 'Checking commitments',
@@ -218,19 +218,19 @@ export const JOB_REGISTRY: JobDefinition[] = [
     label: 'Processing transcripts',
   },
 
-  // ── Priority 2: Observer-first narrative (runs every 15 min) ──
+  // ── Priority 2: End-of-day narrative (runs once per day at ~6pm) ──
   {
     id: 'update-day-narrative',
     category: 'memory',
     provider: null,
     priority: 2,
-    intervalMs: MIN_15,
+    intervalMs: HOUR_24,
     requiresIntegration: false,
     collapsible: true,
-    minGapMs: MIN_15,
+    minGapMs: HOUR_12,
     timeoutMs: TIMEOUT_SHORT,
     estimatedDurationMs: 10_000,
-    label: 'Updating day narrative',
+    label: 'Building end-of-day narrative',
   },
 
   // ── Priority 4: Data retention cleanup (nightly) ──
