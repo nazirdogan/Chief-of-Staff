@@ -26,6 +26,22 @@ const fonts = {
 
 export default function DownloadPage() {
   return (
+    <>
+    <style>{`
+      @media (max-width: 600px) {
+        .download-card { padding: 32px 24px !important; }
+        .download-back { top: 20px !important; left: 20px !important; }
+        .download-wordmark { font-size: 36px !important; }
+        .download-wordmark-wrap { margin-bottom: 40px !important; }
+        .download-heading { font-size: 22px !important; }
+        .download-body { font-size: 14px !important; }
+        .download-btn { padding: 13px 24px !important; font-size: 14px !important; width: 100% !important; justify-content: center !important; }
+        .download-feature-row { gap: 12px !important; }
+      }
+      @media (max-width: 380px) {
+        .download-card { padding: 28px 18px !important; }
+      }
+    `}</style>
     <div
       style={{
         minHeight: "100vh",
@@ -41,6 +57,7 @@ export default function DownloadPage() {
       {/* Back to home */}
       <Link
         href="/"
+        className="download-back"
         style={{
           position: "absolute",
           top: 32,
@@ -63,8 +80,9 @@ export default function DownloadPage() {
       </Link>
 
       {/* Logo wordmark */}
-      <div style={{ textAlign: "center", marginBottom: 56 }}>
+      <div className="download-wordmark-wrap" style={{ textAlign: "center", marginBottom: 56 }}>
         <h1
+          className="download-wordmark"
           style={{
             fontFamily: fonts.display,
             fontSize: 44,
@@ -92,6 +110,7 @@ export default function DownloadPage() {
 
       {/* Main card */}
       <div
+        className="download-card"
         style={{
           background: "#FFFFFF",
           border: `1px solid ${c.border}`,
@@ -122,6 +141,7 @@ export default function DownloadPage() {
 
         {/* Heading */}
         <h2
+          className="download-heading"
           style={{
             fontFamily: fonts.display,
             fontSize: 28,
@@ -135,6 +155,7 @@ export default function DownloadPage() {
         </h2>
 
         <p
+          className="download-body"
           style={{
             fontSize: 15,
             lineHeight: 1.65,
@@ -150,6 +171,7 @@ export default function DownloadPage() {
         {/* Download button */}
         <a
           href="#"
+          className="download-btn"
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -233,7 +255,7 @@ export default function DownloadPage() {
               desc: "Every observation requires explicit permission. Revoke access to any app at any time.",
             },
           ].map((item) => (
-            <div key={item.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <div key={item.title} className="download-feature-row" style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
               <div
                 style={{
                   width: 32,
@@ -278,5 +300,6 @@ export default function DownloadPage() {
         &copy; 2026 Donna
       </p>
     </div>
+    </>
   );
 }

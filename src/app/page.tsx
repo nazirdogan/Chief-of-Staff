@@ -450,7 +450,7 @@ export default function LandingPage() {
           }
           .hero-email-form input {
             border-radius: 8px !important;
-            border-right: 1px solid rgba(255,255,255,0.1) !important;
+            border-right: 1px solid rgba(45,45,45,0.15) !important;
             width: 100% !important;
             box-sizing: border-box !important;
           }
@@ -460,6 +460,17 @@ export default function LandingPage() {
             justify-content: center;
             padding: 16px 24px !important;
             min-height: 48px;
+          }
+          /* Waitlist form — stack on mobile */
+          .waitlist-form {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .waitlist-form input,
+          .waitlist-form button {
+            width: 100% !important;
+            min-width: unset !important;
+            box-sizing: border-box !important;
           }
 
           .problem-header-2col { grid-template-columns: 1fr !important; gap: 28px !important; }
@@ -475,7 +486,8 @@ export default function LandingPage() {
 
           .stats-grid-4col { grid-template-columns: repeat(2, 1fr) !important; }
           .stat-cell { border-right: none !important; padding: 36px 20px !important; }
-          .stat-cell-border-right { border-right: 1px solid rgba(45,45,45,0.08) !important; }
+          /* Stats are on dark charcoal bg — use white dividers */
+          .stat-cell-border-right { border-right: 1px solid rgba(255,255,255,0.06) !important; }
 
           .footer-bar {
             flex-direction: column !important;
@@ -491,7 +503,9 @@ export default function LandingPage() {
         @media (max-width: 480px) {
           .stats-grid-4col { grid-template-columns: 1fr !important; }
           .stat-cell-border-right { border-right: none !important; }
-          .stat-cell { border-bottom: 1px solid rgba(45,45,45,0.08) !important; }
+          /* Dark charcoal section — use white separator */
+          .stat-cell { border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+          .problem-cards-3col > *, .features-cards-2col > * { padding: 28px 20px !important; }
         }
 
         /* iOS safe area insets */
@@ -780,9 +794,9 @@ export default function LandingPage() {
                   marginBottom: 24,
                 }}
               >
-                Before you ask.
+                See everything,
                 <br />
-                <span style={{ color: c.dawn }}>Donna already knows.</span>
+                <span style={{ color: c.dawn }}>miss nothing.</span>
               </h1>
 
               <p
@@ -1444,6 +1458,7 @@ export default function LandingPage() {
               ) : (
                 <form
                   onSubmit={handleSubmit}
+                  className="waitlist-form"
                   style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", maxWidth: 480, margin: "0 auto" }}
                 >
                   <input
