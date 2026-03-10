@@ -111,18 +111,33 @@ export async function middleware(request: NextRequest) {
   // Getting-ready is a standalone authenticated route — no further checks
   if (user && isGettingReadyRoute) return response;
 
-  // Authenticated desktop users: check onboarding status for dashboard routes
+  // Authenticated desktop users: check onboarding status for dashboard routes.
+  // Cache the result in a short-lived cookie to avoid a DB round-trip on every navigation.
   if (user && isDashboardRoute) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('id', user.id)
-      .single();
+    const onboardedCookie = request.cookies.get('donna_onboarded')?.value;
 
-    if (profile && !profile.onboarding_completed) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/onboarding';
-      return NextResponse.redirect(url);
+    if (onboardedCookie !== '1') {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+
+      if (profile && !profile.onboarding_completed) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/onboarding';
+        return NextResponse.redirect(url);
+      }
+
+      // Mark as onboarded in a cookie so we skip the DB check for the next hour
+      if (profile?.onboarding_completed) {
+        response.cookies.set('donna_onboarded', '1', {
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: 60 * 60, // 1 hour
+          path: '/',
+        });
+      }
     }
   }
 

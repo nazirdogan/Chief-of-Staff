@@ -70,7 +70,14 @@
       "Read(//tmp/**)",
       "Bash(supabase:*)",
       "Bash(vercel:*)",
-      "Bash(mv /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/\\\\[id\\\\]/alias /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/alias && rm -rf /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/\\\\[id\\\\] && echo \"fixed\")"
+      "Bash(mv /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/\\\\[id\\\\]/alias /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/alias && rm -rf /Users/nazir/donna/src/app/api/integrations/\\\\[provider\\\\]/\\\\[id\\\\] && echo \"fixed\")",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\))",
+      "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/chat/page.tsx\")",
+      "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/chat/[id]/page.tsx\")",
+      "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/layout.tsx\" | head -50)",
+      "Bash(ls /Users/nazir/donna/supabase/migrations/ | sort | xargs -I{} grep -l \"storage\\\\|bucket\" /Users/nazir/donna/supabase/migrations/{} 2>/dev/null | head -5; grep -r \"bucket\\\\|storage\" /Users/nazir/donna/supabase/migrations/ --include=\"*.sql\" -l 2>/dev/null | head -5)",
+      "Bash(which convert:*)",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/ | grep -E \"\\\\.tsx$\")"
     ]
   }
 }
