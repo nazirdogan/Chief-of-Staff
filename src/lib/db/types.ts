@@ -158,6 +158,7 @@ export interface UserIntegration {
   nango_connection_id: string;
   account_email: string | null;
   account_name: string | null;
+  connection_alias: string | null;
   granted_scopes: string[];
   last_synced_at: string | null;
   error_message: string | null;
@@ -417,6 +418,7 @@ export interface InboxItem {
   task_title: string | null;
   deferred_to: string | null;
   defer_reason: string | null;
+  integration_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -585,10 +587,11 @@ export interface Database {
       };
       user_integrations: {
         Row: UserIntegration;
-        Insert: Omit<UserIntegration, 'id' | 'connected_at' | 'updated_at'> & {
+        Insert: Omit<UserIntegration, 'id' | 'connected_at' | 'updated_at' | 'connection_alias'> & {
           id?: string;
           connected_at?: string;
           updated_at?: string;
+          connection_alias?: string | null;
         };
         Update: Partial<Omit<UserIntegration, 'id'>>;
       };
@@ -675,7 +678,7 @@ export interface Database {
       };
       inbox_items: {
         Row: InboxItem;
-        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at' | 'sentiment' | 'operation_category' | 'operation_context' | 'estimated_duration_minutes' | 'task_tags' | 'task_title' | 'deferred_to' | 'defer_reason'> & {
+        Insert: Omit<InboxItem, 'id' | 'created_at' | 'updated_at' | 'sentiment' | 'operation_category' | 'operation_context' | 'estimated_duration_minutes' | 'task_tags' | 'task_title' | 'deferred_to' | 'defer_reason' | 'integration_id'> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -687,6 +690,7 @@ export interface Database {
           task_title?: string | null;
           deferred_to?: string | null;
           defer_reason?: string | null;
+          integration_id?: string | null;
         };
         Update: Partial<Omit<InboxItem, 'id'>>;
       };

@@ -1,15 +1,22 @@
 import { google } from 'googleapis';
-import { getAccessToken } from './nango';
+import { getAccessToken, getAccessTokenByConnectionId } from './nango';
 
-export async function getCalendarClient(userId: string) {
-  const accessToken = await getAccessToken(userId, 'google-calendar');
+/**
+ * Returns an authenticated Google Calendar client.
+ * Pass nangoConnectionId when working in a multi-account context to target
+ * a specific account. Without it, falls back to the user's first Calendar connection.
+ */
+export async function getCalendarClient(userId: string, nangoConnectionId?: string) {
+  const accessToken = nangoConnectionId
+    ? await getAccessTokenByConnectionId('google-calendar', nangoConnectionId)
+    : await getAccessToken(userId, 'google-calendar');
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return google.calendar({ version: 'v3', auth });
 }
 
-export async function getTodaysEvents(userId: string) {
-  const calendar = await getCalendarClient(userId);
+export async function getTodaysEvents(userId: string, nangoConnectionId?: string) {
+  const calendar = await getCalendarClient(userId, nangoConnectionId);
   const now = new Date();
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
@@ -77,18 +84,20 @@ export function parseCalendarEvent(
 }
 
 export async function getTodaysParsedEvents(
-  userId: string
+  userId: string,
+  nangoConnectionId?: string
 ): Promise<ParsedCalendarEvent[]> {
-  const events = await getTodaysEvents(userId);
+  const events = await getTodaysEvents(userId, nangoConnectionId);
   return events.map(parseCalendarEvent);
 }
 
 export async function getEventsForDateRange(
   userId: string,
   timeMin: Date,
-  timeMax: Date
+  timeMax: Date,
+  nangoConnectionId?: string
 ): Promise<ParsedCalendarEvent[]> {
-  const calendar = await getCalendarClient(userId);
+  const calendar = await getCalendarClient(userId, nangoConnectionId);
 
   const response = await calendar.events.list({
     calendarId: 'primary',

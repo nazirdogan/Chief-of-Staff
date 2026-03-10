@@ -1,5 +1,5 @@
 import { createServiceClient } from '@/lib/db/client';
-import { listUserIntegrations } from '@/lib/db/queries/integrations';
+import { listUserIntegrations, getIntegrationsByProvider } from '@/lib/db/queries/integrations';
 import type { IntegrationProvider } from '@/lib/db/types';
 
 export interface SyncResult {
@@ -29,44 +29,47 @@ export async function syncAllIntegrations(userId: string): Promise<SyncResult[]>
   const results: SyncResult[] = [];
   const connectedProviders = new Set(connected.map(i => i.provider));
 
-  // ── Gmail: Ingest inbox + extract commitments from sent ──
+  // ── Gmail: Ingest inbox + extract commitments from sent (all connected accounts) ──
   if (connectedProviders.has('gmail')) {
-    try {
-      const { ingestGmailMessages } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestGmailMessages(userId);
-      results.push({
-        provider: 'gmail',
-        status: 'success',
-        itemsFound: result.found,
-        itemsProcessed: result.processed,
-      });
-    } catch (err) {
-      results.push({
-        provider: 'gmail',
-        status: 'error',
-        error: err instanceof Error ? err.message : 'Gmail sync failed',
-      });
-    }
-
-    // Also extract commitments from sent messages
-    try {
-      const { extractCommitmentsFromGmail } = await import('@/lib/ai/agents/commitment');
-      const { getGmailClient } = await import('@/lib/integrations/gmail');
-      const gmail = await getGmailClient(userId);
-      const response = await gmail.users.messages.list({
-        userId: 'me',
-        maxResults: 15,
-        labelIds: ['SENT'],
-        q: 'newer_than:1d',
-      });
-      const messageIds = (response.data.messages ?? [])
-        .map(m => m.id)
-        .filter((id): id is string => !!id);
-      if (messageIds.length > 0) {
-        await extractCommitmentsFromGmail(userId, messageIds);
+    const gmailConnections = await getIntegrationsByProvider(supabase, userId, 'gmail');
+    for (const conn of gmailConnections) {
+      try {
+        const { ingestGmailMessages } = await import('@/lib/ai/agents/ingestion');
+        const result = await ingestGmailMessages(userId, conn.nango_connection_id, conn.id);
+        results.push({
+          provider: 'gmail',
+          status: 'success',
+          itemsFound: result.found,
+          itemsProcessed: result.processed,
+        });
+      } catch (err) {
+        results.push({
+          provider: 'gmail',
+          status: 'error',
+          error: err instanceof Error ? err.message : `Gmail sync failed (${conn.connection_alias ?? conn.account_email ?? conn.id})`,
+        });
       }
-    } catch {
-      // Commitment extraction is best-effort — don't fail the sync
+
+      // Extract commitments from sent messages for this account
+      try {
+        const { extractCommitmentsFromGmail } = await import('@/lib/ai/agents/commitment');
+        const { getGmailClient } = await import('@/lib/integrations/gmail');
+        const gmail = await getGmailClient(userId, conn.nango_connection_id);
+        const response = await gmail.users.messages.list({
+          userId: 'me',
+          maxResults: 15,
+          labelIds: ['SENT'],
+          q: 'newer_than:1d',
+        });
+        const messageIds = (response.data.messages ?? [])
+          .map(m => m.id)
+          .filter((id): id is string => !!id);
+        if (messageIds.length > 0) {
+          await extractCommitmentsFromGmail(userId, messageIds);
+        }
+      } catch {
+        // Commitment extraction is best-effort — don't fail the sync
+      }
     }
   }
 
@@ -92,21 +95,24 @@ export async function syncAllIntegrations(userId: string): Promise<SyncResult[]>
 
   // ── Google Calendar: Events are read live at briefing time, but we verify access ──
   if (connectedProviders.has('google_calendar')) {
-    try {
-      const { getTodaysParsedEvents } = await import('@/lib/integrations/google-calendar');
-      const events = await getTodaysParsedEvents(userId);
-      results.push({
-        provider: 'google_calendar',
-        status: 'success',
-        itemsFound: events.length,
-        itemsProcessed: events.length,
-      });
-    } catch (err) {
-      results.push({
-        provider: 'google_calendar',
-        status: 'error',
-        error: err instanceof Error ? err.message : 'Google Calendar sync failed',
-      });
+    const calendarConnections = await getIntegrationsByProvider(supabase, userId, 'google_calendar');
+    for (const conn of calendarConnections) {
+      try {
+        const { getTodaysParsedEvents } = await import('@/lib/integrations/google-calendar');
+        const events = await getTodaysParsedEvents(userId, conn.nango_connection_id);
+        results.push({
+          provider: 'google_calendar',
+          status: 'success',
+          itemsFound: events.length,
+          itemsProcessed: events.length,
+        });
+      } catch (err) {
+        results.push({
+          provider: 'google_calendar',
+          status: 'error',
+          error: err instanceof Error ? err.message : `Google Calendar sync failed (${conn.connection_alias ?? conn.account_email ?? conn.id})`,
+        });
+      }
     }
   }
 

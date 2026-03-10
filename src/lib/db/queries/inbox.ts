@@ -65,6 +65,7 @@ export async function upsertInboxItem(
     needs_reply?: boolean;
     sentiment?: MessageSentiment;
     received_at: string;
+    integration_id?: string | null;
   }
 ): Promise<InboxItem> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,26 +123,46 @@ export async function getExistingInboxSummaries(
 }
 
 /**
- * Deletes all inbox_items for this user+provider whose external_id is NOT in keepIds.
- * This trims messages that have left the inbox since the last scan.
+ * Deletes inbox_items whose external_id is NOT in keepIds.
+ * When integrationId is provided, scopes the deletion to that specific account
+ * (prevents cleaning up items from other connected accounts of the same provider).
+ * When omitted, falls back to provider-scoped deletion (legacy / single-account).
  */
 export async function deleteInboxItemsNotIn(
   supabase: Client,
   userId: string,
   provider: IntegrationProvider,
-  keepIds: string[]
+  keepIds: string[],
+  integrationId?: string | null
 ): Promise<void> {
   if (keepIds.length === 0) {
-    return clearInboxItems(supabase, userId, provider);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
+      .from('inbox_items')
+      .delete()
+      .eq('user_id', userId)
+      .eq('provider', provider);
+    if (integrationId) {
+      query = query.eq('integration_id', integrationId);
+    }
+    const { error } = await query;
+    if (error) throw error;
+    return;
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  let query = (supabase as any)
     .from('inbox_items')
     .delete()
     .eq('user_id', userId)
     .eq('provider', provider)
     .not('external_id', 'in', `(${keepIds.join(',')})`);
 
+  if (integrationId) {
+    query = query.eq('integration_id', integrationId);
+  }
+
+  const { error } = await query;
   if (error) throw error;
 }
 

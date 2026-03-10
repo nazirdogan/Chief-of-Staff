@@ -9,12 +9,28 @@ function getNango(): Nango {
   return nangoClient;
 }
 
+/**
+ * Get an access token for a specific Nango connection ID.
+ * Use this when you already know the connection ID (multi-account flows).
+ */
+export async function getAccessTokenByConnectionId(
+  provider: string,
+  connectionId: string
+): Promise<string> {
+  const nango = getNango();
+  const connection = await nango.getConnection(provider, connectionId);
+  return (connection.credentials as { access_token: string }).access_token;
+}
+
+/**
+ * Get an access token for a user's first connection to a provider.
+ * For multi-account providers, prefer getAccessTokenByConnectionId.
+ */
 export async function getAccessToken(
   userId: string,
   provider: string
 ): Promise<string> {
   const nango = getNango();
-  // Nango Connect uses end_user.id as the connection lookup
   const connections = await nango.listConnections({ userId, integrationId: provider });
   const conn = connections.connections?.[0];
   if (!conn) throw new Error(`No ${provider} connection found for user`);
@@ -66,17 +82,16 @@ export async function listUserConnections(
   return result.connections ?? [];
 }
 
+/**
+ * Delete a specific Nango connection by its connection ID.
+ * Use when disconnecting a specific account in a multi-account setup.
+ */
 export async function deleteConnection(
-  userId: string,
-  provider: string
+  provider: string,
+  connectionId: string
 ): Promise<void> {
   const nango = getNango();
-  // Find the connection for this user+provider
-  const connections = await nango.listConnections({ userId, integrationId: provider });
-  const conn = connections.connections?.[0];
-  if (conn) {
-    await nango.deleteConnection(provider, conn.connection_id);
-  }
+  await nango.deleteConnection(provider, connectionId);
 }
 
 export async function getConnectionDetails(

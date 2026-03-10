@@ -13,6 +13,8 @@ import {
   Shield,
   Eye,
   EyeOff,
+  Plus,
+  Pencil,
 } from 'lucide-react';
 import type { IntegrationProvider, UserIntegration } from '@/lib/db/types';
 import { BackButton } from '@/components/shared/BackButton';
@@ -23,16 +25,46 @@ interface IntegrationConfig {
   label: string;
   permissions: Array<{ label: string; description: string }>;
   category: string;
+  /** Whether the user can connect more than one account of this provider */
+  allowMultiple: boolean;
 }
 
 const INTEGRATIONS: IntegrationConfig[] = [
   // EMAIL & CALENDAR
-  { nangoProvider: 'google-mail', dbProvider: 'gmail', label: 'Gmail', category: 'Email & Calendar', permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }] },
-  { nangoProvider: 'google-calendar', dbProvider: 'google_calendar', label: 'Google Calendar', category: 'Email & Calendar', permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }] },
+  {
+    nangoProvider: 'google-mail',
+    dbProvider: 'gmail',
+    label: 'Gmail',
+    category: 'Email & Calendar',
+    allowMultiple: true,
+    permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }],
+  },
+  {
+    nangoProvider: 'google-calendar',
+    dbProvider: 'google_calendar',
+    label: 'Google Calendar',
+    category: 'Email & Calendar',
+    allowMultiple: true,
+    permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }],
+  },
   // MESSAGING
-  { nangoProvider: 'slack', dbProvider: 'slack', label: 'Slack', category: 'Messaging', permissions: [{ label: 'Read channel messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }] },
+  {
+    nangoProvider: 'slack',
+    dbProvider: 'slack',
+    label: 'Slack',
+    category: 'Messaging',
+    allowMultiple: false,
+    permissions: [{ label: 'Read channel messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }],
+  },
   // DOCUMENTS
-  { nangoProvider: 'notion', dbProvider: 'notion', label: 'Notion', category: 'Documents', permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }] },
+  {
+    nangoProvider: 'notion',
+    dbProvider: 'notion',
+    label: 'Notion',
+    category: 'Documents',
+    allowMultiple: false,
+    permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }],
+  },
 ];
 
 const CATEGORIES = Array.from(new Set(INTEGRATIONS.map((i) => i.category)));
@@ -51,24 +83,23 @@ export default function IntegrationsSettingsPage() {
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [consentProvider, setConsentProvider] = useState<IntegrationConfig | null>(null);
-  // Pre-fetched session token — obtained eagerly when the consent screen opens
-  // so nango.auth() fires synchronously from the "Proceed" click with no async gap,
-  // avoiding the browser popup blocker.
   const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
   const [tokenFetching, setTokenFetching] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  // Tracks which integration row UUID is being disconnected
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  // Tracks which integration row UUID is having its alias edited
+  const [editingAlias, setEditingAlias] = useState<string | null>(null);
+  const [aliasValue, setAliasValue] = useState('');
 
   // Desktop Observer state
   const [observerState, setObserverState] = useState<ObserverState>('unavailable');
   const [observerLoading, setObserverLoading] = useState(false);
   const [observerStats, setObserverStats] = useState<{ apps_observed: number; context_changes_emitted: number } | null>(null);
 
-  // Check desktop observer availability on mount
   useEffect(() => {
     async function checkObserver() {
-      // Only works in Tauri shell
       if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) {
         setObserverState('unavailable');
         return;
@@ -76,10 +107,7 @@ export default function IntegrationsSettingsPage() {
       try {
         const { checkAccessibility, getObserverStatus } = await import('@/lib/desktop-observer/client');
         const hasPermission = await checkAccessibility();
-        if (!hasPermission) {
-          setObserverState('no_permission');
-          return;
-        }
+        if (!hasPermission) { setObserverState('no_permission'); return; }
         const status = await getObserverStatus();
         if (status) {
           setObserverStats({ apps_observed: status.apps_observed, context_changes_emitted: status.context_changes_emitted });
@@ -87,9 +115,7 @@ export default function IntegrationsSettingsPage() {
         } else {
           setObserverState('inactive');
         }
-      } catch {
-        setObserverState('unavailable');
-      }
+      } catch { setObserverState('unavailable'); }
     }
     checkObserver();
   }, []);
@@ -99,14 +125,8 @@ export default function IntegrationsSettingsPage() {
     try {
       const { requestAccessibility } = await import('@/lib/desktop-observer/client');
       const granted = await requestAccessibility();
-      if (granted) {
-        setObserverState('inactive');
-      }
-    } catch {
-      // ignore
-    } finally {
-      setObserverLoading(false);
-    }
+      if (granted) setObserverState('inactive');
+    } catch { /* ignore */ } finally { setObserverLoading(false); }
   }
 
   async function handleToggleObserver() {
@@ -121,11 +141,7 @@ export default function IntegrationsSettingsPage() {
         const started = await startObserver();
         setObserverState(started ? 'active' : 'inactive');
       }
-    } catch {
-      // ignore
-    } finally {
-      setObserverLoading(false);
-    }
+    } catch { /* ignore */ } finally { setObserverLoading(false); }
   }
 
   const fetchIntegrations = useCallback(async () => {
@@ -154,29 +170,26 @@ export default function IntegrationsSettingsPage() {
         const data = await res.json();
         setIntegrations(data.integrations);
       }
-    } catch {
-      // Silently fail
-    }
+    } catch { /* Silently fail */ }
   }, []);
 
   useEffect(() => { fetchIntegrations(); }, [fetchIntegrations]);
 
-  // Poll to detect completed OAuth flows
   useEffect(() => {
     const interval = setInterval(syncIntegrations, 4000);
     return () => clearInterval(interval);
   }, [syncIntegrations]);
 
-  function getStatus(dbProvider: IntegrationProvider): UserIntegration | undefined {
+  /** Returns all connected rows for a provider */
+  function getConnections(dbProvider: IntegrationProvider): UserIntegration[] {
+    return integrations.filter((i) => i.provider === dbProvider && i.status === 'connected');
+  }
+
+  /** Returns any row (connected or error) for a single-account provider */
+  function getSingleStatus(dbProvider: IntegrationProvider): UserIntegration | undefined {
     return integrations.find((i) => i.provider === dbProvider);
   }
 
-  /**
-   * Open the consent screen AND eagerly fetch the Nango session token in the background.
-   * By the time the user reads the consent screen and clicks "Proceed", the token is
-   * already in state, so nango.auth() fires synchronously from the click event and the
-   * browser popup blocker never triggers.
-   */
   async function openConsent(config: IntegrationConfig) {
     setConsentProvider(config);
     setPendingSessionToken(null);
@@ -191,28 +204,19 @@ export default function IntegrationsSettingsPage() {
         const data = await res.json();
         setPendingSessionToken(data.sessionToken ?? null);
       }
-    } catch {
-      // Token will be fetched again inside handleConnect as a fallback
-    } finally {
+    } catch { /* Token will be absent — button stays disabled */ } finally {
       setTokenFetching(false);
     }
   }
 
-  // MUST be a plain (non-async) function — Safari/WKWebView blocks window.open()
-  // when called from an async function even with no awaits before it.
-  // nango.auth() calls window.open() synchronously; async boundaries break gesture propagation.
-  // The button is disabled via tokenLoading until pendingSessionToken is set, so the
-  // token is guaranteed to be available here.
   function handleConnect(config: IntegrationConfig) {
     const token = pendingSessionToken;
-    if (!token) return; // should not happen — button is disabled while token is loading
+    if (!token) return;
 
     setConnecting(true);
     setConnectError(null);
     setPendingSessionToken(null);
 
-    // nango.auth() calls window.open() synchronously as its very first action.
-    // Everything after this is async (WebSocket + OAuth redirect) and happens in the popup.
     new Nango({ connectSessionToken: token })
       .auth(config.nangoProvider)
       .then(() => syncIntegrations())
@@ -228,13 +232,38 @@ export default function IntegrationsSettingsPage() {
       });
   }
 
-  async function handleDisconnect(config: IntegrationConfig) {
-    setDisconnecting(config.dbProvider);
+  async function handleDisconnect(integrationId: string) {
+    setDisconnecting(integrationId);
     try {
-      const res = await fetch('/api/integrations/disconnect', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: config.dbProvider }) });
+      const res = await fetch('/api/integrations/disconnect', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ integrationId }),
+      });
       if (res.ok) await fetchIntegrations();
     } finally {
       setDisconnecting(null);
+    }
+  }
+
+  function startEditAlias(integration: UserIntegration) {
+    setEditingAlias(integration.id);
+    setAliasValue(integration.connection_alias ?? integration.account_email ?? '');
+  }
+
+  async function saveAlias(integrationId: string) {
+    if (!aliasValue.trim()) return;
+    try {
+      await fetch(`/api/integrations/${integrationId}/alias`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alias: aliasValue.trim() }),
+      });
+      setIntegrations(prev =>
+        prev.map(i => i.id === integrationId ? { ...i, connection_alias: aliasValue.trim() } : i)
+      );
+    } catch { /* ignore */ } finally {
+      setEditingAlias(null);
     }
   }
 
@@ -378,27 +407,128 @@ export default function IntegrationsSettingsPage() {
             return (
               <div key={category}>
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{category}</h2>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="space-y-2">
                   {items.map((config) => {
-                    const integration = getStatus(config.dbProvider);
+                    const isAvailable = availableProviders.includes(config.nangoProvider);
+
+                    if (config.allowMultiple) {
+                      // Multi-account provider: show connected account cards + "Add account" button
+                      const connections = getConnections(config.dbProvider);
+                      const hasConnections = connections.length > 0;
+
+                      return (
+                        <div key={config.dbProvider} className="rounded-lg border p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <BrandIcon provider={config.dbProvider} size={20} />
+                              <span className="text-sm font-medium">{config.label}</span>
+                              {hasConnections && (
+                                <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                  {connections.length} connected
+                                </span>
+                              )}
+                            </div>
+                            {isAvailable && (
+                              <button
+                                onClick={() => void openConsent(config)}
+                                className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
+                              >
+                                <Plus className="h-3 w-3" />
+                                {hasConnections ? 'Add account' : 'Connect'}
+                              </button>
+                            )}
+                            {!isAvailable && !hasConnections && (
+                              <span className="text-[10px] font-medium text-muted-foreground">Soon</span>
+                            )}
+                          </div>
+
+                          {/* Connected account cards */}
+                          {hasConnections && (
+                            <div className="mt-3 space-y-2">
+                              {connections.map((integration) => {
+                                const isDisconnecting = disconnecting === integration.id;
+                                const isEditing = editingAlias === integration.id;
+                                const displayName = integration.connection_alias ?? integration.account_email ?? integration.id;
+
+                                return (
+                                  <div
+                                    key={integration.id}
+                                    className="flex items-center gap-2 rounded-md bg-muted/40 px-3 py-2"
+                                  >
+                                    <Check className="h-3.5 w-3.5 shrink-0 text-green-600" />
+
+                                    {isEditing ? (
+                                      <input
+                                        autoFocus
+                                        value={aliasValue}
+                                        onChange={(e) => setAliasValue(e.target.value)}
+                                        onBlur={() => void saveAlias(integration.id)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') void saveAlias(integration.id);
+                                          if (e.key === 'Escape') setEditingAlias(null);
+                                        }}
+                                        className="flex-1 rounded border bg-background px-1.5 py-0.5 text-xs outline-none focus:ring-1 focus:ring-primary"
+                                        maxLength={60}
+                                      />
+                                    ) : (
+                                      <div className="flex min-w-0 flex-1 flex-col">
+                                        <span className="truncate text-xs font-medium">{displayName}</span>
+                                        {integration.connection_alias && integration.account_email && integration.connection_alias !== integration.account_email && (
+                                          <span className="truncate text-[10px] text-muted-foreground">{integration.account_email}</span>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {!isEditing && (
+                                      <button
+                                        onClick={() => startEditAlias(integration)}
+                                        className="ml-auto shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                        title="Rename"
+                                      >
+                                        <Pencil className="h-3 w-3" />
+                                      </button>
+                                    )}
+
+                                    <button
+                                      onClick={() => void handleDisconnect(integration.id)}
+                                      disabled={isDisconnecting}
+                                      className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                                      title="Disconnect"
+                                    >
+                                      {isDisconnecting ? (
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                      ) : (
+                                        <X className="h-3 w-3" />
+                                      )}
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    // Single-account provider: original tile UI
+                    const integration = getSingleStatus(config.dbProvider);
                     const isConnected = integration?.status === 'connected';
                     const hasError = integration?.status === 'error';
-                    const isDisconnecting = disconnecting === config.dbProvider;
-                    const isAvailable = availableProviders.includes(config.nangoProvider);
+                    const isDisconnecting = disconnecting === integration?.id;
 
                     return (
                       <button
                         key={config.dbProvider}
                         onClick={() => {
                           if (!isAvailable && !isConnected) return;
-                          if (isConnected) {
-                            handleDisconnect(config);
+                          if (isConnected && integration) {
+                            void handleDisconnect(integration.id);
                           } else {
                             void openConsent(config);
                           }
                         }}
                         disabled={isDisconnecting || (!isAvailable && !isConnected)}
-                        className={`group relative flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-colors ${
+                        className={`group relative flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                           isConnected
                             ? 'border-green-300 bg-green-50/60 dark:border-green-800 dark:bg-green-950/30 hover:bg-muted/50'
                             : hasError
@@ -408,38 +538,27 @@ export default function IntegrationsSettingsPage() {
                                 : 'cursor-not-allowed opacity-40'
                         }`}
                       >
-                        {/* Status indicator */}
+                        <BrandIcon provider={config.dbProvider} size={20} />
+                        <span className="flex-1 text-sm font-medium">{config.label}</span>
+
+                        {isConnected && integration?.account_email && (
+                          <span className="truncate text-[11px] text-muted-foreground">{integration.account_email}</span>
+                        )}
+
                         {isConnected && (
-                          <div className="absolute right-1.5 top-1.5">
-                            <Check className="h-3 w-3 text-green-600" />
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <Check className="h-3.5 w-3.5 text-green-600" />
+                            <span className="hidden text-[10px] font-medium text-muted-foreground group-hover:block">
+                              {isDisconnecting ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : 'Disconnect'}
+                            </span>
                           </div>
                         )}
-                        {hasError && (
-                          <div className="absolute right-1.5 top-1.5">
-                            <AlertCircle className="h-3 w-3 text-destructive" />
-                          </div>
-                        )}
+                        {hasError && <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive" />}
                         {!isAvailable && !isConnected && !hasError && (
-                          <div className="absolute right-1.5 top-1.5">
-                            <span className="text-[8px] font-medium text-muted-foreground">Soon</span>
-                          </div>
+                          <span className="text-[10px] font-medium text-muted-foreground">Soon</span>
                         )}
-
-                        {/* Disconnect overlay on hover when connected */}
-                        {isConnected && (
-                          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background/80 opacity-0 transition-opacity group-hover:opacity-100">
-                            {isDisconnecting ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
-                                <X className="h-3 w-3" /> Disconnect
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        <BrandIcon provider={config.dbProvider} size={24} />
-                        <span className="text-xs font-medium leading-tight">{config.label}</span>
                       </button>
                     );
                   })}

@@ -41,11 +41,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const supabase = createServiceClient();
 
-    // Look up user by their Gmail account email
+    // Look up the specific integration row by Gmail account email.
+    // Selecting both user_id and the row id (integration_id) so we can scope
+    // historyId reads/writes to the exact connected account.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: integration } = await (supabase as any)
       .from('user_integrations')
-      .select('user_id')
+      .select('user_id, id, nango_connection_id')
       .eq('provider', 'gmail')
       .eq('account_email', emailAddress)
       .eq('status', 'connected')
@@ -55,37 +57,40 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (!integration?.user_id) return NextResponse.json({}, { status: 200 });
 
     const userId = integration.user_id as string;
+    const integrationId = integration.id as string;
+    const nangoConnectionId = integration.nango_connection_id as string;
 
-    // Get the historyId we saved on the previous webhook call
-    const storedHistoryId = await getGmailHistoryId(supabase, userId);
+    // Get the historyId stored for this specific account
+    const storedHistoryId = await getGmailHistoryId(supabase, integrationId);
 
     if (!storedHistoryId) {
       // First delivery — establish a baseline historyId and return
-      const { historyId: newHistoryId, expiration } = await setupGmailWatch(userId);
-      await saveGmailHistoryId(supabase, userId, newHistoryId, expiration);
+      const { historyId: newHistoryId, expiration } = await setupGmailWatch(userId, nangoConnectionId);
+      await saveGmailHistoryId(supabase, integrationId, newHistoryId, expiration);
       return NextResponse.json({}, { status: 200 });
     }
 
-    // Fetch messages added since our stored historyId
+    // Fetch messages added since our stored historyId for this account
     const { messages: newMessages, newHistoryId } = await fetchNewMessagesSinceHistory(
       userId,
-      storedHistoryId
+      storedHistoryId,
+      nangoConnectionId
     );
 
     if (!newHistoryId) {
       // historyId expired (410) — renew watch and return; next push will carry on
-      const { historyId: freshHistoryId, expiration } = await setupGmailWatch(userId);
-      await saveGmailHistoryId(supabase, userId, freshHistoryId, expiration);
+      const { historyId: freshHistoryId, expiration } = await setupGmailWatch(userId, nangoConnectionId);
+      await saveGmailHistoryId(supabase, integrationId, freshHistoryId, expiration);
       return NextResponse.json({}, { status: 200 });
     }
 
     // Process new messages through the AI ingestion pipeline
     if (newMessages.length > 0) {
-      await ingestGmailMessageRefs(userId, newMessages);
+      await ingestGmailMessageRefs(userId, newMessages, nangoConnectionId, integrationId);
     }
 
     // Advance the stored historyId so the next push only fetches deltas
-    await saveGmailHistoryId(supabase, userId, newHistoryId);
+    await saveGmailHistoryId(supabase, integrationId, newHistoryId);
   } catch {
     // Swallow all errors — returning non-200 would trigger Pub/Sub retries
     // causing duplicate processing. Errors are logged via Sentry middleware.

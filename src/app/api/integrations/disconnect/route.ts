@@ -4,17 +4,9 @@ import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { deleteConnection } from '@/lib/integrations/nango';
 import { createServiceClient } from '@/lib/db/client';
-import { deleteIntegration } from '@/lib/db/queries/integrations';
-import type { IntegrationProvider } from '@/lib/db/types';
+import { getIntegrationById, deleteIntegration } from '@/lib/db/queries/integrations';
 
-const VALID_PROVIDERS: IntegrationProvider[] = [
-  'gmail',
-  'google_calendar',
-  'slack',
-  'notion',
-];
-
-// Maps our DB provider to Nango provider key
+// Maps our DB provider enum to Nango provider key
 const DB_TO_NANGO_PROVIDER: Record<string, string> = {
   gmail: 'google-mail',
   google_calendar: 'google-calendar',
@@ -25,27 +17,39 @@ const DB_TO_NANGO_PROVIDER: Record<string, string> = {
 export const DELETE = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
-    const { provider } = body as { provider: IntegrationProvider };
+    const { integrationId } = body as { integrationId: string };
 
-    if (!provider || !VALID_PROVIDERS.includes(provider)) {
+    if (!integrationId) {
       return NextResponse.json(
-        { error: 'Invalid provider', code: 'VALIDATION_ERROR' },
+        { error: 'integrationId is required', code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
 
-    const nangoProvider = DB_TO_NANGO_PROVIDER[provider];
+    const supabase = createServiceClient();
 
-    // Delete from Nango first
-    try {
-      await deleteConnection(req.user.id, nangoProvider);
-    } catch {
-      // Connection may not exist in Nango — continue to clean up our DB
+    // Look up the specific integration row to get provider + nango_connection_id
+    const integration = await getIntegrationById(supabase, req.user.id, integrationId);
+    if (!integration) {
+      return NextResponse.json(
+        { error: 'Integration not found', code: 'NOT_FOUND' },
+        { status: 404 }
+      );
     }
 
-    // Delete from our database
-    const supabase = createServiceClient();
-    await deleteIntegration(supabase, req.user.id, provider);
+    const nangoProvider = DB_TO_NANGO_PROVIDER[integration.provider];
+
+    // Delete from Nango first
+    if (nangoProvider) {
+      try {
+        await deleteConnection(nangoProvider, integration.nango_connection_id);
+      } catch {
+        // Connection may already be gone in Nango — continue to clean up our DB
+      }
+    }
+
+    // Delete this specific row from our database
+    await deleteIntegration(supabase, req.user.id, integrationId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

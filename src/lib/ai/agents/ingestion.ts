@@ -108,9 +108,11 @@ async function summariseSlackMessage(
 // ── TIER 1 — Email & Messaging ──────────────────────────────────────────────
 
 export async function ingestGmailMessages(
-  userId: string
+  userId: string,
+  nangoConnectionId?: string,
+  integrationId?: string
 ): Promise<{ processed: number; found: number }> {
-  const messageRefs = await fetchInboxMessages(userId, 20);
+  const messageRefs = await fetchInboxMessages(userId, 20, nangoConnectionId);
   const found = messageRefs.length;
 
   const supabase = createServiceClient();
@@ -119,8 +121,8 @@ export async function ingestGmailMessages(
   const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'gmail');
 
   if (found === 0) {
-    // Inbox is empty — remove all stored items for this provider
-    await deleteInboxItemsNotIn(supabase, userId, 'gmail', []);
+    // Inbox is empty — remove all stored items for this account
+    await deleteInboxItemsNotIn(supabase, userId, 'gmail', [], integrationId);
     return { processed: 0, found: 0 };
   }
 
@@ -133,7 +135,7 @@ export async function ingestGmailMessages(
     scannedIds.push(ref.id);
 
     // Fetch full message — body is NEVER stored
-    const fullMessage = await fetchMessageForProcessing(userId, ref.id);
+    const fullMessage = await fetchMessageForProcessing(userId, ref.id, nangoConnectionId);
     const parsed = parseGmailMessage(fullMessage);
 
     const existingSummary = existingSummaries.get(parsed.id);
@@ -174,6 +176,7 @@ export async function ingestGmailMessages(
       needs_reply: result.needs_reply,
       sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
+      integration_id: integrationId ?? null,
     });
 
     // Collect for context memory pipeline
@@ -191,8 +194,8 @@ export async function ingestGmailMessages(
     processed++;
   }
 
-  // Remove rows for messages no longer in the inbox
-  await deleteInboxItemsNotIn(supabase, userId, 'gmail', scannedIds);
+  // Remove rows for messages no longer in the inbox (scoped to this account)
+  await deleteInboxItemsNotIn(supabase, userId, 'gmail', scannedIds, integrationId);
 
   await feedContext(userId, 'gmail', contextItems);
   return { processed, found };
@@ -205,7 +208,9 @@ export async function ingestGmailMessages(
  */
 export async function ingestGmailMessageRefs(
   userId: string,
-  messageRefs: Array<{ id: string; threadId: string }>
+  messageRefs: Array<{ id: string; threadId: string }>,
+  nangoConnectionId?: string,
+  integrationId?: string
 ): Promise<{ processed: number }> {
   if (messageRefs.length === 0) return { processed: 0 };
 
@@ -216,7 +221,7 @@ export async function ingestGmailMessageRefs(
   const contextItems: ContextPipelineInput[] = [];
 
   for (const ref of messageRefs) {
-    const fullMessage = await fetchMessageForProcessing(userId, ref.id);
+    const fullMessage = await fetchMessageForProcessing(userId, ref.id, nangoConnectionId);
     const parsed = parseGmailMessage(fullMessage);
 
     const existingSummary = existingSummaries.get(parsed.id);
@@ -252,6 +257,7 @@ export async function ingestGmailMessageRefs(
       needs_reply: result.needs_reply,
       sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
+      integration_id: integrationId ?? null,
     });
 
     contextItems.push({
