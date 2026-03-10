@@ -39,11 +39,26 @@ const MAX_BACKOFF_MS = 60_000; // 1 minute max between retries
 const contextBuffer: DesktopContext[] = [];
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 let unlistenFn: (() => void) | null = null;
+let unlistenTrayFn: (() => void) | null = null;
 let consecutiveFailures = 0;
 let nextRetryAt = 0;
+let isPaused = false;
 
 type ContextChangeHandler = (ctx: DesktopContext) => void;
 const changeListeners: Set<ContextChangeHandler> = new Set();
+
+export interface TrayState {
+  paused: boolean;
+  resumes_at_ms: number | null;
+}
+type TrayStateHandler = (state: TrayState) => void;
+const trayStateListeners: Set<TrayStateHandler> = new Set();
+
+/** Subscribe to tray pause/resume state changes */
+export function onTrayStateChange(handler: TrayStateHandler): () => void {
+  trayStateListeners.add(handler);
+  return () => trayStateListeners.delete(handler);
+}
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -112,6 +127,32 @@ export async function captureNow(): Promise<DesktopContext | null> {
   }
 }
 
+/** Check if screen recording permission is granted (Apple Silicon only) */
+export async function checkScreenRecording(): Promise<boolean> {
+  if (!invoke) {
+    const loaded = await loadTauriApis();
+    if (!loaded) return false;
+  }
+  try {
+    return (await invoke!('check_screen_recording')) as boolean;
+  } catch {
+    return false;
+  }
+}
+
+/** Request screen recording permission from macOS */
+export async function requestScreenRecording(): Promise<boolean> {
+  if (!invoke) {
+    const loaded = await loadTauriApis();
+    if (!loaded) return false;
+  }
+  try {
+    return (await invoke!('request_screen_recording')) as boolean;
+  } catch {
+    return false;
+  }
+}
+
 /** Subscribe to real-time context changes */
 export function onContextChange(handler: ContextChangeHandler): () => void {
   changeListeners.add(handler);
@@ -143,6 +184,17 @@ export async function startObserver(): Promise<boolean> {
     });
     unlistenFn = unlisten;
 
+    // Listen for tray pause/resume state changes
+    unlistenTrayFn?.();
+    const unlistenTray = await listen!('tray-state-changed', (event) => {
+      const state = event.payload as TrayState;
+      isPaused = state.paused;
+      for (const handler of trayStateListeners) {
+        try { handler(state); } catch { /* ignore */ }
+      }
+    });
+    unlistenTrayFn = unlistenTray;
+
     // Start flush timer
     if (flushTimer) clearInterval(flushTimer);
     flushTimer = setInterval(flushBuffer, FLUSH_INTERVAL_MS);
@@ -166,6 +218,8 @@ export async function stopObserver(): Promise<void> {
 
   unlistenFn?.();
   unlistenFn = null;
+  unlistenTrayFn?.();
+  unlistenTrayFn = null;
 
   if (flushTimer) {
     clearInterval(flushTimer);
@@ -199,6 +253,9 @@ function handleContextChange(ctx: DesktopContext) {
 
 async function flushBuffer() {
   if (contextBuffer.length === 0) return;
+
+  // Don't flush while paused — keep buffering but don't send to backend
+  if (isPaused) return;
 
   // Exponential backoff: skip flush if we're in a cooldown period
   if (consecutiveFailures > 0 && Date.now() < nextRetryAt) {

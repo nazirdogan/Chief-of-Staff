@@ -194,6 +194,7 @@ export interface DayNarrative {
   key_events: Array<{ event: string; time: string; importance: string }>;
   people_seen: string[];
   projects_worked_on: string[];
+  structured_summary: Record<string, string[]> | null;
   embedding: number[] | null;
   last_updated_at: string;
   created_at: string;

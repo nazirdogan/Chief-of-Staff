@@ -619,6 +619,7 @@ export async function executeChatTool(
           date,
           source: 'desktop_observer',
           narrative: dayNarrative.narrative,
+          ...(dayNarrative.structured_summary ? { structured_summary: dayNarrative.structured_summary } : {}),
           stats: {
             sessions: dayNarrative.session_count,
             email_sessions: dayNarrative.email_sessions,
@@ -825,19 +826,53 @@ export async function executeChatTool(
 
       // Include session-based data if we have it
       if (sessions.length > 0) {
-        const sessionSummaries = sessions
-          .filter(s => s.summary)
-          .map(s => ({
+        const sessionSummaries = sessions.map(s => {
+          const pd = (s.parsed_data ?? {}) as Record<string, unknown>;
+          const base = {
             app: s.app_name,
             category: s.app_category,
-            summary: s.summary,
             people: s.people,
             projects: s.projects,
             started_at: s.started_at,
             duration_min: s.ended_at
               ? Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
               : null,
-          }));
+          };
+          switch (s.app_category) {
+            case 'chat':
+              return {
+                ...base,
+                conversation_with: pd.conversationPartner,
+                platform: pd.platform,
+                messages: Array.isArray(pd.messages)
+                  ? (pd.messages as unknown[]).slice(-5).map((m) => {
+                      const msg = m as Record<string, unknown>;
+                      return `${String(msg.sender ?? msg.from ?? '')}: ${String(msg.text ?? msg.content ?? '').slice(0, 150)}`;
+                    })
+                  : undefined,
+              };
+            case 'email':
+              return { ...base, subject: pd.subject, from: pd.from };
+            case 'code':
+              return {
+                ...base,
+                file: pd.fileName,
+                project: pd.projectName,
+                language: pd.language,
+                functions: Array.isArray(pd.functions) ? (pd.functions as unknown[]).slice(0, 5).map(String) : undefined,
+              };
+            case 'terminal':
+              return {
+                ...base,
+                directory: pd.currentDirectory,
+                commands: Array.isArray(pd.recentCommands) ? (pd.recentCommands as unknown[]).slice(-5).map(String) : undefined,
+              };
+            case 'browser':
+              return { ...base, page: pd.pageTitle, domain: pd.domain };
+            default:
+              return { ...base, window: s.window_title };
+          }
+        });
 
         result.activity_sessions = sessionSummaries;
         result.session_count = sessions.length;
@@ -864,6 +899,7 @@ export async function executeChatTool(
         result.daily_narratives = relevantNarratives.map(n => ({
           date: n.narrative_date,
           narrative: n.narrative,
+          structured_summary: n.structured_summary ?? undefined,
           key_events: n.key_events,
           people_seen: n.people_seen,
           projects_worked_on: n.projects_worked_on,
@@ -871,7 +907,7 @@ export async function executeChatTool(
         }));
       }
 
-      // If we have session data, return it directly
+      // If we have session data or narratives, return it directly
       if (sessions.length > 0 || relevantNarratives.length > 0) {
         return JSON.stringify(result);
       }
@@ -956,24 +992,60 @@ export async function executeChatTool(
       return JSON.stringify({
         date,
         narrative: narrative?.narrative ?? null,
+        ...(narrative?.structured_summary ? { structured_summary: narrative.structured_summary } : {}),
         key_events: narrative?.key_events ?? [],
         people_seen: narrative?.people_seen ?? [],
         projects_worked_on: narrative?.projects_worked_on ?? [],
         active_minutes: narrative ? Math.round(narrative.total_active_seconds / 60) : 0,
-        sessions: sessions.map(s => ({
-          app: s.app_name,
-          category: s.app_category,
-          window: s.window_title,
-          summary: s.summary,
-          people: s.people,
-          projects: s.projects,
-          importance: s.importance,
-          started_at: s.started_at,
-          ended_at: s.ended_at,
-          duration_min: s.ended_at
-            ? Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
-            : null,
-        })),
+        sessions: sessions.map(s => {
+          const pd = (s.parsed_data ?? {}) as Record<string, unknown>;
+          const base = {
+            app: s.app_name,
+            category: s.app_category,
+            people: s.people,
+            projects: s.projects,
+            importance: s.importance,
+            started_at: s.started_at,
+            ended_at: s.ended_at,
+            duration_min: s.ended_at
+              ? Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
+              : null,
+          };
+          switch (s.app_category) {
+            case 'chat':
+              return {
+                ...base,
+                conversation_with: pd.conversationPartner,
+                platform: pd.platform,
+                messages: Array.isArray(pd.messages)
+                  ? (pd.messages as unknown[]).slice(-5).map((m) => {
+                      const msg = m as Record<string, unknown>;
+                      return `${String(msg.sender ?? msg.from ?? '')}: ${String(msg.text ?? msg.content ?? '').slice(0, 150)}`;
+                    })
+                  : undefined,
+              };
+            case 'email':
+              return { ...base, subject: pd.subject, from: pd.from };
+            case 'code':
+              return {
+                ...base,
+                file: pd.fileName,
+                project: pd.projectName,
+                language: pd.language,
+                functions: Array.isArray(pd.functions) ? (pd.functions as unknown[]).slice(0, 5).map(String) : undefined,
+              };
+            case 'terminal':
+              return {
+                ...base,
+                directory: pd.currentDirectory,
+                commands: Array.isArray(pd.recentCommands) ? (pd.recentCommands as unknown[]).slice(-5).map(String) : undefined,
+              };
+            case 'browser':
+              return { ...base, page: pd.pageTitle, domain: pd.domain };
+            default:
+              return { ...base, window: s.window_title };
+          }
+        }),
       });
     }
 

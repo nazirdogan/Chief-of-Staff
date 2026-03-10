@@ -10,6 +10,8 @@ export interface DesktopContext {
   clipboard_text: string;
   activity_type: string; // reading | writing | browsing | communicating | coding | designing | planning
   url: string | null;
+  /** Apple Vision OCR text from the screen (Apple Silicon only; empty array on Intel) */
+  ocr_text?: string[];
 }
 
 export interface ObserverStatus {

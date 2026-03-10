@@ -13,16 +13,21 @@ const LANGUAGE_EXTENSIONS: Record<string, string> = {
 function parseEditorTitle(windowTitle: string, appName: string): {
   fileName: string | null;
   projectName: string | null;
+  dirPath: string | null;
   language: string | null;
 } {
   const app = appName.toLowerCase();
 
-  // VS Code / Cursor: "filename.ts — project-name — Visual Studio Code"
-  // or "filename.ts — project-name — Cursor"
+  // VS Code / Cursor title format: "filename.ts — [dir...] — project-name — Visual Studio Code"
+  // The project is ALWAYS the segment just before the app name (second-to-last).
+  // Intermediate segments are the directory path (e.g. "login" in "page.tsx — login — donna — Cursor").
   if (app.includes('code') || app.includes('cursor')) {
     const parts = windowTitle.split(/\s*[—–-]\s*/);
     const fileName = parts[0]?.trim() || null;
-    const projectName = parts.length >= 3 ? parts[1]?.trim() : null;
+    // Project = second-to-last segment (last is the app name)
+    const projectName = parts.length >= 3 ? parts[parts.length - 2]?.trim() ?? null : null;
+    // Directory path = any segments between filename and project
+    const dirPath = parts.length >= 4 ? parts.slice(1, -2).join('/') : null;
 
     let language: string | null = null;
     if (fileName) {
@@ -30,7 +35,7 @@ function parseEditorTitle(windowTitle: string, appName: string): {
       language = LANGUAGE_EXTENSIONS[ext] ?? null;
     }
 
-    return { fileName, projectName, language };
+    return { fileName, projectName, dirPath, language };
   }
 
   // Xcode: "FileName.swift — ProjectName"
@@ -38,7 +43,8 @@ function parseEditorTitle(windowTitle: string, appName: string): {
     const parts = windowTitle.split(/\s*[—–-]\s*/);
     return {
       fileName: parts[0]?.trim() || null,
-      projectName: parts[1]?.trim() || null,
+      projectName: parts[parts.length - 2]?.trim() || null,
+      dirPath: null,
       language: 'swift',
     };
   }
@@ -52,15 +58,15 @@ function parseEditorTitle(windowTitle: string, appName: string): {
       const ext = '.' + fileName.split('.').pop()?.toLowerCase();
       language = LANGUAGE_EXTENSIONS[ext] ?? null;
     }
-    return { fileName, projectName: parts[1]?.trim() || null, language };
+    return { fileName, projectName: parts[parts.length - 2]?.trim() || null, dirPath: null, language };
   }
 
   // Claude Code: window title might be "Claude Code — project" or just the terminal
   if (app.includes('claude')) {
-    return { fileName: null, projectName: windowTitle || null, language: null };
+    return { fileName: null, projectName: windowTitle || null, dirPath: null, language: null };
   }
 
-  return { fileName: null, projectName: null, language: null };
+  return { fileName: null, projectName: null, dirPath: null, language: null };
 }
 
 function extractCodeContext(focusedText: string, visibleText: string[]): {
@@ -98,12 +104,15 @@ export const codeParser: AppParser = {
   },
 
   parse(ctx: DesktopContextSnapshot): ParsedScreenContent {
-    const { fileName, projectName, language } = parseEditorTitle(ctx.window_title, ctx.active_app);
+    const { fileName, projectName, dirPath, language } = parseEditorTitle(ctx.window_title, ctx.active_app);
     const { snippet, imports, functions } = extractCodeContext(ctx.focused_text, ctx.visible_text);
+
+    // Full file path: "login/page.tsx" when dirPath="login", fileName="page.tsx"
+    const fullFilePath = dirPath && fileName ? `${dirPath}/${fileName}` : fileName;
 
     const parts: string[] = [];
     if (projectName) parts.push(`Project: ${projectName}`);
-    if (fileName) parts.push(`File: ${fileName}${language ? ` (${language})` : ''}`);
+    if (fullFilePath) parts.push(`File: ${fullFilePath}${language ? ` (${language})` : ''}`);
     if (functions.length > 0) parts.push(`Functions: ${functions.join(', ')}`);
     if (snippet) parts.push(`Code:\n${snippet}`);
 
@@ -111,8 +120,9 @@ export const codeParser: AppParser = {
       appCategory: 'code',
       structuredData: {
         editor: ctx.active_app,
-        fileName,
+        fileName: fullFilePath,  // Store full path so AI sees "login/page.tsx" not just "page.tsx"
         projectName,
+        dirPath,
         language,
         imports: imports.map(line => redactPII(line)),
         functions: functions.map(line => redactPII(line)),

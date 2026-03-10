@@ -25,6 +25,7 @@ import { OneTapConfirmToast } from '@/components/shared/OneTapConfirmToast';
 import { useOneTapQueue } from '@/hooks/useOneTapQueue';
 import { CatchUpBanner } from '@/components/catch-up/CatchUpBanner';
 import { useCatchUpStore } from '@/stores/catch-up-store';
+import { PauseBanner } from '@/components/shared/PauseBanner';
 
 /* ── Navigation structure ── */
 const navItems = [
@@ -502,6 +503,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         {/* ── Main content ── */}
         <main className="flex-1 ml-[220px] overflow-y-auto">
+          <PauseBanner />
           <div className="mx-auto max-w-[1200px] px-8 py-8 animate-fade-in">
             <CatchUpBanner />
             {children}

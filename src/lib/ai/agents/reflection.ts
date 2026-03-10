@@ -154,9 +154,38 @@ export async function generateReflection(
   type: ReflectionType,
   periodStart: Date,
   periodEnd: Date,
-): Promise<Reflection> {
+): Promise<Reflection | null> {
+  // Schedule guard: monthly only on 1st, weekly only on Monday
+  const now = new Date();
+  if (type === 'monthly' && now.getDate() !== 1) return null;
+  if (type === 'weekly' && now.getDay() !== 1) return null;
+
   const startTime = Date.now();
   const supabase = createServiceClient();
+
+  // Deduplicate: skip if a reflection already exists for this period + type
+  const periodStartStr = periodStart.toISOString().split('T')[0];
+  const periodEndStr = periodEnd.toISOString().split('T')[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existing } = await (supabase as any)
+    .from('reflections')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('reflection_type', type)
+    .eq('period_start', periodStartStr)
+    .eq('period_end', periodEndStr)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    // Already generated — return the existing one
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: full } = await (supabase as any)
+      .from('reflections')
+      .select('*')
+      .eq('id', existing[0].id)
+      .single();
+    return full as Reflection;
+  }
 
   const periodData = await gatherPeriodData(
     supabase,

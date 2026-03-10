@@ -7,75 +7,46 @@ import { createServiceClient } from '@/lib/db/client';
 import { listUserIntegrations } from '@/lib/db/queries/integrations';
 
 // POST: Trigger briefing generation for the current user
-// This endpoint first syncs data from all connected integrations, then generates.
+// Syncs connected integrations (if any), then generates briefing from all sources
+// including desktop observer data, commitments, and relationship intelligence.
 export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRequest) => {
   try {
     console.log('[BRIEFING_GENERATE] Starting for user:', req.user.id);
     const supabase = createServiceClient();
 
-    // Check that the user has at least one connected integration
+    // Check connected integrations (optional — briefing can generate without them)
     console.log('[BRIEFING_GENERATE] Fetching integrations...');
     const integrations = await listUserIntegrations(supabase, req.user.id);
     const connected = integrations.filter(i => i.status === 'connected');
     console.log('[BRIEFING_GENERATE] Connected integrations:', connected.map(i => i.provider));
 
-    if (connected.length === 0) {
-      return NextResponse.json(
-        {
-          error: 'No integrations connected. Connect Gmail, Google Calendar, or other tools in Settings first.',
-          code: 'NO_INTEGRATIONS',
-        },
-        { status: 422 }
-      );
+    // Step 1: Sync data from connected integrations (if any)
+    let syncSucceeded: Array<{ provider: string; itemsProcessed?: number }> = [];
+    let totalSynced = 0;
+
+    if (connected.length > 0) {
+      console.log('[BRIEFING_GENERATE] Starting sync...');
+      const syncResults = await syncAllIntegrations(req.user.id);
+      console.log('[BRIEFING_GENERATE] Sync complete:', JSON.stringify(syncResults.map(r => ({ provider: r.provider, status: r.status, error: r.error }))));
+      syncSucceeded = syncResults.filter(r => r.status === 'success');
+      totalSynced = syncSucceeded.reduce((sum, r) => sum + (r.itemsProcessed ?? 0), 0);
+
+      // Log sync failures but don't block — desktop observer + existing data can still produce a briefing
+      const syncFailed = syncResults.filter(r => r.status === 'error');
+      if (syncFailed.length > 0) {
+        console.warn('[BRIEFING_GENERATE] Some syncs failed:', syncFailed.map(r => `${r.provider}: ${r.error}`).join('; '));
+      }
+    } else {
+      console.log('[BRIEFING_GENERATE] No integrations connected — generating from desktop observer + existing data');
     }
 
-    // Step 1: Sync data from all connected integrations
-    console.log('[BRIEFING_GENERATE] Starting sync...');
-    const syncResults = await syncAllIntegrations(req.user.id);
-    console.log('[BRIEFING_GENERATE] Sync complete:', JSON.stringify(syncResults.map(r => ({ provider: r.provider, status: r.status, error: r.error }))));
-    const syncSucceeded = syncResults.filter(r => r.status === 'success');
-    const totalSynced = syncSucceeded.reduce((sum, r) => sum + (r.itemsProcessed ?? 0), 0);
-
-    // If all syncs failed, report the error
-    if (syncSucceeded.length === 0 && syncResults.length > 0) {
-      const errors = syncResults
-        .filter(r => r.status === 'error')
-        .map(r => `${r.provider}: ${r.error}`)
-        .join('; ');
-      return NextResponse.json(
-        {
-          error: `Failed to sync data from your integrations: ${errors}`,
-          code: 'SYNC_FAILED',
-        },
-        { status: 500 }
-      );
-    }
-
-    // If we synced but found nothing (e.g. empty inbox, no events)
-    if (totalSynced === 0) {
-      // Calendar events are read live during briefing generation, so we may still have data.
-      // Let generateDailyBriefing try — it reads calendar directly.
-    }
-
-    // Step 2: Generate the briefing (reads from DB + live calendar)
+    // Step 2: Generate the briefing (reads from DB, desktop observer, live calendar, etc.)
     console.log('[BRIEFING_GENERATE] Starting briefing generation...');
     const briefing = await generateDailyBriefing(req.user.id);
     console.log('[BRIEFING_GENERATE] Briefing generated, items:', briefing.item_count);
 
-    if (briefing.item_count === 0) {
-      return NextResponse.json(
-        {
-          error: 'Your integrations synced successfully but no actionable items were found. This can happen if your inbox is empty or you have no upcoming events today.',
-          code: 'NO_ITEMS',
-          syncSummary: {
-            integrationsSynced: syncSucceeded.length,
-            totalItems: totalSynced,
-          },
-        },
-        { status: 422 }
-      );
-    }
-
+    // Always return success — even an empty briefing is valid.
+    // The UI will show the structured sections with CTAs for missing data sources.
     return NextResponse.json({
       briefing: {
         id: briefing.id,
@@ -86,6 +57,7 @@ export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRe
       syncSummary: {
         integrationsSynced: syncSucceeded.length,
         totalItems: totalSynced,
+        connectedProviders: connected.map(i => i.provider),
       },
     });
   } catch (err) {

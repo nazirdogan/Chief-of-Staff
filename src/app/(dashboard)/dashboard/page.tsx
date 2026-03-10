@@ -217,17 +217,8 @@ export default function BriefingPage() {
     );
   }
 
-  /* ── Empty state ── */
-  if (!briefing || briefing.items.length === 0) {
-    const connectedIntegrations = integrations.filter(i => i.status === 'connected');
-    const hasConnectedIntegrations = connectedIntegrations.length > 0;
-
-    const PROVIDER_LABELS: Record<string, string> = {
-      gmail: 'Gmail', google_calendar: 'Google Calendar', outlook: 'Outlook',
-      slack: 'Slack', notion: 'Notion', google_drive: 'Google Drive',
-      microsoft_calendar: 'Outlook Calendar', linear: 'Linear', github: 'GitHub',
-    };
-
+  /* ── First-time empty state (no briefing generated yet) ── */
+  if (!briefing) {
     return (
       <div className="space-y-6">
         <h1
@@ -241,32 +232,6 @@ export default function BriefingPage() {
           {getGreeting()}
         </h1>
 
-        {hasConnectedIntegrations && (
-          <div
-            className="rounded-xl p-4"
-            style={{ background: c.surface, border: `1px solid ${c.border}` }}
-          >
-            <p
-              className="text-[11px] font-semibold tracking-[0.06em] uppercase mb-2.5"
-              style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              Connected Sources
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {connectedIntegrations.map(i => (
-                <span
-                  key={i.provider}
-                  className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-medium"
-                  style={{ background: 'rgba(82,183,136,0.1)', color: c.sage, border: '1px solid rgba(82,183,136,0.2)' }}
-                >
-                  <CheckCircle2 size={11} />
-                  {PROVIDER_LABELS[i.provider] ?? i.provider}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div
           className="rounded-xl p-10 text-center"
           style={{ background: c.surface, border: `1px dashed ${c.borderHover}` }}
@@ -278,41 +243,29 @@ export default function BriefingPage() {
             <LayoutDashboard size={22} style={{ color: c.dawn }} />
           </div>
           <p className="text-[14px] font-semibold" style={{ color: c.text }}>
-            {hasConnectedIntegrations ? "Ready to generate your first briefing" : 'Connect your tools to get started'}
+            Ready to generate your briefing
           </p>
           <p
             className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed"
             style={{ color: c.textTertiary }}
           >
-            {hasConnectedIntegrations
-              ? 'Your integrations are connected. Generate your briefing to see what needs your attention today.'
-              : 'Connect your email, calendar, and other tools to get your daily briefing.'}
+            Donna will pull from your desktop activity, connected integrations, commitments, and calendar to build your daily briefing.
           </p>
 
-          {hasConnectedIntegrations ? (
-            <button
-              onClick={handleGenerateBriefing}
-              disabled={generating}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
-              style={{
-                background: c.dawn,
-                color: '#FAF9F6',
-                opacity: generating ? 0.7 : 1,
-                cursor: generating ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {generating ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-              {generating ? 'Syncing & generating...' : 'Generate briefing'}
-            </button>
-          ) : (
-            <Link
-              href="/settings/integrations"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[13px] font-semibold"
-              style={{ background: c.dawn, color: '#FAF9F6' }}
-            >
-              Connect integrations
-            </Link>
-          )}
+          <button
+            onClick={handleGenerateBriefing}
+            disabled={generating}
+            className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
+            style={{
+              background: c.dawn,
+              color: '#FAF9F6',
+              opacity: generating ? 0.7 : 1,
+              cursor: generating ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {generating ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+            {generating ? 'Generating...' : 'Generate briefing'}
+          </button>
 
           {generateError && (
             <div
@@ -379,6 +332,11 @@ export default function BriefingPage() {
 
   const hasYesterday = yesterdayCompleted.length > 0 || yesterdayCarriedOver.length > 0;
 
+  // Check which integrations are connected to show relevant CTAs
+  const connectedProviders = new Set(integrations.filter(i => i.status === 'connected').map(i => i.provider));
+  const hasEmail = connectedProviders.has('gmail') || connectedProviders.has('outlook');
+  const hasCalendar = connectedProviders.has('google_calendar') || connectedProviders.has('microsoft_calendar');
+
   return (
     <div className="space-y-8">
 
@@ -442,26 +400,51 @@ export default function BriefingPage() {
           SECTION 1: PRIORITIES
           ═══════════════════════════════════════════════════════ */}
 
-      {priorities.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div
-              className="flex h-6 w-6 items-center justify-center rounded-md"
-              style={{ background: c.dawnMuted }}
-            >
-              <ListChecks size={14} style={{ color: c.dawn }} />
-            </div>
-            <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
-              Today&apos;s Priorities
-            </h2>
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <div
+            className="flex h-6 w-6 items-center justify-center rounded-md"
+            style={{ background: c.dawnMuted }}
+          >
+            <ListChecks size={14} style={{ color: c.dawn }} />
+          </div>
+          <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
+            Today&apos;s Priorities
+          </h2>
+          {priorities.length > 0 && (
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
               style={{ background: c.dawnMuted, color: c.dawn }}
             >
               {priorities.length}
             </span>
-          </div>
+          )}
+        </div>
 
+        {priorities.length === 0 ? (
+          <div
+            className="rounded-xl p-6 text-center"
+            style={{ background: c.surface, border: `1px dashed ${c.border}` }}
+          >
+            <p className="text-[13px] font-medium" style={{ color: c.textTertiary }}>
+              No priorities found for today.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              {!hasEmail && (
+                <Link
+                  href="/settings/integrations"
+                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors"
+                  style={{ background: c.dawnMuted, color: c.dawn, border: '1px solid rgba(232,132,92,0.25)' }}
+                >
+                  <Zap size={11} /> Connect Gmail or Outlook
+                </Link>
+              )}
+              <p className="text-[12px]" style={{ color: c.textMuted }}>
+                Donna uses your email, desktop activity, and commitments to surface priorities.
+              </p>
+            </div>
+          </div>
+        ) : (
           <div className="space-y-1.5">
             {priorities.map((item, i) => {
               const checked = checkedActions.has(item.id);
@@ -587,8 +570,8 @@ export default function BriefingPage() {
               );
             })}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* ═══════════════════════════════════════════════════════
           SECTION 2: YESTERDAY'S SUMMARY
@@ -716,37 +699,58 @@ export default function BriefingPage() {
           SECTION 3: TODAY'S SCHEDULE
           ═══════════════════════════════════════════════════════ */}
 
-      {todaysSchedule.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div
-                className="flex h-6 w-6 items-center justify-center rounded-md"
-                style={{ background: 'rgba(78,125,170,0.12)' }}
-              >
-                <Clock size={14} style={{ color: c.dusk }} />
-              </div>
-              <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
-                Today&apos;s Schedule
-              </h2>
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-md"
+              style={{ background: 'rgba(78,125,170,0.12)' }}
+            >
+              <Clock size={14} style={{ color: c.dusk }} />
+            </div>
+            <h2 className="text-[15px] font-semibold" style={{ color: c.text }}>
+              Today&apos;s Schedule
+            </h2>
+            {todaysSchedule.length > 0 && (
               <span
                 className="rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
                 style={{ background: 'rgba(78,125,170,0.1)', color: c.dusk }}
               >
                 {todaysSchedule.length}
               </span>
-            </div>
-            <Link
-              href="/calendar"
-              className="flex items-center gap-1 text-[12px] font-medium transition-colors duration-150"
-              style={{ color: c.textMuted }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = c.dawn; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = c.textMuted; }}
-            >
-              Full calendar <ArrowRight size={11} />
-            </Link>
+            )}
           </div>
+          <Link
+            href="/calendar"
+            className="flex items-center gap-1 text-[12px] font-medium transition-colors duration-150"
+            style={{ color: c.textMuted }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = c.dawn; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = c.textMuted; }}
+          >
+            Full calendar <ArrowRight size={11} />
+          </Link>
+        </div>
 
+        {todaysSchedule.length === 0 ? (
+          <div
+            className="rounded-xl p-6 text-center"
+            style={{ background: c.surface, border: `1px dashed ${c.border}` }}
+          >
+            <p className="text-[13px] font-medium" style={{ color: c.textTertiary }}>
+              No events on your calendar today.
+            </p>
+            {!hasCalendar && (
+              <Link
+                href="/settings/integrations"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors"
+                style={{ background: 'rgba(78,125,170,0.1)', color: c.dusk, border: '1px solid rgba(78,125,170,0.2)' }}
+              >
+                <Zap size={11} /> Connect Google Calendar or Outlook
+              </Link>
+            )}
+          </div>
+        ) : (
+          <>
           {/* Vertical timeline */}
           <div className="relative">
             <div
@@ -871,8 +875,9 @@ export default function BriefingPage() {
               }
             </div>
           )}
-        </section>
-      )}
+          </>
+        )}
+      </section>
 
       <CitationDrawer
         open={drawerItem !== null}

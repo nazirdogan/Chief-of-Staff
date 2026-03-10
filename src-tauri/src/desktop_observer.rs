@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use tauri::{AppHandle, Emitter};
 
@@ -17,6 +18,9 @@ pub struct DesktopContext {
     pub clipboard_text: String,
     pub activity_type: String, // reading, writing, browsing, communicating, coding, designing
     pub url: Option<String>,   // browser URL if available
+    /// Vision OCR text from the current screen (Apple Silicon only; empty on Intel)
+    #[serde(default)]
+    pub ocr_text: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +37,10 @@ pub struct ObserverState {
     pub last_context: Option<DesktopContext>,
     pub apps_observed: u64,
     pub context_changes_emitted: u64,
+    /// Last OCR text captured (persisted across AX polls so it's attached to the next emit)
+    pub last_ocr_text: Vec<String>,
+    /// True when the Donna window itself is the active app (pause OCR to avoid self-capture)
+    pub donna_is_focused: bool,
 }
 
 // ─── macOS Accessibility FFI ──────────────────────────────────────────────────
@@ -747,6 +755,7 @@ fn capture_desktop_context() -> Option<DesktopContext> {
             clipboard_text,
             activity_type,
             url,
+            ocr_text: Vec::new(), // populated by observer loop from last_ocr_text
         })
     }
 }
@@ -754,7 +763,7 @@ fn capture_desktop_context() -> Option<DesktopContext> {
 // ─── Background Observer Loop ─────────────────────────────────────────────────
 
 #[cfg(target_os = "macos")]
-pub fn start_observer_loop(app: AppHandle, state: Arc<Mutex<ObserverState>>) {
+pub fn start_observer_loop(app: AppHandle, state: Arc<Mutex<ObserverState>>, paused_flag: Arc<AtomicBool>) {
     // Mark as running
     {
         let mut s = state.lock().unwrap();
@@ -771,7 +780,10 @@ pub fn start_observer_loop(app: AppHandle, state: Arc<Mutex<ObserverState>>) {
         let min_emit_interval = Duration::from_secs(1);
         // Poll interval (500ms — fast enough to catch app switches)
         let poll_interval = Duration::from_millis(500);
+        // OCR cadence: every 5 seconds
+        let ocr_interval = Duration::from_secs(5);
         let mut last_emit = Instant::now() - min_emit_interval;
+        let mut last_ocr = Instant::now() - ocr_interval; // fire on first eligible cycle
 
         loop {
             // Check if we should stop
@@ -780,6 +792,27 @@ pub fn start_observer_loop(app: AppHandle, state: Arc<Mutex<ObserverState>>) {
                 if !s.running {
                     break;
                 }
+            }
+
+            // Skip capture if paused
+            if paused_flag.load(Ordering::Relaxed) {
+                std::thread::sleep(poll_interval);
+                continue;
+            }
+
+            // ── Universal Vision OCR — every 5 seconds on aarch64, when not self-focused ──
+            let donna_focused = {
+                let s = state.lock().unwrap();
+                s.donna_is_focused
+            };
+            if !donna_focused && last_ocr.elapsed() >= ocr_interval {
+                let ocr_result = std::panic::catch_unwind(|| crate::screen_ocr::capture_ocr_text());
+                let ocr_texts = ocr_result.unwrap_or_default();
+                if !ocr_texts.is_empty() {
+                    let mut s = state.lock().unwrap();
+                    s.last_ocr_text = ocr_texts;
+                }
+                last_ocr = Instant::now();
             }
 
             // Capture current context — catch panics from unexpected AX element types
@@ -792,7 +825,19 @@ pub fn start_observer_loop(app: AppHandle, state: Arc<Mutex<ObserverState>>) {
                     continue;
                 }
             };
-            if let Some(context) = context_opt {
+            if let Some(mut context) = context_opt {
+                // Detect if Donna itself is focused (to pause OCR next cycle)
+                let is_donna = context.bundle_id == "com.donna.desktop"
+                    || context.active_app.to_lowercase().contains("donna");
+                {
+                    let mut s = state.lock().unwrap();
+                    s.donna_is_focused = is_donna;
+                    // Attach the most recent OCR text to every emitted context
+                    if !s.last_ocr_text.is_empty() {
+                        context.ocr_text = s.last_ocr_text.clone();
+                    }
+                }
+
                 let should_emit = {
                     let s = state.lock().unwrap();
                     context_has_changed(&s.last_context, &context)
@@ -829,6 +874,7 @@ pub fn start_observer_loop(app: AppHandle, state: Arc<Mutex<ObserverState>>) {
 pub fn start_observing(
     app: AppHandle,
     state: tauri::State<'_, Arc<Mutex<ObserverState>>>,
+    paused_flag: tauri::State<'_, Arc<AtomicBool>>,
 ) -> bool {
     #[cfg(target_os = "macos")]
     {
@@ -836,7 +882,7 @@ pub fn start_observing(
             macos::request_accessibility_permission();
             return false;
         }
-        start_observer_loop(app, state.inner().clone());
+        start_observer_loop(app, state.inner().clone(), paused_flag.inner().clone());
         true
     }
 
@@ -860,5 +906,19 @@ pub fn init_observer_state() -> Arc<Mutex<ObserverState>> {
         last_context: None,
         apps_observed: 0,
         context_changes_emitted: 0,
+        last_ocr_text: Vec::new(),
+        donna_is_focused: false,
     }))
+}
+
+// ─── Screen Recording Permission Commands ────────────────────────────────────
+
+#[tauri::command]
+pub fn check_screen_recording() -> bool {
+    crate::screen_ocr::has_screen_recording_permission()
+}
+
+#[tauri::command]
+pub fn request_screen_recording() -> bool {
+    crate::screen_ocr::request_screen_recording_permission()
 }

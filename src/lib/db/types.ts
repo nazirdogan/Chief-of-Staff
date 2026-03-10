@@ -116,6 +116,9 @@ export type MessageSentiment = 'positive' | 'negative' | 'neutral' | 'urgent';
 
 export type ReflectionType = 'weekly' | 'monthly';
 
+export type RoutineType = 'daily_briefing' | 'end_of_day' | 'weekly_review' | 'monthly_review' | 'custom';
+export type RoutineFrequency = 'daily' | 'weekly' | 'monthly';
+
 // ── Row types ──────────────────────────────────────────────
 
 export interface Profile {
@@ -548,6 +551,32 @@ export interface Reflection {
   created_at: string;
 }
 
+export interface UserRoutine {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  routine_type: RoutineType;
+  frequency: RoutineFrequency;
+  scheduled_time: string; // HH:MM
+  scheduled_day: number | null; // 0-6 for weekly (0=Mon), 1-31 for monthly
+  is_enabled: boolean;
+  instructions: string;
+  last_run_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RoutineOutput {
+  id: string;
+  user_id: string;
+  routine_id: string;
+  content: string;
+  generation_model: string | null;
+  generation_ms: number | null;
+  created_at: string;
+}
+
 export interface ChatConversation {
   id: string;
   user_id: string;
@@ -769,6 +798,23 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<Reflection, 'id'>>;
+      };
+      user_routines: {
+        Row: UserRoutine;
+        Insert: Omit<UserRoutine, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<UserRoutine, 'id'>>;
+      };
+      routine_outputs: {
+        Row: RoutineOutput;
+        Insert: Omit<RoutineOutput, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: never;
       };
       user_feedback: {
         Row: UserFeedback;

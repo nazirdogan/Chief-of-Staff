@@ -130,7 +130,7 @@ function isSameSession(
   return true;
 }
 
-function mergeParsedData(
+export function mergeParsedData(
   existing: Record<string, unknown>,
   incoming: Record<string, unknown>,
   category: string
@@ -165,6 +165,15 @@ function mergeParsedData(
     if (incoming.url) merged.url = incoming.url;
     if (incoming.pageTitle) merged.pageTitle = incoming.pageTitle;
     if (incoming.keyContent) merged.keyContent = incoming.keyContent;
+  }
+
+  // Accumulate OCR text across session (universal — all categories)
+  if (Array.isArray(incoming.ocrLines) && (incoming.ocrLines as string[]).length > 0) {
+    const existingLines = (merged.ocrLines as string[]) ?? [];
+    const incomingLines = incoming.ocrLines as string[];
+    // Deduplicate and keep most recent 50 lines
+    const combined = [...new Set([...existingLines, ...incomingLines])];
+    merged.ocrLines = combined.slice(-50);
   }
 
   return merged;
@@ -241,9 +250,14 @@ export async function processSnapshots(
         current.accumulatedActionItems.push({ text: item });
       }
 
+      // Inject OCR lines into structuredData so mergeParsedData can accumulate them
+      const incomingData = snapshot.ocr_text && snapshot.ocr_text.length > 0
+        ? { ...parsed.structuredData, ocrLines: snapshot.ocr_text }
+        : parsed.structuredData;
+
       current.mergedParsedData = mergeParsedData(
         current.mergedParsedData,
-        parsed.structuredData,
+        incomingData,
         parsed.appCategory
       );
 
@@ -294,7 +308,11 @@ export async function processSnapshots(
         }
       }
 
-      // Create new session
+      // Create new session (inject OCR lines into initial parsedData if available)
+      const initialParsedData = snapshot.ocr_text && snapshot.ocr_text.length > 0
+        ? { ...parsed.structuredData, ocrLines: snapshot.ocr_text }
+        : parsed.structuredData;
+
       const newSession = await createActivitySession(supabase, {
         userId,
         appName: snapshot.active_app,
@@ -302,7 +320,7 @@ export async function processSnapshots(
         windowTitle: snapshot.window_title,
         url: snapshot.url ?? undefined,
         startedAt: new Date(snapshot.timestamp).toISOString(),
-        parsedData: parsed.structuredData,
+        parsedData: initialParsedData,
         people: parsed.people.map(p => p.email ?? p.name),
         projects: (parsed.structuredData.projectName as string)
           ? [parsed.structuredData.projectName as string]
@@ -326,7 +344,7 @@ export async function processSnapshots(
           ),
           accumulatedTopics: new Set(),
           accumulatedActionItems: parsed.actionItems.map(text => ({ text })),
-          mergedParsedData: parsed.structuredData,
+          mergedParsedData: initialParsedData,
           textBuffer: parsed.rawText.length > 10 ? [parsed.rawText] : [],
         });
       }

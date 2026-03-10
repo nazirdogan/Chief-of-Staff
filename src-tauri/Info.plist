@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSScreenCaptureDescription</key>
+    <string>Donna reads your screen to understand context from apps that don't support accessibility APIs, such as WhatsApp, Zoom, and Keynote. This data never leaves your device without your permission.</string>
+</dict>
+</plist>

@@ -43,6 +43,8 @@ export interface DesktopContextSnapshot {
   clipboard_text: string;
   activity_type: string;
   url: string | null;
+  /** Apple Vision OCR text from the screen (Apple Silicon only; empty array on Intel) */
+  ocr_text?: string[];
 }
 
 /** A single parser that matches and parses a specific app type */

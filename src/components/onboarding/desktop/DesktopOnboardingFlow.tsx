@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
 import { WelcomeStep } from './WelcomeStep';
 import { AccessibilityStep } from './AccessibilityStep';
+import { ScreenRecordingStep } from './ScreenRecordingStep';
 import { ConnectDataStep } from './ConnectDataStep';
 import { ShowMeYourWorldStep } from './ShowMeYourWorldStep';
 import { ConfirmVIPsStep } from './ConfirmVIPsStep';
@@ -14,6 +15,7 @@ import { OnboardingCompleteStep } from './OnboardingCompleteStep';
 const STEPS = [
   'welcome',
   'accessibility',
+  'screen-recording',
   'connect',
   'observe',
   'vips',
@@ -25,10 +27,11 @@ type Step = (typeof STEPS)[number];
 
 const STEP_META: Partial<Record<Step, { label: string; number: number }>> = {
   accessibility: { label: 'Permissions', number: 1 },
-  connect: { label: 'Connect', number: 2 },
-  observe: { label: 'Observe', number: 3 },
-  vips: { label: 'People', number: 4 },
-  briefing: { label: 'Configure', number: 5 },
+  'screen-recording': { label: 'Screen', number: 2 },
+  connect: { label: 'Connect', number: 3 },
+  observe: { label: 'Observe', number: 4 },
+  vips: { label: 'People', number: 5 },
+  briefing: { label: 'Configure', number: 6 },
 };
 
 export function DesktopOnboardingFlow() {
@@ -276,14 +279,20 @@ export function DesktopOnboardingFlow() {
             )}
             {step === 'accessibility' && (
               <AccessibilityStep
-                onNext={() => goTo('connect')}
+                onNext={() => goTo('screen-recording')}
                 onBack={() => goTo('welcome')}
+              />
+            )}
+            {step === 'screen-recording' && (
+              <ScreenRecordingStep
+                onNext={() => goTo('connect')}
+                onBack={() => goTo('accessibility')}
               />
             )}
             {step === 'connect' && (
               <ConnectDataStep
                 onNext={() => goTo('observe')}
-                onBack={() => goTo('accessibility')}
+                onBack={() => goTo('screen-recording')}
               />
             )}
             {step === 'observe' && (

@@ -357,6 +357,8 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
     }
 
     // ── Reflections ──
+    // Weekly: generates on Monday for the previous Mon–Sun week.
+    // Monthly: generates on the 1st for the previous calendar month.
     case 'weekly-reflection': {
       const { generateReflection } = await import('@/lib/ai/agents/reflection');
       const { data: profile } = await db
@@ -365,10 +367,22 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
         .eq('id', userId)
         .single();
       const tz = profile?.timezone ?? 'UTC';
-      const now = new Date();
-      const periodEnd = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+      const localNow = new Date(new Date().toLocaleString('en-US', { timeZone: tz }));
+      const dayOfWeek = localNow.getDay(); // 0=Sun, 1=Mon, ...
+
+      // Only generate on Monday (day 1). Skip otherwise.
+      if (dayOfWeek !== 1) {
+        return { processed: 0 };
+      }
+
+      // Previous week: last Monday 00:00 → last Sunday 23:59
+      const periodEnd = new Date(localNow);
+      periodEnd.setDate(periodEnd.getDate() - 1); // Sunday
+      periodEnd.setHours(23, 59, 59, 999);
       const periodStart = new Date(periodEnd);
-      periodStart.setDate(periodStart.getDate() - 7);
+      periodStart.setDate(periodStart.getDate() - 6); // Previous Monday
+      periodStart.setHours(0, 0, 0, 0);
+
       await generateReflection(userId, 'weekly', periodStart, periodEnd);
       return { processed: 1 };
     }
@@ -380,10 +394,20 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
         .eq('id', userId)
         .single();
       const tz = profile?.timezone ?? 'UTC';
-      const now = new Date();
-      const periodEnd = new Date(now.toLocaleString('en-US', { timeZone: tz }));
-      const periodStart = new Date(periodEnd);
-      periodStart.setMonth(periodStart.getMonth() - 1);
+      const localNow = new Date(new Date().toLocaleString('en-US', { timeZone: tz }));
+      const dayOfMonth = localNow.getDate();
+
+      // Only generate on the 1st of the month. Skip otherwise.
+      if (dayOfMonth !== 1) {
+        return { processed: 0 };
+      }
+
+      // Previous calendar month: 1st → last day
+      const year = localNow.getFullYear();
+      const month = localNow.getMonth(); // current month (0-indexed)
+      const periodStart = new Date(year, month - 1, 1, 0, 0, 0, 0); // 1st of prev month
+      const periodEnd = new Date(year, month, 0, 23, 59, 59, 999); // last day of prev month
+
       await generateReflection(userId, 'monthly', periodStart, periodEnd);
       return { processed: 1 };
     }

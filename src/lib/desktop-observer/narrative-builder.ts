@@ -43,7 +43,7 @@ function groupSessionsByTimeBlock(sessions: ActivitySession[]): TimeBlock[] {
   return blocks.filter(b => b.sessions.length > 0);
 }
 
-function formatSessionForPrompt(session: ActivitySession): string {
+export function formatSessionForPrompt(session: ActivitySession): string {
   const duration = session.ended_at
     ? Math.round((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 60000)
     : Math.round((Date.now() - new Date(session.started_at).getTime()) / 60000);
@@ -66,12 +66,100 @@ function formatSessionForPrompt(session: ActivitySession): string {
     detail += `\n  Projects: ${session.projects.join(', ')}`;
   }
 
-  // Add key structured data (redact PII before interpolating into prompt)
-  const pd = session.parsed_data;
-  if (pd.subject) detail += `\n  Email subject: ${redactPII(String(pd.subject))}`;
-  if (pd.conversationPartner) detail += `\n  Chat with: ${redactPII(String(pd.conversationPartner))}`;
-  if (pd.fileName) detail += `\n  File: ${String(pd.fileName)}`;
-  if (pd.pageTitle) detail += `\n  Page: ${redactPII(String(pd.pageTitle))}`;
+  // Expand parsed_data into rich structured context per category
+  const pd = session.parsed_data as Record<string, unknown>;
+
+  switch (session.app_category) {
+    case 'chat': {
+      // Keep chat partner names — they are key intelligence, do NOT redact
+      if (pd.conversationPartner) detail += `\n  Chat with: ${String(pd.conversationPartner)}`;
+      if (pd.platform) detail += ` (${String(pd.platform)})`;
+      if (Array.isArray(pd.messages) && pd.messages.length > 0) {
+        const msgs = (pd.messages as unknown[]).slice(-10); // Last 10 for full conversation context
+        const msgLines = msgs.map((m) => {
+          const msg = m as Record<string, unknown>;
+          const text = String(msg.text ?? msg.content ?? '').slice(0, 200);
+          const sender = String(msg.sender ?? msg.from ?? '');
+          return sender ? `${sender}: ${text}` : text;
+        });
+        detail += `\n  Messages (${msgs.length}):\n    ${msgLines.join('\n    ')}`;
+      }
+      break;
+    }
+    case 'email': {
+      if (pd.subject) detail += `\n  Email subject: ${redactPII(String(pd.subject))}`;
+      if (pd.from) detail += `\n  From: ${redactPII(String(pd.from))}`;
+      if (pd.bodyPreview) {
+        detail += `\n  Preview: ${redactPII(String(pd.bodyPreview).slice(0, 200))}`;
+      }
+      break;
+    }
+    case 'code': {
+      // fileName now contains the full path e.g. "login/page.tsx" — tells AI which feature area
+      if (pd.fileName) detail += `\n  File: ${String(pd.fileName)}`;
+      if (pd.projectName) detail += `\n  Project: ${String(pd.projectName)}`;
+      if (pd.language) detail += `\n  Language: ${String(pd.language)}`;
+      if (Array.isArray(pd.functions) && pd.functions.length > 0) {
+        const fns = (pd.functions as unknown[]).slice(0, 5).map(String);
+        detail += `\n  Functions/Classes: ${fns.join(', ')}`;
+      }
+      // Include a short code preview so AI can infer WHAT was being written
+      if (pd.codeSnippet && typeof pd.codeSnippet === 'string' && pd.codeSnippet.length > 20) {
+        detail += `\n  Code preview: ${pd.codeSnippet.slice(0, 250)}`;
+      }
+      break;
+    }
+    case 'terminal': {
+      if (pd.currentDirectory) detail += `\n  Directory: ${String(pd.currentDirectory)}`;
+      if (pd.activeProcess) detail += `\n  Process: ${String(pd.activeProcess)}`;
+      if (Array.isArray(pd.recentCommands) && pd.recentCommands.length > 0) {
+        const cmds = (pd.recentCommands as unknown[]).slice(-5).map(String);
+        detail += `\n  Recent commands: ${cmds.join(' | ')}`;
+      }
+      break;
+    }
+    case 'browser': {
+      if (pd.pageTitle) detail += `\n  Page: ${redactPII(String(pd.pageTitle))}`;
+      if (pd.domain) detail += `\n  Domain: ${String(pd.domain)}`;
+      if (pd.keyContent) {
+        detail += `\n  Content: ${redactPII(String(pd.keyContent).slice(0, 300))}`;
+      }
+      break;
+    }
+    case 'calendar': {
+      if (Array.isArray(pd.events) && pd.events.length > 0) {
+        const evts = (pd.events as unknown[]).map((e) => {
+          const ev = e as Record<string, unknown>;
+          return `${String(ev.title ?? '')} at ${String(ev.time ?? ev.start ?? '')}`;
+        });
+        detail += `\n  Events: ${evts.join('; ')}`;
+      }
+      break;
+    }
+    default: {
+      // Fallback for document, design, unknown — keep existing simple fields
+      if (pd.subject) detail += `\n  Subject: ${redactPII(String(pd.subject))}`;
+      if (pd.fileName) detail += `\n  File: ${String(pd.fileName)}`;
+      if (pd.pageTitle) detail += `\n  Page: ${redactPII(String(pd.pageTitle))}`;
+      break;
+    }
+  }
+
+  // Universal OCR content — shown when AX API couldn't read the app
+  // (WhatsApp native, Zoom, Keynote, Pages, Excel, Figma, etc.)
+  if (Array.isArray(pd.ocrLines) && (pd.ocrLines as string[]).length > 0) {
+    const ocrLines = pd.ocrLines as string[];
+    // Only supplement with OCR when category-specific structured data is sparse
+    const hasStructuredContent =
+      (session.app_category === 'chat' && Array.isArray(pd.messages) && (pd.messages as unknown[]).length > 0) ||
+      (session.app_category === 'email' && pd.subject) ||
+      (session.app_category === 'browser' && pd.keyContent) ||
+      (session.app_category === 'code' && pd.fileName);
+    if (!hasStructuredContent) {
+      const sample = ocrLines.slice(0, 20).join('\n    ');
+      detail += `\n  Screen content (OCR):\n    ${redactPII(sample.slice(0, 600))}`;
+    }
+  }
 
   return detail;
 }
@@ -91,7 +179,7 @@ function buildNarrativePrompt(
     return `## ${block.label}\n${sessionTexts.join('\n\n')}`;
   });
 
-  return `You are a personal activity analyst. Given the user's activity sessions today, write a concise narrative of their day so far.
+  return `You are a personal activity analyst. Given the user's activity sessions today, produce a rich, LittleBird-style intelligence report.
 
 ACTIVITY SESSIONS:
 ${blockTexts.join('\n\n')}
@@ -101,23 +189,34 @@ STATS:
 - Active time: ${Math.round(stats.totalActiveSeconds / 60)} minutes
 - People interacted with: ${stats.people.slice(0, 10).join(', ') || 'none'}
 - Projects touched: ${stats.projects.join(', ') || 'none'}
-${previousNarrative ? `\nPREVIOUS NARRATIVE (update, don't repeat):\n${previousNarrative}` : ''}
+${previousNarrative ? `\nPREVIOUS NARRATIVE (build on this, add new detail):\n${previousNarrative}` : ''}
 
 Rules:
-1. Write 3-6 sentences covering what the user did, who they talked to, and what they focused on.
-2. Be specific — mention actual names, projects, and topics when available.
-3. Note transitions and patterns (e.g., "switched from coding to email around 11am").
-4. Highlight anything that seems important (VIP conversations, deadline mentions, long focus periods).
-5. Write in third person: "The user..." or "They..."
-6. Keep it under 200 words.
+1. Be SPECIFIC — use real names, exact feature names, actual conversation topics, amounts, URLs, file names, command names. Never use vague phrases like "worked on project" or "had conversations".
+2. Produce categorized bullet points grouped by activity type. Only include categories that have actual activity.
+3. Each bullet should name the specific thing done, who was involved, and any notable detail.
+4. The executive summary (narrative) should be 2-3 sentences capturing the day's major themes and any critical items.
+5. Key events should capture notable moments: important conversations, large commits, decisions made, alerts received (max 8 events).
+6. Write all bullet points in second person: "You reviewed...", "You spoke with...", "You deployed..."
+7. For code sessions: interpret the file path to understand the feature area. "login/page.tsx" in project "donna" = "editing Donna's login page". "settings/autonomy/page.tsx" = "working on autonomy settings". The directory path IS the feature context — use it.
+8. For chat sessions: when message content IS available, you MUST extract and name the specific topics, questions, news, or decisions discussed — e.g. "You spoke with Harshal about City's upcoming fixtures and shared the imdonna.app link" or "Mum gave feedback on the mobile view of the site". The messages are the most valuable signal in a chat session — surface them. If only the contact name is available with no messages, say "You had a [platform] conversation with [name]" — do NOT say they "showed up in your activity" and do NOT speculate about content.
+9. Never list a sub-directory (like "login", "settings", "api") as a standalone project focus area. The project is the top-level repo name (e.g., "donna"). Sub-directories tell you WHAT FEATURE was being worked on.
 
-Also extract key events as a JSON array (max 5):
+Categories to use (only include if activity exists):
+- "Development & Technical Work": coding sessions, terminal commands, deployments, PRs, debugging
+- "Communications & Meetings": chat conversations, emails sent/read, calls, calendar events
+- "Research & Browsing": web research, documentation reading, articles, tools explored
+- "Personal & Admin": personal tasks, admin work, settings, unrelated browsing
 
-Return JSON only:
+Return valid JSON only — no markdown fences, no commentary:
 {
-  "narrative": "<the narrative text>",
+  "narrative": "<2-3 sentence executive summary of the day>",
+  "structured_summary": {
+    "Development & Technical Work": ["You refactored the auth middleware in src/lib/middleware/withAuth.ts, extracting token validation into a separate helper", "You ran npm run typecheck and fixed 3 type errors in commitment.ts"],
+    "Communications & Meetings": ["You spoke with Sarah Chen about the Q2 roadmap — she asked about the timeline for the payments feature", "You read 4 emails from investors including a follow-up from Accel Partners"]
+  },
   "key_events": [
-    {"event": "<what happened>", "time": "<when>", "importance": "critical|important|background"}
+    {"event": "<specific description>", "time": "<HH:MM am/pm>", "importance": "critical|important|background"}
   ]
 }`;
 }
@@ -176,11 +275,12 @@ export async function buildDayNarrative(userId: string): Promise<void> {
   // Call AI
   let narrative = '';
   let keyEvents: Array<{ event: string; time: string; importance: string }> = [];
+  let structuredSummary: Record<string, string[]> | undefined;
 
   try {
     const response = await anthropic.messages.create({
       model: AI_MODELS.FAST,
-      max_tokens: 500,
+      max_tokens: 1500,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -191,6 +291,9 @@ export async function buildDayNarrative(userId: string): Promise<void> {
         const parsed = JSON.parse(cleaned);
         narrative = parsed.narrative || '';
         keyEvents = Array.isArray(parsed.key_events) ? parsed.key_events : [];
+        if (parsed.structured_summary && typeof parsed.structured_summary === 'object') {
+          structuredSummary = parsed.structured_summary as Record<string, string[]>;
+        }
       } catch {
         // If JSON parsing fails, use the raw text as narrative
         narrative = textBlock.text;
@@ -235,6 +338,7 @@ export async function buildDayNarrative(userId: string): Promise<void> {
     keyEvents: allKeyEvents,
     peopleSeen: allPeople,
     projectsWorkedOn: allProjects,
+    structuredSummary,
   });
 
   console.log(`[narrative-builder] Updated day narrative for ${todayStr}: ${sessions.length} sessions, ${Math.round(stats.totalActiveSeconds / 60)}min active`);

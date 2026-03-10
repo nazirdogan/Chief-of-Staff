@@ -18,6 +18,7 @@ export async function upsertDayNarrative(
     peopleSeen: string[];
     projectsWorkedOn: string[];
     embedding?: number[];
+    structuredSummary?: Record<string, string[]>;
   }
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,6 +40,7 @@ export async function upsertDayNarrative(
         people_seen: params.peopleSeen,
         projects_worked_on: params.projectsWorkedOn,
         embedding: params.embedding ?? null,
+        structured_summary: params.structuredSummary ?? null,
         last_updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id,narrative_date' }

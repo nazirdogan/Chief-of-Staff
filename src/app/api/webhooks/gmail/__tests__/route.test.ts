@@ -78,8 +78,8 @@ function makePubSubRequest(emailAddress: string, historyId = 12345): NextRequest
 describe('POST /api/webhooks/gmail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: user found
-    mockSingle.mockResolvedValue({ data: { user_id: 'user-123' } });
+    // Default: user found — include id and nango_connection_id as route now selects them
+    mockSingle.mockResolvedValue({ data: { user_id: 'user-123', id: 'integration-456', nango_connection_id: 'nango-conn-789' } });
     // Default: historyId stored
     mockGetGmailHistoryId.mockResolvedValue('12345');
     // Default: fetch returns new messages
@@ -115,9 +115,11 @@ describe('POST /api/webhooks/gmail', () => {
     mockGetGmailHistoryId.mockResolvedValue(null);
     const res = await POST(makePubSubRequest('test@gmail.com'));
     expect(res.status).toBe(200);
-    expect(mockSetupGmailWatch).toHaveBeenCalledWith('user-123');
+    // Route passes userId + nangoConnectionId to setupGmailWatch
+    expect(mockSetupGmailWatch).toHaveBeenCalledWith('user-123', 'nango-conn-789');
+    // Route scopes historyId storage to integrationId, not userId
     expect(mockSaveGmailHistoryId).toHaveBeenCalledWith(
-      mockServiceClient, 'user-123', '99999', '9999999999',
+      mockServiceClient, 'integration-456', '99999', '9999999999',
     );
     // Should NOT try to fetch messages — we need a baseline historyId first
     expect(mockFetchNewMessages).not.toHaveBeenCalled();
@@ -129,9 +131,9 @@ describe('POST /api/webhooks/gmail', () => {
 
     const res = await POST(makePubSubRequest('test@gmail.com'));
     expect(res.status).toBe(200);
-    expect(mockSetupGmailWatch).toHaveBeenCalledWith('user-123');
+    expect(mockSetupGmailWatch).toHaveBeenCalledWith('user-123', 'nango-conn-789');
     expect(mockSaveGmailHistoryId).toHaveBeenCalledWith(
-      mockServiceClient, 'user-123', '99999', '9999999999',
+      mockServiceClient, 'integration-456', '99999', '9999999999',
     );
   });
 
@@ -144,10 +146,13 @@ describe('POST /api/webhooks/gmail', () => {
 
     const res = await POST(makePubSubRequest('test@gmail.com'));
     expect(res.status).toBe(200);
-    expect(mockIngestGmailMessageRefs).toHaveBeenCalledWith('user-123', newMessages);
-    // historyId should advance to 12350 (no expiration update — just a delta save)
+    // Route now passes nangoConnectionId and integrationId as extra args
+    expect(mockIngestGmailMessageRefs).toHaveBeenCalledWith(
+      'user-123', newMessages, 'nango-conn-789', 'integration-456',
+    );
+    // historyId scoped to integrationId, no expiration on a delta save
     expect(mockSaveGmailHistoryId).toHaveBeenCalledWith(
-      mockServiceClient, 'user-123', '12350',
+      mockServiceClient, 'integration-456', '12350',
     );
   });
 
@@ -155,9 +160,9 @@ describe('POST /api/webhooks/gmail', () => {
     mockFetchNewMessages.mockResolvedValue({ messages: [], newHistoryId: '12346' });
     await POST(makePubSubRequest('test@gmail.com'));
     expect(mockIngestGmailMessageRefs).not.toHaveBeenCalled();
-    // But still advances historyId
+    // But still advances historyId (scoped to integrationId)
     expect(mockSaveGmailHistoryId).toHaveBeenCalledWith(
-      mockServiceClient, 'user-123', '12346',
+      mockServiceClient, 'integration-456', '12346',
     );
   });
 });
