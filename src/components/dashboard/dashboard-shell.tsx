@@ -52,11 +52,12 @@ const t = {
   activeBorder: 'rgba(232,132,92,0.25)',
 };
 
-function NavItem({ href, label, icon: Icon, pathname }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string }) {
+function NavItem({ href, label, icon: Icon, pathname, onClick }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string; onClick?: () => void }) {
   const active = href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
   return (
     <Link
       href={href}
+      onClick={onClick}
       className="group flex items-center gap-2.5 rounded-lg px-3 py-[9px] text-[13px] font-medium transition-all duration-150"
       style={{
         background: active ? t.activeAccent : 'transparent',
@@ -90,6 +91,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const conversations = useChatStore((s) => s.conversations);
   const loadConversations = useChatStore((s) => s.loadConversations);
+  const startNewConversation = useChatStore((s) => s.startNewConversation);
   const renameConversation = useChatStore((s) => s.renameConversation);
   const toggleFavorite = useChatStore((s) => s.toggleFavorite);
   const deleteConversationFromStore = useChatStore((s) => s.deleteConversation);
@@ -344,7 +346,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <nav className="flex flex-1 flex-col px-3 pt-3 overflow-hidden">
             <div className="space-y-0.5">
               {navItems.map((item) => (
-                <NavItem key={item.href} {...item} pathname={pathname} />
+                <NavItem
+                  key={item.href}
+                  {...item}
+                  pathname={pathname}
+                  onClick={item.href === '/chat' ? startNewConversation : undefined}
+                />
               ))}
             </div>
 
@@ -360,6 +367,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </span>
                   <Link
                     href="/chat"
+                    onClick={startNewConversation}
                     className="rounded p-0.5 transition-colors duration-150"
                     style={{ color: t.textQuaternary }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = t.textTertiary; }}
