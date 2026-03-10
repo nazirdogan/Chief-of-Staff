@@ -27,7 +27,20 @@ export const POST = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedR
     const supabase = createServiceClient();
 
     // Get all connections from Nango for this user
-    const nangoConnections = await listUserConnections(userId);
+    let nangoConnections: Awaited<ReturnType<typeof listUserConnections>> = [];
+    try {
+      nangoConnections = await listUserConnections(userId);
+    } catch (nangoError) {
+      const msg = nangoError instanceof Error ? nangoError.message : String(nangoError);
+      // If Nango returns 401, the secret key is invalid/expired — return current DB state
+      // rather than crashing with 500. Avoids cascading failures from the polling interval.
+      if (msg.includes('401') || msg.toLowerCase().includes('unauthorized')) {
+        console.error('[integrations/sync] Nango auth failed (401) — check NANGO_SECRET_KEY:', msg);
+        const integrations = await listUserIntegrations(supabase, userId);
+        return NextResponse.json({ synced: 0, integrations, nangoError: 'Nango authentication failed' });
+      }
+      throw nangoError;
+    }
 
     // Upsert each connection into the DB
     let newConnections = 0;
