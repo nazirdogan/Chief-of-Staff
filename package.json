@@ -13,6 +13,7 @@
     "ops:sweep": "npx tsx scripts/operations/run-am-sweep.ts",
     "ops:timeblock": "npx tsx scripts/operations/run-time-blocker.ts",
     "ops:full": "npx tsx scripts/operations/run-full-morning.ts",
+    "tauri": "npx tauri",
     "tauri:dev": "npx tauri dev",
     "tauri:build": "npx tauri build"
   },
