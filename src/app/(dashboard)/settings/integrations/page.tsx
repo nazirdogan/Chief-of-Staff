@@ -85,6 +85,7 @@ export default function IntegrationsSettingsPage() {
   const [consentProvider, setConsentProvider] = useState<IntegrationConfig | null>(null);
   const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
   const [tokenFetching, setTokenFetching] = useState(false);
+  const [tokenError, setTokenError] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   // Tracks which integration row UUID is being disconnected
@@ -193,6 +194,7 @@ export default function IntegrationsSettingsPage() {
   async function openConsent(config: IntegrationConfig) {
     setConsentProvider(config);
     setPendingSessionToken(null);
+    setTokenError(null);
     setTokenFetching(true);
     try {
       const res = await fetch('/api/integrations/connect', {
@@ -203,8 +205,13 @@ export default function IntegrationsSettingsPage() {
       if (res.ok) {
         const data = await res.json();
         setPendingSessionToken(data.sessionToken ?? null);
+      } else {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        setTokenError(data.error ?? `Failed to start ${config.label} connection. Check that the integration is configured in Nango.`);
       }
-    } catch { /* Token will be absent — button stays disabled */ } finally {
+    } catch {
+      setTokenError(`Could not reach the server. Please try again.`);
+    } finally {
       setTokenFetching(false);
     }
   }
@@ -275,9 +282,10 @@ export default function IntegrationsSettingsPage() {
           providerLabel={consentProvider.label}
           permissions={consentProvider.permissions}
           onConsent={() => handleConnect(consentProvider)}
-          onCancel={() => setConsentProvider(null)}
+          onCancel={() => { setConsentProvider(null); setTokenError(null); }}
           loading={connecting}
           tokenLoading={tokenFetching}
+          tokenError={tokenError}
         />
       </div>
     );

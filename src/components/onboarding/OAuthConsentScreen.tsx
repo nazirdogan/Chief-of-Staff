@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Shield, Eye, Trash2 } from 'lucide-react';
+import { Shield, Eye, Trash2, AlertCircle } from 'lucide-react';
 
 interface PermissionItem {
   label: string;
@@ -28,6 +28,8 @@ interface OAuthConsentScreenProps {
    *  an async gap between the click and window.open() which would trigger popup
    *  blockers. */
   tokenLoading?: boolean;
+  /** Error message if the session token could not be obtained. */
+  tokenError?: string | null;
 }
 
 export function OAuthConsentScreen({
@@ -37,6 +39,7 @@ export function OAuthConsentScreen({
   onCancel,
   loading,
   tokenLoading,
+  tokenError,
 }: OAuthConsentScreenProps) {
   return (
     <Card className="mx-auto max-w-lg">
@@ -98,11 +101,17 @@ export function OAuthConsentScreen({
           </span>
         </div>
       </CardContent>
+      {tokenError && (
+        <div className="mx-6 mb-4 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{tokenError}</span>
+        </div>
+      )}
       <CardFooter className="flex gap-3">
         <Button variant="outline" className="flex-1" onClick={onCancel}>
           Cancel
         </Button>
-        <Button className="flex-1" onClick={onConsent} disabled={loading || tokenLoading}>
+        <Button className="flex-1" onClick={onConsent} disabled={loading || tokenLoading || !!tokenError}>
           {loading ? 'Connecting...' : tokenLoading ? 'Preparing...' : `Connect ${providerLabel}`}
         </Button>
       </CardFooter>
