@@ -2,12 +2,20 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * Platform detection: The desktop app (Tauri) sets a `donna_client=desktop`
- * cookie at launch. This is the only reliable way to distinguish desktop
- * from web on navigation requests (custom headers don't apply to page loads).
+ * Platform detection: Two signals are checked, in priority order:
+ *
+ * 1. User-Agent: Tauri v2 is configured (tauri.conf.json `userAgent`) to include
+ *    "DonnaDesktop" in every request. This fires on the very first load — before
+ *    any cookie exists — solving the chicken-and-egg problem.
+ *
+ * 2. Cookie: The `donna_client=desktop` cookie is set client-side by /app-entry
+ *    as a persistent fallback so that subsequent navigation requests (which may
+ *    not carry the custom UA in all edge cases) are still recognised.
  */
 function isDesktopClient(request: NextRequest): boolean {
-  return request.cookies.get('donna_client')?.value === 'desktop';
+  if (request.cookies.get('donna_client')?.value === 'desktop') return true;
+  const ua = request.headers.get('user-agent') ?? '';
+  return ua.includes('DonnaDesktop');
 }
 
 export async function middleware(request: NextRequest) {
@@ -47,6 +55,12 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isDesktop = isDesktopClient(request);
+
+  // ── /app-entry: Tauri desktop entry point — always allow through ──
+  // This page sets the donna_client cookie client-side, then redirects to /login.
+  // We must not intercept it here: on first launch the cookie doesn't exist yet,
+  // so any isDesktop check would be false and would redirect the desktop app to /download.
+  if (pathname === '/app-entry') return response;
 
   // ── Website-only routes — never shown inside the desktop app ──
   // These include marketing, download, billing confirmation, oauth return, and showcases.

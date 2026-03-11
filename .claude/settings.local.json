@@ -107,7 +107,15 @@
       "Read(//Users/nazir/donna/**)",
       "Bash(done)",
       "Bash(ffprobe \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" 2>&1 | grep Duration && md5 \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" && md5 \"/Users/nazir/donna/Rachelle Voiceover.mp3\")",
-      "Bash(find /Users/nazir/donna/src-tauri -type f \\\\\\( -name \"*.toml\" -o -name \"*.json\" \\\\\\) 2>/dev/null | grep -v target | head -20)"
+      "Bash(find /Users/nazir/donna/src-tauri -type f \\\\\\( -name \"*.toml\" -o -name \"*.json\" \\\\\\) 2>/dev/null | grep -v target | head -20)",
+      "Bash(cd /Users/nazir/donna/src-tauri/icons && sips -z 32 32 icon.png --out 32x32.png && sips -z 256 256 icon.png --out 128x128@2x.png && echo \"Done\")",
+      "Bash(sips -g pixelWidth -g pixelHeight /Users/nazir/donna/src-tauri/icons/icon.png)",
+      "Bash(sips -z 128 128 /Users/nazir/donna/src-tauri/icons/icon.png --out /Users/nazir/donna/src-tauri/icons/128x128.png && sips -z 256 256 /Users/nazir/donna/src-tauri/icons/icon.png --out /Users/nazir/donna/src-tauri/icons/128x128@2x.png && sips -g pixelWidth -g pixelHeight /Users/nazir/donna/src-tauri/icons/128x128.png /Users/nazir/donna/src-tauri/icons/128x128@2x.png)",
+      "Bash(qlmanage -t -s 256 -o /tmp /Users/nazir/donna/src-tauri/icons/icon.png 2>/dev/null && echo \"preview saved to /tmp/icon.png.png\")",
+      "Bash(qlmanage -t -s 512 -o /tmp /Users/nazir/donna/src-tauri/icons/icon.png 2>/dev/null)",
+      "Bash(python3 << 'EOF'\nfrom PIL import Image, ImageDraw\n\nSIZE = 1024\n\n# Use the actual brand logo exactly as designed\nlogo = Image.open\\(\"/Users/nazir/donna/src-tauri/icons/donna-monogram-light.png\"\\).convert\\(\"RGBA\"\\)\n\n# Resize to fill the full canvas \\(the logo already has its own background\\)\ncanvas = logo.resize\\(\\(SIZE, SIZE\\), Image.LANCZOS\\)\n\n# Apply macOS squircle mask — corner radius ~22.4% of size\nmask_img = Image.new\\(\"L\", \\(SIZE, SIZE\\), 0\\)\nmask_draw = ImageDraw.Draw\\(mask_img\\)\nradius = int\\(SIZE * 0.224\\)\nmask_draw.rounded_rectangle\\([0, 0, SIZE - 1, SIZE - 1], radius=radius, fill=255\\)\ncanvas.putalpha\\(mask_img\\)\n\ncanvas.save\\(\"/Users/nazir/donna/src-tauri/icons/icon.png\"\\)\nprint\\(\"Done\"\\)\nEOF\nqlmanage -t -s 512 -o /tmp /Users/nazir/donna/src-tauri/icons/icon.png 2>/dev/null)",
+      "Bash(sips -g pixelWidth -g pixelHeight \"/Users/nazir/donna/New Donna Logos/donna-monogram-dark \\(1\\).png\")",
+      "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/layout.tsx\" 2>/dev/null)"
     ]
   }
 }

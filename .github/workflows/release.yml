@@ -108,6 +108,14 @@ jobs:
           includeDebug: false
           args: --target universal-apple-darwin   # builds fat binary: Apple Silicon + Intel
 
+      # ── Rename DMG to stable filename ─────────────────────────────────────────
+      # Tauri produces Donna_0.1.0_universal.dmg — rename to Donna.dmg so the
+      # download URL never changes between releases.
+      - name: Rename DMG to stable filename
+        run: |
+          find src-tauri/target/release/bundle/dmg -name "*.dmg" \
+            -exec mv {} src-tauri/target/release/bundle/dmg/Donna.dmg \;
+
   # ── Optional: Windows build (uncomment when ready) ────────────────────────
   # build-windows:
   #   name: Build Windows installer
