@@ -16,6 +16,8 @@ jobs:
   build-macos:
     name: Build macOS DMG
     runs-on: macos-latest
+    permissions:
+      contents: write   # required to create GitHub Releases and upload assets
 
     steps:
       # ── 1. Checkout ────────────────────────────────────────────────────────
