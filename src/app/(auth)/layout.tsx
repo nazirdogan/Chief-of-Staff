@@ -3,6 +3,15 @@
 import { useEffect } from 'react';
 import { useIsTauri } from '@/lib/utils/is-tauri';
 
+const c = {
+  linen: '#F1EDEA',
+  parchment: '#FAF9F6',
+  charcoal: '#2D2D2D',
+  dawn: '#E8845C',
+  slate: '#8D99AE',
+  playfair: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+};
+
 export default function AuthLayout({
   children,
 }: {
@@ -19,54 +28,93 @@ export default function AuthLayout({
   }, [isTauri]);
 
   return (
-    <div className="flex min-h-screen">
-      {/* Brand panel — Linen background, editorial */}
+    <div
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        background: c.parchment,
+      }}
+    >
+      {/* Brand panel — Linen background, editorial. Always visible (desktop-only app). */}
       <div
-        className="hidden w-1/2 flex-col justify-between p-10 lg:flex"
-        style={{ background: '#F1EDEA', color: '#2D2D2D' }}
+        style={{
+          width: '45%',
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '40px',
+          background: c.linen,
+        }}
       >
-        {/* Logo lockup */}
-        <div className="flex items-center gap-2">
+        {/* Wordmark */}
+        <div>
           <span
-            className="text-[22px]"
             style={{
-              fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+              fontFamily: c.playfair,
               fontWeight: 700,
-              color: '#2D2D2D',
+              fontSize: '22px',
+              color: c.charcoal,
+              letterSpacing: '-0.01em',
             }}
           >
-            Donna<span style={{ color: '#E8845C' }}>.</span>
+            Donna<span style={{ color: c.dawn }}>.</span>
           </span>
         </div>
 
-        <div className="max-w-md space-y-4">
+        {/* Editorial headline */}
+        <div style={{ maxWidth: '360px' }}>
           <h2
-            className="text-[42px] leading-[1.05] tracking-[-0.02em]"
             style={{
-              fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+              fontFamily: c.playfair,
               fontWeight: 700,
-              color: '#2D2D2D',
+              fontSize: '42px',
+              lineHeight: 1.05,
+              letterSpacing: '-0.02em',
+              color: c.charcoal,
+              margin: 0,
+              marginBottom: '16px',
             }}
           >
             Before you ask.
             <br />
-            <em style={{ color: '#E8845C', fontStyle: 'italic' }}>Donna already knows.</em>
+            <em style={{ color: c.dawn, fontStyle: 'italic' }}>Donna already knows.</em>
           </h2>
-          <p className="text-[15px] leading-relaxed" style={{ color: '#8D99AE' }}>
+          <p
+            style={{
+              fontSize: '15px',
+              lineHeight: 1.65,
+              color: c.slate,
+              margin: 0,
+            }}
+          >
             One proactive daily briefing across your entire digital life.
             Know what matters, what you promised, and what to do first.
           </p>
         </div>
 
-        <p className="text-xs" style={{ color: 'rgba(141,153,174,0.6)' }}>
+        {/* Footnote */}
+        <p
+          style={{
+            fontSize: '12px',
+            color: 'rgba(141,153,174,0.6)',
+            margin: 0,
+          }}
+        >
           Secure by default. Your data never leaves your control.
         </p>
       </div>
 
       {/* Form panel — Parchment background */}
       <div
-        className="flex w-full flex-1 items-center justify-center px-4 lg:w-1/2"
-        style={{ background: '#FAF9F6' }}
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '32px 24px',
+          background: c.parchment,
+        }}
       >
         {children}
       </div>

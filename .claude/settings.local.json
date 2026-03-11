@@ -106,7 +106,8 @@
       "Bash(for f:*)",
       "Read(//Users/nazir/donna/**)",
       "Bash(done)",
-      "Bash(ffprobe \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" 2>&1 | grep Duration && md5 \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" && md5 \"/Users/nazir/donna/Rachelle Voiceover.mp3\")"
+      "Bash(ffprobe \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" 2>&1 | grep Duration && md5 \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" && md5 \"/Users/nazir/donna/Rachelle Voiceover.mp3\")",
+      "Bash(find /Users/nazir/donna/src-tauri -type f \\\\\\( -name \"*.toml\" -o -name \"*.json\" \\\\\\) 2>/dev/null | grep -v target | head -20)"
     ]
   }
 }

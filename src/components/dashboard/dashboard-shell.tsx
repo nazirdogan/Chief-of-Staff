@@ -18,9 +18,11 @@ import {
   BookOpen,
   Star,
   Pencil,
+  Zap,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
+import { useNavigationHistory } from '@/hooks/useNavigationHistory';
 import { OneTapConfirmToast } from '@/components/shared/OneTapConfirmToast';
 import { useOneTapQueue } from '@/hooks/useOneTapQueue';
 import { CatchUpBanner } from '@/components/catch-up/CatchUpBanner';
@@ -106,6 +108,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { current: currentToast, resolve: resolveToast } = useOneTapQueue();
   const setCatchUpState = useCatchUpStore((s) => s.setState);
   const setStaleWarnings = useCatchUpStore((s) => s.setStaleWarnings);
+
+  const navHistory = useNavigationHistory();
+  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/billing/subscription')
+      .then((r) => r.json())
+      .then((d) => setSubscriptionTier(d.tier ?? 'free'))
+      .catch(() => setSubscriptionTier('free'));
+  }, []);
 
   const supabase = getSupabaseBrowserClient();
 
@@ -480,6 +492,20 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               style={{ height: 1, background: t.border }}
             />
 
+            {/* Upgrade button — hidden on Pro plan */}
+            {subscriptionTier !== null && subscriptionTier !== 'pro' && (
+              <Link
+                href="/settings/pricing"
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-[9px] mb-0.5 text-[13px] font-semibold transition-all duration-150"
+                style={{ color: t.dawn }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.75'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+              >
+                <Zap size={15} style={{ color: t.dawn }} />
+                Upgrade plan
+              </Link>
+            )}
+
             <NavItem href="/settings" label="Settings" icon={Settings} pathname={pathname} />
 
             <button
@@ -511,7 +537,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </main>
 
         <FeedbackWidget />
-        <CommandPalette open={cmdkOpen} onOpenChange={setCmdkOpen} />
+        <CommandPalette
+          open={cmdkOpen}
+          onOpenChange={setCmdkOpen}
+          recentPages={navHistory}
+          recentChats={conversations}
+        />
 
         {/* Tier 2 one-tap confirm toast — hidden when Tier 3 dialog is open */}
         {currentToast && !dialogOpen && (

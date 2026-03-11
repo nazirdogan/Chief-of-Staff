@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe, tierFromSubscription } from '@/lib/billing/stripe';
+import { withWebhookRateLimit } from '@/lib/middleware/withRateLimit';
 import { createServiceClient } from '@/lib/db/client';
 
 // Public route — Stripe sends webhook events here.
 // HMAC signature is verified via stripe.webhooks.constructEvent before any processing.
+// Rate limited: 60 req/min per IP
 
-export const POST = async (req: NextRequest) => {
+export const POST = withWebhookRateLimit(60, '1 m', async (req: NextRequest) => {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
 
@@ -55,6 +57,7 @@ export const POST = async (req: NextRequest) => {
           subscription_tier: tier,
           subscription_status: subscription.status,
           stripe_subscription_id: subscription.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           subscription_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         }).eq('id', userId);
@@ -76,6 +79,7 @@ export const POST = async (req: NextRequest) => {
           subscription_tier: tier,
           subscription_status: subscription.status,
           stripe_subscription_id: subscription.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           subscription_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         }).eq('id', userId);
@@ -130,4 +134,4 @@ export const POST = async (req: NextRequest) => {
     // Return 500 so Stripe retries the event
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
-};
+});

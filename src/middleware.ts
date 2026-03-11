@@ -48,16 +48,23 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isDesktop = isDesktopClient(request);
 
-  // ── Public routes (landing, download, beta) ──
-  const isPublicRoute = pathname === '/' || pathname === '/beta' || pathname === '/download';
+  // ── Website-only routes — never shown inside the desktop app ──
+  // These include marketing, download, billing confirmation, oauth return, and showcases.
+  const isWebsiteOnlyRoute =
+    pathname === '/' ||
+    pathname === '/beta' ||
+    pathname === '/download' ||
+    pathname === '/connected' ||
+    pathname === '/billing/success' ||
+    pathname.startsWith('/showcase');
 
-  if (isPublicRoute && user && isDesktop) {
+  if (isWebsiteOnlyRoute && isDesktop) {
     const url = request.nextUrl.clone();
-    url.pathname = '/chat';
+    url.pathname = user ? '/chat' : '/login';
     return NextResponse.redirect(url);
   }
 
-  if (isPublicRoute) return response;
+  if (isWebsiteOnlyRoute) return response;
 
   // ── Auth routes: desktop-only ──
   const isAuthRoute = pathname === '/login' || pathname === '/signup';

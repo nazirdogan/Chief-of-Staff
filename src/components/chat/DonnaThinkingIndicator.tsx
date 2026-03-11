@@ -1,25 +1,82 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 
-const THINKING_STEPS = [
+const THINKING_MESSAGES = [
   'On it.',
   'Reading your context...',
   'Finding what you actually need...',
   'Checking your calendar...',
   'Cutting through the noise...',
   'Almost.',
+  'Pulling the threads together...',
+  'Cross-referencing your week...',
+  'Connecting the dots...',
+  'Scanning your inbox...',
+  'Looking at what matters...',
+  'Give me a second.',
+  'Running through the details...',
+  'Reading between the lines...',
+  'Just a moment.',
+  'Digging deeper...',
+  'Sorting through the signal...',
+  'Getting the full picture...',
+  'Thinking this through...',
+  'One sec.',
+  'Pulling your recent activity...',
+  'Looking at the bigger picture...',
+  'Cross-checking your commitments...',
+  'Filtering the noise...',
+  'Almost there.',
+  'Seeing who\'s been waiting...',
+  'Spotting what slipped through...',
+  'Mapping your day...',
+  'Reviewing what came in overnight...',
+  'Piecing it together...',
+  'Working on it.',
+  'Prioritising for you...',
+  'Checking what actually matters...',
+  'Your attention is limited. Mine isn\'t.',
+  'Making sure I have this right...',
+  'Looking across your whole week...',
+  'Checking what you might have missed...',
+  'Pulling the full story together...',
+  'Thinking ahead...',
+  'Tracking down the thread...',
+  'Reading your signals...',
+  'Lining it all up...',
+  'Let me check on that.',
+  'Scanning for what matters...',
+  'Sorting your priorities...',
+  'Running a quick check...',
+  'Pulling together what I know...',
+  'Getting you what you need...',
+  'Sifting through the recent messages...',
+  'Nothing gets past me.',
 ];
 
 const STEP_DURATION_MS = 2500;
 
+function pickNext(current: number): number {
+  let next: number;
+  do {
+    next = Math.floor(Math.random() * THINKING_MESSAGES.length);
+  } while (next === current);
+  return next;
+}
+
 export default function DonnaThinkingIndicator() {
-  const [stepIndex, setStepIndex] = useState(0);
+  // Start with a random message instead of always index 0
+  const [msgIndex, setMsgIndex] = useState(() =>
+    Math.floor(Math.random() * THINKING_MESSAGES.length)
+  );
+  const msgIndexRef = useRef(msgIndex);
+  msgIndexRef.current = msgIndex;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStepIndex((i) => (i + 1) % THINKING_STEPS.length);
+      setMsgIndex((current) => pickNext(current));
     }, STEP_DURATION_MS);
     return () => clearInterval(interval);
   }, []);
@@ -31,7 +88,7 @@ export default function DonnaThinkingIndicator() {
     >
       <AnimatePresence mode="wait">
         <motion.div
-          key={stepIndex}
+          key={msgIndex}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -4 }}
@@ -42,7 +99,7 @@ export default function DonnaThinkingIndicator() {
             duration={1.8}
             spread={3}
           >
-            {THINKING_STEPS[stepIndex]}
+            {THINKING_MESSAGES[msgIndex]}
           </TextShimmer>
         </motion.div>
       </AnimatePresence>

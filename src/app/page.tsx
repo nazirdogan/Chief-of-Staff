@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useWebsiteOnly } from "@/hooks/useWebsiteOnly";
 import {
   Mail,
   Calendar,
@@ -288,6 +289,7 @@ function BriefingBlock({
    LANDING PAGE
 ═══════════════════════════════════════════ */
 export default function LandingPage() {
+  useWebsiteOnly();
   const router = useRouter();
   const [heroEmail, setHeroEmail] = useState("");
   const [heroSubmitted, setHeroSubmitted] = useState(false);

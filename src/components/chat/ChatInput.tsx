@@ -268,27 +268,25 @@ export default function ChatInput({
         )}
 
         {/* Textarea */}
-        <div className="overflow-y-auto">
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder={files.length > 0 ? 'Add a message or just send the files…' : 'Ask Donna anything…'}
-            disabled={disabled}
-            rows={1}
-            className="w-full resize-none bg-transparent px-4 py-3 text-[15px] leading-6 outline-none placeholder:opacity-60"
-            style={{
-              color: c.text,
-              caretColor: c.dawn,
-              maxHeight: `${24 * 6}px`,
-              overflow: 'hidden',
-            }}
-            autoFocus
-          />
-        </div>
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={files.length > 0 ? 'Add a message or just send the files…' : 'Ask Donna anything…'}
+          disabled={disabled}
+          rows={1}
+          className="w-full resize-none bg-transparent px-4 py-3 text-[15px] leading-6 outline-none placeholder:opacity-60"
+          style={{
+            color: c.text,
+            caretColor: c.dawn,
+            maxHeight: `${24 * 6}px`,
+            overflowY: 'auto',
+          }}
+          autoFocus
+        />
 
         {/* Action bar */}
         <div

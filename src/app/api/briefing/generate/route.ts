@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
+import { handleApiError } from '@/lib/api-utils';
 import { generateDailyBriefing } from '@/lib/ai/agents/briefing';
 import { syncAllIntegrations } from '@/lib/integrations/sync';
 import { createServiceClient } from '@/lib/db/client';
@@ -63,10 +64,6 @@ export const POST = withAuth(withRateLimit(3, '1 h', async (req: AuthenticatedRe
   } catch (err) {
     console.error('[BRIEFING_GENERATE] FAILED:', err);
     console.error('[BRIEFING_GENERATE] Stack:', err instanceof Error ? err.stack : 'no stack');
-    const message = err instanceof Error ? err.message : 'Briefing generation failed';
-    return NextResponse.json(
-      { error: message, code: 'GENERATION_FAILED' },
-      { status: 500 }
-    );
+    return handleApiError(err);
   }
 }));

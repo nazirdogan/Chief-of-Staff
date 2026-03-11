@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod/v4';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
@@ -28,17 +29,23 @@ const NANGO_TO_DB_PROVIDER: Record<string, IntegrationProvider> = {
  * the session token. The frontend SDK uses this token to open a real
  * OAuth popup for the provider.
  */
+const connectSchema = z.object({
+  provider: z.enum(['google-mail', 'google-calendar', 'slack', 'notion'] as const),
+});
+
 export const POST = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
-    const { provider } = body as { provider: string };
+    const parsed = connectSchema.safeParse(body);
 
-    if (!provider || !NANGO_TO_DB_PROVIDER[provider]) {
+    if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid provider', code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
+
+    const { provider } = parsed.data;
 
     const scopes = PROVIDER_SCOPES[provider];
     const sessionToken = await createConnectSession(req.user.id, provider, scopes);

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import type { AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { bootWorker } from '@/lib/worker/boot';
 
@@ -8,8 +9,9 @@ import { bootWorker } from '@/lib/worker/boot';
  *
  * Boots the local worker system (catch-up + scheduler) for the authenticated user.
  * Runs server-side to avoid bundling server-only modules in the client.
+ * Rate limited: 3 req/min to prevent abuse.
  */
-export const POST = withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(3, '1 m', async (req: AuthenticatedRequest) => {
   const userId = req.user.id;
   const { appClosedAt } = (await req.json().catch(() => ({}))) as {
     appClosedAt?: number;
@@ -25,4 +27,4 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
       { status: 500 },
     );
   }
-});
+}));

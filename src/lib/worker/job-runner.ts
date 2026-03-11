@@ -329,6 +329,13 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       await buildDayNarrative(userId);
       return { processed: 1 };
     }
+    case 'summarise-recent-sessions': {
+      const { sweepUnsummarisedSessions } = await import(
+        '@/lib/desktop-observer/session-summariser'
+      );
+      const count = await sweepUnsummarisedSessions(userId);
+      return { processed: count };
+    }
 
     // ── Data Retention Cleanup ──
     case 'pii-retention-cleanup': {

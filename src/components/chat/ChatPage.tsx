@@ -63,7 +63,14 @@ export default function ChatPage({ conversationId }: ChatPageProps) {
   /* ── Load / reset on route change ─────────────────────────── */
   useEffect(() => {
     if (conversationId) {
-      loadConversation(conversationId);
+      // If we already have this conversation loaded in memory (e.g. just created it),
+      // skip the API fetch to prevent the messages from briefly disappearing.
+      const state = useChatStore.getState();
+      const alreadyLoaded =
+        state.currentConversationId === conversationId && state.messages.length > 0;
+      if (!alreadyLoaded) {
+        loadConversation(conversationId);
+      }
       setPhase('chat');
     } else {
       // Mark any stale conversationId as already-navigated so the mirror

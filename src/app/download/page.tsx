@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Monitor, Shield, Zap, ArrowLeft, Lock } from "lucide-react";
+import { useWebsiteOnly } from "@/hooks/useWebsiteOnly";
 
 /* ─────────────────────────────────────────────
    Brand tokens — The Editor palette
@@ -25,6 +26,7 @@ const fonts = {
 };
 
 export default function DownloadPage() {
+  useWebsiteOnly();
   return (
     <>
     <style>{`

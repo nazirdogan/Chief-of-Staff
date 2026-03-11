@@ -6,6 +6,7 @@ import { handleApiError } from '@/lib/api-utils';
 import { AI_MODELS } from '@/lib/ai/models';
 import { buildContextAwareSystemPrompt } from '@/lib/ai/prompts/chat';
 import { CHAT_TOOL_DEFINITIONS, executeChatTool } from '@/lib/ai/tools/chat-tools';
+import { sanitiseContent } from '@/lib/ai/safety/sanitise';
 import { createServiceClient } from '@/lib/db/client';
 import { getWorkingPatterns } from '@/lib/db/queries/context';
 import { queryContext } from '@/lib/context/query-engine';
@@ -101,10 +102,11 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
           },
         });
       } else if (TEXT_LIKE.some((t) => mimeType.startsWith(t)) || file.name.endsWith('.txt') || file.name.endsWith('.csv') || file.name.endsWith('.md')) {
-        const text = buffer.toString('utf-8').slice(0, 50_000); // cap at 50K chars
+        const rawText = buffer.toString('utf-8').slice(0, 50_000); // cap at 50K chars
+        const { content: safeText } = sanitiseContent(rawText, `upload:${file.name}`);
         attachmentBlocks.push({
           type: 'text',
-          text: `📎 File: ${file.name}\n\`\`\`\n${text}\n\`\`\``,
+          text: `📎 File: ${file.name}\n\`\`\`\n${safeText}\n\`\`\``,
         });
       } else {
         attachmentBlocks.push({
@@ -205,15 +207,17 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       const toolResults: Anthropic.Messages.ToolResultBlockParam[] = [];
       for (const toolUse of toolUseBlocks) {
         try {
-          const result = await executeChatTool(
+          const rawResult = await executeChatTool(
             toolUse.name,
             toolUse.input as Record<string, unknown>,
             userId
           );
+          // Sanitise tool output before feeding back into the AI prompt
+          const { content: safeResult } = sanitiseContent(rawResult, `tool:${toolUse.name}`);
           toolResults.push({
             type: 'tool_result',
             tool_use_id: toolUse.id,
-            content: result,
+            content: safeResult,
           });
         } catch (err) {
           toolResults.push({

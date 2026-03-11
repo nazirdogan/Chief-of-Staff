@@ -18,10 +18,11 @@ import {
   getActiveSession,
   logAppTransition,
 } from '@/lib/db/queries/activity-sessions';
+import { summariseClosedSession } from './session-summariser';
 
 // ── In-memory active session state ──────────────────────────────
 
-interface ActiveSessionState {
+export interface ActiveSessionState {
   sessionId: string;
   appName: string;
   appCategory: string;
@@ -147,7 +148,18 @@ export function mergeParsedData(
   }
 
   if (category === 'code') {
-    if (incoming.fileName) merged.fileName = incoming.fileName;
+    if (incoming.fileName) {
+      merged.fileName = incoming.fileName;
+      const prevFiles: string[] = Array.isArray(merged.filesWorkedOn)
+        ? [...(merged.filesWorkedOn as string[])]
+        : [];
+      const newFile = incoming.fileName as string;
+      if (!prevFiles.includes(newFile)) {
+        merged.filesWorkedOn = [...prevFiles, newFile].slice(-20);
+      } else {
+        merged.filesWorkedOn = prevFiles;
+      }
+    }
     if (incoming.projectName) merged.projectName = incoming.projectName;
     if (incoming.language) merged.language = incoming.language;
     const existingFns = (existing.functions as string[]) ?? [];
@@ -296,6 +308,11 @@ export async function processSnapshots(
           actionItems: current.accumulatedActionItems.slice(-20),
         });
 
+        // Fire-and-forget: generate a specific summary for the closed session
+        summariseClosedSession(current.sessionId, current).catch((err) =>
+          console.error('[session-manager] session summarise failed:', err)
+        );
+
         if (current.appName !== snapshot.active_app) {
           await logAppTransition(supabase, {
             userId,
@@ -344,7 +361,12 @@ export async function processSnapshots(
           ),
           accumulatedTopics: new Set(),
           accumulatedActionItems: parsed.actionItems.map(text => ({ text })),
-          mergedParsedData: initialParsedData,
+          mergedParsedData: {
+            ...initialParsedData,
+            ...(initialParsedData.fileName
+              ? { filesWorkedOn: [initialParsedData.fileName as string] }
+              : {}),
+          },
           textBuffer: parsed.rawText.length > 10 ? [parsed.rawText] : [],
         });
       }
@@ -374,6 +396,11 @@ export async function closeActiveSession(
     projects: [...state.accumulatedProjects],
     topics: [...state.accumulatedTopics],
   });
+
+  // Fire-and-forget: generate a specific summary for the closed session
+  summariseClosedSession(state.sessionId, state).catch((err) =>
+    console.error('[session-manager] session summarise failed:', err)
+  );
 
   userSessions.delete(userId);
 }

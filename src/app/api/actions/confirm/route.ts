@@ -1,21 +1,28 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod/v4';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import { executeConfirmedAction } from '@/lib/actions/executor';
 
+const confirmSchema = z.object({
+  pending_action_id: z.string().uuid('pending_action_id must be a valid UUID'),
+});
+
 export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
-    const { pending_action_id } = body as { pending_action_id: string };
+    const parsed = confirmSchema.safeParse(body);
 
-    if (!pending_action_id) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'pending_action_id is required', code: 'VALIDATION_ERROR' },
+        { error: z.prettifyError(parsed.error), code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
+
+    const { pending_action_id } = parsed.data;
 
     const supabase = createServiceClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

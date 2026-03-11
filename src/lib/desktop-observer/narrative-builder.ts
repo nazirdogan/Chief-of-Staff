@@ -58,6 +58,9 @@ export function formatSessionForPrompt(session: ActivitySession): string {
 
   if (session.summary) {
     detail += `\n  Summary: ${session.summary}`;
+    if (session.people.length > 0) detail += `\n  People: ${session.people.slice(0, 5).join(', ')}`;
+    if (session.projects.length > 0) detail += `\n  Projects: ${session.projects.join(', ')}`;
+    return detail; // summary is authoritative — skip raw parsed_data
   }
   if (session.people.length > 0) {
     detail += `\n  People: ${session.people.slice(0, 5).join(', ')}`;
@@ -95,17 +98,21 @@ export function formatSessionForPrompt(session: ActivitySession): string {
       break;
     }
     case 'code': {
-      // fileName now contains the full path e.g. "login/page.tsx" — tells AI which feature area
-      if (pd.fileName) detail += `\n  File: ${String(pd.fileName)}`;
+      // Show accumulated file list first for richer context
+      if (Array.isArray(pd.filesWorkedOn) && (pd.filesWorkedOn as string[]).length > 0) {
+        detail += `\n  Files worked on: ${(pd.filesWorkedOn as string[]).join(', ')}`;
+      } else if (pd.fileName) {
+        detail += `\n  File: ${String(pd.fileName)}`;
+      }
       if (pd.projectName) detail += `\n  Project: ${String(pd.projectName)}`;
       if (pd.language) detail += `\n  Language: ${String(pd.language)}`;
       if (Array.isArray(pd.functions) && pd.functions.length > 0) {
         const fns = (pd.functions as unknown[]).slice(0, 5).map(String);
         detail += `\n  Functions/Classes: ${fns.join(', ')}`;
       }
-      // Include a short code preview so AI can infer WHAT was being written
+      // Include a code preview so AI can infer WHAT was being written
       if (pd.codeSnippet && typeof pd.codeSnippet === 'string' && pd.codeSnippet.length > 20) {
-        detail += `\n  Code preview: ${pd.codeSnippet.slice(0, 250)}`;
+        detail += `\n  Code preview: ${pd.codeSnippet.slice(0, 500)}`;
       }
       break;
     }
@@ -113,7 +120,7 @@ export function formatSessionForPrompt(session: ActivitySession): string {
       if (pd.currentDirectory) detail += `\n  Directory: ${String(pd.currentDirectory)}`;
       if (pd.activeProcess) detail += `\n  Process: ${String(pd.activeProcess)}`;
       if (Array.isArray(pd.recentCommands) && pd.recentCommands.length > 0) {
-        const cmds = (pd.recentCommands as unknown[]).slice(-5).map(String);
+        const cmds = (pd.recentCommands as unknown[]).slice(-10).map(String);
         detail += `\n  Recent commands: ${cmds.join(' | ')}`;
       }
       break;
@@ -145,19 +152,17 @@ export function formatSessionForPrompt(session: ActivitySession): string {
     }
   }
 
-  // Universal OCR content — shown when AX API couldn't read the app
-  // (WhatsApp native, Zoom, Keynote, Pages, Excel, Figma, etc.)
+  // OCR content — shown for design/document/unknown categories and when
+  // structured data is truly sparse (no messages, no filename, no subject, no key content)
   if (Array.isArray(pd.ocrLines) && (pd.ocrLines as string[]).length > 0) {
     const ocrLines = pd.ocrLines as string[];
-    // Only supplement with OCR when category-specific structured data is sparse
-    const hasStructuredContent =
-      (session.app_category === 'chat' && Array.isArray(pd.messages) && (pd.messages as unknown[]).length > 0) ||
-      (session.app_category === 'email' && pd.subject) ||
-      (session.app_category === 'browser' && pd.keyContent) ||
-      (session.app_category === 'code' && pd.fileName);
-    if (!hasStructuredContent) {
-      const sample = ocrLines.slice(0, 20).join('\n    ');
-      detail += `\n  Screen content (OCR):\n    ${redactPII(sample.slice(0, 600))}`;
+    const messages = pd.messages as unknown[] | undefined;
+    const showOcr =
+      ['design', 'document', 'unknown'].includes(session.app_category) ||
+      (!messages?.length && !pd.fileName && !pd.subject && !pd.keyContent);
+    if (showOcr) {
+      const sample = ocrLines.slice(0, 40).join('\n    ');
+      detail += `\n  Screen content (OCR):\n    ${redactPII(sample.slice(0, 1200))}`;
     }
   }
 

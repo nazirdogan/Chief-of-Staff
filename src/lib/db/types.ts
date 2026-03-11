@@ -158,7 +158,7 @@ export interface UserIntegration {
   user_id: string;
   provider: IntegrationProvider;
   status: IntegrationStatus;
-  nango_connection_id: string;
+  nango_connection_id: string | null;
   account_email: string | null;
   account_name: string | null;
   connection_alias: string | null;
@@ -167,6 +167,9 @@ export interface UserIntegration {
   error_message: string | null;
   connected_at: string;
   updated_at: string;
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expiry: string | null;
 }
 
 export interface IntegrationAuditLog {

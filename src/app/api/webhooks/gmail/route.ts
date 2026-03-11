@@ -24,7 +24,52 @@ import { setupGmailWatch, fetchNewMessagesSinceHistory } from '@/lib/integration
 import { saveGmailHistoryId, getGmailHistoryId } from '@/lib/db/queries/integrations';
 import { ingestGmailMessageRefs } from '@/lib/ai/agents/ingestion';
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+/** Rate limiter state for Gmail webhook (IP-based, 60 req/min) */
+import { withWebhookRateLimit } from '@/lib/middleware/withRateLimit';
+
+/**
+ * Verify the Google Pub/Sub OIDC JWT bearer token from the Authorization header.
+ * Uses Google's tokeninfo endpoint to validate the token and confirm:
+ *   - The token is a valid Google-issued JWT
+ *   - The email matches the Pub/Sub service account
+ * Returns true if valid, false otherwise.
+ */
+async function verifyGoogleOIDCToken(req: NextRequest): Promise<boolean> {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader) return false;
+
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+  if (!token) return false;
+
+  try {
+    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
+    if (!res.ok) return false;
+
+    const info = (await res.json()) as { email?: string; email_verified?: string; aud?: string };
+
+    // The token must come from a verified Google service account email
+    if (info.email_verified !== 'true') return false;
+
+    // Verify it's a Google service account (ends with .iam.gserviceaccount.com)
+    // or the Pub/Sub system account
+    if (!info.email?.endsWith('.iam.gserviceaccount.com') && !info.email?.endsWith('.google.com')) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    console.error('[Gmail Webhook] OIDC verification failed');
+    return false;
+  }
+}
+
+async function handleGmailWebhook(req: NextRequest): Promise<NextResponse> {
+  // Verify Google OIDC JWT — reject unauthenticated requests
+  const isValid = await verifyGoogleOIDCToken(req);
+  if (!isValid) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     // Parse Pub/Sub envelope
     const body = await req.json() as { message?: { data?: string } };
@@ -98,3 +143,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Always 200 — see note above
   return NextResponse.json({}, { status: 200 });
 }
+
+// Apply IP-based rate limiting (60 req/min)
+export const POST = withWebhookRateLimit(60, '1 m', handleGmailWebhook);

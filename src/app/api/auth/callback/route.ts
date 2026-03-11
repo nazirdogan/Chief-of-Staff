@@ -7,7 +7,17 @@ import type { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/chat';
+  const rawNext = searchParams.get('next') ?? '/chat';
+
+  // Validate redirect target to prevent open redirect attacks.
+  // Must start with '/' (relative), must not contain '//' (protocol-relative),
+  // and must not contain a protocol prefix.
+  const isValidRedirect =
+    rawNext.startsWith('/') &&
+    !rawNext.startsWith('//') &&
+    !rawNext.includes(':') &&
+    !rawNext.includes('\\');
+  const next = isValidRedirect ? rawNext : '/chat';
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);

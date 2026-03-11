@@ -831,6 +831,7 @@ export async function executeChatTool(
           const base = {
             app: s.app_name,
             category: s.app_category,
+            summary: s.summary ?? undefined,
             people: s.people,
             projects: s.projects,
             started_at: s.started_at,
@@ -845,9 +846,9 @@ export async function executeChatTool(
                 conversation_with: pd.conversationPartner,
                 platform: pd.platform,
                 messages: Array.isArray(pd.messages)
-                  ? (pd.messages as unknown[]).slice(-5).map((m) => {
+                  ? (pd.messages as unknown[]).slice(-15).map((m) => {
                       const msg = m as Record<string, unknown>;
-                      return `${String(msg.sender ?? msg.from ?? '')}: ${String(msg.text ?? msg.content ?? '').slice(0, 150)}`;
+                      return `${String(msg.sender ?? msg.from ?? '')}: ${String(msg.text ?? msg.content ?? '').slice(0, 300)}`;
                     })
                   : undefined,
               };
@@ -856,6 +857,9 @@ export async function executeChatTool(
             case 'code':
               return {
                 ...base,
+                files_worked_on: Array.isArray(pd.filesWorkedOn)
+                  ? (pd.filesWorkedOn as string[])
+                  : pd.fileName ? [String(pd.fileName)] : undefined,
                 file: pd.fileName,
                 project: pd.projectName,
                 language: pd.language,
@@ -865,7 +869,7 @@ export async function executeChatTool(
               return {
                 ...base,
                 directory: pd.currentDirectory,
-                commands: Array.isArray(pd.recentCommands) ? (pd.recentCommands as unknown[]).slice(-5).map(String) : undefined,
+                commands: Array.isArray(pd.recentCommands) ? (pd.recentCommands as unknown[]).slice(-10).map(String) : undefined,
               };
             case 'browser':
               return { ...base, page: pd.pageTitle, domain: pd.domain };
@@ -1002,6 +1006,7 @@ export async function executeChatTool(
           const base = {
             app: s.app_name,
             category: s.app_category,
+            summary: s.summary ?? undefined,
             people: s.people,
             projects: s.projects,
             importance: s.importance,
@@ -1018,9 +1023,9 @@ export async function executeChatTool(
                 conversation_with: pd.conversationPartner,
                 platform: pd.platform,
                 messages: Array.isArray(pd.messages)
-                  ? (pd.messages as unknown[]).slice(-5).map((m) => {
+                  ? (pd.messages as unknown[]).slice(-15).map((m) => {
                       const msg = m as Record<string, unknown>;
-                      return `${String(msg.sender ?? msg.from ?? '')}: ${String(msg.text ?? msg.content ?? '').slice(0, 150)}`;
+                      return `${String(msg.sender ?? msg.from ?? '')}: ${String(msg.text ?? msg.content ?? '').slice(0, 300)}`;
                     })
                   : undefined,
               };
@@ -1029,6 +1034,9 @@ export async function executeChatTool(
             case 'code':
               return {
                 ...base,
+                files_worked_on: Array.isArray(pd.filesWorkedOn)
+                  ? (pd.filesWorkedOn as string[])
+                  : pd.fileName ? [String(pd.fileName)] : undefined,
                 file: pd.fileName,
                 project: pd.projectName,
                 language: pd.language,
@@ -1038,7 +1046,7 @@ export async function executeChatTool(
               return {
                 ...base,
                 directory: pd.currentDirectory,
-                commands: Array.isArray(pd.recentCommands) ? (pd.recentCommands as unknown[]).slice(-5).map(String) : undefined,
+                commands: Array.isArray(pd.recentCommands) ? (pd.recentCommands as unknown[]).slice(-10).map(String) : undefined,
               };
             case 'browser':
               return { ...base, page: pd.pageTitle, domain: pd.domain };

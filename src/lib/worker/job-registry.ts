@@ -233,6 +233,19 @@ export const JOB_REGISTRY: JobDefinition[] = [
     estimatedDurationMs: 10_000,
     label: 'Building end-of-day narrative',
   },
+  {
+    id: 'summarise-recent-sessions',
+    category: 'memory',
+    provider: null,
+    priority: 2,
+    intervalMs: MIN_15,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_5,
+    timeoutMs: TIMEOUT_MED,
+    estimatedDurationMs: 30_000,
+    label: 'Summarising activity sessions',
+  },
 
   // ── Priority 4: Data retention cleanup (nightly) ──
   {

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { CheckCircle, Loader2 } from 'lucide-react';
+import { useWebsiteOnly } from '@/hooks/useWebsiteOnly';
 
 // This page is shown in the user's system browser after a successful Stripe payment.
 // It confirms the subscription, then prompts them to return to the desktop app.
 export default function BillingSuccessPage() {
+  useWebsiteOnly();
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {

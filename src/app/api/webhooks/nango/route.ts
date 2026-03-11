@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyNangoWebhook } from '@/lib/middleware/withWebhookVerification';
+import { withWebhookRateLimit } from '@/lib/middleware/withRateLimit';
 import { createServiceClient } from '@/lib/db/client';
 import { upsertIntegration, updateIntegrationStatus } from '@/lib/db/queries/integrations';
 import type { IntegrationProvider } from '@/lib/db/types';
@@ -34,7 +35,8 @@ function extractUserId(payload: Record<string, unknown>): string | null {
 }
 
 // Public route — Nango webhook handler for connection events
-export async function POST(req: NextRequest) {
+// Rate limited: 60 req/min per IP
+export const POST = withWebhookRateLimit(60, '1 m', async function handleNangoWebhook(req: NextRequest) {
   const body = await req.text();
 
   if (!verifyNangoWebhook(req, body)) {
@@ -95,4 +97,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
-}
+});

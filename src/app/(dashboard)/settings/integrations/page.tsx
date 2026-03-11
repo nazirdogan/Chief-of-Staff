@@ -7,10 +7,6 @@ import {
   Check,
   AlertCircle,
   X,
-  Monitor,
-  Shield,
-  Eye,
-  EyeOff,
   Plus,
   Pencil,
 } from 'lucide-react';
@@ -62,14 +58,6 @@ const INTEGRATIONS: IntegrationConfig[] = [
 
 const CATEGORIES = Array.from(new Set(INTEGRATIONS.map((i) => i.category)));
 
-// Desktop Observer apps captured via macOS accessibility
-const DESKTOP_OBSERVER_APPS = [
-  'WhatsApp', 'Messages', 'Telegram', 'Signal', 'Discord',
-  'Slack (desktop)', 'Teams (desktop)', 'Mail', 'Calendar',
-  'Notion', 'Figma', 'Chrome', 'Safari', 'Arc',
-];
-
-type ObserverState = 'unavailable' | 'no_permission' | 'active' | 'inactive';
 
 export default function IntegrationsSettingsPage() {
   const [integrations, setIntegrations] = useState<UserIntegration[]>([]);
@@ -84,10 +72,17 @@ export default function IntegrationsSettingsPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const connected = params.get('connected');
+    // Support both old ?connected= and new ?provider= param names
+    const connected = params.get('connected') ?? params.get('provider');
     const error = params.get('error');
     if (connected) {
-      setConnectSuccess(connected === 'gmail' ? 'Gmail connected!' : 'Google Calendar connected!');
+      const label: Record<string, string> = {
+        gmail: 'Gmail',
+        google_calendar: 'Google Calendar',
+        slack: 'Slack',
+        notion: 'Notion',
+      };
+      setConnectSuccess(`${label[connected] ?? connected} connected!`);
       window.history.replaceState({}, '', window.location.pathname);
     } else if (error) {
       const messages: Record<string, string> = {
@@ -104,57 +99,6 @@ export default function IntegrationsSettingsPage() {
   // Tracks which integration row UUID is having its alias edited
   const [editingAlias, setEditingAlias] = useState<string | null>(null);
   const [aliasValue, setAliasValue] = useState('');
-
-  // Desktop Observer state
-  const [observerState, setObserverState] = useState<ObserverState>('unavailable');
-  const [observerLoading, setObserverLoading] = useState(false);
-  const [observerStats, setObserverStats] = useState<{ apps_observed: number; context_changes_emitted: number } | null>(null);
-
-  useEffect(() => {
-    async function checkObserver() {
-      if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) {
-        setObserverState('unavailable');
-        return;
-      }
-      try {
-        const { checkAccessibility, getObserverStatus } = await import('@/lib/desktop-observer/client');
-        const hasPermission = await checkAccessibility();
-        if (!hasPermission) { setObserverState('no_permission'); return; }
-        const status = await getObserverStatus();
-        if (status) {
-          setObserverStats({ apps_observed: status.apps_observed, context_changes_emitted: status.context_changes_emitted });
-          setObserverState(status.running ? 'active' : 'inactive');
-        } else {
-          setObserverState('inactive');
-        }
-      } catch { setObserverState('unavailable'); }
-    }
-    checkObserver();
-  }, []);
-
-  async function handleRequestPermission() {
-    setObserverLoading(true);
-    try {
-      const { requestAccessibility } = await import('@/lib/desktop-observer/client');
-      const granted = await requestAccessibility();
-      if (granted) setObserverState('inactive');
-    } catch { /* ignore */ } finally { setObserverLoading(false); }
-  }
-
-  async function handleToggleObserver() {
-    setObserverLoading(true);
-    try {
-      if (observerState === 'active') {
-        const { stopObserver } = await import('@/lib/desktop-observer/client');
-        await stopObserver();
-        setObserverState('inactive');
-      } else {
-        const { startObserver } = await import('@/lib/desktop-observer/client');
-        const started = await startObserver();
-        setObserverState(started ? 'active' : 'inactive');
-      }
-    } catch { /* ignore */ } finally { setObserverLoading(false); }
-  }
 
   const fetchIntegrations = useCallback(async () => {
     try {
@@ -326,100 +270,6 @@ export default function IntegrationsSettingsPage() {
           </button>
         </div>
       )}
-
-      {/* Desktop Observer Section */}
-      <div className="mt-6 rounded-lg border p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Monitor className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold">Desktop Observer</h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Captures activity from apps on your Mac — WhatsApp, Messages, Telegram, and more.
-                Uses macOS Accessibility to read on-screen text. No API needed.
-              </p>
-            </div>
-          </div>
-
-          <div className="ml-4 shrink-0">
-            {observerState === 'unavailable' && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">
-                Desktop app required
-              </span>
-            )}
-            {observerState === 'no_permission' && (
-              <button
-                onClick={handleRequestPermission}
-                disabled={observerLoading}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-              >
-                {observerLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
-                Grant Permission
-              </button>
-            )}
-            {(observerState === 'active' || observerState === 'inactive') && (
-              <button
-                onClick={handleToggleObserver}
-                disabled={observerLoading}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
-                  observerState === 'active'
-                    ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {observerLoading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : observerState === 'active' ? (
-                  <Eye className="h-3 w-3" />
-                ) : (
-                  <EyeOff className="h-3 w-3" />
-                )}
-                {observerState === 'active' ? 'Observing' : 'Start Observer'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {observerState === 'active' && observerStats && (
-          <div className="mt-3 flex gap-4 text-[10px] text-muted-foreground">
-            <span>{observerStats.apps_observed} apps observed</span>
-            <span>{observerStats.context_changes_emitted} context changes captured</span>
-          </div>
-        )}
-
-        {observerState !== 'unavailable' && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {DESKTOP_OBSERVER_APPS.map((app) => (
-              <span
-                key={app}
-                className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                  observerState === 'active'
-                    ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {app}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {observerState === 'no_permission' && (
-          <div className="mt-3 rounded-md bg-amber-50 p-2.5 text-[11px] text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
-            <strong>How it works:</strong> Click &quot;Grant Permission&quot; above, then enable Donna in
-            System Settings &rarr; Privacy &amp; Security &rarr; Accessibility. You may need to restart the app.
-          </div>
-        )}
-
-        {observerState === 'unavailable' && (
-          <div className="mt-3 rounded-md bg-muted/50 p-2.5 text-[11px] text-muted-foreground">
-            The Desktop Observer requires the Donna desktop app (macOS). It captures
-            WhatsApp, Messages, and other app activity that can&apos;t be accessed via OAuth APIs.
-          </div>
-        )}
-      </div>
 
       {/* OAuth Integrations */}
       {loading ? (

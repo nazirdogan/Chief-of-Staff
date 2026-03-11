@@ -1,8 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { google } from 'googleapis';
 import { exchangeCodeForTokens, getOAuthClient, type GoogleProvider } from '@/lib/integrations/google-oauth';
 import { encrypt } from '@/lib/utils/encryption';
 import { createServiceClient } from '@/lib/db/client';
+import { env } from '@/lib/config';
+
+/** Maximum age (in ms) of a valid OAuth state parameter — 10 minutes. */
+const STATE_MAX_AGE_MS = 10 * 60 * 1000;
+
+/**
+ * Verify the HMAC-signed OAuth state parameter.
+ * Format: `<base64url-payload>.<hmac-hex>`
+ * Returns the decoded payload or null if verification fails.
+ */
+function verifyState(state: string): { userId: string; provider: GoogleProvider; ts: number } | null {
+  const dotIdx = state.lastIndexOf('.');
+  if (dotIdx === -1) return null;
+
+  const data = state.slice(0, dotIdx);
+  const receivedHmac = state.slice(dotIdx + 1);
+
+  const expectedHmac = crypto
+    .createHmac('sha256', Buffer.from(env.ENCRYPTION_KEY, 'hex'))
+    .update(data)
+    .digest('hex');
+
+  // Constant-time comparison to prevent timing attacks
+  const receivedBuf = Buffer.from(receivedHmac);
+  const expectedBuf = Buffer.from(expectedHmac);
+  if (receivedBuf.length !== expectedBuf.length) return null;
+  if (!crypto.timingSafeEqual(receivedBuf, expectedBuf)) return null;
+
+  try {
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString()) as {
+      userId?: string;
+      provider?: string;
+      ts?: number;
+    };
+    if (!payload.userId || !payload.provider || !payload.ts) return null;
+
+    // Check freshness — reject state older than 10 minutes
+    if (Date.now() - payload.ts > STATE_MAX_AGE_MS) return null;
+
+    return {
+      userId: payload.userId,
+      provider: payload.provider as GoogleProvider,
+      ts: payload.ts,
+    };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * GET /api/integrations/google/callback
@@ -20,9 +69,9 @@ export async function GET(req: NextRequest) {
   const state = searchParams.get('state');
   const errorParam = searchParams.get('error');
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://imdonna.app';
+  const appUrl = env.NEXT_PUBLIC_APP_URL ?? 'https://imdonna.app';
   const failRedirect = (reason: string) =>
-    NextResponse.redirect(`${appUrl}/settings/integrations?error=${reason}`);
+    NextResponse.redirect(`${appUrl}/connected?error=${reason}`);
 
   if (errorParam === 'access_denied') {
     return failRedirect('google_denied');
@@ -32,20 +81,12 @@ export async function GET(req: NextRequest) {
     return failRedirect('invalid_callback');
   }
 
-  // Decode and validate state
-  let userId: string;
-  let provider: GoogleProvider;
-  try {
-    const decoded = JSON.parse(Buffer.from(state, 'base64url').toString()) as {
-      userId?: string;
-      provider?: string;
-    };
-    if (!decoded.userId || !decoded.provider) throw new Error('missing fields');
-    userId = decoded.userId;
-    provider = decoded.provider as GoogleProvider;
-  } catch {
+  // Verify HMAC signature + freshness of the state parameter (CSRF protection)
+  const verified = verifyState(state);
+  if (!verified) {
     return failRedirect('invalid_state');
   }
+  const { userId, provider } = verified;
 
   // Exchange auth code for tokens
   let tokens: Awaited<ReturnType<typeof exchangeCodeForTokens>>;
@@ -101,8 +142,8 @@ export async function GET(req: NextRequest) {
     return failRedirect('db_error');
   }
 
-  // Redirect to settings page — desktop app is polling and will pick up the new row
+  // Redirect to the public confirmation page — desktop app is polling and will pick up the new row
   return NextResponse.redirect(
-    `${appUrl}/settings/integrations?connected=${provider}`
+    `${appUrl}/connected?provider=${provider}`
   );
 }

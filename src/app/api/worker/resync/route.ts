@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/middleware/withAuth';
+import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import type { AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { bootWorker, resetCircuitForJobs } from '@/lib/worker/boot';
 
@@ -8,10 +9,11 @@ import { bootWorker, resetCircuitForJobs } from '@/lib/worker/boot';
  *
  * Manually re-syncs: resets circuit breakers and re-runs the boot sequence
  * (staleness check → catch-up → restart scheduler).
+ * Rate limited: 3 req/min to prevent abuse.
  *
  * Body: { jobIds?: string[] } — optional: only reset specific job circuits
  */
-export const POST = withAuth(async (req: AuthenticatedRequest) => {
+export const POST = withAuth(withRateLimit(3, '1 m', async (req: AuthenticatedRequest) => {
   const userId = req.user.id;
   const { jobIds } = (await req.json().catch(() => ({}))) as {
     jobIds?: string[];
@@ -32,4 +34,4 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
       { status: 500 },
     );
   }
-});
+}));

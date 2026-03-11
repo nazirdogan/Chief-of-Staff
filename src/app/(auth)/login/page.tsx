@@ -4,18 +4,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
+
+const c = {
+  white: '#FFFFFF',
+  parchment: '#FAF9F6',
+  charcoal: '#2D2D2D',
+  dawn: '#E8845C',
+  slate: '#8D99AE',
+  border: 'rgba(45,45,45,0.10)',
+  errorBg: 'rgba(220,38,38,0.07)',
+  errorText: '#dc2626',
+  playfair: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+  dmSans: "var(--font-dm-sans), 'DM Sans', system-ui, sans-serif",
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -108,42 +110,66 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-md animate-slide-up">
-      <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 lg:hidden">
-            <span
-              style={{
-                fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
-                fontWeight: 700,
-                fontStyle: 'italic',
-                fontSize: '26px',
-                color: '#2D2D2D',
-              }}
-            >
-              Donna<span style={{ color: '#E8845C' }}>.</span>
-            </span>
-          </div>
-          <CardTitle
-            className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif" }}
+    <div className="animate-slide-up" style={{ width: '100%', maxWidth: '380px' }}>
+      {/* Card — explicit inline styles, immune to dark mode CSS variables */}
+      <div
+        style={{
+          background: c.white,
+          border: `1px solid ${c.border}`,
+          borderRadius: '10px',
+          padding: '32px 28px 28px',
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <h1
+            style={{
+              fontFamily: c.playfair,
+              fontWeight: 700,
+              fontSize: '24px',
+              letterSpacing: '-0.01em',
+              color: c.charcoal,
+              margin: 0,
+              marginBottom: '6px',
+            }}
           >
             Welcome back
-          </CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-        </CardHeader>
+          </h1>
+          <p
+            style={{
+              fontFamily: c.dmSans,
+              fontSize: '14px',
+              color: c.slate,
+              margin: 0,
+            }}
+          >
+            Sign in to your account
+          </p>
+        </div>
 
         {!showTotp ? (
           <form onSubmit={handleLogin}>
-            <CardContent className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                <div
+                  style={{
+                    borderRadius: '6px',
+                    background: c.errorBg,
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    color: c.errorText,
+                    fontFamily: c.dmSans,
+                  }}
+                >
                   {error}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label htmlFor="email" style={{ color: c.charcoal, fontSize: '13px', fontWeight: 500, fontFamily: c.dmSans }}>
+                  Email
+                </label>
+                <input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
@@ -151,11 +177,26 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
+                  style={{
+                    background: c.parchment,
+                    border: `1px solid rgba(45,45,45,0.15)`,
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    color: c.charcoal,
+                    width: '100%',
+                    fontSize: '14px',
+                    fontFamily: c.dmSans,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label htmlFor="password" style={{ color: c.charcoal, fontSize: '13px', fontWeight: 500, fontFamily: c.dmSans }}>
+                  Password
+                </label>
+                <input
                   id="password"
                   type="password"
                   value={password}
@@ -163,47 +204,117 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   minLength={12}
+                  style={{
+                    background: c.parchment,
+                    border: `1px solid rgba(45,45,45,0.15)`,
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    color: c.charcoal,
+                    width: '100%',
+                    fontSize: '14px',
+                    fontFamily: c.dmSans,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing in...' : 'Sign in'}
-              </Button>
+            </div>
 
-              <div className="relative w-full">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">or</span>
-                </div>
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: loading ? 'rgba(232,132,92,0.6)' : c.dawn,
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '7px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  fontFamily: c.dmSans,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.01em',
+                  transition: 'background 0.15s ease',
+                }}
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+
+              {/* Divider */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  margin: '2px 0',
+                }}
+              >
+                <div style={{ flex: 1, height: '1px', background: c.border }} />
+                <span
+                  style={{
+                    fontSize: '11px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: c.slate,
+                    fontFamily: c.dmSans,
+                  }}
+                >
+                  or
+                </span>
+                <div style={{ flex: 1, height: '1px', background: c.border }} />
               </div>
 
               <SocialAuthButtons />
 
-              <p className="text-sm text-muted-foreground">
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontSize: '13px',
+                  color: c.slate,
+                  fontFamily: c.dmSans,
+                  margin: 0,
+                  marginTop: '4px',
+                }}
+              >
                 Don&apos;t have an account?{' '}
                 <Link
                   href="/signup"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
+                  style={{
+                    color: c.dawn,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                  }}
                 >
                   Sign up
                 </Link>
               </p>
-            </CardFooter>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleTotpVerify}>
-            <CardContent className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                <div
+                  style={{
+                    borderRadius: '6px',
+                    background: c.errorBg,
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    color: c.errorText,
+                    fontFamily: c.dmSans,
+                  }}
+                >
                   {error}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="totp">Authentication Code</Label>
-                <Input
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label htmlFor="totp" style={{ color: c.charcoal, fontSize: '13px', fontWeight: 500, fontFamily: c.dmSans }}>
+                  Authentication Code
+                </label>
+                <input
                   id="totp"
                   type="text"
                   inputMode="numeric"
@@ -214,33 +325,82 @@ export default function LoginPage() {
                   onChange={(e) => setTotpCode(e.target.value)}
                   required
                   autoComplete="one-time-code"
+                  style={{
+                    background: c.parchment,
+                    border: `1px solid rgba(45,45,45,0.15)`,
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    color: c.charcoal,
+                    width: '100%',
+                    fontSize: '14px',
+                    fontFamily: c.dmSans,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    letterSpacing: '0.15em',
+                  }}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: c.slate,
+                    fontFamily: c.dmSans,
+                    margin: 0,
+                  }}
+                >
                   Enter the 6-digit code from your authenticator app.
                 </p>
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={loading}>
+            </div>
+
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: loading ? 'rgba(232,132,92,0.6)' : c.dawn,
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '7px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  fontFamily: c.dmSans,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.01em',
+                  transition: 'background 0.15s ease',
+                }}
+              >
                 {loading ? 'Verifying...' : 'Verify'}
-              </Button>
-              <Button
+              </button>
+
+              <button
                 type="button"
-                variant="ghost"
-                className="w-full"
                 onClick={() => {
                   setShowTotp(false);
                   setTotpCode('');
                   setError(null);
                 }}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: 'transparent',
+                  color: c.slate,
+                  border: `1px solid ${c.border}`,
+                  borderRadius: '7px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  fontFamily: c.dmSans,
+                  cursor: 'pointer',
+                  transition: 'background 0.15s ease',
+                }}
               >
                 Back to login
-              </Button>
-            </CardFooter>
+              </button>
+            </div>
           </form>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
-

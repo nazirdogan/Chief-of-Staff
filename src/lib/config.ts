@@ -89,6 +89,13 @@ const envSchema = z.object({
   CALENDLY_CLIENT_ID: z.string().optional(),
   CALENDLY_CLIENT_SECRET: z.string().optional(),
 
+  // Email (Resend — chat feedback notifications)
+  RESEND_API_KEY: z.string().optional(),
+
+  // GitHub (release downloads)
+  GITHUB_REPO_OWNER: z.string().default('imdonna'),
+  GITHUB_REPO_NAME: z.string().default('donna'),
+
   // Stripe (Billing)
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
