@@ -4,6 +4,7 @@ import {
   Shield,
   MessageCircle,
   CreditCard,
+  Receipt,
   Plug,
   Zap,
   Lock,
@@ -32,8 +33,14 @@ const settingsSections = [
   {
     href: '/settings/pricing',
     label: 'Pricing',
-    description: 'View plans and manage your subscription.',
+    description: 'View plans and upgrade or downgrade.',
     icon: CreditCard,
+  },
+  {
+    href: '/settings/billing',
+    label: 'Billing',
+    description: 'Payment method, invoices, and cancellation.',
+    icon: Receipt,
   },
   {
     href: '/settings/integrations',

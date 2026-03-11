@@ -72,7 +72,7 @@ export type HeartbeatFrequency = 'realtime' | 'hourly' | 'daily';
 
 export type DataRegion = 'me-south-1' | 'eu-central-1' | 'us-east-1';
 
-export type SubscriptionTier = 'free' | 'pro' | 'power' | 'team';
+export type SubscriptionTier = 'free' | 'plus' | 'pro' | 'enterprise' | 'power' | 'team';
 
 export type WaitlistStatus = 'pending' | 'approved' | 'rejected';
 

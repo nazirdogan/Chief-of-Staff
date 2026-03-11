@@ -60,7 +60,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md lg:max-w-lg animate-slide-up">
         <Card className="border-0 shadow-lg lg:border lg:shadow-sm">
           <CardHeader className="text-center px-8 lg:px-12">
-            <CardTitle className="text-2xl font-bold tracking-tight">Check your email</CardTitle>
+            <CardTitle className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif" }}>Check your email</CardTitle>
             <CardDescription className="text-base">
               We&apos;ve sent a verification link to <strong>{email}</strong>.
               Click the link to verify your account and sign in.
@@ -96,7 +96,7 @@ export default function SignupPage() {
               Donna<span style={{ color: '#E8845C' }}>.</span>
             </span>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Get started</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight" style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif" }}>Get started</CardTitle>
           <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSignup}>

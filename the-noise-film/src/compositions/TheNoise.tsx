@@ -1,13 +1,13 @@
 import React from "react";
 import { loadFont } from "@remotion/google-fonts/Inter";
+import "../load-fonts"; // loads Cormorant Garamond via FontFace API
 import { BG } from "../constants";
 import { ChaosLayer } from "../components/ChaosLayer";
 import { Act2Targets } from "../components/Act2Targets";
 import { Act3Layer } from "../components/Act3Layer";
-import { Act4Layer } from "../components/Act4Layer";
+import { FinalFrame } from "../components/FinalFrame";
 import { SoundDesign } from "../components/SoundDesign";
 
-// Load Inter (UI font) — blocks rendering until ready
 loadFont("normal", {
   weights: ["400", "500"],
   subsets: ["latin"],
@@ -30,11 +30,11 @@ export const TheNoise: React.FC = () => {
       {/* Layer 2: Act 2 target cards + labels + centre text */}
       <Act2Targets />
 
-      {/* Layer 3: Act 3 — amber light journey + Donna wordmark */}
+      {/* Layer 3: Act 3 — amber light journey (frames 852–1003) */}
       <Act3Layer />
 
-      {/* Layer 4: Act 4 — briefing lines + final wordmark */}
-      <Act4Layer />
+      {/* Layer 4: CTA sequence — DONNA wordmark + "Get Early Access" (frames 984–1188) */}
+      <FinalFrame />
 
       {/* Audio */}
       <SoundDesign />

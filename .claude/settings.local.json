@@ -93,7 +93,14 @@
       "Bash(find /Users/nazir/donna/src -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) 2>/dev/null | head -60)",
       "Bash(source /Users/nazir/donna/.env.local && curl -s -X POST \"${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/sql\" -H \"apikey: ${SUPABASE_SERVICE_ROLE_KEY}\" -H \"Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}\" -H \"Content-Type: application/json\" -d '{\"query\": \"DELETE FROM public.reflections\"}' 2>&1 | head -5)",
       "Bash(cargo test:*)",
-      "Bash(mkdir -p the-noise-film/src/components/elements the-noise-film/src/components && mkdir -p the-noise-film/public/audio && cp audio_assets/*.wav the-noise-film/public/audio/ && ls the-noise-film/public/audio/)"
+      "Bash(mkdir -p the-noise-film/src/components/elements the-noise-film/src/components && mkdir -p the-noise-film/public/audio && cp audio_assets/*.wav the-noise-film/public/audio/ && ls the-noise-film/public/audio/)",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(auth\\\\\\)/ 2>/dev/null)",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/settings/)",
+      "Bash(npm list:*)",
+      "Read(//private/tmp/**)",
+      "Bash(unzip -l \"/Users/nazir/Library/Mobile Documents/com~apple~Pages/Documents/I''''m Donna movie w Voiceover.pages\")",
+      "Bash(textutil -convert txt -stdout \"/Users/nazir/Library/Mobile Documents/com~apple~Pages/Documents/I'm Donna movie w Voiceover.pages\" 2>/dev/null | head -200)",
+      "Bash(mkdir -p /Users/nazir/donna/the-noise-film/public/fonts && cp \"/Users/nazir/Downloads/Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf\" /Users/nazir/donna/the-noise-film/public/fonts/ && cp \"/Users/nazir/Downloads/Cormorant_Garamond/CormorantGaramond-Italic-VariableFont_wght.ttf\" /Users/nazir/donna/the-noise-film/public/fonts/ && echo \"Fonts copied\")"
     ]
   }
 }

@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useIsTauri } from '@/lib/utils/is-tauri';
-import { DotGlobeHero } from '@/components/ui/globe-hero';
 
 export default function AuthLayout({
   children,
@@ -18,35 +17,6 @@ export default function AuthLayout({
       document.cookie = 'donna_client=desktop;path=/;max-age=31536000;samesite=lax';
     }
   }, [isTauri]);
-
-  if (isTauri) {
-    return (
-      <DotGlobeHero
-        className="min-h-screen"
-        rotationSpeed={0.003}
-        globeRadius={1.2}
-      >
-        <div className="flex flex-col items-center gap-6">
-          {/* Brand lockup — Donna wordmark */}
-          <div className="flex items-center gap-3">
-            <span
-              className="text-[24px]"
-              style={{
-                fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
-                fontWeight: 700,
-                color: '#FAF9F6',
-              }}
-            >
-              Donna<span style={{ color: '#E8845C' }}>.</span>
-            </span>
-          </div>
-          <div className="w-full max-w-md">
-            {children}
-          </div>
-        </div>
-      </DotGlobeHero>
-    );
-  }
 
   return (
     <div className="flex min-h-screen">

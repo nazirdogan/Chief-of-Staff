@@ -124,7 +124,12 @@ export default function LoginPage() {
               Donna<span style={{ color: '#E8845C' }}>.</span>
             </span>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
+          <CardTitle
+            className="text-2xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif" }}
+          >
+            Welcome back
+          </CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
 

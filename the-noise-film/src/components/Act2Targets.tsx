@@ -55,6 +55,9 @@ const TargetA: React.FC = () => {
     ...CLAMP,
     easing: easeOutQuad,
   });
+
+  // Fade in as blur lands on background (444→480), fade out at end of Act 2
+  const appearOp = interpolate(frame, [444, 480], [0, 1], { ...CLAMP, easing: easeOutQuad });
   const gFade = globalFadeOut(frame);
 
   return (
@@ -65,7 +68,7 @@ const TargetA: React.FC = () => {
         top: cy,
         transform: `translate(-50%, -50%) scale(${scale})`,
         transformOrigin: "center",
-        opacity: gFade,
+        opacity: appearOp * gFade,
         zIndex: 10,
       }}
     >
@@ -157,6 +160,8 @@ const TargetB: React.FC = () => {
     ...CLAMP,
     easing: easeOutQuad,
   });
+
+  const appearOp = interpolate(frame, [444, 480], [0, 1], { ...CLAMP, easing: easeOutQuad });
   const gFade = globalFadeOut(frame);
 
   return (
@@ -167,7 +172,7 @@ const TargetB: React.FC = () => {
         top: cy,
         transform: `translate(-50%, -50%) scale(${scale})`,
         transformOrigin: "center",
-        opacity: gFade,
+        opacity: appearOp * gFade,
         zIndex: 10,
       }}
     >
@@ -250,6 +255,8 @@ const TargetC: React.FC = () => {
     ...CLAMP,
     easing: easeOutQuad,
   });
+
+  const appearOp = interpolate(frame, [444, 480], [0, 1], { ...CLAMP, easing: easeOutQuad });
   const gFade = globalFadeOut(frame);
 
   return (
@@ -260,7 +267,7 @@ const TargetC: React.FC = () => {
         top: cy,
         transform: `translate(-50%, -50%) scale(${scale})`,
         transformOrigin: "center",
-        opacity: gFade,
+        opacity: appearOp * gFade,
         zIndex: 10,
       }}
     >

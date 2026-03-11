@@ -15,7 +15,7 @@ export interface JobResult {
 
 export interface JobDefinition {
   id: string;
-  category: 'heartbeat' | 'briefing' | 'operations' | 'reflections' | 'memory' | 'onboarding';
+  category: 'heartbeat' | 'briefing' | 'operations' | 'reflections' | 'memory' | 'onboarding' | 'routines';
   provider: IntegrationProvider | null;
   priority: 1 | 2 | 3 | 4 | 5;
   /** Schedule for steady-state (after catch-up). null = event-triggered only */
@@ -35,6 +35,7 @@ export interface JobDefinition {
 }
 
 // ── Schedule constants ──
+const MIN_5 = 5 * 60_000;
 const MIN_15 = 15 * 60_000;
 const MIN_30 = 30 * 60_000;
 const HOUR_4 = 4 * 60 * 60_000;
@@ -300,6 +301,21 @@ export const JOB_REGISTRY: JobDefinition[] = [
     timeoutMs: TIMEOUT_LONG,
     estimatedDurationMs: 45_000,
     label: 'Writing monthly reflection',
+  },
+
+  // ── Priority 3: User-defined scheduled routines (clock-tick, runs every 5 min) ──
+  {
+    id: 'run-user-routines',
+    category: 'routines',
+    provider: null,
+    priority: 3,
+    intervalMs: MIN_5,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_5,
+    timeoutMs: TIMEOUT_LONG,
+    estimatedDurationMs: 30_000,
+    label: 'Running scheduled routines',
   },
 ];
 

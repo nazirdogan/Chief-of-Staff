@@ -3,16 +3,14 @@ import { Sequence, staticFile, interpolate } from "remotion";
 import { Audio } from "@remotion/media";
 import {
   FPS,
-  VOL_CHIME, VOL_HUM_MAX, VOL_BASS, VOL_PAD_START, VOL_PAD_SWELL, VOL_PIANO,
+  VOL_CHIME, VOL_HUM_MAX, VOL_BASS, VOL_PAD_START, VOL_PIANO,
   BASS_TONE_START, ACT2_FADE_START,
-  LIGHT_APPEAR, SUBLINE_ACT3, LIGHT_RETURN_START, ACT3_END,
+  LIGHT_APPEAR, LIGHT_RETURN_START, ACT3_END,
   PIANO_FRAME,
 } from "../constants";
 import { CLAMP } from "../utils";
 
 // ─── CHIME SEQUENCE ───────────────────────────────────────────────────────────
-// One chime per element spawn for the first ~30 elements (up to ~0:08)
-// Chimes cycle through 5 variants
 const CHIME_SPAWNS: Array<{ frame: number; variant: number }> = [
   { frame: 24, variant: 1 },
   { frame: 29, variant: 2 },
@@ -34,7 +32,6 @@ const CHIME_SPAWNS: Array<{ frame: number; variant: number }> = [
   { frame: 156, variant: 3 },
   { frame: 168, variant: 4 },
   { frame: 180, variant: 5 },
-  // Continue into the chaos phase at reduced density
   { frame: 192, variant: 1 },
   { frame: 200, variant: 2 },
   { frame: 210, variant: 3 },
@@ -78,7 +75,7 @@ export const SoundDesign: React.FC = () => {
         />
       </Sequence>
 
-      {/* ── 120Hz bass tone (0:26.50 → 0:35.00, fade in 3s, hold, fade out 1s) ── */}
+      {/* ── 120Hz bass tone (0:26.50 → 0:35.00) ── */}
       <Sequence
         from={BASS_TONE_START}
         durationInFrames={ACT2_FADE_START - BASS_TONE_START + 24}
@@ -86,9 +83,7 @@ export const SoundDesign: React.FC = () => {
         <Audio
           src={staticFile("audio/120hz_bass_tone_10s.wav")}
           volume={(f) => {
-            // Fade in over 3 seconds (72 frames)
             const fadeIn = interpolate(f, [0, 72], [0, VOL_BASS], { ...CLAMP });
-            // Fade out over last 24 frames
             const totalDur = ACT2_FADE_START - BASS_TONE_START + 24;
             const fadeOut = interpolate(f, [totalDur - 24, totalDur], [1, 0], { ...CLAMP });
             return fadeIn * fadeOut;
@@ -96,34 +91,26 @@ export const SoundDesign: React.FC = () => {
         />
       </Sequence>
 
-      {/* ── Near silence / room tone (0:18 → 0:32) ── */}
-      {/* Represented by extremely low volume — no explicit file, skip */}
-
-      {/* ── Warm ambient pad (Act 3: 0:36.00 → 0:50.50) ── */}
+      {/* ── Warm ambient pad (Act 3: 0:36.00 → 0:41.00 when CTA opens) ── */}
       <Sequence
         from={LIGHT_APPEAR + 10}
-        durationInFrames={ACT3_END + 12 - (LIGHT_APPEAR + 10)}
+        durationInFrames={ACT3_END - (LIGHT_APPEAR + 10)}
       >
         <Audio
           src={staticFile("audio/ambient_pad_warm_20s.wav")}
           loop
           volume={(f) => {
-            const totalDur = ACT3_END + 12 - (LIGHT_APPEAR + 10);
-            // Fade in from -28dB (0:36→ start)
+            const totalDur = ACT3_END - (LIGHT_APPEAR + 10);
             const fadeIn = interpolate(f, [0, 24], [0, VOL_PAD_START], { ...CLAMP });
-            // Swell at 0:44 (+4dB over 4 seconds = 96 frames)
-            const swellStart = (SUBLINE_ACT3 - (LIGHT_APPEAR + 10)) + 12;
-            const swell = interpolate(f, [swellStart, swellStart + 96], [VOL_PAD_START, VOL_PAD_SWELL], { ...CLAMP });
-            // Fade out 0:49.50 → 0:50.50
+            // Fade out when CTA opens
             const fadeOutStart = LIGHT_RETURN_START - (LIGHT_APPEAR + 10);
-            const fadeOut = interpolate(f, [fadeOutStart, fadeOutStart + 24], [1, 0], { ...CLAMP });
-            const vol = Math.max(fadeIn, swell);
-            return vol * fadeOut;
+            const fadeOut = interpolate(f, [fadeOutStart, totalDur], [1, 0], { ...CLAMP });
+            return fadeIn * fadeOut;
           }}
         />
       </Sequence>
 
-      {/* ── Piano note (0:55.00 — single shot) ── */}
+      {/* ── Piano note (0:45.00 — single shot) ── */}
       <Sequence from={PIANO_FRAME} durationInFrames={96}>
         <Audio
           src={staticFile("audio/piano_note_middleC_4s.wav")}

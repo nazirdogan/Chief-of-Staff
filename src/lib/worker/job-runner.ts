@@ -412,6 +412,165 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       return { processed: 1 };
     }
 
+    // ── User-defined scheduled routines ──
+    case 'run-user-routines': {
+      // Get user's timezone for correct local-time comparison
+      const { data: userProfile } = await db
+        .from('profiles')
+        .select('timezone')
+        .eq('id', userId)
+        .single();
+      const timezone = (userProfile?.timezone as string) || 'UTC';
+
+      // Current local time in user's timezone
+      const nowInTz = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+      const currentTotalMinutes = nowInTz.getHours() * 60 + nowInTz.getMinutes();
+      const currentDay = nowInTz.getDay(); // 0=Sun
+      const currentDate = nowInTz.getDate();
+      const todayStr = nowInTz.toLocaleDateString('en-CA'); // YYYY-MM-DD
+
+      // Fetch all enabled routines for this user
+      const { data: routines } = await db
+        .from('user_routines')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_enabled', true);
+
+      if (!routines || routines.length === 0) return { processed: 0 };
+
+      // Window matches the poll interval — routine fires if current time is
+      // within [scheduled_time, scheduled_time + 5 min)
+      const WINDOW_MINUTES = 5;
+      let fired = 0;
+
+      for (const routine of routines as Array<Record<string, unknown>>) {
+        // Parse scheduled_time (stored as "HH:MM" or "HH:MM:SS")
+        const [schedHour, schedMin] = String(routine.scheduled_time ?? '08:00')
+          .split(':')
+          .map(Number);
+        const scheduledTotalMinutes = schedHour * 60 + schedMin;
+
+        const inTimeWindow =
+          currentTotalMinutes >= scheduledTotalMinutes &&
+          currentTotalMinutes < scheduledTotalMinutes + WINDOW_MINUTES;
+
+        if (!inTimeWindow) continue;
+
+        // Determine whether the routine should fire based on frequency + last_run_at
+        const lastRunAt = routine.last_run_at
+          ? new Date(routine.last_run_at as string)
+          : null;
+        const lastRunInTz = lastRunAt
+          ? new Date(lastRunAt.toLocaleString('en-US', { timeZone: timezone }))
+          : null;
+
+        let shouldRun = false;
+        if (routine.frequency === 'daily') {
+          const lastRunDateStr = lastRunInTz?.toLocaleDateString('en-CA') ?? null;
+          shouldRun = lastRunDateStr !== todayStr;
+        } else if (routine.frequency === 'weekly') {
+          const scheduledDay = routine.scheduled_day as number | null;
+          if (scheduledDay !== null && currentDay === scheduledDay) {
+            const weekStart = new Date(nowInTz);
+            weekStart.setDate(nowInTz.getDate() - nowInTz.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            shouldRun = !lastRunAt || lastRunAt < weekStart;
+          }
+        } else if (routine.frequency === 'monthly') {
+          const scheduledDay = routine.scheduled_day as number | null;
+          if (scheduledDay !== null && currentDate === scheduledDay) {
+            const monthStart = new Date(nowInTz.getFullYear(), nowInTz.getMonth(), 1, 0, 0, 0, 0);
+            shouldRun = !lastRunAt || lastRunAt < monthStart;
+          }
+        }
+
+        if (!shouldRun) continue;
+
+        try {
+          if (routine.routine_type === 'daily_briefing') {
+            // Reuse the full briefing generation pipeline
+            const { generateDailyBriefing } = await import('@/lib/ai/agents/briefing');
+            const { executeIfTierOne } = await import('@/lib/actions/executor');
+            const { AutonomyTier } = await import('@/lib/db/types');
+
+            await generateDailyBriefing(userId, timezone);
+
+            const { data: tierOneActions } = await db
+              .from('pending_actions')
+              .select('id')
+              .eq('user_id', userId)
+              .eq('autonomy_tier', AutonomyTier.SILENT)
+              .eq('status', 'awaiting_confirmation');
+            for (const action of (tierOneActions ?? []) as Array<{ id: string }>) {
+              await executeIfTierOne(action.id);
+            }
+
+            // Stamp last_run_at on the routine row
+            await db
+              .from('user_routines')
+              .update({
+                last_run_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', routine.id as string)
+              .eq('user_id', userId);
+          } else {
+            // Generic routine types — generate content and save as routine_output
+            const { generateRoutineOutput } = await import('@/lib/ai/agents/routine-generator');
+            const { createRoutineOutput } = await import('@/lib/db/queries/routines');
+
+            const { data: narrativeRow } = await db
+              .from('day_narratives')
+              .select('narrative_text')
+              .eq('user_id', userId)
+              .eq('narrative_date', todayStr)
+              .single();
+
+            const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const { data: sessions } = await db
+              .from('activity_sessions')
+              .select('app_name, duration_seconds, summary')
+              .eq('user_id', userId)
+              .gte('started_at', since)
+              .order('started_at', { ascending: false })
+              .limit(20);
+
+            const result = await generateRoutineOutput(
+              routine as unknown as Parameters<typeof generateRoutineOutput>[0],
+              {
+                todayDate: todayStr,
+                todayNarrative:
+                  (narrativeRow as { narrative_text?: string } | null)?.narrative_text ?? null,
+                recentSessions: (
+                  (sessions ?? []) as Array<{
+                    app_name: string;
+                    duration_seconds: number | null;
+                    summary: string | null;
+                  }>
+                ).map((s) => ({
+                  app: s.app_name,
+                  duration_minutes: Math.round((s.duration_seconds ?? 0) / 60),
+                  summary: s.summary ?? undefined,
+                })),
+              },
+            );
+
+            // createRoutineOutput also stamps last_run_at on the routine row
+            await createRoutineOutput(db, userId, routine.id as string, result.content, {
+              generation_model: result.model,
+              generation_ms: result.durationMs,
+            });
+          }
+
+          fired++;
+        } catch {
+          // Non-fatal — log and continue to the next routine
+        }
+      }
+
+      return { processed: fired, found: (routines as unknown[]).length };
+    }
+
     default:
       return { processed: 0, error: `Unknown job: ${jobId}` };
   }

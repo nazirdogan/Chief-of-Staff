@@ -83,6 +83,13 @@ const envSchema = z.object({
   // Calendly
   CALENDLY_CLIENT_ID: z.string().optional(),
   CALENDLY_CLIENT_SECRET: z.string().optional(),
+
+  // Stripe (Billing)
+  STRIPE_SECRET_KEY: z.string().min(1),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1),
+  STRIPE_PLUS_PRICE_ID: z.string().min(1),
+  STRIPE_PRO_PRICE_ID: z.string().min(1),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
 });
 
 export type Env = z.infer<typeof envSchema>;
