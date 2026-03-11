@@ -35,7 +35,7 @@ export async function syncAllIntegrations(userId: string): Promise<SyncResult[]>
     for (const conn of gmailConnections) {
       try {
         const { ingestGmailMessages } = await import('@/lib/ai/agents/ingestion');
-        const result = await ingestGmailMessages(userId, conn.nango_connection_id, conn.id);
+        const result = await ingestGmailMessages(userId, conn.id, conn.id);
         results.push({
           provider: 'gmail',
           status: 'success',
@@ -54,7 +54,7 @@ export async function syncAllIntegrations(userId: string): Promise<SyncResult[]>
       try {
         const { extractCommitmentsFromGmail } = await import('@/lib/ai/agents/commitment');
         const { getGmailClient } = await import('@/lib/integrations/gmail');
-        const gmail = await getGmailClient(userId, conn.nango_connection_id);
+        const gmail = await getGmailClient(userId, conn.id);
         const response = await gmail.users.messages.list({
           userId: 'me',
           maxResults: 15,
@@ -99,7 +99,7 @@ export async function syncAllIntegrations(userId: string): Promise<SyncResult[]>
     for (const conn of calendarConnections) {
       try {
         const { getTodaysParsedEvents } = await import('@/lib/integrations/google-calendar');
-        const events = await getTodaysParsedEvents(userId, conn.nango_connection_id);
+        const events = await getTodaysParsedEvents(userId, conn.id);
         results.push({
           provider: 'google_calendar',
           status: 'success',

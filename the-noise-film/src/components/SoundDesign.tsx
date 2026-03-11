@@ -117,6 +117,14 @@ export const SoundDesign: React.FC = () => {
           volume={VOL_PIANO}
         />
       </Sequence>
+
+      {/* ── Voiceover — Rachelle narration, full film ── */}
+      <Sequence from={0} durationInFrames={1188}>
+        <Audio
+          src={staticFile("audio/voiceover.mp3")}
+          volume={1}
+        />
+      </Sequence>
     </>
   );
 };

@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Nango from '@nangohq/frontend';
 import { Button } from '@/components/ui/button';
 import { OAuthConsentScreen } from './OAuthConsentScreen';
 import { BrandIcon } from '@/components/shared/BrandIcon';
@@ -14,7 +13,6 @@ import {
 import type { IntegrationProvider, UserIntegration } from '@/lib/db/types';
 
 interface IntegrationConfig {
-  nangoProvider: string;
   dbProvider: IntegrationProvider;
   label: string;
   description: string;
@@ -24,11 +22,13 @@ interface IntegrationConfig {
 }
 
 const INTEGRATIONS: IntegrationConfig[] = [
-  { nangoProvider: 'google-mail', dbProvider: 'gmail', label: 'Gmail', description: 'Read emails for your daily briefing and commitment tracking', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }] },
-  { nangoProvider: 'google-calendar', dbProvider: 'google_calendar', label: 'Google Calendar', description: 'Surface your schedule and prepare meeting briefs', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }] },
-  { nangoProvider: 'slack', dbProvider: 'slack', label: 'Slack', description: 'Surface important conversations and action items', category: 'Messaging', recommended: true, permissions: [{ label: 'Read channel messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }] },
-  { nangoProvider: 'notion', dbProvider: 'notion', label: 'Notion', description: 'Index pages for context and meeting prep', category: 'Documents', recommended: true, permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }] },
+  { dbProvider: 'gmail', label: 'Gmail', description: 'Read emails for your daily briefing and commitment tracking', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }] },
+  { dbProvider: 'google_calendar', label: 'Google Calendar', description: 'Surface your schedule and prepare meeting briefs', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }] },
+  { dbProvider: 'slack', label: 'Slack', description: 'Surface important conversations and action items', category: 'Messaging', recommended: true, permissions: [{ label: 'Read channel messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }] },
+  { dbProvider: 'notion', label: 'Notion', description: 'Index pages for context and meeting prep', category: 'Documents', recommended: true, permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }] },
 ];
+
+const GOOGLE_PROVIDERS: IntegrationProvider[] = ['gmail', 'google_calendar'];
 
 interface IntegrationConnectStepProps {
   onNext: () => void;
@@ -39,8 +39,8 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [consentProvider, setConsentProvider] = useState<IntegrationConfig | null>(null);
-  const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
-  const [tokenFetching, setTokenFetching] = useState(false);
+  const [pendingAuthUrl, setPendingAuthUrl] = useState<string | null>(null);
+  const [urlFetching, setUrlFetching] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
 
@@ -70,16 +70,13 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
         const data = await res.json();
         setIntegrations(data.integrations);
       }
-    } catch {
-      // Silently fail — will retry on next poll
-    }
+    } catch { /* Silently fail — will retry on next poll */ }
   }, []);
 
-  useEffect(() => { fetchIntegrations(); }, [fetchIntegrations]);
+  useEffect(() => { void fetchIntegrations(); }, [fetchIntegrations]);
 
-  // Poll: sync with Nango every 3s to detect completed OAuth flows
   useEffect(() => {
-    const interval = setInterval(syncIntegrations, 3000);
+    const interval = setInterval(() => { void syncIntegrations(); }, 3000);
     return () => clearInterval(interval);
   }, [syncIntegrations]);
 
@@ -91,69 +88,70 @@ export function IntegrationConnectStep({ onNext }: IntegrationConnectStepProps) 
 
   async function openConsent(config: IntegrationConfig) {
     setConsentProvider(config);
-    setPendingSessionToken(null);
-    setTokenFetching(true);
+    setPendingAuthUrl(null);
+    setUrlFetching(true);
     try {
-      const res = await fetch('/api/integrations/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: config.nangoProvider }),
-      });
+      const res = await fetch(`/api/integrations/google/auth-url?provider=${config.dbProvider}`);
       if (res.ok) {
-        const data = await res.json() as { sessionToken?: string };
-        setPendingSessionToken(data.sessionToken ?? null);
+        const data = await res.json() as { url?: string };
+        setPendingAuthUrl(data.url ?? null);
       }
-    } catch { /* token will be re-fetched inside handleConnect as fallback */ }
-    finally { setTokenFetching(false); }
+    } catch { /* URL will be fetched again when user clicks Connect */ }
+    finally { setUrlFetching(false); }
   }
 
-  // MUST be a plain (non-async) function — see settings/integrations/page.tsx for explanation.
   function handleConnect(config: IntegrationConfig) {
-    const token = pendingSessionToken;
-    if (!token) return;
+    const url = pendingAuthUrl;
+    if (!url) return;
 
     setConnecting(true);
     setConnectError(null);
-    setPendingSessionToken(null);
+    setPendingAuthUrl(null);
 
-    new Nango({ connectSessionToken: token })
-      .auth(config.nangoProvider)
-      .then(() => syncIntegrations())
-      .catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : 'Connection failed';
-        if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
-          setConnectError(`Failed to connect ${config.label}: ${message}`);
-        }
-      })
-      .finally(() => {
-        setConnecting(false);
-        setConsentProvider(null);
-      });
+    const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+    if (isTauri) {
+      import('@tauri-apps/api/core')
+        .then(({ invoke }) => invoke('plugin:shell|open', { path: url }))
+        .then(() => {
+          setConsentProvider(null);
+          setConnecting(false);
+        })
+        .catch(() => {
+          setConnectError(`Could not open browser for ${config.label} sign-in.`);
+          setConnecting(false);
+        });
+    } else {
+      // Web: redirect to Google. Callback will return to settings page.
+      window.location.href = url;
+    }
+  }
+
+  function isAvailable(dbProvider: IntegrationProvider): boolean {
+    return availableProviders.includes(dbProvider);
   }
 
   if (consentProvider) {
     return (
       <div className="space-y-6">
         <OAuthConsentScreen
-          provider={consentProvider.nangoProvider}
+          provider={consentProvider.dbProvider}
           providerLabel={consentProvider.label}
           permissions={consentProvider.permissions}
           onConsent={() => handleConnect(consentProvider)}
           onCancel={() => setConsentProvider(null)}
           loading={connecting}
-          tokenLoading={tokenFetching}
+          tokenLoading={urlFetching}
         />
       </div>
     );
   }
 
-  function isAvailable(nangoProvider: string): boolean {
-    return availableProviders.includes(nangoProvider);
-  }
-
   function renderTile(config: IntegrationConfig) {
     const connected = isConnected(config.dbProvider);
-    const available = isAvailable(config.nangoProvider);
+    const available = GOOGLE_PROVIDERS.includes(config.dbProvider)
+      ? isAvailable(config.dbProvider)
+      : false; // Slack/Notion not yet wired to direct OAuth
     return (
       <button
         key={config.dbProvider}

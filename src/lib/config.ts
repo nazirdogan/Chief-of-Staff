@@ -19,7 +19,12 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1),
   OPENAI_API_KEY: z.string().min(1),
 
-  // Google (optional — not needed until push notifications)
+  // Google OAuth (direct — required for Gmail and Calendar integrations)
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  GOOGLE_REDIRECT_URI: z.url(),
+
+  // Google PubSub (optional — Gmail push notifications)
   GOOGLE_PUBSUB_TOPIC: z.string().optional(),
   GOOGLE_SERVICE_ACCOUNT_KEY: z.string().optional(),
 

@@ -97,10 +97,10 @@ async function summariseSlackMessage(
 
 export async function ingestGmailMessages(
   userId: string,
-  nangoConnectionId?: string,
-  integrationId?: string
+  integrationId?: string,
+  _legacyIntegrationId?: string
 ): Promise<{ processed: number; found: number }> {
-  const messageRefs = await fetchInboxMessages(userId, 20, nangoConnectionId);
+  const messageRefs = await fetchInboxMessages(userId, 20, integrationId);
   const found = messageRefs.length;
 
   const supabase = createServiceClient();
@@ -122,7 +122,7 @@ export async function ingestGmailMessages(
     scannedIds.push(ref.id);
 
     // Fetch full message — body is NEVER stored
-    const fullMessage = await fetchMessageForProcessing(userId, ref.id, nangoConnectionId);
+    const fullMessage = await fetchMessageForProcessing(userId, ref.id, integrationId);
     const parsed = parseGmailMessage(fullMessage);
 
     const existingSummary = existingSummaries.get(parsed.id);
@@ -173,8 +173,8 @@ export async function ingestGmailMessages(
 export async function ingestGmailMessageRefs(
   userId: string,
   messageRefs: Array<{ id: string; threadId: string }>,
-  nangoConnectionId?: string,
-  integrationId?: string
+  integrationId?: string,
+  _legacyIntegrationId?: string
 ): Promise<{ processed: number }> {
   if (messageRefs.length === 0) return { processed: 0 };
 
@@ -184,7 +184,7 @@ export async function ingestGmailMessageRefs(
   let processed = 0;
 
   for (const ref of messageRefs) {
-    const fullMessage = await fetchMessageForProcessing(userId, ref.id, nangoConnectionId);
+    const fullMessage = await fetchMessageForProcessing(userId, ref.id, integrationId);
     const parsed = parseGmailMessage(fullMessage);
 
     const existingSummary = existingSummaries.get(parsed.id);

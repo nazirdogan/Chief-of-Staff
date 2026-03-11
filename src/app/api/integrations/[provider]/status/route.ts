@@ -4,7 +4,6 @@ import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
 import { createServiceClient } from '@/lib/db/client';
 import { getIntegration } from '@/lib/db/queries/integrations';
-import { getConnectionDetails } from '@/lib/integrations/nango';
 import type { IntegrationProvider } from '@/lib/db/types';
 
 const VALID_PROVIDERS: IntegrationProvider[] = [
@@ -13,13 +12,6 @@ const VALID_PROVIDERS: IntegrationProvider[] = [
   'slack',
   'notion',
 ];
-
-const DB_TO_NANGO_PROVIDER: Record<string, string> = {
-  gmail: 'google-mail',
-  google_calendar: 'google-calendar',
-  slack: 'slack',
-  notion: 'notion',
-};
 
 export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
@@ -39,24 +31,26 @@ export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRe
     const integration = await getIntegration(supabase, req.user.id, provider);
 
     if (!integration) {
-      return NextResponse.json({
-        provider,
-        status: 'disconnected',
-        nango_healthy: false,
-      });
+      return NextResponse.json({ provider, status: 'disconnected' });
     }
 
-    // Check Nango connection health
-    const nangoProvider = DB_TO_NANGO_PROVIDER[provider];
-    const nangoConnection = await getConnectionDetails(req.user.id, nangoProvider);
+    // For Google providers, verify the stored token is still usable
+    let tokenHealthy = true;
+    if (provider === 'gmail' || provider === 'google_calendar') {
+      try {
+        const { getLiveAccessToken } = await import('@/lib/integrations/google-oauth');
+        await getLiveAccessToken(integration.id);
+      } catch {
+        tokenHealthy = false;
+      }
+    }
 
     return NextResponse.json({
       provider,
-      status: integration.status,
+      status: tokenHealthy ? integration.status : 'error',
       account_email: integration.account_email,
       last_synced_at: integration.last_synced_at,
-      error_message: integration.error_message,
-      nango_healthy: nangoConnection !== null,
+      error_message: tokenHealthy ? integration.error_message : 'Token expired — please reconnect.',
     });
   } catch (error) {
     return handleApiError(error);

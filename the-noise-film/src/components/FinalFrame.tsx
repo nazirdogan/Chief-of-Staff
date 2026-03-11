@@ -1,6 +1,5 @@
 import React from "react";
 import { useCurrentFrame, interpolate } from "remotion";
-import { loadFont } from "@remotion/google-fonts/PlayfairDisplay";
 import {
   FINAL_FRAME_START,
   FINAL_DONNA_APPEAR,
@@ -14,13 +13,10 @@ import {
 } from "../constants";
 import { easeOutQuad, CLAMP } from "../utils";
 
-// Load Playfair Display for the wordmark
-loadFont("normal", { weights: ["700"], subsets: ["latin"] });
-
 // ─── DONNA WORDMARK ───────────────────────────────────────────────────────────
-// Inline SVG — extracts text from donna-wordmark.svg and centres the text
-// itself at X:960 using text-anchor="middle". This guarantees pixel-perfect
-// centering regardless of font metrics, unlike placing the SVG file as an <Img>.
+// Inline SVG centred at X:960 using text-anchor="middle".
+// Uses Cormorant Garamond (loaded via load-fonts.ts / FontFace API).
+// Renders "Donna." matching the brand wordmark (Donna + amber dot).
 // Baseline lands at Y:380. Subline "she already knows" sits at Y:442 (62px below).
 const DonnaWordmark: React.FC = () => {
   const frame = useCurrentFrame();
@@ -36,12 +32,12 @@ const DonnaWordmark: React.FC = () => {
       style={{
         position: "absolute",
         left: 0,
-        // Baseline of 72px text with y=72 in SVG: container top = 380 - 72 = 308
+        // Baseline of 72px text: container top = 380 - 72 = 308
         top: 308,
         width: 1920,
         opacity: op,
         transform: `scale(${scale})`,
-        transformOrigin: "960px 72px", // scale from the text baseline centre
+        transformOrigin: "960px 72px",
       }}
     >
       <svg
@@ -55,14 +51,14 @@ const DonnaWordmark: React.FC = () => {
           x={960}
           y={72}
           textAnchor="middle"
-          fontFamily="'Playfair Display', serif"
+          fontFamily='"Cormorant Garamond", Georgia, serif'
           fontSize={72}
-          fontWeight={700}
-          letterSpacing={-2}
-          fill="#FAF9F6"
+          fontWeight={400}
+          letterSpacing="0.15em"
+          fill="#F4E9D5"
         >
           Donna
-          <tspan fill="#E8845C" letterSpacing={0}>.</tspan>
+          <tspan fill="#C4914A" letterSpacing="0">.</tspan>
         </text>
       </svg>
     </div>

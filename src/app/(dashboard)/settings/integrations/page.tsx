@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Nango from '@nangohq/frontend';
 import { BrandIcon } from '@/components/shared/BrandIcon';
 import {
   Loader2,
@@ -19,7 +18,6 @@ import type { IntegrationProvider, UserIntegration } from '@/lib/db/types';
 import { BackButton } from '@/components/shared/BackButton';
 
 interface IntegrationConfig {
-  nangoProvider: string;
   dbProvider: IntegrationProvider;
   label: string;
   permissions: Array<{ label: string; description: string }>;
@@ -31,7 +29,6 @@ interface IntegrationConfig {
 const INTEGRATIONS: IntegrationConfig[] = [
   // EMAIL & CALENDAR
   {
-    nangoProvider: 'google-mail',
     dbProvider: 'gmail',
     label: 'Gmail',
     category: 'Email & Calendar',
@@ -39,7 +36,6 @@ const INTEGRATIONS: IntegrationConfig[] = [
     permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }],
   },
   {
-    nangoProvider: 'google-calendar',
     dbProvider: 'google_calendar',
     label: 'Google Calendar',
     category: 'Email & Calendar',
@@ -48,7 +44,6 @@ const INTEGRATIONS: IntegrationConfig[] = [
   },
   // MESSAGING
   {
-    nangoProvider: 'slack',
     dbProvider: 'slack',
     label: 'Slack',
     category: 'Messaging',
@@ -57,7 +52,6 @@ const INTEGRATIONS: IntegrationConfig[] = [
   },
   // DOCUMENTS
   {
-    nangoProvider: 'notion',
     dbProvider: 'notion',
     label: 'Notion',
     category: 'Documents',
@@ -81,14 +75,30 @@ export default function IntegrationsSettingsPage() {
   const [integrations, setIntegrations] = useState<UserIntegration[]>([]);
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  // Session tokens keyed by nangoProvider, pre-fetched as soon as providers are known
-  const sessionTokens = useRef<Record<string, string>>({});
-  const fetchingTokens = useRef<Set<string>>(new Set());
-  const [tokenReady, setTokenReady] = useState<Record<string, boolean>>({});
-  const [tokenErrors, setTokenErrors] = useState<Record<string, string>>({});
-  // Which provider is actively connecting (OAuth popup open)
   const [connecting, setConnecting] = useState<string | null>(null);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [connectSuccess, setConnectSuccess] = useState<string | null>(null);
+  const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+  // On web: Google redirects back with ?connected=provider or ?error=reason
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get('connected');
+    const error = params.get('error');
+    if (connected) {
+      setConnectSuccess(connected === 'gmail' ? 'Gmail connected!' : 'Google Calendar connected!');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (error) {
+      const messages: Record<string, string> = {
+        google_denied: 'Sign-in cancelled.',
+        token_exchange_failed: 'Could not complete sign-in. Please try again.',
+        db_error: 'Account connected but failed to save. Please try again.',
+      };
+      setConnectError(messages[error] ?? 'Connection failed. Please try again.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
   // Tracks which integration row UUID is being disconnected
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   // Tracks which integration row UUID is having its alias edited
@@ -182,44 +192,16 @@ export default function IntegrationsSettingsPage() {
     return () => clearInterval(interval);
   }, [syncIntegrations]);
 
-  /**
-   * Pre-fetch a session token for a provider in the background.
-   * Stores it in a ref so reads are always synchronous — no state-read delay.
-   */
-  async function prefetchToken(nangoProvider: string) {
-    if (sessionTokens.current[nangoProvider]) return;
-    if (fetchingTokens.current.has(nangoProvider)) return;
-    fetchingTokens.current.add(nangoProvider);
-    try {
-      const res = await fetch('/api/integrations/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: nangoProvider }),
-      });
-      if (res.ok) {
-        const data = await res.json() as { sessionToken?: string };
-        if (data.sessionToken) {
-          sessionTokens.current[nangoProvider] = data.sessionToken;
-          setTokenReady((prev) => ({ ...prev, [nangoProvider]: true }));
-        }
-      } else {
-        const data = await res.json().catch(() => ({})) as { error?: string };
-        setTokenErrors((prev) => ({ ...prev, [nangoProvider]: data.error ?? 'Failed to prepare connection' }));
-      }
-    } catch {
-      setTokenErrors((prev) => ({ ...prev, [nangoProvider]: 'Could not reach the server' }));
-    } finally {
-      fetchingTokens.current.delete(nangoProvider);
-    }
-  }
-
-  // Pre-fetch tokens for all available providers as soon as we know what's available
+  // Auto-clear connecting state when the new connection appears in the DB
   useEffect(() => {
-    for (const provider of availableProviders) {
-      void prefetchToken(provider);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableProviders]);
+    if (!connecting) return;
+    const config = INTEGRATIONS.find((c) => c.dbProvider === connecting);
+    if (!config) return;
+    const isNowConnected = integrations.some(
+      (i) => i.provider === config.dbProvider && i.status === 'connected'
+    );
+    if (isNowConnected) setConnecting(null);
+  }, [integrations, connecting]);
 
   /** Returns all connected rows for a provider */
   function getConnections(dbProvider: IntegrationProvider): UserIntegration[] {
@@ -232,39 +214,47 @@ export default function IntegrationsSettingsPage() {
   }
 
   /**
-   * Called directly from onClick — no async gap before .auth().
-   * Token is read synchronously from the ref so popup blockers can't fire.
+   * Kick off the Google OAuth flow.
+   *
+   * Web: redirects the current tab to Google sign-in. On return, the callback
+   * route stores the tokens and redirects back to this page.
+   *
+   * Tauri (desktop): opens the auth URL in the system browser. The callback
+   * stores the tokens server-side; the 4-second polling loop detects the new row.
    */
-  function connectProvider(config: IntegrationConfig) {
-    const token = sessionTokens.current[config.nangoProvider];
-    if (!token) {
-      // Token not ready yet — start fetching and tell the user
-      void prefetchToken(config.nangoProvider);
-      setConnectError(`Still preparing ${config.label} — please try again in a moment.`);
+  async function connectProvider(config: IntegrationConfig) {
+    if (!['gmail', 'google_calendar'].includes(config.dbProvider)) {
+      setConnectError(`${config.label} connections are not yet available.`);
       return;
     }
 
-    // Consume immediately so it can't be reused
-    delete sessionTokens.current[config.nangoProvider];
-    setTokenReady((prev) => ({ ...prev, [config.nangoProvider]: false }));
-    setConnecting(config.nangoProvider);
+    setConnecting(config.dbProvider);
     setConnectError(null);
 
-    // .auth() must be called here, synchronously within the click handler
-    new Nango({ connectSessionToken: token })
-      .auth(config.nangoProvider)
-      .then(() => { void syncIntegrations(); })
-      .catch((error: unknown) => {
-        const message = error instanceof Error ? error.message : 'Connection failed';
-        if (!message.includes('closed') && !message.includes('cancelled') && !message.includes('canceled')) {
-          setConnectError(`Failed to connect ${config.label}: ${message}`);
-        }
-      })
-      .finally(() => {
-        setConnecting(null);
-        // Re-fetch a fresh token for next time
-        void prefetchToken(config.nangoProvider);
-      });
+    try {
+      const res = await fetch(`/api/integrations/google/auth-url?provider=${config.dbProvider}`);
+      if (!res.ok) throw new Error('Could not generate auth URL');
+      const { url } = await res.json() as { url: string };
+
+      if (isTauri) {
+        // Open in system browser; polling loop will detect the new row
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('plugin:shell|open', { path: url });
+
+        // Poll every 2s for up to 90s, then give up
+        const checkDone = setInterval(() => { void syncIntegrations(); }, 2000);
+        setTimeout(() => {
+          clearInterval(checkDone);
+          setConnecting(null);
+        }, 90_000);
+      } else {
+        // Web: redirect current tab; callback will redirect back here
+        window.location.href = url;
+      }
+    } catch {
+      setConnectError(`Could not start ${config.label} sign-in. Please try again.`);
+      setConnecting(null);
+    }
   }
 
   async function handleDisconnect(integrationId: string) {
@@ -309,6 +299,23 @@ export default function IntegrationsSettingsPage() {
       <p className="mt-1 text-sm text-muted-foreground">
         Connect your accounts to power your daily briefing.
       </p>
+
+      {isTauri && connecting && !connectError && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-blue-300/60 bg-blue-50/60 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+          <span>Sign-in opened in your browser — complete it there and come back.</span>
+        </div>
+      )}
+
+      {connectSuccess && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-green-300/60 bg-green-50/60 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300">
+          <Check className="h-4 w-4 shrink-0" />
+          <span>{connectSuccess}</span>
+          <button onClick={() => setConnectSuccess(null)} className="ml-auto">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
 
       {connectError && (
         <div className="mt-4 flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -428,7 +435,7 @@ export default function IntegrationsSettingsPage() {
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{category}</h2>
                 <div className="space-y-2">
                   {items.map((config) => {
-                    const isAvailable = availableProviders.includes(config.nangoProvider);
+                    const isAvailable = availableProviders.includes(config.dbProvider);
 
                     if (config.allowMultiple) {
                       // Multi-account provider: show connected account cards + "Add account" button
@@ -450,13 +457,13 @@ export default function IntegrationsSettingsPage() {
                             {isAvailable && (
                               <button
                                 onClick={() => connectProvider(config)}
-                                disabled={connecting === config.nangoProvider}
+                                disabled={connecting === config.dbProvider}
                                 className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground disabled:opacity-50"
                               >
-                                {connecting === config.nangoProvider
+                                {connecting === config.dbProvider
                                   ? <Loader2 className="h-3 w-3 animate-spin" />
                                   : <Plus className="h-3 w-3" />}
-                                {connecting === config.nangoProvider ? 'Connecting...' : hasConnections ? 'Add account' : 'Connect'}
+                                {connecting === config.dbProvider ? (isTauri ? 'Check browser...' : 'Connecting...') : hasConnections ? 'Add account' : 'Connect'}
                               </button>
                             )}
                             {!isAvailable && !hasConnections && (
@@ -549,7 +556,7 @@ export default function IntegrationsSettingsPage() {
                             connectProvider(config);
                           }
                         }}
-                        disabled={isDisconnecting || connecting === config.nangoProvider || (!isAvailable && !isConnected)}
+                        disabled={isDisconnecting || connecting === config.dbProvider || (!isAvailable && !isConnected)}
                         className={`group relative flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                           isConnected
                             ? 'border-green-300 bg-green-50/60 dark:border-green-800 dark:bg-green-950/30 hover:bg-muted/50'

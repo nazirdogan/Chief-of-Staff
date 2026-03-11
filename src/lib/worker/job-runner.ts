@@ -514,6 +514,50 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
               })
               .eq('id', routine.id as string)
               .eq('user_id', userId);
+
+            // Also save a routine_output with desktop observer narrative for Today page card
+            try {
+              const { generateRoutineOutput } = await import('@/lib/ai/agents/routine-generator');
+              const { createRoutineOutput } = await import('@/lib/db/queries/routines');
+
+              const { data: narrativeRow } = await db
+                .from('day_narratives')
+                .select('narrative_text')
+                .eq('user_id', userId)
+                .eq('narrative_date', todayStr)
+                .single();
+
+              const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+              const { data: sessions } = await db
+                .from('activity_sessions')
+                .select('app_name, duration_seconds, summary')
+                .eq('user_id', userId)
+                .gte('started_at', since)
+                .order('started_at', { ascending: false })
+                .limit(20);
+
+              const routineResult = await generateRoutineOutput(
+                routine as unknown as Parameters<typeof generateRoutineOutput>[0],
+                {
+                  todayDate: todayStr,
+                  todayNarrative: (narrativeRow as { narrative_text?: string } | null)?.narrative_text ?? null,
+                  recentSessions: (
+                    (sessions ?? []) as Array<{ app_name: string; duration_seconds: number | null; summary: string | null }>
+                  ).map((s) => ({
+                    app: s.app_name,
+                    duration_minutes: Math.round((s.duration_seconds ?? 0) / 60),
+                    summary: s.summary ?? undefined,
+                  })),
+                },
+              );
+
+              await createRoutineOutput(db, userId, routine.id as string, routineResult.content, {
+                generation_model: routineResult.model,
+                generation_ms: routineResult.durationMs,
+              });
+            } catch {
+              // Non-fatal — don't block fired++
+            }
           } else {
             // Generic routine types — generate content and save as routine_output
             const { generateRoutineOutput } = await import('@/lib/ai/agents/routine-generator');

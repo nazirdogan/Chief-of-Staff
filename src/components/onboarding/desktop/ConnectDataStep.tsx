@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Nango from '@nangohq/frontend';
 import { BrandIcon } from '@/components/shared/BrandIcon';
 import { OAuthConsentScreen } from '../OAuthConsentScreen';
 import { Loader2, AlertCircle, X } from 'lucide-react';
@@ -13,31 +12,32 @@ interface ConnectDataStepProps {
 }
 
 interface ProviderConfig {
-  nangoProvider: string;
   dbProvider: IntegrationProvider;
   label: string;
   description: string;
   permissions: Array<{ label: string; description: string }>;
 }
 
+const GOOGLE_PROVIDERS: IntegrationProvider[] = ['gmail', 'google_calendar'];
+
 const ESSENTIAL_PROVIDERS: ProviderConfig[] = [
   {
-    nangoProvider: 'google-mail', dbProvider: 'gmail', label: 'Gmail',
+    dbProvider: 'gmail', label: 'Gmail',
     description: '30 days of email history \u2014 commitments, contacts, context',
     permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }],
   },
   {
-    nangoProvider: 'google-calendar', dbProvider: 'google_calendar', label: 'Google Calendar',
+    dbProvider: 'google_calendar', label: 'Google Calendar',
     description: 'Schedule, meetings, and attendees for meeting prep',
     permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for today's schedule and meeting prep." }],
   },
   {
-    nangoProvider: 'slack', dbProvider: 'slack', label: 'Slack',
+    dbProvider: 'slack', label: 'Slack',
     description: 'Conversations, action items, and @mentions',
     permissions: [{ label: 'Read messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }],
   },
   {
-    nangoProvider: 'notion', dbProvider: 'notion', label: 'Notion',
+    dbProvider: 'notion', label: 'Notion',
     description: 'Pages and databases for context and meeting prep',
     permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }],
   },
@@ -48,10 +48,8 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [consentProvider, setConsentProvider] = useState<ProviderConfig | null>(null);
-  // Pre-fetched session token — obtained eagerly when the consent screen opens so
-  // nango.auth() fires synchronously from the "Proceed" click, avoiding popup blocking.
-  const [pendingSessionToken, setPendingSessionToken] = useState<string | null>(null);
-  const [tokenFetching, setTokenFetching] = useState(false);
+  const [pendingAuthUrl, setPendingAuthUrl] = useState<string | null>(null);
+  const [urlFetching, setUrlFetching] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -75,59 +73,58 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
     } catch { /* silent */ }
   }, []);
 
-  useEffect(() => { fetchIntegrations(); }, [fetchIntegrations]);
+  useEffect(() => { void fetchIntegrations(); }, [fetchIntegrations]);
   useEffect(() => {
-    const interval = setInterval(syncIntegrations, 3000);
+    const interval = setInterval(() => { void syncIntegrations(); }, 3000);
     return () => clearInterval(interval);
   }, [syncIntegrations]);
 
   function isConnected(p: IntegrationProvider) { return integrations.some((i) => i.provider === p && i.status === 'connected'); }
-  function isAvailable(p: string) { return availableProviders.includes(p); }
+  function isAvailable(p: IntegrationProvider) {
+    return GOOGLE_PROVIDERS.includes(p) ? availableProviders.includes(p) : false;
+  }
   const connectedCount = ESSENTIAL_PROVIDERS.filter((p) => isConnected(p.dbProvider)).length;
 
   async function openConsent(config: ProviderConfig) {
     setConsentProvider(config);
-    setPendingSessionToken(null);
-    setTokenFetching(true);
+    setPendingAuthUrl(null);
+    setUrlFetching(true);
     try {
-      const res = await fetch('/api/integrations/connect', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: config.nangoProvider }),
-      });
-      if (res.ok) setPendingSessionToken(((await res.json()) as { sessionToken?: string }).sessionToken ?? null);
-    } catch { /* token will be re-fetched inside handleConnect as fallback */ }
-    finally { setTokenFetching(false); }
+      const res = await fetch(`/api/integrations/google/auth-url?provider=${config.dbProvider}`);
+      if (res.ok) setPendingAuthUrl(((await res.json()) as { url?: string }).url ?? null);
+    } catch { /* will fall through */ }
+    finally { setUrlFetching(false); }
   }
 
-  // MUST be a plain (non-async) function — see settings/integrations/page.tsx for explanation.
   function handleConnect(config: ProviderConfig) {
-    const token = pendingSessionToken;
-    if (!token) return;
+    const url = pendingAuthUrl;
+    if (!url) return;
 
     setConnecting(true);
     setConnectError(null);
-    setPendingSessionToken(null);
+    setPendingAuthUrl(null);
 
-    new Nango({ connectSessionToken: token })
-      .auth(config.nangoProvider)
-      .then(() => syncIntegrations())
-      .catch((error: unknown) => {
-        const msg = error instanceof Error ? error.message : 'Connection failed';
-        if (!msg.includes('closed') && !msg.includes('cancel')) setConnectError(`${config.label}: ${msg}`);
-      })
-      .finally(() => { setConnecting(false); setConsentProvider(null); });
+    // In Tauri (desktop onboarding), open the OAuth URL in the system browser.
+    // Polling will detect the new row when the user returns.
+    import('@tauri-apps/api/core')
+      .then(({ invoke }) => invoke('plugin:shell|open', { path: url }))
+      .then(() => { setConsentProvider(null); setConnecting(false); })
+      .catch(() => {
+        setConnectError(`Could not open browser for ${config.label} sign-in.`);
+        setConnecting(false);
+      });
   }
 
   if (consentProvider) {
     return (
       <OAuthConsentScreen
-        provider={consentProvider.nangoProvider}
+        provider={consentProvider.dbProvider}
         providerLabel={consentProvider.label}
         permissions={consentProvider.permissions}
         onConsent={() => handleConnect(consentProvider)}
         onCancel={() => setConsentProvider(null)}
         loading={connecting}
-        tokenLoading={tokenFetching}
+        tokenLoading={urlFetching}
       />
     );
   }
@@ -181,7 +178,7 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
         >
           {ESSENTIAL_PROVIDERS.map((config) => {
             const connected = isConnected(config.dbProvider);
-            const available = isAvailable(config.nangoProvider);
+            const available = isAvailable(config.dbProvider);
 
             return (
               <button
@@ -190,23 +187,15 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
                 disabled={connected || !available}
                 className="group flex w-full items-center gap-4 rounded-xl p-4 text-left transition-all duration-300"
                 style={{
-                  background: connected
-                    ? 'rgba(82, 183, 136, 0.06)'
-                    : 'rgba(14, 18, 37, 0.4)',
-                  border: connected
-                    ? '1px solid rgba(82, 183, 136, 0.2)'
-                    : '1px solid rgba(251, 247, 244, 0.04)',
+                  background: connected ? 'rgba(82, 183, 136, 0.06)' : 'rgba(14, 18, 37, 0.4)',
+                  border: connected ? '1px solid rgba(82, 183, 136, 0.2)' : '1px solid rgba(251, 247, 244, 0.04)',
                   opacity: !available && !connected ? 0.35 : 1,
                   cursor: connected ? 'default' : !available ? 'not-allowed' : 'pointer',
                 }}
               >
                 <div
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-300"
-                  style={{
-                    background: connected
-                      ? 'rgba(82, 183, 136, 0.1)'
-                      : 'rgba(251, 247, 244, 0.03)',
-                  }}
+                  style={{ background: connected ? 'rgba(82, 183, 136, 0.1)' : 'rgba(251, 247, 244, 0.03)' }}
                 >
                   <BrandIcon provider={config.dbProvider} size={22} />
                 </div>
@@ -249,7 +238,6 @@ export function ConnectDataStep({ onNext, onBack }: ConnectDataStepProps) {
         </p>
       )}
 
-      {/* Navigation */}
       <div className="mt-7 flex w-full items-center justify-between">
         <button onClick={onBack} className="text-[12px] font-medium transition-colors hover:underline" style={{ color: 'rgba(155,175,196,0.4)' }}>
           Back

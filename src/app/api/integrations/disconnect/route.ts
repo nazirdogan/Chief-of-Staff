@@ -2,17 +2,11 @@ import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
-import { deleteConnection } from '@/lib/integrations/nango';
+import { revokeToken } from '@/lib/integrations/google-oauth';
 import { createServiceClient } from '@/lib/db/client';
 import { getIntegrationById, deleteIntegration } from '@/lib/db/queries/integrations';
 
-// Maps our DB provider enum to Nango provider key
-const DB_TO_NANGO_PROVIDER: Record<string, string> = {
-  gmail: 'google-mail',
-  google_calendar: 'google-calendar',
-  slack: 'slack',
-  notion: 'notion',
-};
+const GOOGLE_PROVIDERS = new Set(['gmail', 'google_calendar']);
 
 export const DELETE = withAuth(withRateLimit(10, '1 m', async (req: AuthenticatedRequest) => {
   try {
@@ -28,7 +22,6 @@ export const DELETE = withAuth(withRateLimit(10, '1 m', async (req: Authenticate
 
     const supabase = createServiceClient();
 
-    // Look up the specific integration row to get provider + nango_connection_id
     const integration = await getIntegrationById(supabase, req.user.id, integrationId);
     if (!integration) {
       return NextResponse.json(
@@ -37,18 +30,15 @@ export const DELETE = withAuth(withRateLimit(10, '1 m', async (req: Authenticate
       );
     }
 
-    const nangoProvider = DB_TO_NANGO_PROVIDER[integration.provider];
-
-    // Delete from Nango first
-    if (nangoProvider) {
-      try {
-        await deleteConnection(nangoProvider, integration.nango_connection_id);
-      } catch {
-        // Connection may already be gone in Nango — continue to clean up our DB
+    // For Google providers: revoke the access token at Google
+    if (GOOGLE_PROVIDERS.has(integration.provider)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const row = integration as any;
+      if (row.access_token) {
+        await revokeToken(row.access_token); // silently ignores errors
       }
     }
 
-    // Delete this specific row from our database
     await deleteIntegration(supabase, req.user.id, integrationId);
 
     return NextResponse.json({ success: true });

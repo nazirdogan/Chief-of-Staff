@@ -1,0 +1,23 @@
+{
+  "name": "donna-im-donna",
+  "version": "1.0.0",
+  "description": "Donna — I'm Donna reMotion film",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render ImDonna --output=out/ImDonna_Master.mp4 --codec=h264",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/media": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.4.0"
+  }
+}

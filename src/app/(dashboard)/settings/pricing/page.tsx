@@ -98,13 +98,10 @@ export default function PricingSettingsPage() {
 
   // Open a URL in the system browser (Tauri) or current tab (web).
   async function openExternal(url: string) {
-    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).__TAURI__) {
+    if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
       try {
-        // Dynamic import avoids compile-time type errors when the plugin types are absent.
-        // The shell plugin is registered in tauri.conf.json.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const shell = await import('@tauri-apps/plugin-shell' as any);
-        await shell.open(url);
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('plugin:shell|open', { path: url });
         return;
       } catch {
         // Fall through to browser navigation if plugin is unavailable

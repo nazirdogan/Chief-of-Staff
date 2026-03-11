@@ -1,22 +1,27 @@
 import { google } from 'googleapis';
-import { getAccessToken, getAccessTokenByConnectionId } from './nango';
+import { getLiveAccessToken } from './google-oauth';
+import { createServiceClient } from '@/lib/db/client';
+import { getIntegration, getIntegrationById } from '@/lib/db/queries/integrations';
 
 /**
  * Returns an authenticated Google Calendar client.
- * Pass nangoConnectionId when working in a multi-account context to target
- * a specific account. Without it, falls back to the user's first Calendar connection.
+ * Pass integrationId (DB row UUID) to target a specific connected account.
+ * Without it, falls back to the user's first Calendar connection.
  */
-export async function getCalendarClient(userId: string, nangoConnectionId?: string) {
-  const accessToken = nangoConnectionId
-    ? await getAccessTokenByConnectionId('google-calendar', nangoConnectionId)
-    : await getAccessToken(userId, 'google-calendar');
+export async function getCalendarClient(userId: string, integrationId?: string) {
+  const supabase = createServiceClient();
+  const row = integrationId
+    ? await getIntegrationById(supabase, userId, integrationId)
+    : await getIntegration(supabase, userId, 'google_calendar');
+  if (!row) throw new Error('Google Calendar is not connected. Please connect your account in Settings.');
+  const accessToken = await getLiveAccessToken(row.id);
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return google.calendar({ version: 'v3', auth });
 }
 
-export async function getTodaysEvents(userId: string, nangoConnectionId?: string) {
-  const calendar = await getCalendarClient(userId, nangoConnectionId);
+export async function getTodaysEvents(userId: string, integrationId?: string) {
+  const calendar = await getCalendarClient(userId, integrationId);
   const now = new Date();
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
@@ -85,9 +90,9 @@ export function parseCalendarEvent(
 
 export async function getTodaysParsedEvents(
   userId: string,
-  nangoConnectionId?: string
+  integrationId?: string
 ): Promise<ParsedCalendarEvent[]> {
-  const events = await getTodaysEvents(userId, nangoConnectionId);
+  const events = await getTodaysEvents(userId, integrationId);
   return events.map(parseCalendarEvent);
 }
 
@@ -95,9 +100,9 @@ export async function getEventsForDateRange(
   userId: string,
   timeMin: Date,
   timeMax: Date,
-  nangoConnectionId?: string
+  integrationId?: string
 ): Promise<ParsedCalendarEvent[]> {
-  const calendar = await getCalendarClient(userId, nangoConnectionId);
+  const calendar = await getCalendarClient(userId, integrationId);
 
   const response = await calendar.events.list({
     calendarId: 'primary',

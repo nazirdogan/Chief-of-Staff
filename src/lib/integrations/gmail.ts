@@ -1,23 +1,28 @@
 import { google } from 'googleapis';
-import { getAccessToken, getAccessTokenByConnectionId } from './nango';
+import { getLiveAccessToken } from './google-oauth';
+import { createServiceClient } from '@/lib/db/client';
+import { getIntegration, getIntegrationById } from '@/lib/db/queries/integrations';
 import { env } from '@/lib/config';
 
 /**
  * Returns an authenticated Gmail client.
- * Pass nangoConnectionId when working in a multi-account context to target
- * a specific account. Without it, falls back to the user's first Gmail connection.
+ * Pass integrationId (DB row UUID) to target a specific connected account.
+ * Without it, falls back to the user's first Gmail connection.
  */
-export async function getGmailClient(userId: string, nangoConnectionId?: string) {
-  const accessToken = nangoConnectionId
-    ? await getAccessTokenByConnectionId('google-mail', nangoConnectionId)
-    : await getAccessToken(userId, 'google-mail');
+export async function getGmailClient(userId: string, integrationId?: string) {
+  const supabase = createServiceClient();
+  const row = integrationId
+    ? await getIntegrationById(supabase, userId, integrationId)
+    : await getIntegration(supabase, userId, 'gmail');
+  if (!row) throw new Error('Gmail is not connected. Please connect your account in Settings.');
+  const accessToken = await getLiveAccessToken(row.id);
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
   return google.gmail({ version: 'v1', auth });
 }
 
-export async function fetchInboxMessages(userId: string, maxResults = 20, nangoConnectionId?: string) {
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+export async function fetchInboxMessages(userId: string, maxResults = 20, integrationId?: string) {
+  const gmail = await getGmailClient(userId, integrationId);
   const response = await gmail.users.messages.list({
     userId: 'me',
     maxResults,
@@ -27,8 +32,8 @@ export async function fetchInboxMessages(userId: string, maxResults = 20, nangoC
   return response.data.messages ?? [];
 }
 
-export async function fetchMessageMetadata(userId: string, messageId: string, nangoConnectionId?: string) {
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+export async function fetchMessageMetadata(userId: string, messageId: string, integrationId?: string) {
+  const gmail = await getGmailClient(userId, integrationId);
   const response = await gmail.users.messages.get({
     userId: 'me',
     id: messageId,
@@ -38,8 +43,8 @@ export async function fetchMessageMetadata(userId: string, messageId: string, na
   return response.data;
 }
 
-export async function fetchMessageForProcessing(userId: string, messageId: string, nangoConnectionId?: string) {
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+export async function fetchMessageForProcessing(userId: string, messageId: string, integrationId?: string) {
+  const gmail = await getGmailClient(userId, integrationId);
   const response = await gmail.users.messages.get({
     userId: 'me',
     id: messageId,
@@ -129,10 +134,10 @@ export async function fetchMessagesByDateRange(
     labelIds?: string[];
     maxTotal?: number;
     excludePromotional?: boolean;
-    nangoConnectionId?: string;
+    integrationId?: string;
   }
 ): Promise<Array<{ id: string; threadId: string | null }>> {
-  const gmail = await getGmailClient(userId, options.nangoConnectionId);
+  const gmail = await getGmailClient(userId, options.integrationId);
   const maxTotal = options.maxTotal ?? 500;
 
   const afterEpoch = Math.floor(options.after.getTime() / 1000);
@@ -176,8 +181,8 @@ export async function fetchMessagesByDateRange(
  * Fetch emails sent yesterday that have no reply in the thread yet.
  * Used for "Awaiting Reply" briefing section.
  */
-export async function fetchSentAwaitingReply(userId: string, maxResults = 15, nangoConnectionId?: string): Promise<ParsedGmailMessage[]> {
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+export async function fetchSentAwaitingReply(userId: string, maxResults = 15, integrationId?: string): Promise<ParsedGmailMessage[]> {
+  const gmail = await getGmailClient(userId, integrationId);
 
   // Sent yesterday, in threads where we're waiting for a response
   const response = await gmail.users.messages.list({
@@ -224,8 +229,8 @@ export async function fetchSentAwaitingReply(userId: string, maxResults = 15, na
  * Fetch emails that arrived after working hours (8pm-7am).
  * Used for "After Hours" briefing section.
  */
-export async function fetchAfterHoursMessages(userId: string, maxResults = 10, nangoConnectionId?: string): Promise<ParsedGmailMessage[]> {
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+export async function fetchAfterHoursMessages(userId: string, maxResults = 10, integrationId?: string): Promise<ParsedGmailMessage[]> {
+  const gmail = await getGmailClient(userId, integrationId);
 
   // Get unread primary inbox messages from last 12 hours
   const response = await gmail.users.messages.list({
@@ -290,12 +295,12 @@ export function parseGmailMessage(
  */
 export async function setupGmailWatch(
   userId: string,
-  nangoConnectionId?: string
+  integrationId?: string
 ): Promise<{ historyId: string; expiration: string }> {
   const topic = env.GOOGLE_PUBSUB_TOPIC;
   if (!topic) throw new Error('GOOGLE_PUBSUB_TOPIC is not configured');
 
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+  const gmail = await getGmailClient(userId, integrationId);
   const response = await gmail.users.watch({
     userId: 'me',
     requestBody: {
@@ -320,9 +325,9 @@ export async function setupGmailWatch(
 export async function fetchNewMessagesSinceHistory(
   userId: string,
   startHistoryId: string,
-  nangoConnectionId?: string
+  integrationId?: string
 ): Promise<{ messages: Array<{ id: string; threadId: string }>; newHistoryId: string }> {
-  const gmail = await getGmailClient(userId, nangoConnectionId);
+  const gmail = await getGmailClient(userId, integrationId);
 
   try {
     const response = await gmail.users.history.list({

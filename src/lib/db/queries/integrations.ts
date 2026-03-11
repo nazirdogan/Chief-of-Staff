@@ -88,7 +88,7 @@ export async function upsertIntegration(
   provider: IntegrationProvider,
   fields: {
     status: IntegrationStatus;
-    nango_connection_id: string;
+    nango_connection_id?: string | null;
     account_email?: string;
     account_name?: string;
     granted_scopes?: string[];
@@ -104,7 +104,7 @@ export async function upsertIntegration(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('user_integrations')
-    .upsert(row, { onConflict: 'user_id,nango_connection_id' })
+    .upsert(row, { onConflict: 'user_id,provider,account_email' })
     .select()
     .single();
 

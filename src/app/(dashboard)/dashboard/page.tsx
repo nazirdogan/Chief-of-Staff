@@ -18,11 +18,30 @@ import {
   ListChecks,
   History,
   ArrowRightFromLine,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import Link from 'next/link';
 
 interface BriefingResponse {
   briefing: (Briefing & { items: BriefingItem[] }) | null;
+}
+
+interface RoutineOutputWithMeta {
+  id: string;
+  routine_id: string;
+  content: string;
+  generation_model: string | null;
+  generation_ms: number | null;
+  created_at: string;
+  user_routines: {
+    id: string;
+    name: string;
+    routine_type: string;
+    frequency: string;
+    scheduled_time: string;
+    is_enabled: boolean;
+  };
 }
 
 /* Donna brand tokens — The Editor */
@@ -44,6 +63,20 @@ const c = {
   gold: '#C9862A',
 };
 
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:13px;font-weight:600;margin:12px 0 4px">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:14px;font-weight:600;margin:14px 0 6px">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:15px;font-weight:600;margin:16px 0 8px">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)$/gm, '<li style="margin:2px 0;padding-left:4px">$1</li>')
+    .replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul style="list-style:disc;padding-left:16px;margin:6px 0">$&</ul>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
+
 export default function BriefingPage() {
   const [briefing, setBriefing] = useState<BriefingResponse['briefing']>(null);
   const [meetingPreps, setMeetingPreps] = useState<MeetingPrepData[]>([]);
@@ -56,6 +89,8 @@ export default function BriefingPage() {
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set());
   const [prepLoading, setPrepLoading] = useState<Record<string, boolean>>({});
   const [generatedPreps, setGeneratedPreps] = useState<Record<string, MeetingPrepData>>({});
+  const [routineOutputs, setRoutineOutputs] = useState<RoutineOutputWithMeta[]>([]);
+  const [expandedRoutine, setExpandedRoutine] = useState<string | null>(null);
 
   const fetchBriefing = useCallback(async () => {
     try {
@@ -76,6 +111,10 @@ export default function BriefingPage() {
     fetch('/api/integrations')
       .then((r) => r.json())
       .then((data) => setIntegrations(data.integrations ?? []))
+      .catch(() => {});
+    fetch('/api/routines/today')
+      .then((r) => r.json())
+      .then((data: { outputs?: RoutineOutputWithMeta[] }) => setRoutineOutputs(data.outputs ?? []))
       .catch(() => {});
   }, [fetchBriefing]);
 
@@ -878,6 +917,76 @@ export default function BriefingPage() {
           </>
         )}
       </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          ROUTINES — outputs from user-scheduled routines
+          ═══════════════════════════════════════════════════════ */}
+      {routineOutputs.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-center gap-2">
+            <Zap size={16} style={{ color: c.gold }} />
+            <h2 className="text-[13px] font-medium tracking-[0.06em] uppercase" style={{ color: c.textTertiary }}>
+              Routines
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {routineOutputs.map(output => {
+              const isExpanded = expandedRoutine === output.id;
+              const timeStr = new Date(output.created_at).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              });
+              return (
+                <div
+                  key={output.id}
+                  className="rounded-xl overflow-hidden"
+                  style={{ border: `1px solid ${c.border}`, background: c.surface }}
+                >
+                  <button
+                    className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left"
+                    style={{ background: 'transparent' }}
+                    onClick={() => setExpandedRoutine(isExpanded ? null : output.id)}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
+                        style={{ background: c.dawnMuted }}
+                      >
+                        <Zap size={13} style={{ color: c.dawn }} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-medium truncate" style={{ color: c.text }}>
+                          {output.user_routines.name}
+                        </p>
+                        <p className="text-[12px] mt-0.5" style={{ color: c.textMuted }}>
+                          Generated at {timeStr}
+                          {output.generation_ms && ` · ${(output.generation_ms / 1000).toFixed(1)}s`}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ color: c.textMuted, flexShrink: 0 }}>
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </button>
+                  {isExpanded && (
+                    <div
+                      className="px-5 pb-5"
+                      style={{ borderTop: `1px solid ${c.border}` }}
+                    >
+                      <div
+                        className="pt-4 prose prose-sm max-w-none text-[13px] leading-relaxed"
+                        style={{ color: c.textSecondary }}
+                        dangerouslySetInnerHTML={{ __html: renderMarkdown(output.content) }}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <CitationDrawer
         open={drawerItem !== null}
