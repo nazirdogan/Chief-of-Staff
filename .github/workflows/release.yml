@@ -1,11 +1,11 @@
 name: Release Donna
 
-# Triggers when you push a version tag like: git tag v0.1.0 && git push origin v0.1.0
+# Triggers when you push a version tag: git tag v0.1.0 && git push origin v0.1.0
+# Or manually from GitHub Actions → Run workflow → enter tag
 on:
   push:
     tags:
       - 'v*'
-  # Also allows manual trigger from GitHub Actions UI
   workflow_dispatch:
     inputs:
       tag:
@@ -22,14 +22,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Node.js ─────────────────────────────────────────────────────────
+      # ── 2. Resolve tag ─────────────────────────────────────────────────────
+      # github.ref_name = branch name on workflow_dispatch, tag name on push.
+      # We normalise both into a single output so downstream steps are simple.
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "value=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      # ── 3. Node.js ─────────────────────────────────────────────────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # ── 3. Rust (required by Tauri) ────────────────────────────────────────
+      # ── 4. Rust (required by Tauri) ────────────────────────────────────────
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -40,55 +52,53 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      # ── 4. Install JS dependencies ─────────────────────────────────────────
+      # ── 5. Install JS dependencies (Tauri CLI lives in node_modules) ───────
       - name: Install Node dependencies
         run: npm ci
 
-      # ── 5. Build Next.js + Tauri → produces .dmg ──────────────────────────
+      # ── 6. Build Tauri → produces universal .dmg ───────────────────────────
       #
-      # OPTIONAL CODE SIGNING: If you later get an Apple Developer account,
-      # add these secrets in GitHub → Settings → Secrets and variables → Actions:
-      #   APPLE_CERTIFICATE          (base64-encoded .p12 file)
-      #   APPLE_CERTIFICATE_PASSWORD (password for the .p12)
-      #   APPLE_SIGNING_IDENTITY     (e.g. "Developer ID Application: Your Name (TEAMID)")
-      #   APPLE_ID                   (your Apple ID email)
-      #   APPLE_PASSWORD             (app-specific password from appleid.apple.com)
-      #   APPLE_TEAM_ID              (10-character team ID)
+      # Architecture: Donna's Tauri shell loads https://imdonna.app at runtime.
+      # No Next.js static export needed — this step only compiles the Rust layer
+      # (desktop observer, screen OCR, system tray) and packages the DMG.
       #
+      # OPTIONAL CODE SIGNING — add these secrets when you have an Apple Developer account:
+      #   APPLE_CERTIFICATE          base64-encoded .p12 file
+      #   APPLE_CERTIFICATE_PASSWORD password for the .p12
+      #   APPLE_SIGNING_IDENTITY     e.g. "Developer ID Application: Your Name (TEAMID)"
+      #   APPLE_ID                   your Apple ID email
+      #   APPLE_PASSWORD             app-specific password from appleid.apple.com
+      #   APPLE_TEAM_ID              10-character team ID
       # When those secrets are present, Tauri auto-signs and notarizes.
-      # Without them, it builds an unsigned DMG — totally fine for early distribution.
+      # Without them, it builds an unsigned DMG — totally fine for early testing.
       #
-      - name: Build Tauri app (unsigned DMG)
+      - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Next.js build needs these — add to GitHub Secrets if your build requires them
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # Uncomment when you have Apple Developer certs:
-          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          # APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          # APPLE_ID: ${{ secrets.APPLE_ID }}
-          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Apple code signing — only active when secrets are present
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Donna ${{ github.ref_name }}'
+          tagName: ${{ steps.tag.outputs.value }}
+          releaseName: 'Donna ${{ steps.tag.outputs.value }}'
           releaseBody: |
-            ## What's new in ${{ github.ref_name }}
+            ## Donna ${{ steps.tag.outputs.value }}
 
-            Download **Donna.dmg** below, open it, and drag Donna to your Applications folder.
+            Download **Donna.dmg** below, open it, and drag Donna into your Applications folder.
 
-            > **First time opening?** If macOS warns about an unidentified developer,
-            > right-click the app → Open → Open. You only need to do this once.
-          releaseDraft: true        # Creates a draft — you review before publishing
+            > **First time?** If macOS shows an "unidentified developer" warning,
+            > right-click the app → **Open** → **Open**. You only need to do this once.
+          releaseDraft: true      # Creates a draft — you review and click Publish when ready
           prerelease: false
           includeDebug: false
-          # Build for both Apple Silicon and Intel
-          args: --target universal-apple-darwin
+          args: --target universal-apple-darwin   # builds fat binary: Apple Silicon + Intel
 
-  # ── Optional: Windows build (uncomment when ready) ──────────────────────
+  # ── Optional: Windows build (uncomment when ready) ────────────────────────
   # build-windows:
   #   name: Build Windows installer
   #   runs-on: windows-latest
@@ -107,7 +117,7 @@ jobs:
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   #       with:
-  #         tagName: ${{ github.ref_name }}
-  #         releaseName: 'Donna ${{ github.ref_name }}'
+  #         tagName: ${{ steps.tag.outputs.value }}
+  #         releaseName: 'Donna ${{ steps.tag.outputs.value }}'
   #         releaseDraft: true
   #         prerelease: false

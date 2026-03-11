@@ -6,7 +6,8 @@
   "build": {
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": ""
+    "beforeBuildCommand": "",
+    "frontendDist": "https://imdonna.app"
   },
   "app": {
     "withGlobalTauri": true,
@@ -14,7 +15,7 @@
       {
         "title": "Donna",
         "label": "main",
-        "url": "/login",
+        "url": "https://imdonna.app/login",
         "width": 1280,
         "height": 800,
         "minWidth": 900,
