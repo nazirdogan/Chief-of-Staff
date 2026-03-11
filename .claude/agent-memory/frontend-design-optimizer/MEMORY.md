@@ -55,6 +55,14 @@ Tailwind v4 — NO `tailwind.config.ts`. All design tokens live in `src/app/glob
 8. `src/app/(dashboard)/dashboard/page.tsx` — token block + Playfair fonts
 9. `src/components/onboarding/desktop/GettingReadyScreen.tsx` — parchment bg, cleaned of grain/glows
 
+## Routine Outputs on Today Page (added session 4)
+- API: `src/app/api/routines/today/route.ts` — GET, 30/min rate limit, deduplicates to most recent output per routine, joins `user_routines`
+- Dashboard: `RoutineOutputWithMeta` interface + `renderMarkdown` module-level fn + accordion section at bottom of page before `CitationDrawer`; uses `ChevronUp`/`ChevronDown`
+- Job runner: `daily_briefing` branch now also saves a `routine_output` via `generateRoutineOutput` in an inner non-fatal try/catch
+
+## Pre-existing lint failures (do not report as regressions)
+Files with lint errors that predate this project: `demo-video/`, `im-donna-film/`, `reflections/page.tsx`, billing routes, `PauseBanner.tsx`, `text-shimmer.tsx`. These are NOT caused by frontend-design work.
+
 ## Files NOT Yet Updated to The Editor Brand
 - `src/app/(dashboard)/reflections/page.tsx` — Cormorant/Inter still used
 - `src/app/download/page.tsx` — Cormorant/Inter still used

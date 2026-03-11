@@ -100,7 +100,13 @@
       "Read(//private/tmp/**)",
       "Bash(unzip -l \"/Users/nazir/Library/Mobile Documents/com~apple~Pages/Documents/I''''m Donna movie w Voiceover.pages\")",
       "Bash(textutil -convert txt -stdout \"/Users/nazir/Library/Mobile Documents/com~apple~Pages/Documents/I'm Donna movie w Voiceover.pages\" 2>/dev/null | head -200)",
-      "Bash(mkdir -p /Users/nazir/donna/the-noise-film/public/fonts && cp \"/Users/nazir/Downloads/Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf\" /Users/nazir/donna/the-noise-film/public/fonts/ && cp \"/Users/nazir/Downloads/Cormorant_Garamond/CormorantGaramond-Italic-VariableFont_wght.ttf\" /Users/nazir/donna/the-noise-film/public/fonts/ && echo \"Fonts copied\")"
+      "Bash(mkdir -p /Users/nazir/donna/the-noise-film/public/fonts && cp \"/Users/nazir/Downloads/Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf\" /Users/nazir/donna/the-noise-film/public/fonts/ && cp \"/Users/nazir/Downloads/Cormorant_Garamond/CormorantGaramond-Italic-VariableFont_wght.ttf\" /Users/nazir/donna/the-noise-film/public/fonts/ && echo \"Fonts copied\")",
+      "Bash(osascript << 'EOF'\ntell application \"Pages\"\n  set docPath to \"/Users/nazir/Library/Mobile Documents/com~apple~Pages/Documents/I'm Donna movie w Voiceover.pages\"\n  set exportPath to \"/tmp/donna_film_script.txt\"\n  open docPath\n  delay 2\n  set theDoc to document 1\n  export theDoc to POSIX file exportPath as unformatted text\n  close theDoc\nend tell\nEOF\necho \"done\")",
+      "Bash(ffprobe \"/Users/nazir/donna/Rachelle Voiceover.mp3\" 2>&1 | grep -E \"Duration|Audio|Stream\")",
+      "Bash(for f:*)",
+      "Read(//Users/nazir/donna/**)",
+      "Bash(done)",
+      "Bash(ffprobe \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" 2>&1 | grep Duration && md5 \"/Users/nazir/donna/im-donna-film/public/audio/voiceover.mp3\" && md5 \"/Users/nazir/donna/Rachelle Voiceover.mp3\")"
     ]
   }
 }

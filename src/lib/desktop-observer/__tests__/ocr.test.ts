@@ -35,6 +35,9 @@ function makeSession(overrides: Partial<MinimalSession> = {}): MinimalSession {
     action_items: [],
     summary: null,
     parsed_data: {} as Record<string, unknown>,
+    importance: 'background',
+    importance_score: null,
+    created_at: new Date('2026-03-11T10:00:00Z').toISOString(),
     ...overrides,
   };
 }
