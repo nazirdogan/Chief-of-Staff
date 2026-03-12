@@ -3,9 +3,10 @@ import { validateBriefingItem } from '@/lib/ai/safety/citation-validator';
 import {
   synthesiseBriefing,
   mapInboxItemToCandidate,
-  mapCommitmentToCandidate,
+  mapTaskToCandidate,
   mapEventToCandidate,
   mapColdContactToCandidate,
+  mapDecliningContactToCandidate,
   mapSentAwaitingReplyToCandidate,
   mapAfterHoursToCandidate,
   mapDesktopObservationToCandidate,
@@ -13,14 +14,16 @@ import {
 import { fetchEnrichedContext } from './briefing-context';
 import type { MeetingPrep } from './meeting-prep';
 import type { BriefingItemCandidate, RankedBriefingItem } from './prioritisation';
+import type { BriefingStats } from '@/lib/ai/prompts/briefing-synthesis';
 import { createServiceClient } from '@/lib/db/client';
 import { listInboxItems } from '@/lib/db/queries/inbox';
-import { listCommitments } from '@/lib/db/queries/commitments';
+import { listTasks } from '@/lib/db/queries/tasks';
 import { getProfile, getOnboardingData, getVipContacts, getColdContacts } from '@/lib/db/queries/users';
+import { getDecliningContacts, listContacts } from '@/lib/db/queries/contacts';
 import { insertBriefing, insertBriefingItems } from '@/lib/db/queries/briefings';
 import { getDesktopObserverChunks } from '@/lib/db/queries/context';
 import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
-import type { Briefing, BriefingItem, BriefingItemSection } from '@/lib/db/types';
+import type { Briefing, BriefingItem, BriefingItemSection, Contact } from '@/lib/db/types';
 import { getTodayInTimezone } from '@/lib/utils/timezone';
 
 export interface GeneratedBriefing extends Briefing {
@@ -28,9 +31,10 @@ export interface GeneratedBriefing extends Briefing {
   meeting_preps: MeetingPrep[];
 }
 
-// New 3-section briefing order
+// Briefing section order
 const SECTION_ORDER: BriefingItemSection[] = [
   'priorities',
+  'todays_meetings',
   'yesterday_completed',
   'yesterday_carried_over',
   'todays_schedule',
@@ -124,8 +128,8 @@ async function getAfterHoursEmails(userId: string): Promise<BriefingItemCandidat
 }
 
 /**
- * Fetch yesterday's resolved commitments as "completed" candidates,
- * and still-open commitments from yesterday as "carried over" candidates.
+ * Fetch yesterday's resolved tasks as "completed" candidates,
+ * and still-open tasks from yesterday as "carried over" candidates.
  */
 async function getYesterdaySummary(
   supabase: ReturnType<typeof createServiceClient>,
@@ -134,40 +138,40 @@ async function getYesterdaySummary(
   const candidates: BriefingItemCandidate[] = [];
 
   try {
-    // Get commitments resolved yesterday
-    const resolvedCommitments = await listCommitments(supabase, userId, { status: 'resolved' });
+    // Get tasks resolved yesterday
+    const resolvedTasks = await listTasks(supabase, userId, { status: 'resolved' });
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    for (const c of resolvedCommitments) {
+    for (const c of resolvedTasks) {
       const resolvedAt = c.resolved_at ? new Date(c.resolved_at) : null;
       if (resolvedAt && resolvedAt >= yesterday && resolvedAt < today) {
         candidates.push({
           item_type: 'commitment',
           section: 'yesterday_completed',
-          title: c.commitment_text,
-          summary: `Completed commitment to ${c.recipient_name || c.recipient_email}`,
+          title: c.task_text,
+          summary: `Completed task for ${c.recipient_name || c.recipient_email}`,
           source_ref: c.source_ref as unknown as BriefingItemCandidate['source_ref'],
           sentiment: 'positive',
         });
       }
     }
 
-    // Get open commitments that were created before today (carried over)
-    const openCommitments = await listCommitments(supabase, userId, { status: 'open' });
-    for (const c of openCommitments) {
+    // Get open tasks that were created before today (carried over)
+    const openTasks = await listTasks(supabase, userId, { status: 'open' });
+    for (const c of openTasks) {
       const createdAt = new Date(c.created_at);
       if (createdAt < today) {
         candidates.push({
           item_type: 'commitment',
           section: 'yesterday_carried_over',
-          title: c.commitment_text,
+          title: c.task_text,
           summary: c.implied_deadline
             ? `Still open — deadline: ${c.implied_deadline}. To ${c.recipient_name || c.recipient_email}`
-            : `Still open — commitment to ${c.recipient_name || c.recipient_email}`,
+            : `Still open — task for ${c.recipient_name || c.recipient_email}`,
           source_ref: c.source_ref as unknown as BriefingItemCandidate['source_ref'],
           sentiment: c.implied_deadline && new Date(c.implied_deadline) < today ? 'urgent' : 'neutral',
         });
@@ -223,9 +227,10 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
 
   const [
     inboxItems,
-    commitments,
+    tasks,
     todaysEvents,
     coldContacts,
+    decliningContacts,
     sentAwaitingReply,
     afterHoursEmails,
     desktopObservations,
@@ -234,9 +239,10 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     _profile,
   ] = await Promise.all([
     listInboxItems(supabase, userId, { unreadOnly: true, limit: 30 }),
-    listCommitments(supabase, userId, { status: 'open' }),
+    listTasks(supabase, userId, { status: 'open' }),
     getTodaysCalendarEvents(userId),
     getColdContacts(supabase, userId),
+    getDecliningContacts(supabase, userId),
     getSentAwaitingReply(userId),
     getAfterHoursEmails(userId),
     getDesktopObserverChunks(supabase, userId, {
@@ -249,6 +255,8 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     getProfile(supabase, userId),
   ]);
 
+  // Overdue/due-today counts used in buildBriefingStats below
+
   // Build candidate items — map to new sections
   const candidates: BriefingItemCandidate[] = [
     // Today's actionable items → will be synthesised into "priorities"
@@ -256,8 +264,8 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
       ...mapInboxItemToCandidate(item, userContext.vipEmails),
       section: 'priorities' as BriefingItemSection,
     })),
-    ...commitments.map(c => ({
-      ...mapCommitmentToCandidate(c),
+    ...tasks.map(c => ({
+      ...mapTaskToCandidate(c),
       section: 'priorities' as BriefingItemSection,
     })),
     // Calendar → todays_schedule
@@ -270,6 +278,13 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
       ...mapColdContactToCandidate(c),
       section: 'priorities' as BriefingItemSection,
     })),
+    // Declining relationships (exclude contacts already flagged cold to avoid dupes)
+    ...decliningContacts
+      .filter(c => !c.is_cold)
+      .map(c => ({
+        ...mapDecliningContactToCandidate(c),
+        section: 'priorities' as BriefingItemSection,
+      })),
     // Sent awaiting → priorities
     ...sentAwaitingReply.map(c => ({
       ...c,
@@ -289,9 +304,56 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     ...yesterdaySummary,
   ];
 
-  // Meeting prep is now on-demand only (user taps "Prep for meeting" button).
-  // Removed from briefing generation to eliminate per-event Sonnet calls.
+  // Enrich briefing with auto-generated meeting preps (from meeting-prep-auto job)
   const meetingPreps: MeetingPrep[] = [];
+  try {
+    const { getTodaysMeetingPreps } = await import('@/lib/db/queries/meeting-preps');
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const storedPreps = await getTodaysMeetingPreps(
+      supabase,
+      userId,
+      todayStart.toISOString(),
+      todayEnd.toISOString(),
+    );
+
+    for (const prep of storedPreps) {
+      meetingPreps.push({
+        event_id: prep.event_id,
+        event_title: prep.event_title,
+        summary: prep.summary,
+        attendee_context: prep.attendee_context,
+        open_items: prep.open_items,
+        suggested_talking_points: prep.suggested_talking_points,
+        watch_out_for: prep.watch_out_for,
+      });
+
+      // Add a briefing candidate for each prepped meeting
+      const attendeeNames = prep.attendees
+        .map((a: { name: string }) => a.name)
+        .slice(0, 3)
+        .join(', ');
+      const openItemCount = prep.open_items.length;
+
+      candidates.push({
+        item_type: 'calendar_event' as const,
+        section: 'todays_meetings' as BriefingItemSection,
+        title: prep.event_title,
+        summary: `${attendeeNames}${prep.attendees.length > 3 ? ` +${prep.attendees.length - 3}` : ''} — ${openItemCount > 0 ? `${openItemCount} open item${openItemCount > 1 ? 's' : ''} to discuss. ` : ''}${prep.summary}`,
+        source_ref: {
+          provider: 'google_calendar',
+          message_id: prep.event_id,
+          excerpt: prep.summary.slice(0, 200),
+        },
+        sentiment: openItemCount > 0 ? 'urgent' as const : 'neutral' as const,
+      });
+    }
+  } catch {
+    // Non-fatal — briefing works without meeting prep enrichment
+  }
 
   const enrichedContext = await fetchEnrichedContext(
     supabase,
@@ -302,8 +364,11 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     timezone,
   );
 
+  // Build briefing stats: overdue tasks, relationship scores, working patterns
+  const briefingStats = await buildBriefingStats(supabase, userId, tasks, enrichedContext);
+
   // AI synthesis: rank, group, and reason about all candidates using full context
-  const ranked = await synthesiseBriefing(candidates, userContext, enrichedContext);
+  const ranked = await synthesiseBriefing(candidates, userContext, enrichedContext, briefingStats);
 
   // Build sections
   const sections = buildBriefingSections(ranked);
@@ -352,5 +417,93 @@ export async function generateDailyBriefing(userId: string, timezone?: string): 
     ...briefing,
     items: savedItems,
     meeting_preps: meetingPreps,
+  };
+}
+
+/**
+ * Build stats for the briefing synthesis prompt: overdue tasks,
+ * relationship scores, and working pattern peak hours.
+ */
+async function buildBriefingStats(
+  supabase: ReturnType<typeof createServiceClient>,
+  userId: string,
+  openTasks: Awaited<ReturnType<typeof listTasks>>,
+  enrichedContext: Awaited<ReturnType<typeof fetchEnrichedContext>>,
+): Promise<BriefingStats> {
+  const now = new Date();
+
+  // Count overdue and due-today tasks
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrowStart = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+  const overdueTaskCount = openTasks.filter(c => {
+    if (!c.implied_deadline) return false;
+    return new Date(c.implied_deadline) < todayStart;
+  }).length;
+  const dueTodayTaskCount = openTasks.filter(c => {
+    if (!c.implied_deadline) return false;
+    const d = new Date(c.implied_deadline);
+    return d >= todayStart && d < tomorrowStart;
+  }).length;
+
+  // Get top relationships and declining ones
+  let topRelationshipScores: BriefingStats['topRelationshipScores'] = [];
+  let decliningRelationships: BriefingStats['decliningRelationships'] = [];
+
+  try {
+    const topContacts = await listContacts(supabase, userId, {
+      limit: 5,
+      orderBy: 'relationship_score',
+    });
+
+    topRelationshipScores = topContacts
+      .filter((c: Contact) => c.relationship_score !== null && c.relationship_score > 0)
+      .map((c: Contact) => ({
+        name: c.name ?? c.email,
+        email: c.email,
+        score: c.relationship_score ?? 0,
+      }));
+
+    // Find declining contacts from score_history
+    const allScored = await listContacts(supabase, userId, { limit: 50 });
+    decliningRelationships = allScored
+      .filter((c: Contact) => {
+        const history = c.score_history ?? [];
+        if (history.length < 2) return false;
+        const current = history[0]?.score ?? 0;
+        const previous = history[1]?.score ?? 0;
+        return previous - current >= 5; // Meaningful decline
+      })
+      .slice(0, 5)
+      .map((c: Contact) => {
+        const history = c.score_history ?? [];
+        return {
+          name: c.name ?? c.email,
+          email: c.email,
+          score: history[0]?.score ?? c.relationship_score ?? 0,
+          previousScore: history[1]?.score ?? 0,
+        };
+      });
+  } catch {
+    // Non-fatal — stats are best-effort
+  }
+
+  // Extract peak hours and work hours from enriched context working patterns
+  const wp = enrichedContext.workingPatterns;
+  const peakHours = wp?.peak_hours
+    ?.sort((a, b) => b.activity_score - a.activity_score)
+    .slice(0, 5)
+    .map(h => ({ hour: h.hour, activityScore: h.activity_score })) ?? [];
+
+  const workHours = wp?.typical_start_time && wp?.typical_end_time
+    ? { start: wp.typical_start_time, end: wp.typical_end_time }
+    : null;
+
+  return {
+    overdueTaskCount,
+    dueTodayTaskCount,
+    topRelationshipScores,
+    decliningRelationships,
+    peakHours,
+    workHours,
   };
 }

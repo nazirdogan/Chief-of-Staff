@@ -60,7 +60,7 @@ export function CommitmentCard({ commitment, onAction }: CommitmentCardProps) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: c.text, lineHeight: 1.4 }}>
-            {decodeEntities(commitment.commitment_text)}
+            {decodeEntities((commitment as unknown as Record<string, string>).task_text || (commitment as unknown as Record<string, string>).commitment_text)}
           </div>
           <div style={{ fontSize: 12, color: c.textTertiary, marginTop: 2 }}>
             To: {commitment.recipient_name || commitment.recipient_email}

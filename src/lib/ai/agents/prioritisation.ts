@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_MODELS } from '@/lib/ai/models';
 import { buildSafeAIContext } from '@/lib/ai/safety/sanitise';
-import type { InboxItem, Commitment, Contact, BriefingItemType, BriefingItemSection, SourceRef, MessageSentiment } from '@/lib/db/types';
+import type { InboxItem, Task, Contact, BriefingItemType, BriefingItemSection, SourceRef, MessageSentiment } from '@/lib/db/types';
 import type { ParsedCalendarEvent } from '@/lib/integrations/google-calendar';
 import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
 import type { ParsedOutlookMessage } from '@/lib/integrations/outlook';
@@ -15,6 +15,7 @@ import {
   VALID_SENTIMENTS,
   type SynthesisInputItem,
   type SynthesisOutputItem,
+  type BriefingStats,
 } from '@/lib/ai/prompts/briefing-synthesis';
 
 const anthropic = new Anthropic();
@@ -63,11 +64,12 @@ export async function synthesiseBriefing(
   candidates: BriefingItemCandidate[],
   userContext: UserContext,
   enrichedContext: EnrichedContext,
+  stats?: BriefingStats,
 ): Promise<RankedBriefingItem[]> {
   if (candidates.length === 0) return [];
 
   try {
-    return await runAISynthesis(candidates, userContext, enrichedContext);
+    return await runAISynthesis(candidates, userContext, enrichedContext, stats);
   } catch (err) {
     console.error('[briefing] AI synthesis failed, falling back to formula scoring:', err);
     return fallbackPrioritise(candidates, userContext);
@@ -78,6 +80,7 @@ async function runAISynthesis(
   candidates: BriefingItemCandidate[],
   userContext: UserContext,
   enrichedContext: EnrichedContext,
+  stats?: BriefingStats,
 ): Promise<RankedBriefingItem[]> {
   // Cap candidates to avoid exceeding token limits
   const capped = candidates.slice(0, 50);
@@ -103,6 +106,7 @@ async function runAISynthesis(
     userContext.vipEmails,
     userContext.activeProjects,
     userContext.weeklyPriority,
+    stats,
   );
 
   const safeContent = buildSafeAIContext(
@@ -296,20 +300,53 @@ export function mapInboxItemToCandidate(
   };
 }
 
-export function mapCommitmentToCandidate(commitment: Commitment): BriefingItemCandidate {
+export function mapTaskToCandidate(task: Task): BriefingItemCandidate {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const deadline = task.implied_deadline ? new Date(task.implied_deadline) : null;
+  const isOverdue = deadline ? deadline < today : false;
+  const isDueToday = deadline
+    ? deadline >= today && deadline < new Date(today.getTime() + 24 * 60 * 60 * 1000)
+    : false;
+
+  // Overdue = highest urgency, due today = very high, explicit deadline = high
+  let urgency = 7;
+  if (isOverdue) urgency = 10;
+  else if (isDueToday) urgency = 9;
+  else if (task.explicit_deadline) urgency = 9;
+
+  let summary = `Promised to ${task.recipient_name ?? task.recipient_email}`;
+  if (isOverdue && deadline) {
+    const daysOverdue = Math.floor((now.getTime() - deadline.getTime()) / (1000 * 60 * 60 * 24));
+    summary = `OVERDUE by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} — promised to ${task.recipient_name ?? task.recipient_email}`;
+  } else if (isDueToday) {
+    summary = `DUE TODAY — promised to ${task.recipient_name ?? task.recipient_email}`;
+  }
+
+  let actionSuggestion = 'Follow up';
+  if (isOverdue) {
+    actionSuggestion = 'Urgent: fulfill this overdue task now';
+  } else if (isDueToday) {
+    actionSuggestion = 'Due today — complete before end of day';
+  } else if (task.implied_deadline) {
+    actionSuggestion = `Due: ${new Date(task.implied_deadline).toLocaleDateString()}`;
+  }
+
   return {
     item_type: 'commitment',
     section: 'commitment_queue',
-    title: commitment.commitment_text,
-    summary: `Promised to ${commitment.recipient_name ?? commitment.recipient_email}`,
-    source_ref: commitment.source_ref,
-    action_suggestion: commitment.implied_deadline
-      ? `Due: ${new Date(commitment.implied_deadline).toLocaleDateString()}`
-      : 'Follow up',
-    from_email: commitment.recipient_email,
-    raw_urgency: commitment.explicit_deadline ? 9 : 7,
+    title: task.task_text,
+    summary,
+    source_ref: task.source_ref,
+    action_suggestion: actionSuggestion,
+    from_email: task.recipient_email,
+    raw_urgency: urgency,
+    sentiment: isOverdue ? 'urgent' : isDueToday ? 'urgent' : undefined,
   };
 }
+
+/** @deprecated Use mapTaskToCandidate instead */
+export const mapCommitmentToCandidate = mapTaskToCandidate;
 
 export function mapEventToCandidate(event: ParsedCalendarEvent): BriefingItemCandidate {
   const attendeeNames = event.attendees.map(a => a.name).slice(0, 3).join(', ');
@@ -353,6 +390,28 @@ export function mapColdContactToCandidate(contact: Contact): BriefingItemCandida
     action_suggestion: 'Send a quick check-in',
     from_email: contact.email,
     raw_urgency: contact.is_vip ? 7 : 5,
+  };
+}
+
+export function mapDecliningContactToCandidate(contact: Contact): BriefingItemCandidate {
+  const history = contact.score_history ?? [];
+  const prevScore = history.length >= 2 ? history[1].score : null;
+  const currentScore = history.length >= 1 ? history[0].score : contact.relationship_score;
+  const drop = prevScore !== null && currentScore !== null ? prevScore - currentScore : 0;
+
+  return {
+    item_type: 'relationship_alert',
+    section: 'priorities',
+    title: `${contact.name ?? contact.email} — relationship declining`,
+    summary: `Score dropped ${drop} points${contact.is_vip ? ' (VIP)' : ''}. Consider reaching out.`,
+    source_ref: {
+      provider: contact.last_interaction_channel ?? 'gmail',
+      message_id: contact.id,
+      excerpt: `Score: ${currentScore} (was ${prevScore}). Last interaction: ${contact.last_interaction_at ? new Date(contact.last_interaction_at).toLocaleDateString() : 'unknown'}`,
+    },
+    action_suggestion: 'Send a quick check-in to reverse the trend',
+    from_email: contact.email,
+    raw_urgency: contact.is_vip ? 8 : 6,
   };
 }
 

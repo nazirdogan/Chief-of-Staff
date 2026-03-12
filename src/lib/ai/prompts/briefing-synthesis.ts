@@ -80,15 +80,22 @@ Each item should have:
 - A one-line summary explaining WHY it matters (e.g. "Overdue by 2 days", "Meeting at 2pm requires this", "VIP waiting on your response")
 - A concrete action_suggestion (e.g. "Reply to Sarah with pricing approval", "Review deck before 2pm meeting")
 
-Include: VIP emails needing replies, open commitments at risk, action-required items, decisions to make, quick wins, relationship alerts.
+Include: VIP emails needing replies, open tasks at risk, action-required items, decisions to make, quick wins, relationship alerts.
 Do NOT include calendar events here — those go in todays_schedule.
+
+**TASK ESCALATION RULES:**
+- Overdue tasks (past their deadline) MUST appear in the top 3 priorities. Always.
+- Tasks due today MUST appear in the top 5 priorities.
+- Use strong, direct language for overdue items: "OVERDUE: You promised X to Y — N days late"
+- For overdue items: urgency_score = 10, risk_score >= 9, composite_score >= 9
+- If there are overdue tasks, your opening summary tone should acknowledge them: e.g. "You have 3 overdue promises that need attention."
 
 ## SECTION 2: YESTERDAY'S SUMMARY
 Split into two sub-sections:
-- **Completed** (section = "yesterday_completed"): What got done yesterday — resolved commitments, sent replies, completed tasks, key decisions made.
-- **Carried Over** (section = "yesterday_carried_over"): What didn't get done and why it's still relevant — open commitments, unanswered threads, stalled items.
+- **Completed** (section = "yesterday_completed"): What got done yesterday — resolved tasks, sent replies, completed tasks, key decisions made.
+- **Carried Over** (section = "yesterday_carried_over"): What didn't get done and why it's still relevant — open tasks, unanswered threads, stalled items.
 
-Use the contextual intelligence (yesterday's narrative, resolved commitments, activity sessions) to populate this section. If no yesterday data is available, omit these items entirely.
+Use the contextual intelligence (yesterday's narrative, resolved tasks, activity sessions) to populate this section. If no yesterday data is available, omit these items entirely.
 
 ## SECTION 3: TODAY'S SCHEDULE (section = "todays_schedule")
 Calendar events for the day. Each item should include:
@@ -105,7 +112,7 @@ Calendar events for the day. Each item should include:
 5. **Score each item 1-10 on four dimensions:**
    - \`urgency_score\`: How time-sensitive? Calendar events today = high. Informational = low.
    - \`importance_score\`: How much does this matter to the executive's goals, relationships, and projects?
-   - \`risk_score\`: What happens if they ignore this? Broken commitments and cold VIPs = high risk.
+   - \`risk_score\`: What happens if they ignore this? Broken tasks and cold VIPs = high risk.
    - \`composite_score\`: Your overall priority score (not a formula — your holistic judgment).
 6. **Always include sentiment** for each item: "positive", "negative", "neutral", or "urgent".
 7. **Always include action_suggestion** for priorities — a concrete next step. Can be null for yesterday items and schedule items where no action is needed.
@@ -131,6 +138,22 @@ Each object:
   "composite_score": <1-10>
 }`;
 
+/** Additional stats passed into the synthesis prompt for ranking/toning */
+export interface BriefingStats {
+  /** Number of overdue tasks (past implied_deadline, still open) */
+  overdueTaskCount: number;
+  /** Number of tasks due today */
+  dueTodayTaskCount: number;
+  /** Top relationship scores: [{name, email, score}] */
+  topRelationshipScores: Array<{ name: string; email: string; score: number }>;
+  /** Contacts with declining scores: [{name, email, score, previousScore}] */
+  decliningRelationships: Array<{ name: string; email: string; score: number; previousScore: number }>;
+  /** Peak productivity hours from working patterns */
+  peakHours: Array<{ hour: number; activityScore: number }>;
+  /** Typical work hours */
+  workHours: { start: string; end: string } | null;
+}
+
 /**
  * Build the user message for the synthesis call.
  * Keeps candidates and context clearly separated.
@@ -141,6 +164,7 @@ export function buildSynthesisUserMessage(
   vipEmails: string[],
   activeProjects: string[],
   weeklyPriority: string | null,
+  stats?: BriefingStats,
 ): string {
   const parts: string[] = [];
 
@@ -154,6 +178,39 @@ export function buildSynthesisUserMessage(
   }
   if (weeklyPriority) {
     parts.push(`This week's priority: ${weeklyPriority}`);
+  }
+
+  // Briefing stats — working patterns, relationships, overdue tasks
+  if (stats) {
+    const statParts: string[] = [];
+    if (stats.overdueTaskCount > 0) {
+      statParts.push(`**${stats.overdueTaskCount} OVERDUE tasks** — these MUST be the top priorities. The executive has broken promises that need immediate resolution.`);
+    }
+    if (stats.dueTodayTaskCount > 0) {
+      statParts.push(`**${stats.dueTodayTaskCount} tasks due TODAY** — these must appear in top 5 priorities.`);
+    }
+    if (stats.workHours) {
+      statParts.push(`Work hours: ${stats.workHours.start} – ${stats.workHours.end}`);
+    }
+    if (stats.peakHours.length > 0) {
+      const peakStr = stats.peakHours
+        .sort((a, b) => b.activityScore - a.activityScore)
+        .slice(0, 3)
+        .map(h => `${h.hour}:00 (score: ${h.activityScore})`)
+        .join(', ');
+      statParts.push(`Peak productivity hours: ${peakStr}. Schedule deep work and important tasks during these windows.`);
+    }
+    if (stats.topRelationshipScores.length > 0) {
+      statParts.push('Strongest relationships: ' +
+        stats.topRelationshipScores.map(r => `${r.name} (${r.score})`).join(', '));
+    }
+    if (stats.decliningRelationships.length > 0) {
+      statParts.push('Declining relationships (needs attention): ' +
+        stats.decliningRelationships.map(r => `${r.name} (${r.score}, was ${r.previousScore})`).join(', '));
+    }
+    if (statParts.length > 0) {
+      parts.push('\n## EXECUTIVE STATS\n' + statParts.join('\n'));
+    }
   }
 
   // Enriched context

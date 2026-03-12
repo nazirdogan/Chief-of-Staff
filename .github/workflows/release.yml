@@ -78,8 +78,13 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Apple code signing — uncomment these lines once you have an Apple Developer
-          # account and have added the secrets in GitHub → Settings → Secrets → Actions:
+          # Tauri updater signing — required for auto-updates.
+          # Generate these once with: npm run tauri signer generate
+          # Then add TAURI_SIGNING_PRIVATE_KEY and TAURI_SIGNING_PRIVATE_KEY_PASSWORD
+          # as secrets in GitHub → Settings → Secrets → Actions.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # Apple code signing — uncomment once you have an Apple Developer account:
           #   APPLE_CERTIFICATE          base64-encoded .p12 file
           #   APPLE_CERTIFICATE_PASSWORD password for the .p12
           #   APPLE_SIGNING_IDENTITY     e.g. "Developer ID Application: Your Name (TEAMID)"

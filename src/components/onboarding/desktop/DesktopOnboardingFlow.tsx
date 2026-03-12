@@ -113,7 +113,7 @@ export function DesktopOnboardingFlow() {
             user_id: user.id, email,
             name: contact.name.trim() || null,
             is_vip: true, relationship_score: 80,
-            interaction_count_30d: 0, open_commitments_count: 0, is_cold: false,
+            interaction_count_30d: 0, open_tasks_count: 0, is_cold: false,
           });
         }
       }

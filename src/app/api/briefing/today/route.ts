@@ -24,13 +24,23 @@ export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRe
       date = getTodayInTimezone(tz);
     }
 
+    // Also fetch briefing schedule so the UI knows whether to show a "schedule" CTA
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profile } = await (supabase as any)
+      .from('profiles')
+      .select('briefing_time, timezone')
+      .eq('id', req.user.id)
+      .single();
+
+    const briefingTime = (profile?.briefing_time as string | null) ?? null;
+
     const briefing = await getTodaysBriefing(supabase, req.user.id, date);
 
     if (!briefing) {
-      return NextResponse.json({ briefing: null }, { status: 200 });
+      return NextResponse.json({ briefing: null, briefing_time: briefingTime }, { status: 200 });
     }
 
-    return NextResponse.json({ briefing });
+    return NextResponse.json({ briefing, briefing_time: briefingTime });
   } catch (error) {
     return handleApiError(error);
   }

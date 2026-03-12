@@ -3,21 +3,18 @@ import Anthropic from '@anthropic-ai/sdk';
 import { withAuth, type AuthenticatedRequest } from '@/lib/middleware/withAuth';
 import { withRateLimit } from '@/lib/middleware/withRateLimit';
 import { handleApiError } from '@/lib/api-utils';
-import { AI_MODELS } from '@/lib/ai/models';
 import { buildContextAwareSystemPrompt } from '@/lib/ai/prompts/chat';
-import { CHAT_TOOL_DEFINITIONS, executeChatTool } from '@/lib/ai/tools/chat-tools';
+import { executeChatTool } from '@/lib/ai/tools/chat-tools';
 import { sanitiseContent } from '@/lib/ai/safety/sanitise';
 import { createServiceClient } from '@/lib/db/client';
 import { getWorkingPatterns } from '@/lib/db/queries/context';
-import { queryContext } from '@/lib/context/query-engine';
+import { routeQuery, loadContextForStrategy } from '@/lib/ai/router';
 import {
   getConversation,
   addMessage,
   updateConversationTitle,
 } from '@/lib/db/queries/chat';
-
-const MAX_TOOL_ROUNDS = 5;
-const PROACTIVE_CONTEXT_COUNT = 5;
+import { checkMessageLimit, incrementDailyUsage } from '@/lib/db/queries/message-usage';
 
 export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedRequest) => {
   try {
@@ -55,6 +52,22 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
 
     const userId = req.user.id;
     const supabase = createServiceClient();
+
+    // Check daily message limit for free tier users.
+    // req.user.tier is resolved by withAuth — pass it to avoid a redundant profiles query.
+    const limitCheck = await checkMessageLimit(supabase, userId, req.user.tier);
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Daily message limit reached',
+          code: 'MESSAGE_LIMIT_REACHED',
+          used: limitCheck.used,
+          limit: limitCheck.limit,
+          upgrade_url: '/settings/pricing',
+        },
+        { status: 429 }
+      );
+    }
 
     // Verify the conversation belongs to this user
     const conversation = await getConversation(supabase, conversationId, userId);
@@ -139,10 +152,19 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       },
     ];
 
-    // Pre-fetch working patterns and custom instructions for context-aware system prompt
+    // ── Route the query through the agent router ─────────────────────
+    // Classification runs on Haiku (fast, cheap), then we hand off to
+    // the right specialist agent with pre-loaded context and scoped tools.
+    const conversationHistory = recentMessages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const route = await routeQuery(content.trim(), conversationHistory);
+
+    // Pre-fetch working patterns and custom instructions (always needed for system prompt)
     const patterns = await getWorkingPatterns(supabase, userId);
 
-    // Fetch custom instructions from profile
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: profileData } = await (supabase as any)
       .from('profiles')
@@ -151,24 +173,31 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       .single();
     const customInstructions: string | null = profileData?.custom_instructions ?? null;
 
-    // Proactive context injection based on the user's latest message
-    let recentContext: Array<{ title?: string | null; content_summary: string; provider: string }> = [];
-    try {
-      const contextResult = await queryContext({
-        userId,
-        query: content.trim(),
-        limit: PROACTIVE_CONTEXT_COUNT,
-      });
-      recentContext = contextResult.chunks.map((c) => ({
-        title: c.title,
-        content_summary: c.content_summary,
-        provider: c.provider,
-      }));
-    } catch {
-      // Non-fatal: continue without proactive context
-    }
+    // Load strategy-specific context (replaces generic proactive search)
+    const preloaded = await loadContextForStrategy(
+      route.contextStrategy,
+      userId,
+      content.trim(),
+    );
 
-    const systemPrompt = buildContextAwareSystemPrompt(patterns, recentContext, customInstructions);
+    // Build the system prompt with pre-loaded context + specialist addendum
+    const recentContext = preloaded.contextLines.length > 0
+      ? preloaded.contextLines.map((line) => {
+          // Parse lines that look like "[provider] title: summary" back into objects
+          const match = line.match(/^\[([^\]]+)\]\s*([^:]*?):\s*(.+)$/);
+          if (match) {
+            return { provider: match[1], title: match[2].trim() || null, content_summary: match[3] };
+          }
+          return { provider: 'system', title: null, content_summary: line };
+        })
+      : [];
+
+    let systemPrompt = buildContextAwareSystemPrompt(patterns, recentContext, customInstructions);
+
+    // Append specialist prompt addendum if the router provided one
+    if (route.systemPromptAddendum) {
+      systemPrompt += '\n' + route.systemPromptAddendum;
+    }
 
     const anthropic = new Anthropic();
 
@@ -177,16 +206,16 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       content: m.content as string | Anthropic.Messages.ContentBlockParam[],
     }));
 
-    // Agentic loop: call the model, execute tools, repeat until we get a final text response
+    // Agentic loop with route-specific model, tools, and max rounds
     let finalText = '';
     let toolRound = 0;
 
-    while (toolRound < MAX_TOOL_ROUNDS) {
+    while (toolRound < route.maxToolRounds) {
       const response = await anthropic.messages.create({
-        model: AI_MODELS.STANDARD,
+        model: route.model,
         max_tokens: 4096,
         system: systemPrompt,
-        tools: CHAT_TOOL_DEFINITIONS,
+        tools: route.tools,
         messages: anthropicMessages,
       });
 
@@ -198,7 +227,6 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
       );
 
       if (toolUseBlocks.length === 0) {
-        // No tools — we have our final answer
         finalText = textBlocks.map((b) => b.text).join('\n');
         break;
       }
@@ -212,7 +240,6 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
             toolUse.input as Record<string, unknown>,
             userId
           );
-          // Sanitise tool output before feeding back into the AI prompt
           const { content: safeResult } = sanitiseContent(rawResult, `tool:${toolUse.name}`);
           toolResults.push({
             type: 'tool_result',
@@ -229,23 +256,18 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
         }
       }
 
-      // Add assistant response + tool results to conversation
       anthropicMessages = [
         ...anthropicMessages,
         { role: 'assistant', content: response.content },
         { role: 'user', content: toolResults },
       ];
 
-      // Don't capture intermediate text as final — it may be partial reasoning
-      // alongside tool calls. Only the loop-exit text block (no tool_use) is final.
-
       toolRound++;
     }
 
-    if (toolRound >= MAX_TOOL_ROUNDS) {
-      // If we exhausted tool rounds, make one last call without tools to get a summary
+    if (toolRound >= route.maxToolRounds) {
       const summaryResponse = await anthropic.messages.create({
-        model: AI_MODELS.STANDARD,
+        model: route.model,
         max_tokens: 4096,
         system: systemPrompt,
         messages: anthropicMessages,
@@ -264,10 +286,20 @@ export const POST = withAuth(withRateLimit(20, '1 m', async (req: AuthenticatedR
     // Persist the assistant's response
     const assistantMessage = await addMessage(supabase, conversationId, 'assistant', finalText);
 
+    // Increment usage counter after a successful exchange (fire-and-forget — don't block response)
+    incrementDailyUsage(supabase, userId).catch(() => {
+      // Non-critical — usage tracking failure should not break the response
+    });
+
     return NextResponse.json({
       userMessage,
       assistantMessage,
-      model: AI_MODELS.STANDARD,
+      model: route.model,
+      route: {
+        intent: route.intent,
+        confidence: route.confidence,
+        contextStrategy: route.contextStrategy,
+      },
     });
   } catch (error) {
     return handleApiError(error);

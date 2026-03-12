@@ -1,7 +1,23 @@
+/* eslint-disable react-hooks/static-components -- framer-motion motion() with dynamic tags requires runtime component creation; module-level cache prevents re-creation per render */
 'use client';
 import React, { useMemo, type JSX } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+type MotionEl = React.ComponentType<React.HTMLAttributes<HTMLElement> & {
+  initial?: Record<string, unknown>;
+  animate?: Record<string, unknown>;
+  transition?: Record<string, unknown>;
+}>;
+
+// Cache motion components outside render to satisfy react-hooks/static-components
+const motionComponentCache = new Map<string, MotionEl>();
+function getMotionComponent(tag: keyof JSX.IntrinsicElements): MotionEl {
+  if (!motionComponentCache.has(tag)) {
+    motionComponentCache.set(tag, motion(tag) as unknown as MotionEl);
+  }
+  return motionComponentCache.get(tag)!;
+}
 
 interface TextShimmerProps {
   children: string;
@@ -18,7 +34,7 @@ export function TextShimmer({
   duration = 2,
   spread = 2,
 }: TextShimmerProps) {
-  const MotionComponent = motion(Component as keyof JSX.IntrinsicElements);
+  const MotionComponent = getMotionComponent(Component as keyof JSX.IntrinsicElements);
 
   const dynamicSpread = useMemo(() => {
     return children.length * spread;

@@ -41,7 +41,7 @@ export const CommitmentsScene: React.FC = () => {
             <span style={{ fontSize: 20, fontWeight: 700, color: COLORS.charcoal, fontFamily: '"DM Sans", sans-serif' }}>Commitments</span>
           </div>
           <div style={{ fontSize: 12, color: COLORS.textTertiary, fontFamily: '"DM Sans", sans-serif', marginBottom: 16 }}>
-            Promises you've made, extracted from your conversations
+            {"Promises you've made, extracted from your conversations"}
           </div>
 
           {/* Confidence filter */}

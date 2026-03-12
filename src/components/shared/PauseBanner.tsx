@@ -5,6 +5,7 @@ import { onTrayStateChange, type TrayState } from '@/lib/desktop-observer/client
 
 export function PauseBanner() {
   const [trayState, setTrayState] = useState<TrayState | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const unsubscribe = onTrayStateChange((state) => {
@@ -13,13 +14,19 @@ export function PauseBanner() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (!trayState?.paused) return;
+    const id = setInterval(() => setNow(Date.now()), 10_000);
+    return () => clearInterval(id);
+  }, [trayState?.paused]);
+
   if (!trayState?.paused) return null;
 
   const resumesAt = trayState.resumes_at_ms;
   let label = 'Context collection paused';
 
   if (resumesAt) {
-    const diffMs = resumesAt - Date.now();
+    const diffMs = resumesAt - now;
     if (diffMs > 0) {
       const mins = Math.ceil(diffMs / 60_000);
       if (mins > 60) {

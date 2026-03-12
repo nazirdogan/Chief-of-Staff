@@ -5,7 +5,7 @@ import { validateCitations } from '@/lib/ai/safety/citation-validator';
 import { MEETING_PREP_PROMPT } from '@/lib/ai/prompts/meeting-prep';
 import { createServiceClient } from '@/lib/db/client';
 import { listInboxItems } from '@/lib/db/queries/inbox';
-import { listCommitments } from '@/lib/db/queries/commitments';
+import { listTasks } from '@/lib/db/queries/tasks';
 import { getContextChunksByPeople } from '@/lib/db/queries/context';
 import type { SourceRef } from '@/lib/db/types';
 
@@ -67,9 +67,9 @@ export async function generateMeetingPrep(
   // Gather context about attendees from inbox and commitments
   const attendeeEmails = event.attendees.map(a => a.email);
 
-  const [allInboxItems, allCommitments] = await Promise.all([
+  const [allInboxItems, allTasks] = await Promise.all([
     listInboxItems(supabase, userId, { limit: 100 }),
-    listCommitments(supabase, userId, { status: 'open' }),
+    listTasks(supabase, userId, { status: 'open' }),
   ]);
 
   // Filter to items involving meeting attendees
@@ -79,9 +79,9 @@ export async function generateMeetingPrep(
     )
   );
 
-  const relevantCommitments = allCommitments.filter(commitment =>
+  const relevantTasks = allTasks.filter(task =>
     attendeeEmails.some(email =>
-      commitment.recipient_email?.toLowerCase() === email.toLowerCase()
+      task.recipient_email?.toLowerCase() === email.toLowerCase()
     )
   );
 
@@ -127,24 +127,24 @@ export async function generateMeetingPrep(
     });
   }
 
-  // Open commitments with attendees
-  for (const commitment of relevantCommitments.slice(0, 10)) {
+  // Open tasks with attendees
+  for (const task of relevantTasks.slice(0, 10)) {
     const { content: safeText } = sanitiseContent(
-      commitment.commitment_text,
-      `commitment:${commitment.id}`
+      task.task_text,
+      `task:${task.id}`
     );
     contextParts.push({
-      label: 'open_commitment',
+      label: 'open_task',
       content: JSON.stringify({
-        commitment: safeText,
-        to: commitment.recipient_name ?? commitment.recipient_email,
-        to_email: commitment.recipient_email,
-        source_quote: commitment.source_quote,
-        source_ref: commitment.source_ref,
-        deadline: commitment.implied_deadline,
-        created: commitment.created_at,
+        task: safeText,
+        to: task.recipient_name ?? task.recipient_email,
+        to_email: task.recipient_email,
+        source_quote: task.source_quote,
+        source_ref: task.source_ref,
+        deadline: task.implied_deadline,
+        created: task.created_at,
       }),
-      source: `commitment:${commitment.id}`,
+      source: `task:${task.id}`,
     });
   }
 
@@ -178,7 +178,7 @@ export async function generateMeetingPrep(
   }
 
   // If no context available, return a minimal prep
-  if (relevantInbox.length === 0 && relevantCommitments.length === 0) {
+  if (relevantInbox.length === 0 && relevantTasks.length === 0) {
     return {
       event_id: event.id,
       event_title: event.summary,

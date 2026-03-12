@@ -19,6 +19,7 @@ import {
   Star,
   Pencil,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { CommandPalette } from '@/components/search/CommandPalette';
@@ -32,9 +33,9 @@ import { PauseBanner } from '@/components/shared/PauseBanner';
 /* ── Navigation structure ── */
 const navItems = [
   { href: '/chat', label: 'Ask Donna', icon: MessageCircle },
-  { href: '/dashboard', label: 'Today', icon: LayoutDashboard },
+  { href: '/today', label: 'Today', icon: LayoutDashboard },
   { href: '/inbox', label: 'Inbox', icon: Inbox },
-  { href: '/commitments', label: 'Commitments', icon: CheckCircle2 },
+  { href: '/tasks', label: 'Tasks', icon: CheckCircle2 },
   { href: '/people', label: 'People', icon: Users },
   { href: '/reflections', label: 'Reflections', icon: BookOpen },
 ];
@@ -56,7 +57,7 @@ const t = {
 };
 
 function NavItem({ href, label, icon: Icon, pathname, onClick }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string; onClick?: () => void }) {
-  const active = href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href);
+  const active = href === '/today' ? pathname === '/today' : pathname.startsWith(href);
   return (
     <Link
       href={href}
@@ -98,6 +99,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const renameConversation = useChatStore((s) => s.renameConversation);
   const toggleFavorite = useChatStore((s) => s.toggleFavorite);
   const deleteConversationFromStore = useChatStore((s) => s.deleteConversation);
+  const markDonnaConversationHandled = useChatStore((s) => s.markDonnaConversationHandled);
+  const getDonnaChats = useChatStore((s) => s.getDonnaChats);
+  const getMyChats = useChatStore((s) => s.getMyChats);
+
+  const donnaChats = getDonnaChats();
+  const myChats = getMyChats();
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
@@ -368,15 +375,93 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               ))}
             </div>
 
-            {/* Chat history */}
-            {conversations.length > 0 && (
+            {/* Donna's Drafts — donna-initiated, unhandled conversations */}
+            {donnaChats.length > 0 && (
+              <div className="mt-4 flex flex-col overflow-hidden min-h-0">
+                <div className="flex items-center justify-between px-3 mb-1.5">
+                  <span
+                    className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.10em] uppercase"
+                    style={{ color: t.dawn }}
+                  >
+                    <Sparkles size={10} style={{ color: t.dawn }} />
+                    {`Donna's Drafts`}
+                    <span
+                      className="ml-0.5 inline-flex items-center justify-center rounded-full text-[9px] font-bold px-1.5 min-w-[16px] h-[16px]"
+                      style={{
+                        background: 'rgba(232,132,92,0.15)',
+                        color: t.dawn,
+                      }}
+                    >
+                      {donnaChats.length}
+                    </span>
+                  </span>
+                </div>
+                <div className="space-y-px">
+                  {donnaChats.slice(0, 8).map((conv) => {
+                    const href = `/chat/${conv.id}`;
+                    const active = pathname === href;
+                    return (
+                      <div key={conv.id} className="group relative">
+                        <Link
+                          href={href}
+                          className="flex items-center gap-2 rounded-lg px-3 py-[7px] text-[12px] transition-all duration-150"
+                          style={{
+                            background: active ? t.activeAccent : 'transparent',
+                            border: `1px solid ${active ? t.activeBorder : 'transparent'}`,
+                            color: active ? t.text : t.textTertiary,
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!active) {
+                              e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
+                              e.currentTarget.style.color = t.textSecondary;
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!active) {
+                              e.currentTarget.style.background = 'transparent';
+                              e.currentTarget.style.color = t.textTertiary;
+                            }
+                          }}
+                        >
+                          <Sparkles size={11} style={{ color: t.dawn, flexShrink: 0 }} />
+                          <span className="truncate flex-1">
+                            {conv.title || 'Donna suggestion'}
+                          </span>
+                        </Link>
+                        {/* Dismiss button — marks as handled without deleting */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            markDonnaConversationHandled(conv.id);
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center justify-center rounded p-0.5 transition-colors"
+                          style={{ color: t.textQuaternary }}
+                          onMouseEnter={(el) => { el.currentTarget.style.color = t.textTertiary; }}
+                          onMouseLeave={(el) => { el.currentTarget.style.color = t.textQuaternary; }}
+                          title="Dismiss"
+                          aria-label="Dismiss suggestion"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* My Chats — user-initiated conversations */}
+            {myChats.length > 0 && (
               <div className="mt-4 flex flex-col overflow-hidden min-h-0">
                 <div className="flex items-center justify-between px-3 mb-1.5">
                   <span
                     className="text-[10px] font-semibold tracking-[0.10em] uppercase"
                     style={{ color: t.textQuaternary }}
                   >
-                    Recent chats
+                    My Chats
                   </span>
                   <Link
                     href="/chat"
@@ -391,7 +476,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </Link>
                 </div>
                 <div className="flex-1 overflow-y-auto space-y-px min-h-0">
-                  {conversations.slice(0, 15).map((conv) => {
+                  {myChats.slice(0, 15).map((conv) => {
                     const href = `/chat/${conv.id}`;
                     const active = pathname === href;
                     const isRenaming = renamingId === conv.id;

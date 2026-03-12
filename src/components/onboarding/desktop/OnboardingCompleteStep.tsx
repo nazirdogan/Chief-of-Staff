@@ -18,7 +18,7 @@ function formatTime(time: string): string {
 
 const NEXT_STEPS = [
   { color: '#E8845C', text: 'Processing your email history and desktop captures' },
-  { color: '#52B788', text: 'Extracting commitments and scoring relationships' },
+  { color: '#52B788', text: 'Extracting tasks and scoring relationships' },
   { color: '#4E7DAA', text: 'Building your first ranked morning briefing' },
   { color: '#F4C896', text: 'Learning your patterns \u2014 the more she sees, the smarter she gets' },
 ];

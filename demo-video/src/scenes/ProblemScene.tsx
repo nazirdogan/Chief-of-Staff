@@ -1,6 +1,6 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import { COLORS, SCENES, FPS } from '../constants';
+import { COLORS, SCENES } from '../constants';
 
 const stats = [
   { number: 847, label: 'unread emails', color: COLORS.dawn },

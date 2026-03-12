@@ -150,10 +150,10 @@ export function HeartbeatMonitor() {
                 onToggle={(v) => updateConfig({ vip_alerts_enabled: v })}
               />
               <ToggleRow
-                label="Commitment checks"
-                description="Scan outbound messages for new commitments"
-                checked={config.commitment_check_enabled}
-                onToggle={(v) => updateConfig({ commitment_check_enabled: v })}
+                label="Task checks"
+                description="Scan outbound messages for new tasks"
+                checked={config.task_check_enabled}
+                onToggle={(v) => updateConfig({ task_check_enabled: v })}
               />
               <ToggleRow
                 label="Relationship monitoring"

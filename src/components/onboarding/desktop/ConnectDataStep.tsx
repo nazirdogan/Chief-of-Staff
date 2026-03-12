@@ -23,7 +23,7 @@ const GOOGLE_PROVIDERS: IntegrationProvider[] = ['gmail', 'google_calendar'];
 const ESSENTIAL_PROVIDERS: ProviderConfig[] = [
   {
     dbProvider: 'gmail', label: 'Gmail',
-    description: '30 days of email history \u2014 commitments, contacts, context',
+    description: '30 days of email history \u2014 tasks, contacts, context',
     permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }],
   },
   {

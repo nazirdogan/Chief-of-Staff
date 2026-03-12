@@ -98,10 +98,10 @@ export async function middleware(request: NextRequest) {
 
   // ── Dashboard routes: desktop-only ──
   const isDashboardRoute =
-    pathname === '/dashboard' ||
+    pathname === '/today' ||
     pathname.startsWith('/inbox') ||
     pathname.startsWith('/calendar') ||
-    pathname.startsWith('/commitments') ||
+    pathname.startsWith('/tasks') ||
     pathname.startsWith('/people') ||
     pathname.startsWith('/heartbeat') ||
     pathname.startsWith('/settings') ||

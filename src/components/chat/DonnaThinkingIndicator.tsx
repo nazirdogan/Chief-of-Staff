@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 
@@ -26,7 +26,7 @@ const THINKING_MESSAGES = [
   'One sec.',
   'Pulling your recent activity...',
   'Looking at the bigger picture...',
-  'Cross-checking your commitments...',
+  'Cross-checking your tasks...',
   'Filtering the noise...',
   'Almost there.',
   'Seeing who\'s been waiting...',
@@ -71,9 +71,6 @@ export default function DonnaThinkingIndicator() {
   const [msgIndex, setMsgIndex] = useState(() =>
     Math.floor(Math.random() * THINKING_MESSAGES.length)
   );
-  const msgIndexRef = useRef(msgIndex);
-  msgIndexRef.current = msgIndex;
-
   useEffect(() => {
     const interval = setInterval(() => {
       setMsgIndex((current) => pickNext(current));

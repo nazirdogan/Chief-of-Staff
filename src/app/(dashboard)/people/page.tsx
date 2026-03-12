@@ -56,6 +56,28 @@ export default function PeoplePage() {
     router.push(`/people/${contact.id}`);
   }
 
+  async function handleToggleVip(contact: Contact) {
+    const newVip = !contact.is_vip;
+    // Optimistic update
+    setContacts(prev => prev.map(c =>
+      c.id === contact.id ? { ...c, is_vip: newVip } : c
+    ));
+
+    try {
+      const res = await fetch(`/api/people/${contact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_vip: newVip }),
+      });
+      if (!res.ok) throw new Error('Failed to update VIP status');
+    } catch {
+      // Revert on failure
+      setContacts(prev => prev.map(c =>
+        c.id === contact.id ? { ...c, is_vip: contact.is_vip } : c
+      ));
+    }
+  }
+
   const coldCount = contacts.filter(c => c.is_cold).length;
   const vipCount = contacts.filter(c => c.is_vip).length;
 
@@ -159,6 +181,7 @@ export default function PeoplePage() {
               key={contact.id}
               contact={contact}
               onClick={handleContactClick}
+              onToggleVip={handleToggleVip}
             />
           ))}
         </div>

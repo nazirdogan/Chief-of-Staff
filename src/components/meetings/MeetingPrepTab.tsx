@@ -25,7 +25,7 @@ interface AttendeeContext {
   email: string;
   name?: string;
   recent_interactions: string;
-  open_commitments: string[];
+  open_tasks: string[];
   current_focus?: string;
 }
 
@@ -122,23 +122,23 @@ export default function MeetingPrepTab({ prep }: MeetingPrepTabProps) {
             {attendee.recent_interactions}
           </p>
 
-          {attendee.open_commitments.length > 0 && (
+          {attendee.open_tasks.length > 0 && (
             <div className="mt-3">
               <p
                 className="text-[11px] font-semibold uppercase tracking-wide mb-1.5"
                 style={{ color: c.textMuted }}
               >
-                Open Commitments
+                Open Tasks
               </p>
               <ul className="flex flex-col gap-1">
-                {attendee.open_commitments.map((commitment, i) => (
+                {attendee.open_tasks.map((task, i) => (
                   <li
                     key={i}
                     className="text-[13px] flex items-start gap-2"
                     style={{ color: c.textTertiary }}
                   >
                     <span style={{ color: c.dawn, marginTop: 2 }}>•</span>
-                    {commitment}
+                    {task}
                   </li>
                 ))}
               </ul>

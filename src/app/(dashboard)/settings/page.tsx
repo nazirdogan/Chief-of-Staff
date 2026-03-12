@@ -9,6 +9,7 @@ import {
   Zap,
   Lock,
   Database,
+  Bell,
 } from 'lucide-react';
 
 const settingsSections = [
@@ -59,6 +60,12 @@ const settingsSections = [
     label: 'Security',
     description: 'Sessions, audit log, and two-factor auth.',
     icon: Lock,
+  },
+  {
+    href: '/settings/notifications',
+    label: 'Notifications',
+    description: 'Choose which proactive notifications Donna sends.',
+    icon: Bell,
   },
   {
     href: '/settings/data',

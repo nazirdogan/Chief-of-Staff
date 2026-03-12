@@ -45,7 +45,7 @@ export const POST = withAuth(async (req: AuthenticatedRequest) => {
 
     return NextResponse.json({
       cancel_at_period_end: subscription.cancel_at_period_end,
-      current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
+      current_period_end: new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000).toISOString(),
     });
   } catch (err) {
     console.error('Failed to cancel subscription:', err);

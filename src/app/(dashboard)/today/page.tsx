@@ -9,10 +9,8 @@ import type { Briefing, BriefingItem, MeetingPrepData, SourceRef } from '@/lib/d
 import {
   Loader2,
   Zap,
-  RefreshCw,
   Clock,
   Users,
-  LayoutDashboard,
   CheckCircle2,
   ArrowRight,
   ListChecks,
@@ -20,11 +18,13 @@ import {
   ArrowRightFromLine,
   ChevronUp,
   ChevronDown,
+  CalendarClock,
 } from 'lucide-react';
 import Link from 'next/link';
 
 interface BriefingResponse {
   briefing: (Briefing & { items: BriefingItem[] }) | null;
+  briefing_time: string | null;
 }
 
 interface RoutineOutputWithMeta {
@@ -79,13 +79,12 @@ function renderMarkdown(text: string): string {
 
 export default function BriefingPage() {
   const [briefing, setBriefing] = useState<BriefingResponse['briefing']>(null);
+  const [briefingTime, setBriefingTime] = useState<string | null>(null);
   const [meetingPreps, setMeetingPreps] = useState<MeetingPrepData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drawerItem, setDrawerItem] = useState<BriefingItem | null>(null);
   const [integrations, setIntegrations] = useState<Array<{ provider: string; status: string }>>([]);
-  const [generating, setGenerating] = useState(false);
-  const [generateError, setGenerateError] = useState<string | null>(null);
   const [checkedActions, setCheckedActions] = useState<Set<string>>(new Set());
   const [prepLoading, setPrepLoading] = useState<Record<string, boolean>>({});
   const [generatedPreps, setGeneratedPreps] = useState<Record<string, MeetingPrepData>>({});
@@ -98,6 +97,7 @@ export default function BriefingPage() {
       if (!res.ok) throw new Error('Failed to fetch briefing');
       const data: BriefingResponse = await res.json();
       setBriefing(data.briefing);
+      setBriefingTime(data.briefing_time);
       setMeetingPreps(data.briefing?.meeting_preps ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -117,31 +117,6 @@ export default function BriefingPage() {
       .then((data: { outputs?: RoutineOutputWithMeta[] }) => setRoutineOutputs(data.outputs ?? []))
       .catch(() => {});
   }, [fetchBriefing]);
-
-  async function handleGenerateBriefing() {
-    setGenerating(true);
-    setGenerateError(null);
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 300_000);
-      const res = await fetch('/api/briefing/generate', { method: 'POST', signal: controller.signal });
-      clearTimeout(timeout);
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? 'Generation failed');
-      }
-      toast.success('Briefing generated!');
-      await fetchBriefing();
-    } catch (err) {
-      const message = err instanceof Error
-        ? err.name === 'AbortError' ? 'Generation timed out. Please try again.' : err.message
-        : 'Failed to generate briefing';
-      setGenerateError(message);
-      toast.error(message);
-    } finally {
-      setGenerating(false);
-    }
-  }
 
   function handleCitationClick(item: BriefingItem) {
     setDrawerItem(item);
@@ -256,8 +231,18 @@ export default function BriefingPage() {
     );
   }
 
-  /* ── First-time empty state (no briefing generated yet) ── */
+  /* ── Empty state: no briefing for today ── */
   if (!briefing) {
+    // Format the scheduled time nicely (e.g. "07:30:00" → "7:30 AM")
+    const scheduledTimeLabel = briefingTime
+      ? (() => {
+          const [h, m] = briefingTime.split(':').map(Number);
+          const d = new Date();
+          d.setHours(h, m, 0, 0);
+          return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        })()
+      : null;
+
     return (
       <div className="space-y-6">
         <h1
@@ -273,46 +258,47 @@ export default function BriefingPage() {
 
         <div
           className="rounded-xl p-10 text-center"
-          style={{ background: c.surface, border: `1px dashed ${c.borderHover}` }}
+          style={{ background: c.surface, border: `1px dashed ${c.border}` }}
         >
           <div
             className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-            style={{ background: c.dawnMuted }}
+            style={{ background: scheduledTimeLabel ? c.dawnMuted : 'rgba(78,125,170,0.1)' }}
           >
-            <LayoutDashboard size={22} style={{ color: c.dawn }} />
+            <CalendarClock size={22} style={{ color: scheduledTimeLabel ? c.dawn : c.dusk }} />
           </div>
-          <p className="text-[14px] font-semibold" style={{ color: c.text }}>
-            Ready to generate your briefing
-          </p>
-          <p
-            className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed"
-            style={{ color: c.textTertiary }}
-          >
-            Donna will pull from your desktop activity, connected integrations, commitments, and calendar to build your daily briefing.
-          </p>
 
-          <button
-            onClick={handleGenerateBriefing}
-            disabled={generating}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
-            style={{
-              background: c.dawn,
-              color: '#FAF9F6',
-              opacity: generating ? 0.7 : 1,
-              cursor: generating ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {generating ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-            {generating ? 'Generating...' : 'Generate briefing'}
-          </button>
-
-          {generateError && (
-            <div
-              className="mx-auto mt-4 max-w-md rounded-lg px-4 py-3 text-[12px]"
-              style={{ background: 'rgba(214,75,42,0.08)', border: '1px solid rgba(214,75,42,0.2)', color: c.alert }}
-            >
-              {generateError}
-            </div>
+          {scheduledTimeLabel ? (
+            <>
+              <p className="text-[14px] font-semibold" style={{ color: c.text }}>
+                Your briefing is scheduled for {scheduledTimeLabel}
+              </p>
+              <p
+                className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed"
+                style={{ color: c.textTertiary }}
+              >
+                Donna will automatically prepare your briefing each morning. Check back then.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-[14px] font-semibold" style={{ color: c.text }}>
+                No briefing scheduled
+              </p>
+              <p
+                className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed"
+                style={{ color: c.textTertiary }}
+              >
+                Set up a daily briefing and Donna will automatically prepare your morning summary.
+              </p>
+              <Link
+                href="/reflections"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-[13px] font-semibold transition-all duration-200"
+                style={{ background: c.dawn, color: '#FAF9F6' }}
+              >
+                <Zap size={14} />
+                Schedule daily briefings
+              </Link>
+            </>
           )}
         </div>
       </div>
@@ -383,57 +369,30 @@ export default function BriefingPage() {
           HEADER
           ═══════════════════════════════════════════════════════ */}
 
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1
-            className="text-[28px] tracking-[-0.02em] leading-tight"
-            style={{
-              color: c.text,
-              fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
-              fontWeight: 300,
-            }}
-          >
-            {getGreeting()}
-          </h1>
-          <div className="mt-1.5 flex items-center gap-3">
-            <p
-              className="text-[12px] font-medium tracking-wide"
-              style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              {dateStr}
-            </p>
-            <span style={{ color: c.textGhost }}>·</span>
-            <p className="text-[13px] font-medium" style={{ color: c.textTertiary }}>
-              {contextLine}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={handleGenerateBriefing}
-          disabled={generating}
-          className="mt-1 shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-medium transition-all duration-150"
+      <div>
+        <h1
+          className="text-[28px] tracking-[-0.02em] leading-tight"
           style={{
-            background: generating ? c.dawnMuted : c.surface,
-            color: generating ? c.textMuted : c.textTertiary,
-            border: `1px solid ${c.border}`,
-            cursor: generating ? 'not-allowed' : 'pointer',
+            color: c.text,
+            fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+            fontWeight: 300,
           }}
-          onMouseEnter={(e) => { if (!generating) e.currentTarget.style.borderColor = c.borderHover; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = c.border; }}
         >
-          {generating ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-          {generating ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
-
-      {generateError && (
-        <div
-          className="rounded-lg px-4 py-3 text-[12px]"
-          style={{ background: 'rgba(214,75,42,0.08)', border: '1px solid rgba(214,75,42,0.2)', color: c.alert }}
-        >
-          {generateError}
+          {getGreeting()}
+        </h1>
+        <div className="mt-1.5 flex items-center gap-3">
+          <p
+            className="text-[12px] font-medium tracking-wide"
+            style={{ color: c.textMuted, fontFamily: "'JetBrains Mono', monospace" }}
+          >
+            {dateStr}
+          </p>
+          <span style={{ color: c.textGhost }}>·</span>
+          <p className="text-[13px] font-medium" style={{ color: c.textTertiary }}>
+            {contextLine}
+          </p>
         </div>
-      )}
+      </div>
 
       {/* ═══════════════════════════════════════════════════════
           SECTION 1: PRIORITIES

@@ -1,6 +1,6 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import { COLORS, SCENES, FPS } from '../constants';
+import { COLORS, SCENES } from '../constants';
 
 export const HookScene: React.FC = () => {
   const frame = useCurrentFrame();

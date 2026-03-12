@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { IntegrationConnectStep } from './IntegrationConnectStep';
 import { VIPSetupStep } from './VIPSetupStep';
 import { ProjectSetupStep } from './ProjectSetupStep';
-import { CommitmentCalibrationStep } from './CommitmentCalibrationStep';
+import { TaskCalibrationStep } from './CommitmentCalibrationStep';
 
 interface VIPContact {
   email: string;
@@ -91,22 +91,22 @@ export function OnboardingFlow() {
             is_vip: true,
             relationship_score: 80,
             interaction_count_30d: 0,
-            open_commitments_count: 0,
+            open_tasks_count: 0,
             is_cold: false,
           });
         }
       }
 
-      // Write commitment calibration decisions — trains the model
-      for (const [commitmentId, confirmed] of Object.entries(decisions)) {
+      // Write task calibration decisions — trains the model
+      for (const [taskId, confirmed] of Object.entries(decisions)) {
         await db
-          .from('commitments')
+          .from('tasks')
           .update({
             user_confirmed: confirmed,
             status: confirmed ? 'open' : 'dismissed',
           })
           .eq('user_id', user.id)
-          .eq('id', commitmentId);
+          .eq('id', taskId);
       }
 
       // Mark onboarding as completed
@@ -219,7 +219,7 @@ export function OnboardingFlow() {
           )}
 
           {step === 3 && (
-            <CommitmentCalibrationStep
+            <TaskCalibrationStep
               onNext={(decisions) => {
                 calibrationDecisionsRef.current = decisions;
                 handleComplete(decisions);

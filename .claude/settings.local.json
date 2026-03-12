@@ -115,7 +115,31 @@
       "Bash(qlmanage -t -s 512 -o /tmp /Users/nazir/donna/src-tauri/icons/icon.png 2>/dev/null)",
       "Bash(python3 << 'EOF'\nfrom PIL import Image, ImageDraw\n\nSIZE = 1024\n\n# Use the actual brand logo exactly as designed\nlogo = Image.open\\(\"/Users/nazir/donna/src-tauri/icons/donna-monogram-light.png\"\\).convert\\(\"RGBA\"\\)\n\n# Resize to fill the full canvas \\(the logo already has its own background\\)\ncanvas = logo.resize\\(\\(SIZE, SIZE\\), Image.LANCZOS\\)\n\n# Apply macOS squircle mask — corner radius ~22.4% of size\nmask_img = Image.new\\(\"L\", \\(SIZE, SIZE\\), 0\\)\nmask_draw = ImageDraw.Draw\\(mask_img\\)\nradius = int\\(SIZE * 0.224\\)\nmask_draw.rounded_rectangle\\([0, 0, SIZE - 1, SIZE - 1], radius=radius, fill=255\\)\ncanvas.putalpha\\(mask_img\\)\n\ncanvas.save\\(\"/Users/nazir/donna/src-tauri/icons/icon.png\"\\)\nprint\\(\"Done\"\\)\nEOF\nqlmanage -t -s 512 -o /tmp /Users/nazir/donna/src-tauri/icons/icon.png 2>/dev/null)",
       "Bash(sips -g pixelWidth -g pixelHeight \"/Users/nazir/donna/New Donna Logos/donna-monogram-dark \\(1\\).png\")",
-      "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/layout.tsx\" 2>/dev/null)"
+      "Bash(cat \"/Users/nazir/donna/src/app/\\(dashboard\\)/layout.tsx\" 2>/dev/null)",
+      "WebFetch(domain:www.perplexity.ai)",
+      "WebFetch(domain:www.instagram.com)",
+      "WebFetch(domain:9to5mac.com)",
+      "WebFetch(domain:www.digitaltrends.com)",
+      "WebFetch(domain:venturebeat.com)",
+      "WebFetch(domain:appleinsider.com)",
+      "WebFetch(domain:thenextweb.com)",
+      "WebFetch(domain:aitoolsclub.com)",
+      "WebFetch(domain:imdonna.ai)",
+      "WebFetch(domain:techcrunch.com)",
+      "WebFetch(domain:www.axios.com)",
+      "WebFetch(domain:www.the-ai-corner.com)",
+      "WebFetch(domain:www.neowin.net)",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/people/)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/people/page.tsx)",
+      "Bash(ls /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/)",
+      "WebFetch(domain:docs.perplexity.ai)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/layout.tsx)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/settings/page.tsx)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/settings/general/page.tsx)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/inbox/page.tsx)",
+      "Bash(ls /Users/nazir/donna/src/components/commitments/ 2>/dev/null && ls /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/commitments/ 2>/dev/null)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/commitments/page.tsx)",
+      "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/commitments/loading.tsx)"
     ]
   }
 }

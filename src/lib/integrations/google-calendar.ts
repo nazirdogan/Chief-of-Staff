@@ -136,3 +136,21 @@ export async function createCalendarEvent(
 
   return response.data.id ?? '';
 }
+
+export async function updateCalendarEventTimes(
+  userId: string,
+  eventId: string,
+  newStart: string,
+  newEnd: string,
+): Promise<void> {
+  const calendar = await getCalendarClient(userId);
+
+  await calendar.events.patch({
+    calendarId: 'primary',
+    eventId,
+    requestBody: {
+      start: { dateTime: newStart },
+      end: { dateTime: newEnd },
+    },
+  });
+}

@@ -15,7 +15,7 @@ interface BackfillStatus {
 const PHASES = [
   'email_backfill',
   'contact_graph',
-  'commitment_extraction',
+  'task_extraction',
   'calendar_backfill',
   'desktop_processing',
   'first_briefing',
@@ -30,8 +30,8 @@ const PHASE_LABELS: Record<string, { label: string; description: string }> = {
     label: 'Mapping relationships',
     description: 'Building your contact graph and interaction scores',
   },
-  commitment_extraction: {
-    label: 'Finding commitments',
+  task_extraction: {
+    label: 'Finding tasks',
     description: 'Extracting promises you\'ve made from sent emails',
   },
   calendar_backfill: {
@@ -444,8 +444,8 @@ function getPhaseDetail(phase: string, details: Record<string, unknown>): string
       const n = details.contacts_upserted;
       return typeof n === 'number' && n > 0 ? `${n} contacts` : '';
     }
-    case 'commitment_extraction': {
-      const n = details.commitments_extracted;
+    case 'task_extraction': {
+      const n = details.tasks_extracted;
       return typeof n === 'number' && n > 0 ? `${n} found` : '';
     }
     case 'calendar_backfill': {

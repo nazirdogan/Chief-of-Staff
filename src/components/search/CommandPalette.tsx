@@ -57,9 +57,9 @@ const t = {
 // Page registry
 // ---------------------------------------------------------------------------
 const pages = [
-  { label: 'Today', path: '/dashboard', icon: LayoutDashboard, shortcut: 'T' },
+  { label: 'Today', path: '/today', icon: LayoutDashboard, shortcut: 'T' },
   { label: 'Inbox', path: '/inbox', icon: Inbox, shortcut: 'I' },
-  { label: 'Commitments', path: '/commitments', icon: CheckCircle2, shortcut: 'M' },
+  { label: 'Tasks', path: '/tasks', icon: CheckCircle2, shortcut: 'M' },
   { label: 'People', path: '/people', icon: Users, shortcut: 'P' },
   { label: 'Chat', path: '/chat', icon: MessageCircle, shortcut: 'C' },
   { label: 'Reflections', path: '/reflections', icon: BookOpen, shortcut: 'R' },
@@ -68,9 +68,9 @@ const pages = [
 ] as const
 
 const pathIconMap: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
-  '/dashboard': LayoutDashboard,
+  '/today': LayoutDashboard,
   '/inbox': Inbox,
-  '/commitments': CheckCircle2,
+  '/tasks': CheckCircle2,
   '/people': Users,
   '/chat': MessageCircle,
   '/reflections': BookOpen,
@@ -241,13 +241,15 @@ export function CommandPalette({
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (!trimmed) {
-      setMemoryResults([])
-      setMessageResults([])
-      setLoadingMessages(false)
-      return
+      const id = setTimeout(() => {
+        setMemoryResults([])
+        setMessageResults([])
+        setLoadingMessages(false)
+      }, 0)
+      return () => clearTimeout(id)
     }
 
-    setLoadingMessages(true)
+    const loadingId = setTimeout(() => setLoadingMessages(true), 0)
     const controller = new AbortController()
 
     debounceRef.current = setTimeout(async () => {
@@ -273,6 +275,7 @@ export function CommandPalette({
     }, 320)
 
     return () => {
+      clearTimeout(loadingId)
       controller.abort()
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }

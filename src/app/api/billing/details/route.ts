@@ -47,7 +47,7 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
         id: subscription.id,
         status: subscription.status,
         tier: profile.subscription_tier,
-        current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
+        current_period_end: new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000).toISOString(),
         cancel_at_period_end: subscription.cancel_at_period_end,
         canceled_at: subscription.canceled_at
           ? new Date(subscription.canceled_at * 1000).toISOString()

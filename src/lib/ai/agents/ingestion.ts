@@ -6,8 +6,11 @@ import { fetchInboxMessages, fetchMessageForProcessing, parseGmailMessage } from
 import { fetchRecentDMs } from '@/lib/integrations/slack';
 import { upsertInboxItem, getExistingInboxSummaries, deleteInboxItemsNotIn } from '@/lib/db/queries/inbox';
 import { createServiceClient } from '@/lib/db/client';
+import { listContacts } from '@/lib/db/queries/contacts';
 import type { ParsedGmailMessage } from '@/lib/integrations/gmail';
 import type { ParsedSlackMessage } from '@/lib/integrations/slack';
+
+const VIP_URGENCY_MULTIPLIER = 1.5;
 
 const anthropic = new Anthropic();
 
@@ -105,6 +108,10 @@ export async function ingestGmailMessages(
 
   const supabase = createServiceClient();
 
+  // Load VIP emails for urgency boost
+  const vipContacts = await listContacts(supabase, userId, { vipOnly: true });
+  const vipEmails = new Set(vipContacts.map(c => c.email.toLowerCase()));
+
   // Delta sync: load existing summaries so we can skip re-processing
   const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'gmail');
 
@@ -139,6 +146,13 @@ export async function ingestGmailMessages(
     // Skip promotional content that got through Gmail's category filter
     if (result.is_promotional) continue;
 
+    // VIP senders get urgency boost
+    const isVip = parsed.from ? vipEmails.has(parsed.from.toLowerCase()) : false;
+    const baseUrgency = Math.min(10, Math.max(1, result.urgency_score));
+    const urgencyScore = isVip
+      ? Math.min(10, Math.round(baseUrgency * VIP_URGENCY_MULTIPLIER))
+      : baseUrgency;
+
     // Store only metadata + AI summary — raw body discarded
     await upsertInboxItem(supabase, {
       user_id: userId,
@@ -149,7 +163,7 @@ export async function ingestGmailMessages(
       from_name: parsed.fromName,
       subject: parsed.subject,
       ai_summary: result.summary,
-      urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
+      urgency_score: urgencyScore,
       needs_reply: result.needs_reply,
       sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
@@ -179,6 +193,8 @@ export async function ingestGmailMessageRefs(
   if (messageRefs.length === 0) return { processed: 0 };
 
   const supabase = createServiceClient();
+  const vipContacts = await listContacts(supabase, userId, { vipOnly: true });
+  const vipEmails = new Set(vipContacts.map(c => c.email.toLowerCase()));
   const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'gmail');
 
   let processed = 0;
@@ -195,6 +211,13 @@ export async function ingestGmailMessageRefs(
     const result = await summariseGmailMessage(parsed);
     if (result.is_promotional) continue;
 
+    // VIP senders get urgency boost
+    const isVip = parsed.from ? vipEmails.has(parsed.from.toLowerCase()) : false;
+    const baseUrgency = Math.min(10, Math.max(1, result.urgency_score));
+    const urgencyScore = isVip
+      ? Math.min(10, Math.round(baseUrgency * VIP_URGENCY_MULTIPLIER))
+      : baseUrgency;
+
     await upsertInboxItem(supabase, {
       user_id: userId,
       provider: 'gmail',
@@ -204,7 +227,7 @@ export async function ingestGmailMessageRefs(
       from_name: parsed.fromName,
       subject: parsed.subject,
       ai_summary: result.summary,
-      urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
+      urgency_score: urgencyScore,
       needs_reply: result.needs_reply,
       sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: receivedAt,
@@ -224,6 +247,10 @@ export async function ingestSlackDMs(
   const found = messages.length;
 
   const supabase = createServiceClient();
+
+  // Load VIP emails for urgency boost
+  const vipContacts = await listContacts(supabase, userId, { vipOnly: true });
+  const vipEmails = new Set(vipContacts.map(c => c.email.toLowerCase()));
 
   // Delta sync: load existing summaries so we can skip re-processing
   const existingSummaries = await getExistingInboxSummaries(supabase, userId, 'slack');
@@ -246,6 +273,13 @@ export async function ingestSlackDMs(
     // New message — run AI summarisation
     const result = await summariseSlackMessage(msg);
 
+    // VIP senders get urgency boost
+    const isVip = msg.from ? vipEmails.has(msg.from.toLowerCase()) : false;
+    const baseUrgency = Math.min(10, Math.max(1, result.urgency_score));
+    const slackUrgency = isVip
+      ? Math.min(10, Math.round(baseUrgency * VIP_URGENCY_MULTIPLIER))
+      : baseUrgency;
+
     await upsertInboxItem(supabase, {
       user_id: userId,
       provider: 'slack',
@@ -255,7 +289,7 @@ export async function ingestSlackDMs(
       from_name: msg.fromName,
       subject: `Slack DM from ${msg.fromName}`,
       ai_summary: result.summary,
-      urgency_score: Math.min(10, Math.max(1, result.urgency_score)),
+      urgency_score: slackUrgency,
       needs_reply: result.needs_reply,
       sentiment: result.sentiment as import('@/lib/db/types').MessageSentiment,
       received_at: msg.date,

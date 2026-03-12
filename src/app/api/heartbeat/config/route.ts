@@ -51,7 +51,7 @@ export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRe
 const ALLOWED_FIELDS = [
   'scan_frequency',
   'vip_alerts_enabled',
-  'commitment_check_enabled',
+  'task_check_enabled',
   'relationship_check_enabled',
   'document_index_enabled',
   'quiet_hours_start',

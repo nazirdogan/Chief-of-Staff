@@ -16,6 +16,21 @@ export function classifyAction(
     return AutonomyTier.FULL;
   }
 
+  // ── view_meeting_prep is ALWAYS Tier 2 (informational toast) ──
+  if (action_type === 'view_meeting_prep') {
+    return AutonomyTier.ONE_TAP;
+  }
+
+  // ── Commitment reminders are always Tier 2 (one-tap toast) ──
+  if (action_type === 'task_reminder') {
+    return AutonomyTier.ONE_TAP;
+  }
+
+  // ── set_reminder is ALWAYS Tier 1 (SILENT) — user-initiated, low-stakes ──
+  if (action_type === 'set_reminder') {
+    return AutonomyTier.SILENT;
+  }
+
   const settings = userSettings.find((s) => s.action_type === action_type);
   const tier1Enabled = settings?.tier_1_enabled === true;
   const tier2Enabled = settings?.tier_2_enabled === true;
@@ -56,8 +71,8 @@ export function classifyAction(
       tier = AutonomyTier.ONE_TAP;
     } else if (
       action_type === 'create_calendar_event' &&
-      (!payload.external_attendees ||
-        (payload.external_attendees as unknown[]).length === 0)
+      (!payload.attendees ||
+        (payload.attendees as unknown[]).length === 0)
     ) {
       tier = AutonomyTier.ONE_TAP;
     } else if (

@@ -35,8 +35,22 @@ export interface EnrichedContext {
   recentDesktopActivity: ContextChunk[];
   /** Today's rolling day narrative from the observer */
   todayNarrative: DayNarrative | null;
+  /** Yesterday's completed day narrative from the observer */
+  yesterdayNarrative: DayNarrative | null;
   /** Recent activity sessions from the observer (last 24h) */
   recentSessions: ActivitySession[];
+  /** OCR-captured text from recent sessions (last 4h) — document titles, tickets, file names */
+  recentOcrContext: OcrContextChunk[];
+}
+
+/** Lightweight OCR context extracted from activity sessions */
+export interface OcrContextChunk {
+  app_name: string;
+  app_category: string;
+  started_at: string;
+  ocr_lines: string[];
+  /** Document titles, ticket IDs, and file names extracted from OCR */
+  extracted_items: string[];
 }
 
 /**
@@ -122,11 +136,18 @@ export async function fetchEnrichedContext(
     [] as ContextChunk[],
   );
 
-  // Fetch today's day narrative and recent activity sessions (observer-first intelligence)
-  const [todayNarrative, recentSessions] = await Promise.all([
+  // Fetch today's + yesterday's day narratives and recent activity sessions (observer-first intelligence)
+  // Also fetch last 4h of sessions for OCR context extraction
+  const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+  const [todayNarrative, yesterdayNarrative, recentSessions, ocrSessions] = await Promise.all([
     withTimeout(getDayNarrative(supabase, userId, today), null),
+    withTimeout(getDayNarrative(supabase, userId, yesterdayStr), null),
     withTimeout(
       getSessionsInRange(supabase, userId, yesterday.toISOString(), undefined, { limit: 50 }),
+      [] as ActivitySession[],
+    ),
+    withTimeout(
+      getSessionsInRange(supabase, userId, fourHoursAgo, undefined, { limit: 100 }),
       [] as ActivitySession[],
     ),
   ]);
@@ -157,6 +178,9 @@ export async function fetchEnrichedContext(
     }
   }
 
+  // Extract OCR context from recent sessions (last 4h)
+  const recentOcrContext = extractOcrContext(ocrSessions);
+
   return {
     yesterdaySnapshot,
     workingPatterns,
@@ -165,8 +189,70 @@ export async function fetchEnrichedContext(
     projectContext,
     recentDesktopActivity: desktopChunks,
     todayNarrative,
+    yesterdayNarrative,
     recentSessions,
+    recentOcrContext,
   };
+}
+
+/**
+ * Extract OCR lines from recent sessions and identify document titles,
+ * ticket IDs, code file names, and other structured items.
+ */
+function extractOcrContext(sessions: ActivitySession[]): OcrContextChunk[] {
+  const chunks: OcrContextChunk[] = [];
+
+  for (const session of sessions) {
+    const pd = (session.parsed_data ?? {}) as Record<string, unknown>;
+    const ocrLines = pd.ocrLines as string[] | undefined;
+    if (!ocrLines || ocrLines.length === 0) continue;
+
+    // Extract structured items from OCR text
+    const extractedItems = extractItemsFromOcr(ocrLines);
+
+    chunks.push({
+      app_name: session.app_name,
+      app_category: session.app_category,
+      started_at: session.started_at,
+      ocr_lines: ocrLines.slice(0, 20), // Keep top 20 lines for context
+      extracted_items: extractedItems,
+    });
+  }
+
+  return chunks;
+}
+
+/** Patterns to identify structured items in OCR text */
+const OCR_PATTERNS = {
+  // Ticket/issue IDs: PROJ-123, #456, GH-789
+  ticket: /\b([A-Z]{2,10}-\d{1,6}|#\d{2,6}|GH-\d+|ISSUE-\d+)\b/g,
+  // File names: something.ext
+  fileName: /\b[\w-]+\.(ts|tsx|js|jsx|py|go|rs|rb|java|swift|kt|css|scss|html|json|yaml|yml|md|sql|sh|env|toml|xml|csv)\b/gi,
+  // Document titles: typically title-cased phrases (3+ words)
+  docTitle: /^[A-Z][A-Za-z0-9\s:—–-]{15,80}$/,
+  // URLs
+  url: /https?:\/\/[^\s<>"{}|\\^`\[\]]{10,}/g,
+};
+
+function extractItemsFromOcr(lines: string[]): string[] {
+  const items = new Set<string>();
+
+  for (const line of lines) {
+    // Tickets
+    const tickets = line.match(OCR_PATTERNS.ticket);
+    if (tickets) tickets.forEach(t => items.add(`ticket:${t}`));
+
+    // File names
+    const files = line.match(OCR_PATTERNS.fileName);
+    if (files) files.forEach(f => items.add(`file:${f}`));
+
+    // Document titles (standalone lines that look like headings)
+    if (OCR_PATTERNS.docTitle.test(line.trim())) {
+      items.add(`title:${line.trim()}`);
+    }
+  }
+
+  return [...items].slice(0, 30);
 }
 
 /**
@@ -200,6 +286,35 @@ export function serializeEnrichedContext(ctx: EnrichedContext): string {
     if (parts.length > 0) {
       sections.push(parts.join('\n\n'));
     }
+  }
+
+  // Yesterday's observer narrative (first-class context block — what the observer saw)
+  if (ctx.yesterdayNarrative) {
+    const yn = ctx.yesterdayNarrative;
+    const parts: string[] = [];
+    if (yn.narrative) parts.push(yn.narrative);
+
+    const stats = [
+      yn.email_sessions > 0 && `${yn.email_sessions} email sessions`,
+      yn.chat_sessions > 0 && `${yn.chat_sessions} chat sessions`,
+      yn.code_sessions > 0 && `${yn.code_sessions} coding sessions`,
+      yn.meeting_sessions > 0 && `${yn.meeting_sessions} meetings`,
+      yn.browsing_sessions > 0 && `${yn.browsing_sessions} browsing sessions`,
+    ].filter(Boolean);
+    if (stats.length > 0) parts.push(`Activity breakdown: ${stats.join(', ')}`);
+    if (yn.total_active_seconds > 0) {
+      const hours = Math.floor(yn.total_active_seconds / 3600);
+      const mins = Math.round((yn.total_active_seconds % 3600) / 60);
+      parts.push(`Total active time: ${hours}h ${mins}m`);
+    }
+    if (yn.people_seen.length > 0) parts.push(`People interacted with: ${yn.people_seen.slice(0, 10).join(', ')}`);
+    if (yn.projects_worked_on.length > 0) parts.push(`Projects touched: ${yn.projects_worked_on.join(', ')}`);
+
+    if (yn.key_events.length > 0) {
+      parts.push('Key events:\n' + yn.key_events.map(e => `- [${e.importance}] ${e.event} (${e.time})`).join('\n'));
+    }
+
+    sections.push("YESTERDAY'S OBSERVER NARRATIVE (what the desktop observer captured):\n" + parts.join('\n'));
   }
 
   // Working patterns
@@ -325,6 +440,36 @@ export function serializeEnrichedContext(ctx: EnrichedContext): string {
 
     if (sessionLines.length > 0) {
       sections.push('RECENT ACTIVITY SESSIONS:\n' + sessionLines.join('\n'));
+    }
+  }
+
+  // OCR-extracted context (document titles, tickets, file names from last 4h)
+  if (ctx.recentOcrContext.length > 0) {
+    const allExtracted = ctx.recentOcrContext.flatMap(c => c.extracted_items);
+    const uniqueExtracted = [...new Set(allExtracted)];
+
+    if (uniqueExtracted.length > 0) {
+      const byType = {
+        tickets: uniqueExtracted.filter(i => i.startsWith('ticket:')).map(i => i.slice(7)),
+        files: uniqueExtracted.filter(i => i.startsWith('file:')).map(i => i.slice(5)),
+        titles: uniqueExtracted.filter(i => i.startsWith('title:')).map(i => i.slice(6)),
+      };
+
+      const ocrParts: string[] = [];
+      if (byType.tickets.length > 0) ocrParts.push(`Tickets/Issues: ${byType.tickets.join(', ')}`);
+      if (byType.files.length > 0) ocrParts.push(`Files seen: ${byType.files.join(', ')}`);
+      if (byType.titles.length > 0) ocrParts.push(`Documents: ${byType.titles.join(' | ')}`);
+
+      // Also include a sample of raw OCR lines for additional context
+      const sampleLines = ctx.recentOcrContext
+        .flatMap(c => c.ocr_lines)
+        .filter(l => l.length > 15 && l.length < 200)
+        .slice(0, 10);
+      if (sampleLines.length > 0) {
+        ocrParts.push('Recent screen text:\n' + sampleLines.map(l => `  "${l}"`).join('\n'));
+      }
+
+      sections.push('OCR SCREEN CONTEXT (last 4h):\n' + ocrParts.join('\n'));
     }
   }
 

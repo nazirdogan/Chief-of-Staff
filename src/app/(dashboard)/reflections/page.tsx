@@ -438,13 +438,13 @@ function RoutineDrawer({
 
   useEffect(() => {
     if (state.open) {
-      setMounted(true);
+      const mountId = setTimeout(() => setMounted(true), 0);
       const id = requestAnimationFrame(() => setShown(true));
-      return () => cancelAnimationFrame(id);
+      return () => { clearTimeout(mountId); cancelAnimationFrame(id); };
     } else {
-      setShown(false);
+      const showId = setTimeout(() => setShown(false), 0);
       const id = setTimeout(() => setMounted(false), 340);
-      return () => clearTimeout(id);
+      return () => { clearTimeout(showId); clearTimeout(id); };
     }
   }, [state.open]);
 

@@ -111,7 +111,7 @@ export const JOB_REGISTRY: JobDefinition[] = [
     label: 'Scanning Slack',
   },
   {
-    id: 'commitment-check',
+    id: 'task-check',
     category: 'heartbeat',
     provider: null,
     priority: 2,
@@ -121,7 +121,7 @@ export const JOB_REGISTRY: JobDefinition[] = [
     minGapMs: HOUR_12,
     timeoutMs: TIMEOUT_LONG,
     estimatedDurationMs: 30_000,
-    label: 'Checking commitments',
+    label: 'Checking tasks',
   },
   {
     id: 'relationship-check',
@@ -135,6 +135,47 @@ export const JOB_REGISTRY: JobDefinition[] = [
     timeoutMs: TIMEOUT_MED,
     estimatedDurationMs: 15_000,
     label: 'Scoring relationships',
+  },
+
+  // ── Priority 2: Meeting intelligence ──
+  {
+    id: 'meeting-prep-auto',
+    category: 'heartbeat',
+    provider: 'google_calendar',
+    priority: 2,
+    intervalMs: MIN_30,
+    requiresIntegration: true,
+    collapsible: true,
+    minGapMs: MIN_15,
+    timeoutMs: TIMEOUT_MED,
+    estimatedDurationMs: 30_000,
+    label: 'Preparing for meetings',
+  },
+  {
+    id: 'meeting-prep-notify',
+    category: 'heartbeat',
+    provider: null,
+    priority: 2,
+    intervalMs: MIN_5,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_5,
+    timeoutMs: TIMEOUT_SHORT,
+    estimatedDurationMs: 5_000,
+    label: 'Sending meeting reminders',
+  },
+  {
+    id: 'post-meeting-tasks',
+    category: 'heartbeat',
+    provider: null,
+    priority: 2,
+    intervalMs: MIN_30,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_15,
+    timeoutMs: TIMEOUT_MED,
+    estimatedDurationMs: 20_000,
+    label: 'Scanning post-meeting tasks',
   },
 
   // ── Priority 3: Synthesis (depends on P1/P2 data) ──
@@ -316,6 +357,21 @@ export const JOB_REGISTRY: JobDefinition[] = [
     label: 'Writing monthly reflection',
   },
 
+  // ── Priority 3: Scheduled briefing delivery (checks profiles.briefing_time, runs every 5 min) ──
+  {
+    id: 'scheduled-briefing-delivery',
+    category: 'briefing',
+    provider: null,
+    priority: 3,
+    intervalMs: MIN_5,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_5,
+    timeoutMs: TIMEOUT_LONG,
+    estimatedDurationMs: 45_000,
+    label: 'Checking scheduled briefing delivery',
+  },
+
   // ── Priority 3: User-defined scheduled routines (clock-tick, runs every 5 min) ──
   {
     id: 'run-user-routines',
@@ -329,6 +385,47 @@ export const JOB_REGISTRY: JobDefinition[] = [
     timeoutMs: TIMEOUT_LONG,
     estimatedDurationMs: 30_000,
     label: 'Running scheduled routines',
+  },
+
+  // ── Priority 3: Proactive intelligence — donna-initiated conversations ──
+  {
+    id: 'proactive-vip-reply-check',
+    category: 'heartbeat',
+    provider: null,
+    priority: 3,
+    intervalMs: 60 * 60_000, // every 60 minutes
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_30,
+    timeoutMs: TIMEOUT_MED,
+    estimatedDurationMs: 10_000,
+    label: 'Checking unanswered VIP emails',
+  },
+  {
+    id: 'proactive-task-deadline',
+    category: 'heartbeat',
+    provider: null,
+    priority: 3,
+    intervalMs: MIN_30,
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_15,
+    timeoutMs: TIMEOUT_SHORT,
+    estimatedDurationMs: 5_000,
+    label: 'Checking task deadlines',
+  },
+  {
+    id: 'proactive-meeting-prep',
+    category: 'heartbeat',
+    provider: null,
+    priority: 3,
+    intervalMs: 10 * 60_000, // every 10 minutes
+    requiresIntegration: false,
+    collapsible: true,
+    minGapMs: MIN_5,
+    timeoutMs: TIMEOUT_MED,
+    estimatedDurationMs: 30_000,
+    label: 'Preparing for upcoming meetings',
   },
 ];
 

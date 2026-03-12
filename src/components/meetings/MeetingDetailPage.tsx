@@ -50,7 +50,7 @@ interface AttendeeContext {
   email: string;
   name?: string;
   recent_interactions: string;
-  open_commitments: string[];
+  open_tasks: string[];
   current_focus?: string;
 }
 

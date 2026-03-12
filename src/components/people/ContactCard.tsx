@@ -17,12 +17,43 @@ const c = {
   purple: '#6B21A8',
 };
 
+type RelationshipTrend = 'declining' | 'stable' | 'warming';
+
+function getTrend(contact: Contact): RelationshipTrend {
+  const history = contact.score_history ?? [];
+  if (history.length < 2) return 'stable';
+  const current = history[0].score;
+  const prev = history[1].score;
+  const diff = current - prev;
+  if (diff <= -10) return 'declining';
+  if (diff >= 10) return 'warming';
+  return 'stable';
+}
+
 interface ContactCardProps {
   contact: Contact;
   onClick?: (contact: Contact) => void;
+  onToggleVip?: (contact: Contact) => void;
 }
 
-function ScoreBadge({ score }: { score: number | null }) {
+function TrendIndicator({ trend }: { trend: RelationshipTrend }) {
+  if (trend === 'stable') return null;
+
+  const isDecline = trend === 'declining';
+  return (
+    <span
+      title={isDecline ? 'Relationship declining' : 'Relationship warming'}
+      style={{
+        fontSize: 11, fontWeight: 600,
+        color: isDecline ? c.red : c.green,
+      }}
+    >
+      {isDecline ? '\u2193' : '\u2191'}
+    </span>
+  );
+}
+
+function ScoreBadge({ score, trend }: { score: number | null; trend: RelationshipTrend }) {
   if (score === null) return null;
 
   let color = c.textQuaternary;
@@ -35,19 +66,23 @@ function ScoreBadge({ score }: { score: number | null }) {
       fontSize: 11, fontWeight: 700, color,
       padding: '2px 8px', borderRadius: 4,
       background: `${color}10`,
+      display: 'inline-flex', alignItems: 'center', gap: 3,
     }}>
+      <TrendIndicator trend={trend} />
       {score}
     </span>
   );
 }
 
-export function ContactCard({ contact, onClick }: ContactCardProps) {
+export function ContactCard({ contact, onClick, onToggleVip }: ContactCardProps) {
   const lastInteraction = contact.last_interaction_at
     ? new Date(contact.last_interaction_at).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
       })
     : 'Never';
+
+  const trend = getTrend(contact);
 
   return (
     <div
@@ -85,14 +120,22 @@ export function ContactCard({ contact, onClick }: ContactCardProps) {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginLeft: 12 }}>
-          {contact.is_vip && (
-            <span style={{
+          <button
+            title={contact.is_vip ? 'Remove VIP status' : 'Mark as VIP'}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleVip?.(contact);
+            }}
+            style={{
               fontSize: 10, padding: '2px 8px', borderRadius: 4,
-              background: `${c.purple}10`, color: c.purple, fontWeight: 600,
-            }}>
-              VIP
-            </span>
-          )}
+              background: contact.is_vip ? `${c.purple}10` : c.surface,
+              color: contact.is_vip ? c.purple : c.textQuaternary,
+              fontWeight: 600, cursor: 'pointer',
+              border: `1px solid ${contact.is_vip ? `${c.purple}30` : c.border}`,
+            }}
+          >
+            VIP
+          </button>
           {contact.is_cold && (
             <span style={{
               fontSize: 10, padding: '2px 8px', borderRadius: 4,
@@ -101,18 +144,18 @@ export function ContactCard({ contact, onClick }: ContactCardProps) {
               Cold
             </span>
           )}
-          <ScoreBadge score={contact.relationship_score} />
+          <ScoreBadge score={contact.relationship_score} trend={trend} />
         </div>
       </div>
 
       {/* Meta row */}
-      <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: c.textQuaternary }}>
+      <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: c.textQuaternary, flexWrap: 'wrap' }}>
         {contact.organisation && <span>{contact.organisation}</span>}
         <span>Last: {lastInteraction}</span>
         <span>{contact.interaction_count_30d} interactions (30d)</span>
-        {contact.open_commitments_count > 0 && (
+        {contact.open_tasks_count > 0 && (
           <span style={{ color: '#92400E' }}>
-            {contact.open_commitments_count} open commitment{contact.open_commitments_count > 1 ? 's' : ''}
+            {contact.open_tasks_count} open task{contact.open_tasks_count > 1 ? 's' : ''}
           </span>
         )}
       </div>

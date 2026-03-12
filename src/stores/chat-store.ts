@@ -12,6 +12,9 @@ interface ConversationSummary {
   title: string | null;
   updated_at: string;
   is_favorite: boolean;
+  is_donna_initiated?: boolean;
+  trigger_source?: string;
+  handled_at?: string | null;
 }
 
 interface ChatStore {
@@ -38,6 +41,11 @@ interface ChatStore {
   renameConversation: (id: string, title: string) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
+  markDonnaConversationHandled: (id: string) => Promise<void>;
+
+  // Computed selectors — derive views from conversations array
+  getDonnaChats: () => ConversationSummary[];
+  getMyChats: () => ConversationSummary[];
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -261,6 +269,31 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       conversations: state.conversations.filter((c) => c.id !== id),
     }));
     await fetch(`/api/chat/conversations/${id}`, { method: 'DELETE' });
+  },
+
+  markDonnaConversationHandled: async (id: string) => {
+    const now = new Date().toISOString();
+    // Optimistic update
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === id ? { ...c, handled_at: now } : c,
+      ),
+    }));
+    await fetch(`/api/chat/conversations/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ handled_at: now }),
+    });
+  },
+
+  getDonnaChats: () => {
+    const { conversations } = get();
+    return conversations.filter((c) => c.is_donna_initiated && !c.handled_at);
+  },
+
+  getMyChats: () => {
+    const { conversations } = get();
+    return conversations.filter((c) => !c.is_donna_initiated);
   },
 
   clearMessages: () => set({ messages: [] }),

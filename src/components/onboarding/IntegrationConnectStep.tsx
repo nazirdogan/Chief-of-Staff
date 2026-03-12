@@ -22,7 +22,7 @@ interface IntegrationConfig {
 }
 
 const INTEGRATIONS: IntegrationConfig[] = [
-  { dbProvider: 'gmail', label: 'Gmail', description: 'Read emails for your daily briefing and commitment tracking', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }] },
+  { dbProvider: 'gmail', label: 'Gmail', description: 'Read emails for your daily briefing and task tracking', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your emails', description: 'We read email metadata and content to generate your daily briefing. Raw email bodies are never stored.' }] },
   { dbProvider: 'google_calendar', label: 'Google Calendar', description: 'Surface your schedule and prepare meeting briefs', category: 'Email & Calendar', recommended: true, permissions: [{ label: 'Read your calendar events', description: "We read event titles, times, and attendees for your today's schedule and meeting prep." }] },
   { dbProvider: 'slack', label: 'Slack', description: 'Surface important conversations and action items', category: 'Messaging', recommended: true, permissions: [{ label: 'Read channel messages and DMs', description: 'We read recent messages to surface important conversations in your briefing.' }] },
   { dbProvider: 'notion', label: 'Notion', description: 'Index pages for context and meeting prep', category: 'Documents', recommended: true, permissions: [{ label: 'Read your pages and databases', description: 'We index your Notion content for meeting prep and context retrieval.' }] },

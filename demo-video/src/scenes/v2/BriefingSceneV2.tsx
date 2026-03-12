@@ -1,7 +1,6 @@
 import React from 'react';
 import { interpolate, useCurrentFrame, spring, useVideoConfig } from 'remotion';
 import { COLORS, SCENES, FAKE_DATA } from '../../constants-v2';
-import { DesktopFrame } from '../../components/DesktopFrame';
 import { Sidebar } from '../../components/Sidebar';
 
 export const BriefingSceneV2: React.FC = () => {

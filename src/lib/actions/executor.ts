@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/db/client';
 import { getGmailClient } from '@/lib/integrations/gmail';
 import { getGraphClient } from '@/lib/integrations/outlook';
+import { createCalendarEvent, updateCalendarEventTimes } from '@/lib/integrations/google-calendar';
 import { updateInboxItem } from '@/lib/db/queries/inbox';
 import { classifyAction } from '@/lib/actions/classifier';
 import type { PendingAction, PendingActionType, UserAutonomySettings } from '@/lib/db/types';
@@ -100,9 +101,9 @@ async function executeByType(
     case 'create_task':
       return `Task created: ${(payload.title as string) ?? 'Untitled'}`;
     case 'reschedule_meeting':
-      return `Meeting rescheduled`;
+      return executeRescheduleMeeting(userId, payload);
     case 'create_calendar_event':
-      return `Calendar event created`;
+      return executeCreateCalendarEvent(userId, payload);
     case 'update_notion_page':
       return `Notion page updated`;
     case 'archive_email':
@@ -182,6 +183,50 @@ async function executeArchiveEmail(
     actioned_at: new Date().toISOString(),
   });
   return `Archived inbox item ${itemId}`;
+}
+
+async function executeCreateCalendarEvent(
+  userId: string,
+  payload: Record<string, unknown>
+): Promise<string> {
+  const title = payload.title as string;
+  const start = payload.start as string;
+  const end = payload.end as string;
+  const location = payload.location as string | undefined;
+  const description = payload.description as string | undefined;
+  const attendees = (payload.attendees as string[]) ?? [];
+
+  if (!title || !start || !end) {
+    throw new Error('Missing required fields: title, start, end');
+  }
+
+  const eventId = await createCalendarEvent(userId, {
+    summary: title,
+    description,
+    location,
+    start: { dateTime: start },
+    end: { dateTime: end },
+  });
+
+  const attendeeCount = attendees.length;
+  const suffix = attendeeCount > 0 ? ` with ${attendeeCount} attendee${attendeeCount > 1 ? 's' : ''}` : '';
+  return `Calendar event created: "${title}"${suffix} (id: ${eventId})`;
+}
+
+async function executeRescheduleMeeting(
+  userId: string,
+  payload: Record<string, unknown>
+): Promise<string> {
+  const eventId = payload.event_id as string;
+  const newStart = payload.new_start as string;
+  const newEnd = payload.new_end as string;
+
+  if (!eventId || !newStart || !newEnd) {
+    throw new Error('Missing required fields: event_id, new_start, new_end');
+  }
+
+  await updateCalendarEventTimes(userId, eventId, newStart, newEnd);
+  return `Event ${eventId} rescheduled to ${newStart}`;
 }
 
 /**

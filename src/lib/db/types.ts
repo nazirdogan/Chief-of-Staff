@@ -28,6 +28,7 @@ export type BriefingItemSection =
   | 'yesterday_completed'
   | 'yesterday_carried_over'
   | 'todays_schedule'
+  | 'todays_meetings'
   // Legacy sections — kept for backward compatibility with existing data
   | 'commitment_queue'
   | 'vip_inbox'
@@ -40,9 +41,13 @@ export type BriefingItemSection =
   | 'quick_wins'
   | 'people_context';
 
-export type CommitmentStatus = 'open' | 'resolved' | 'snoozed' | 'dismissed' | 'delegated';
+export type TaskStatus = 'open' | 'resolved' | 'snoozed' | 'dismissed' | 'delegated';
+/** @deprecated Use TaskStatus */
+export type CommitmentStatus = TaskStatus;
 
-export type CommitmentConfidence = 'high' | 'medium' | 'low';
+export type TaskConfidence = 'high' | 'medium' | 'low';
+/** @deprecated Use TaskConfidence */
+export type CommitmentConfidence = TaskConfidence;
 
 export type PendingActionType =
   | 'send_email'
@@ -51,7 +56,10 @@ export type PendingActionType =
   | 'reschedule_meeting'
   | 'create_calendar_event'
   | 'update_notion_page'
-  | 'archive_email';
+  | 'archive_email'
+  | 'task_reminder'
+  | 'view_meeting_prep'
+  | 'set_reminder';
 
 export enum AutonomyTier {
   SILENT = 1,
@@ -215,6 +223,37 @@ export interface MeetingPrepData {
   watch_out_for: string | null;
 }
 
+export interface MeetingPrepRow {
+  id: string;
+  user_id: string;
+  event_id: string;
+  event_title: string;
+  event_start: string;
+  event_end: string;
+  attendees: Array<{ email: string; name: string }>;
+  summary: string;
+  attendee_context: Array<{
+    name: string;
+    relationship_note: string;
+    source_ref: SourceRef;
+  }>;
+  open_items: Array<{
+    description: string;
+    source_ref: SourceRef;
+  }>;
+  suggested_talking_points: string[];
+  watch_out_for: string | null;
+  generation_model: string | null;
+  generation_ms: number | null;
+  source: 'auto' | 'on_demand';
+  notification_sent: boolean;
+  notification_sent_at: string | null;
+  post_meeting_scan_done: boolean;
+  post_meeting_scan_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SourceRef {
   provider: string;
   message_id: string;
@@ -249,27 +288,30 @@ export interface BriefingItem {
   created_at: string;
 }
 
-export interface Commitment {
+export interface Task {
   id: string;
   user_id: string;
   recipient_email: string;
   recipient_name: string | null;
-  commitment_text: string;
+  task_text: string;
   source_quote: string;
   source_ref: SourceRef;
-  confidence: CommitmentConfidence;
+  confidence: TaskConfidence;
   confidence_score: number;
   implied_deadline: string | null;
   explicit_deadline: boolean;
-  status: CommitmentStatus;
+  status: TaskStatus;
   resolved_at: string | null;
   resolved_via_ref: Record<string, unknown> | null;
   snoozed_until: string | null;
   delegated_to: string | null;
   user_confirmed: boolean | null;
+  direction: 'outbound' | 'inbound';
   created_at: string;
   updated_at: string;
 }
+/** @deprecated Use Task */
+export type Commitment = Task;
 
 export interface Contact {
   id: string;
@@ -284,12 +326,13 @@ export interface Contact {
   last_interaction_channel: string | null;
   interaction_count_30d: number;
   avg_response_time_hours: number | null;
-  open_commitments_count: number;
+  open_tasks_count: number;
   context_notes: string | null;
   context_notes_updated_at: string | null;
   user_notes: string | null;
   is_cold: boolean;
   cold_flagged_at: string | null;
+  score_history: Array<{ score: number; recorded_at: string }>;
 }
 
 export interface ContactInteraction {
@@ -359,7 +402,7 @@ export interface HeartbeatConfig {
   user_id: string;
   scan_frequency: HeartbeatFrequency;
   vip_alerts_enabled: boolean;
-  commitment_check_enabled: boolean;
+  task_check_enabled: boolean;
   relationship_check_enabled: boolean;
   document_index_enabled: boolean;
   quiet_hours_start: string;
@@ -549,6 +592,12 @@ export interface Reflection {
   relationship_highlights: Array<{ contact_name: string; note: string }>;
   patterns: Array<{ observation: string; suggestion?: string }>;
   recommendations: string | null;
+  /** Task completion stats for the period */
+  task_stats: { completed: number; total: number; completion_rate: number } | null;
+  /** Screen time breakdown by app category (minutes) */
+  screen_time_by_category: Record<string, number> | null;
+  /** One-sentence strategic recommendation based on patterns */
+  strategic_recommendation: string | null;
   generation_model: string | null;
   generation_ms: number | null;
   created_at: string;
@@ -580,11 +629,42 @@ export interface RoutineOutput {
   created_at: string;
 }
 
+export interface NotificationPreference {
+  id: string;
+  user_id: string;
+  category: string;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DailyMessageUsage {
+  id: string;
+  user_id: string;
+  usage_date: string;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Report {
+  id: string;
+  user_id: string;
+  type: 'weekly_summary' | 'project_status' | 'ad_hoc_research';
+  title: string;
+  content: string;
+  sections: Array<{ heading: string; body: string }>;
+  created_at: string;
+}
+
 export interface ChatConversation {
   id: string;
   user_id: string;
   title: string | null;
   is_favorite: boolean;
+  trigger_source?: string;
+  is_donna_initiated?: boolean;
+  handled_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -653,14 +733,14 @@ export interface Database {
         };
         Update: Partial<Omit<BriefingItem, 'id'>>;
       };
-      commitments: {
-        Row: Commitment;
-        Insert: Omit<Commitment, 'id' | 'created_at' | 'updated_at'> & {
+      tasks: {
+        Row: Task;
+        Insert: Omit<Task, 'id' | 'created_at' | 'updated_at'> & {
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Omit<Commitment, 'id'>>;
+        Update: Partial<Omit<Task, 'id'>>;
       };
       contacts: {
         Row: Contact;
@@ -851,6 +931,15 @@ export interface Database {
         };
         Update: never;
       };
+      daily_message_usage: {
+        Row: DailyMessageUsage;
+        Insert: Omit<DailyMessageUsage, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<DailyMessageUsage, 'id'>>;
+      };
       chat_conversations: {
         Row: ChatConversation;
         Insert: Omit<ChatConversation, 'id' | 'created_at' | 'updated_at'> & {
@@ -867,6 +956,15 @@ export interface Database {
           created_at?: string;
         };
         Update: never;
+      };
+      notification_preferences: {
+        Row: NotificationPreference;
+        Insert: Omit<NotificationPreference, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<NotificationPreference, 'id'>>;
       };
     };
     Functions: {
@@ -892,8 +990,8 @@ export interface Database {
       integration_status: IntegrationStatus;
       briefing_item_type: BriefingItemType;
       briefing_item_section: BriefingItemSection;
-      commitment_status: CommitmentStatus;
-      commitment_confidence: CommitmentConfidence;
+      task_status: TaskStatus;
+      task_confidence: TaskConfidence;
       pending_action_type: PendingActionType;
       pending_action_status: PendingActionStatus;
       message_delivery_channel: MessageDeliveryChannel;

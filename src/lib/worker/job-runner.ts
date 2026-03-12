@@ -78,6 +78,7 @@ export async function runJob(
     'calendar-scan': 'google_calendar',
     'slack-scan': 'slack',
     'document-index': 'notion',
+    'meeting-prep-auto': 'google_calendar',
   };
 
   const provider = providerMap[jobId];
@@ -118,17 +119,58 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
     // ── Email / Communication Scans ──
     case 'gmail-scan': {
       const { ingestGmailMessages } = await import('@/lib/ai/agents/ingestion');
-      const result = await ingestGmailMessages(userId);
+      const { getIntegrationsByProvider } = await import('@/lib/db/queries/integrations');
+      const gmailIntegrations = await getIntegrationsByProvider(db, userId, 'gmail');
+
+      let totalProcessed = 0;
+      let totalFound = 0;
+
+      if (gmailIntegrations.length === 0) {
+        // Fallback for legacy single-account path
+        const result = await ingestGmailMessages(userId);
+        totalProcessed = result.processed;
+        totalFound = result.found;
+      } else {
+        // Iterate over all connected Gmail accounts
+        for (const integration of gmailIntegrations) {
+          try {
+            const result = await ingestGmailMessages(userId, integration.id);
+            totalProcessed += result.processed;
+            totalFound += result.found;
+          } catch {
+            // Non-fatal — continue scanning other accounts
+          }
+        }
+      }
+
       // Run engagement/archiving post-processing
       await runGmailPostProcessing(db, userId);
-      return { processed: result.processed, found: result.found };
+      return { processed: totalProcessed, found: totalFound };
     }
     case 'gmail-watch-renew': {
       const { setupGmailWatch } = await import('@/lib/integrations/gmail');
-      const { saveGmailHistoryId } = await import('@/lib/db/queries/integrations');
-      const { historyId, expiration } = await setupGmailWatch(userId);
-      await saveGmailHistoryId(db, userId, historyId, expiration);
-      return { processed: 1 };
+      const { saveGmailHistoryId, getIntegrationsByProvider } = await import('@/lib/db/queries/integrations');
+      const gmailIntegrations = await getIntegrationsByProvider(db, userId, 'gmail');
+
+      let renewed = 0;
+      if (gmailIntegrations.length === 0) {
+        // Fallback for legacy single-account path
+        const { historyId, expiration } = await setupGmailWatch(userId);
+        await saveGmailHistoryId(db, userId, historyId, expiration);
+        renewed = 1;
+      } else {
+        for (const integration of gmailIntegrations) {
+          try {
+            const { historyId, expiration } = await setupGmailWatch(userId, integration.id);
+            await saveGmailHistoryId(db, integration.id, historyId, expiration);
+            renewed++;
+          } catch {
+            // Non-fatal — continue renewing other accounts
+          }
+        }
+      }
+
+      return { processed: renewed };
     }
     case 'slack-scan': {
       const { ingestSlackDMs } = await import('@/lib/ai/agents/ingestion');
@@ -148,21 +190,262 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
     }
 
 
+    // ── Meeting Intelligence ──
+    case 'meeting-prep-auto': {
+      const { getTodaysParsedEvents } = await import('@/lib/integrations/google-calendar');
+      const { generateMeetingPrep } = await import('@/lib/ai/agents/meeting-prep');
+      const { upsertMeetingPrep, getUnpreppedUpcomingEvents } = await import(
+        '@/lib/db/queries/meeting-preps'
+      );
+      const { AI_MODELS } = await import('@/lib/ai/models');
+
+      const events = await getTodaysParsedEvents(userId);
+      const now = Date.now();
+      const ninetyMinutesFromNow = now + 90 * 60 * 1000;
+
+      // Find events starting within the next 90 minutes
+      const upcomingEvents = events.filter((e) => {
+        const startMs = new Date(e.start).getTime();
+        return startMs > now && startMs <= ninetyMinutesFromNow && !e.isAllDay;
+      });
+
+      if (upcomingEvents.length === 0) return { processed: 0, found: 0 };
+
+      const eventIds = upcomingEvents.map((e) => e.id);
+      const unpreppedIds = await getUnpreppedUpcomingEvents(db, userId, eventIds);
+
+      let prepped = 0;
+      for (const event of upcomingEvents) {
+        if (!unpreppedIds.includes(event.id)) continue;
+
+        try {
+          const startTime = Date.now();
+          const prep = await generateMeetingPrep(userId, {
+            id: event.id,
+            summary: event.summary,
+            description: event.description ?? '',
+            start: event.start,
+            end: event.end,
+            attendees: event.attendees.map((a) => ({
+              email: a.email,
+              name: a.name ?? a.email,
+            })),
+            organizer: {
+              email: event.attendees[0]?.email ?? '',
+              name: event.attendees[0]?.name ?? '',
+            },
+          });
+
+          await upsertMeetingPrep(db, {
+            user_id: userId,
+            event_id: event.id,
+            event_title: event.summary,
+            event_start: event.start,
+            event_end: event.end,
+            attendees: event.attendees.map((a) => ({
+              email: a.email,
+              name: a.name ?? a.email,
+            })),
+            summary: prep.summary,
+            attendee_context: prep.attendee_context,
+            open_items: prep.open_items,
+            suggested_talking_points: prep.suggested_talking_points,
+            watch_out_for: prep.watch_out_for,
+            generation_model: AI_MODELS.STANDARD,
+            generation_ms: Date.now() - startTime,
+            source: 'auto',
+            notification_sent: false,
+            notification_sent_at: null,
+            post_meeting_scan_done: false,
+            post_meeting_scan_at: null,
+          });
+
+          prepped++;
+        } catch {
+          // Non-fatal — continue with other events
+        }
+      }
+
+      return { processed: prepped, found: upcomingEvents.length };
+    }
+
+    case 'meeting-prep-notify': {
+      const { getMeetingsNeedingNotification, markNotificationSent } = await import(
+        '@/lib/db/queries/meeting-preps'
+      );
+
+      const now = new Date();
+      const thirtyMinutesFromNow = new Date(now.getTime() + 35 * 60 * 1000);
+      const twentyFiveMinutesFromNow = new Date(now.getTime() + 25 * 60 * 1000);
+
+      // Meetings starting in 25-35 minutes (covers the ~30min window with 5min poll interval)
+      const meetings = await getMeetingsNeedingNotification(
+        db,
+        userId,
+        thirtyMinutesFromNow.toISOString(),
+        twentyFiveMinutesFromNow.toISOString(),
+      );
+
+      let notified = 0;
+      for (const meeting of meetings) {
+        try {
+          const startTime = new Date(meeting.event_start);
+          const timeStr = startTime.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          });
+          const attendeeNames = meeting.attendees
+            .map((a: { name: string }) => a.name.split(' ')[0])
+            .slice(0, 3)
+            .join(', ');
+          const suffix = meeting.attendees.length > 3
+            ? ` +${meeting.attendees.length - 3}`
+            : '';
+
+          await db.from('pending_actions').insert({
+            user_id: userId,
+            action_type: 'view_meeting_prep',
+            status: 'awaiting_confirmation',
+            payload: {
+              event_id: meeting.event_id,
+              event_title: meeting.event_title,
+              event_start: meeting.event_start,
+              meeting_prep_id: meeting.id,
+            },
+            source_context: {
+              description: `Your ${timeStr} with ${attendeeNames}${suffix} is in 30 minutes. Prep ready — tap to view.`,
+              event_title: meeting.event_title,
+              attendees: meeting.attendees,
+            },
+            autonomy_tier: 2, // ONE_TAP
+            expires_at: meeting.event_start, // Expire when meeting starts
+          });
+
+          await markNotificationSent(db, userId, meeting.event_id);
+          notified++;
+        } catch {
+          // Non-fatal
+        }
+      }
+
+      return { processed: notified, found: meetings.length };
+    }
+
+    case 'post-meeting-tasks': {
+      const { getMeetingsNeedingPostScan, markPostMeetingScanDone } = await import(
+        '@/lib/db/queries/meeting-preps'
+      );
+      const { extractTasksFromGmail } = await import('@/lib/ai/agents/task');
+
+      const now = new Date();
+      // Meetings that ended 30min-2h ago (give time for follow-up emails to arrive)
+      const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+      const meetings = await getMeetingsNeedingPostScan(
+        db,
+        userId,
+        twoHoursAgo.toISOString(),
+        thirtyMinAgo.toISOString(),
+      );
+
+      if (meetings.length === 0) return { processed: 0, found: 0 };
+
+      let extracted = 0;
+      for (const meeting of meetings) {
+        try {
+          // Collect attendee emails for filtering
+          const attendeeEmails = meeting.attendees.map(
+            (a: { email: string }) => a.email.toLowerCase(),
+          );
+          const meetingEndTime = new Date(meeting.event_end);
+
+          // Find recent emails from meeting attendees sent after meeting ended
+          const { data: recentMessages } = await db
+            .from('inbox_items')
+            .select('external_id, provider, from_email')
+            .eq('user_id', userId)
+            .gte('received_at', meetingEndTime.toISOString())
+            .in('provider', ['gmail', 'outlook']);
+
+          const postMeetingMessages = (
+            recentMessages ?? []
+          ).filter((m: { from_email: string }) =>
+            attendeeEmails.includes(m.from_email?.toLowerCase()),
+          );
+
+          if (postMeetingMessages.length > 0) {
+            // Extract tasks from post-meeting messages
+            const gmailMessageIds = postMeetingMessages
+              .filter((m: { provider: string }) => m.provider === 'gmail')
+              .map((m: { external_id: string }) => m.external_id);
+
+            if (gmailMessageIds.length > 0) {
+              const result = await extractTasksFromGmail(userId, gmailMessageIds);
+              extracted += result.extracted;
+            }
+          }
+
+          // Also scan SENT messages for tasks the user made during/after the meeting
+          try {
+            const { getGmailClient } = await import('@/lib/integrations/gmail');
+            const gmail = await getGmailClient(userId);
+            const response = await gmail.users.messages.list({
+              userId: 'me',
+              maxResults: 10,
+              labelIds: ['SENT'],
+              q: `after:${Math.floor(meetingEndTime.getTime() / 1000)}`,
+            });
+
+            const sentIds = (response.data.messages ?? [])
+              .map((m: { id?: string | null }) => m.id)
+              .filter((id: string | null | undefined): id is string => !!id);
+
+            if (sentIds.length > 0) {
+              const result = await extractTasksFromGmail(userId, sentIds);
+              extracted += result.extracted;
+            }
+          } catch {
+            // Gmail not connected — skip sent scan
+          }
+
+          await markPostMeetingScanDone(db, userId, meeting.event_id);
+        } catch {
+          // Non-fatal — continue with other meetings
+        }
+      }
+
+      return { processed: extracted, found: meetings.length };
+    }
+
     // ── Intelligence ──
-    case 'commitment-check': {
-      const { extractCommitmentsFromGmail } = await import('@/lib/ai/agents/commitment');
+    case 'task-check': {
+      const {
+        extractTasksFromGmail,
+        extractTasksFromSlack,
+        extractTasksFromCalendar,
+        checkTaskResolutions,
+        getUpcomingDeadlineTasks,
+      } = await import('@/lib/ai/agents/task');
+      const { listTasks } = await import('@/lib/db/queries/tasks');
+      const { AutonomyTier } = await import('@/lib/db/types');
+
       const { data: integrations } = await db
         .from('user_integrations')
         .select('provider')
         .eq('user_id', userId)
-        .eq('status', 'connected')
-        .eq('provider', 'gmail');
+        .eq('status', 'connected');
       const connected = new Set((integrations ?? []).map((i: { provider: string }) => i.provider));
+
       let extracted = 0;
       let total = 0;
+      const sentMessagesForResolution: import('@/lib/ai/agents/task').SentMessage[] = [];
+
+      // 1. Gmail task extraction
       if (connected.has('gmail')) {
         try {
-          const { getGmailClient } = await import('@/lib/integrations/gmail');
+          const { getGmailClient, fetchMessageForProcessing, parseGmailMessage } = await import('@/lib/integrations/gmail');
           const gmail = await getGmailClient(userId);
           const response = await gmail.users.messages.list({
             userId: 'me',
@@ -173,11 +456,93 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
           const messageIds = (response.data.messages ?? [])
             .map((m: { id?: string | null }) => m.id)
             .filter((id: string | null | undefined): id is string => !!id);
-          const result = await extractCommitmentsFromGmail(userId, messageIds);
+          const result = await extractTasksFromGmail(userId, messageIds);
           extracted += result.extracted;
           total += result.total;
+
+          // Collect sent messages for resolution checking
+          for (const msgId of messageIds.slice(0, 10)) {
+            try {
+              const fullMsg = await fetchMessageForProcessing(userId, msgId);
+              const parsed = parseGmailMessage(fullMsg);
+              if (parsed.labelIds.includes('SENT')) {
+                sentMessagesForResolution.push({
+                  id: parsed.id,
+                  threadId: parsed.threadId,
+                  provider: 'gmail',
+                  to: parsed.to,
+                  toName: '',
+                  body: parsed.body || parsed.snippet,
+                  date: parsed.date,
+                });
+              }
+            } catch { /* skip individual message */ }
+          }
         } catch { /* gmail not connected */ }
       }
+
+      // 2. Slack task extraction
+      if (connected.has('slack')) {
+        try {
+          const result = await extractTasksFromSlack(userId);
+          extracted += result.extracted;
+          total += result.total;
+        } catch { /* slack not connected */ }
+      }
+
+      // 3. Calendar task extraction (event descriptions)
+      if (connected.has('google_calendar')) {
+        try {
+          const result = await extractTasksFromCalendar(userId);
+          extracted += result.extracted;
+          total += result.total;
+        } catch { /* calendar not connected */ }
+      }
+
+      // 4. Auto-resolution: check if recent sent messages resolve open tasks
+      if (sentMessagesForResolution.length > 0) {
+        try {
+          const resolutionResult = await checkTaskResolutions(userId, sentMessagesForResolution);
+          if (resolutionResult.resolved > 0) {
+            console.log(`[task-check] Auto-resolved ${resolutionResult.resolved} tasks for ${userId}`);
+          }
+        } catch { /* resolution check is non-fatal */ }
+      }
+
+      // 5. Proactive alerts: create Tier 2 pending_actions for tasks due within 24h
+      try {
+        const openTasks = await listTasks(db, userId, { status: 'open' });
+        const upcoming = getUpcomingDeadlineTasks(openTasks as Parameters<typeof getUpcomingDeadlineTasks>[0]);
+
+        for (const task of upcoming) {
+          // Check if we already have a pending reminder for this task
+          const { data: existingReminder } = await db
+            .from('pending_actions')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('action_type', 'task_reminder')
+            .eq('status', 'awaiting_confirmation')
+            .contains('payload', { task_id: task.id })
+            .limit(1);
+
+          if (existingReminder && existingReminder.length > 0) continue;
+
+          await db.from('pending_actions').insert({
+            user_id: userId,
+            action_type: 'task_reminder',
+            status: 'awaiting_confirmation',
+            payload: {
+              task_id: task.id,
+              task_text: task.task_text,
+              recipient: task.recipient_name ?? task.recipient_email,
+              deadline: task.implied_deadline,
+            },
+            source_context: task.source_ref,
+            autonomy_tier: AutonomyTier.ONE_TAP,
+          });
+        }
+      } catch { /* proactive alerts are non-fatal */ }
+
       return { processed: extracted, found: total };
     }
     case 'relationship-check': {
@@ -185,12 +550,13 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       const { computeRelationshipUpdates } = await import('@/lib/ai/agents/relationship');
       const contacts = await getAllContactsForScoring(db, userId);
       const updates = await computeRelationshipUpdates(contacts);
-      // Apply updates
+      // Apply updates (including score history for trajectory tracking)
       for (const update of updates) {
         await db.from('contacts').update({
           relationship_score: update.newScore,
           is_cold: update.isCold,
-          ...(update.isCold ? { cold_flagged_at: new Date().toISOString() } : {}),
+          score_history: update.scoreHistory,
+          ...(update.isCold ? { cold_flagged_at: update.coldFlaggedAt } : {}),
         }).eq('id', update.contactId);
       }
       return { processed: updates.length, found: contacts.length };
@@ -265,6 +631,69 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       return { processed: briefing.items.length, found: briefing.items.length };
     }
 
+    case 'scheduled-briefing-delivery': {
+      // Clock-tick job: checks if it's time to deliver the user's daily briefing
+      // based on profiles.briefing_time (stored as HH:MM:SS in local time)
+      const { data: userProfile } = await db
+        .from('profiles')
+        .select('briefing_time, timezone')
+        .eq('id', userId)
+        .single();
+
+      if (!userProfile) return { processed: 0 };
+
+      const timezone = (userProfile.timezone as string) || 'UTC';
+      const briefingTime = (userProfile.briefing_time as string) || '07:30:00';
+      const [schedHour, schedMin] = briefingTime.split(':').map(Number);
+
+      // Current local time in user's timezone
+      const nowInTz = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+      const currentTotalMinutes = nowInTz.getHours() * 60 + nowInTz.getMinutes();
+      const scheduledTotalMinutes = schedHour * 60 + schedMin;
+
+      // 5-minute window matching the poll interval
+      const WINDOW_MINUTES = 5;
+      const inTimeWindow =
+        currentTotalMinutes >= scheduledTotalMinutes &&
+        currentTotalMinutes < scheduledTotalMinutes + WINDOW_MINUTES;
+
+      if (!inTimeWindow) return { processed: 0 };
+
+      // Check if we already generated a briefing today
+      const todayStr = nowInTz.toLocaleDateString('en-CA'); // YYYY-MM-DD
+      const { data: existingBriefing } = await db
+        .from('briefings')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('briefing_date', todayStr)
+        .limit(1);
+
+      if (existingBriefing && existingBriefing.length > 0) {
+        return { processed: 0 }; // Already generated today
+      }
+
+      // Generate and deliver the briefing
+      const { generateDailyBriefing } = await import('@/lib/ai/agents/briefing');
+      const { executeIfTierOne } = await import('@/lib/actions/executor');
+      const { AutonomyTier } = await import('@/lib/db/types');
+
+      const briefing = await generateDailyBriefing(userId, timezone);
+
+      // Auto-execute Tier 1 actions
+      const { data: tierOneActions } = await db
+        .from('pending_actions')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('autonomy_tier', AutonomyTier.SILENT)
+        .eq('status', 'awaiting_confirmation');
+
+      for (const action of (tierOneActions ?? []) as Array<{ id: string }>) {
+        await executeIfTierOne(action.id);
+      }
+
+      return { processed: briefing.items.length, found: briefing.items.length };
+    }
+
     // ── Operations ──
     case 'scheduled-am-sweep': {
       const { classifyTasks } = await import('@/lib/ai/agents/operations/am-sweep');
@@ -282,25 +711,36 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
     }
     case 'overnight-email-triage': {
       const { triageEmails } = await import('@/lib/ai/agents/operations/email-triage');
-      const { data: integration } = await db
+      const { data: gmailRows } = await db
         .from('user_integrations')
         .select('account_email')
         .eq('user_id', userId)
         .eq('provider', 'gmail')
-        .eq('status', 'connected')
-        .single();
+        .eq('status', 'connected');
       const { data: onboarding } = await db
         .from('onboarding_data')
         .select('vip_contacts, active_projects')
         .eq('user_id', userId)
         .single();
-      const result = await triageEmails(
-        userId,
-        integration?.account_email ?? '',
-        onboarding?.vip_contacts ?? [],
-        onboarding?.active_projects ?? [],
-      );
-      return { processed: result.tasksCreated, found: result.emailsScanned };
+
+      let totalTasks = 0;
+      let totalScanned = 0;
+      const accounts = (gmailRows ?? []) as Array<{ account_email: string | null }>;
+      for (const account of accounts.length > 0 ? accounts : [{ account_email: null }]) {
+        try {
+          const result = await triageEmails(
+            userId,
+            account.account_email ?? '',
+            onboarding?.vip_contacts ?? [],
+            onboarding?.active_projects ?? [],
+          );
+          totalTasks += result.tasksCreated;
+          totalScanned += result.emailsScanned;
+        } catch {
+          // Non-fatal — continue with other accounts
+        }
+      }
+      return { processed: totalTasks, found: totalScanned };
     }
     case 'overnight-calendar-transit': {
       const { calculateCalendarTransit } = await import('@/lib/ai/agents/operations/calendar-transit');
@@ -620,6 +1060,23 @@ async function executeJobLogic(jobId: string, userId: string, db: DB): Promise<J
       }
 
       return { processed: fired, found: (routines as unknown[]).length };
+    }
+
+    // ── Proactive Intelligence ──
+    case 'proactive-vip-reply-check': {
+      const { checkVIPUnansweredEmails } = await import('@/lib/ai/agents/proactive');
+      const result = await checkVIPUnansweredEmails(userId);
+      return { processed: result.draftsCreated };
+    }
+    case 'proactive-task-deadline': {
+      const { checkTaskDeadlines } = await import('@/lib/ai/agents/proactive');
+      const result = await checkTaskDeadlines(userId);
+      return { processed: result.nudgesCreated };
+    }
+    case 'proactive-meeting-prep': {
+      const { generateAutoMeetingPrep } = await import('@/lib/ai/agents/proactive');
+      const result = await generateAutoMeetingPrep(userId);
+      return { processed: result.prepsGenerated };
     }
 
     default:

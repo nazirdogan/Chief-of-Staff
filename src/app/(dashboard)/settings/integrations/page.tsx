@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BrandIcon } from '@/components/shared/BrandIcon';
 import {
   Loader2,
@@ -9,6 +9,8 @@ import {
   X,
   Plus,
   Pencil,
+  Info,
+  Star,
 } from 'lucide-react';
 import type { IntegrationProvider, UserIntegration } from '@/lib/db/types';
 import { BackButton } from '@/components/shared/BackButton';
@@ -99,6 +101,8 @@ export default function IntegrationsSettingsPage() {
   // Tracks which integration row UUID is having its alias edited
   const [editingAlias, setEditingAlias] = useState<string | null>(null);
   const [aliasValue, setAliasValue] = useState('');
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [settingPrimary, setSettingPrimary] = useState<string | null>(null);
 
   const fetchIntegrations = useCallback(async () => {
     try {
@@ -236,6 +240,31 @@ export default function IntegrationsSettingsPage() {
     }
   }
 
+  async function setPrimaryAccount(provider: IntegrationProvider, integrationId: string) {
+    setSettingPrimary(integrationId);
+    try {
+      await fetch(`/api/integrations/${integrationId}/primary`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider }),
+      });
+      await fetchIntegrations();
+    } catch { /* ignore */ } finally {
+      setSettingPrimary(null);
+    }
+  }
+
+  /** Check if an integration row is the primary for its provider */
+  function isPrimary(integration: UserIntegration, allConnections: UserIntegration[]): boolean {
+    // Primary = has connection_alias containing "(Primary)" or is the first connected
+    if (integration.connection_alias?.includes('(Primary)')) return true;
+    // If no explicit primary is set, the first connected account is primary
+    const firstConnected = allConnections[0];
+    return firstConnected?.id === integration.id && !allConnections.some(
+      (c) => c.connection_alias?.includes('(Primary)')
+    );
+  }
+
   return (
     <div>
       <BackButton href="/settings" />
@@ -268,6 +297,33 @@ export default function IntegrationsSettingsPage() {
           <button onClick={() => setConnectError(null)} className="ml-auto">
             <X className="h-3.5 w-3.5" />
           </button>
+        </div>
+      )}
+
+      {/* Google OAuth setup guide */}
+      <button
+        onClick={() => setShowSetupGuide(!showSetupGuide)}
+        className="mt-4 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Info className="h-3.5 w-3.5" />
+        <span>Seeing an &ldquo;unverified app&rdquo; warning from Google?</span>
+      </button>
+
+      {showSetupGuide && (
+        <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50/50 p-4 text-sm dark:border-blue-900 dark:bg-blue-950/20">
+          <p className="font-medium text-blue-900 dark:text-blue-200">Google OAuth Setup (Beta)</p>
+          <p className="mt-1 text-blue-800/80 dark:text-blue-300/80">
+            While Donna is in beta, Google shows an &ldquo;unverified app&rdquo; screen during sign-in.
+            This is normal for apps that haven&apos;t completed Google&apos;s verification review yet.
+          </p>
+          <ol className="mt-2 list-inside list-decimal space-y-1 text-blue-800/80 dark:text-blue-300/80">
+            <li>On the warning screen, click <strong>&ldquo;Advanced&rdquo;</strong></li>
+            <li>Then click <strong>&ldquo;Go to Donna (unsafe)&rdquo;</strong></li>
+            <li>Review the permissions and click <strong>&ldquo;Continue&rdquo;</strong></li>
+          </ol>
+          <p className="mt-2 text-[11px] text-blue-700/60 dark:text-blue-400/60">
+            Your data is protected by encryption at rest. Donna never stores raw email content — only AI-generated summaries.
+          </p>
         </div>
       )}
 
@@ -329,10 +385,12 @@ export default function IntegrationsSettingsPage() {
                                 const isEditing = editingAlias === integration.id;
                                 const displayName = integration.connection_alias ?? integration.account_email ?? integration.id;
 
+                                const isAccountPrimary = isPrimary(integration, connections);
+
                                 return (
                                   <div
                                     key={integration.id}
-                                    className="flex items-center gap-2 rounded-md bg-muted/40 px-3 py-2"
+                                    className={`flex items-center gap-2 rounded-md px-3 py-2 ${isAccountPrimary ? 'bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40' : 'bg-muted/40'}`}
                                   >
                                     <Check className="h-3.5 w-3.5 shrink-0 text-green-600" />
 
@@ -359,13 +417,31 @@ export default function IntegrationsSettingsPage() {
                                     )}
 
                                     {!isEditing && (
-                                      <button
-                                        onClick={() => startEditAlias(integration)}
-                                        className="ml-auto shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                        title="Rename"
-                                      >
-                                        <Pencil className="h-3 w-3" />
-                                      </button>
+                                      <>
+                                        {connections.length > 1 && (
+                                          <button
+                                            onClick={() => void setPrimaryAccount(config.dbProvider, integration.id)}
+                                            disabled={settingPrimary === integration.id || isAccountPrimary}
+                                            className={`ml-auto shrink-0 rounded p-1 transition-colors ${
+                                              isAccountPrimary
+                                                ? 'text-amber-500'
+                                                : 'text-muted-foreground hover:bg-muted hover:text-amber-500 disabled:opacity-50'
+                                            }`}
+                                            title={isAccountPrimary ? 'Primary account' : 'Set as primary'}
+                                          >
+                                            {settingPrimary === integration.id
+                                              ? <Loader2 className="h-3 w-3 animate-spin" />
+                                              : <Star className={`h-3 w-3 ${isAccountPrimary ? 'fill-amber-500' : ''}`} />}
+                                          </button>
+                                        )}
+                                        <button
+                                          onClick={() => startEditAlias(integration)}
+                                          className={`${connections.length <= 1 ? 'ml-auto' : ''} shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground`}
+                                          title="Rename"
+                                        >
+                                          <Pencil className="h-3 w-3" />
+                                        </button>
+                                      </>
                                     )}
 
                                     <button

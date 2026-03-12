@@ -4,6 +4,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, ThumbsUp, ThumbsDown, Check, X, Send } from 'lucide-react';
 import { useChatStore } from '@/stores/chat-store';
+import EmailDraftCard from './EmailDraftCard';
+import ActionCard, { type ActionType } from './ActionCard';
 
 const c = {
   surface: 'rgba(45,45,45,0.04)',
@@ -417,6 +419,84 @@ function MessageActions({ messageId, content }: MessageActionsProps) {
   );
 }
 
+// ── Action block extraction ───────────────────────────────────────
+
+const KNOWN_ACTION_TYPES = new Set<ActionType>([
+  'email_draft',
+  'calendar_event',
+  'task_created',
+  'meeting_prep',
+  'web_search',
+]);
+
+export interface ActionBlock {
+  type: ActionType;
+  data: Record<string, unknown>;
+  pendingActionId?: string;
+  expiresAt?: string;
+  status?: 'pending' | 'confirmed' | 'executed' | 'failed';
+}
+
+// Matches fenced ```json ... ``` blocks that contain a known action type field.
+// Falls back to matching bare top-level JSON objects with a "type" field.
+// Note: the bare-object regex is intentionally shallow — deeply nested JSON payloads
+// are expected to arrive inside fenced blocks from the AI.
+function extractActionBlocks(content: string): { text: string; blocks: ActionBlock[] } {
+  const blocks: ActionBlock[] = [];
+  let text = content;
+
+  // Strategy 1 — fenced ```json``` blocks (preferred, handles nested JSON)
+  const fencedRegex = /```json\s*([\s\S]*?)\s*```/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = fencedRegex.exec(content)) !== null) {
+    const raw = match[0];
+    const jsonStr = match[1];
+    try {
+      const parsed = JSON.parse(jsonStr) as Record<string, unknown>;
+      if (parsed.type && KNOWN_ACTION_TYPES.has(parsed.type as ActionType)) {
+        blocks.push({
+          type: parsed.type as ActionType,
+          // For email_draft the payload is in parsed.draft; for others it is the parsed object itself
+          data: parsed as Record<string, unknown>,
+          pendingActionId: typeof parsed.pending_action_id === 'string' ? parsed.pending_action_id : undefined,
+          expiresAt: typeof parsed.expires_at === 'string' ? parsed.expires_at : undefined,
+          status: (parsed.status as ActionBlock['status']) ?? 'pending',
+        });
+        text = text.replace(raw, '').trim();
+      }
+    } catch {
+      // Not valid JSON — leave as-is
+    }
+  }
+
+  // Strategy 2 — bare single-level JSON objects (fallback for simple types)
+  // Only run if no fenced blocks were found, to avoid double-extraction
+  if (blocks.length === 0) {
+    const bareRegex = /\{[^{}]*"type"\s*:\s*"([^"]+)"[^{}]*\}/g;
+    while ((match = bareRegex.exec(content)) !== null) {
+      const raw = match[0];
+      const detectedType = match[1] as ActionType;
+      if (!KNOWN_ACTION_TYPES.has(detectedType)) continue;
+      try {
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        blocks.push({
+          type: detectedType,
+          data: parsed,
+          pendingActionId: typeof parsed.pending_action_id === 'string' ? parsed.pending_action_id : undefined,
+          expiresAt: typeof parsed.expires_at === 'string' ? parsed.expires_at : undefined,
+          status: (parsed.status as ActionBlock['status']) ?? 'pending',
+        });
+        text = text.replace(raw, '').trim();
+      } catch {
+        // Skip
+      }
+    }
+  }
+
+  return { text, blocks };
+}
+
 // ── ChatMessage ──────────────────────────────────────────────────
 
 interface ChatMessageProps {
@@ -450,6 +530,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
+  const { text: cleanText, blocks } = extractActionBlocks(message.content);
+
   return (
     <div className="group flex justify-start">
       <motion.div
@@ -458,14 +540,57 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }}
         transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
       >
-        <div
-          className="pl-4 text-[15px] leading-relaxed"
-          style={{
-            borderLeft: `2px solid ${c.borderActive}`,
-            color: c.textSecondary,
-          }}
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
-        />
+        {cleanText && (
+          <div
+            className="pl-4 text-[15px] leading-relaxed"
+            style={{
+              borderLeft: `2px solid ${c.borderActive}`,
+              color: c.textSecondary,
+            }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(cleanText) }}
+          />
+        )}
+
+        {blocks.map((block, i) => {
+          // email_draft gets the EmailDraftCard directly via ActionCard's delegation
+          const data = block.data;
+          const emailDraft =
+            block.type === 'email_draft'
+              ? (data.draft as { to: string; subject: string; body: string; provider?: string } | undefined)
+              : undefined;
+
+          if (block.type === 'email_draft' && emailDraft && block.pendingActionId) {
+            return (
+              <div
+                key={i}
+                className={cleanText || i > 0 ? 'mt-3 pl-4' : 'pl-4'}
+                style={{ borderLeft: `2px solid ${c.borderActive}` }}
+              >
+                <EmailDraftCard
+                  draft={emailDraft}
+                  pendingActionId={block.pendingActionId}
+                  expiresAt={block.expiresAt}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={i}
+              className={cleanText || i > 0 ? 'mt-3 pl-4' : 'pl-4'}
+              style={{ borderLeft: `2px solid ${c.borderActive}` }}
+            >
+              <ActionCard
+                type={block.type}
+                data={block.data}
+                pendingActionId={block.pendingActionId}
+                status={block.status}
+                expiresAt={block.expiresAt}
+              />
+            </div>
+          );
+        })}
 
         {/* Timestamp + action buttons row */}
         <div className="mt-1.5 pl-4 flex items-center gap-2">

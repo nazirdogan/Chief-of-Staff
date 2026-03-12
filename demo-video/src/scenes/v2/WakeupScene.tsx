@@ -73,7 +73,7 @@ export const WakeupScene: React.FC = () => {
             opacity: nameScale,
           }}
         >
-          Sarah's day
+          {"Sarah's day"}
         </div>
         <div
           style={{

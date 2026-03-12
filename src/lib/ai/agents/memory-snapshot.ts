@@ -75,25 +75,30 @@ export async function generateDailySnapshot(
     });
 
   const response = await anthropic.messages.create({
-    model: AI_MODELS.STANDARD,
-    max_tokens: 800,
-    system: `You are generating a daily memory snapshot for a personal intelligence assistant. Given a chronological list of today's activity, generate:
+    model: AI_MODELS.FAST,
+    max_tokens: 1200,
+    system: `You are generating a daily memory snapshot for a personal intelligence assistant. Given a chronological list of today's activity, generate a structured extraction.
 
-1. day_narrative: A 3-5 sentence flowing narrative (NOT a list) describing what the user did today. Be specific with names, projects, and outcomes. Example: "Most of your morning was consumed by the Product Review meeting, where the team decided to push the launch to April. After that, you had a back-and-forth with Sarah about the pricing model."
-
-2. key_decisions: Array of decisions made today, each with { "decision": "...", "context": "...", "source_ref": {} }
-
-3. open_loops: Array of things started but not resolved — unread emails, in-progress tasks, meetings without follow-up. Each: { "description": "..." }
-
-4. notable_interactions: Array of important conversations. Each: { "person": "...", "summary": "..." }
-
-Return JSON only:
+Return JSON only — no markdown, no explanation:
 {
-  "day_narrative": "...",
-  "key_decisions": [...],
-  "open_loops": [...],
-  "notable_interactions": [...]
-}`,
+  "day_narrative": "3-5 sentence flowing narrative of the day. Be SPECIFIC — use real names, project names, outcomes, and times. NOT a list. Example: 'Most of the morning was consumed by the Product Review meeting, where the team decided to push the launch to April. After that, you had a back-and-forth with Sarah about the pricing model.'",
+  "key_decisions": [
+    {"decision": "What was decided", "context": "Why it matters or what led to it", "source_ref": {"provider": "...", "message_id": "...", "excerpt": "..."}}
+  ],
+  "open_loops": [
+    {"description": "Specific unresolved item — e.g. 'Unread email from David re: contract terms', 'PR #142 review requested but not started', 'Meeting with Ops team had no follow-up action assigned'"}
+  ],
+  "notable_interactions": [
+    {"person": "Name or email", "summary": "What you discussed, decided, or what they need from you"}
+  ]
+}
+
+Rules:
+- key_decisions: Extract REAL decisions from the activity — approvals given, directions chosen, deadlines set, scope changes agreed. If no decisions were made, return an empty array. Never fabricate.
+- open_loops: Look for emails not replied to, tasks started but not finished, meetings that ended without clear next steps, promises made without follow-through. Be specific — include the person's name and the topic.
+- notable_interactions: Focus on back-and-forth conversations, not one-way notifications. Include what was discussed and any outcomes.
+- Maximum 5 items per array.
+- Every key_decision must have a source_ref with provider and excerpt from the input data.`,
     messages: [
       {
         role: 'user',

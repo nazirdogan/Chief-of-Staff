@@ -64,19 +64,33 @@ export function validateBriefingItem(item: Partial<BriefingItem>): void {
   }
 }
 
-export function validateCommitmentRecord(record: {
-  commitment_text: string;
+export function validateTaskRecord(record: {
+  task_text: string;
   source_quote?: string;
   source_ref?: unknown;
 }): void {
   if (!record.source_quote) {
     throw new Error(
-      `Commitment "${record.commitment_text}" has no source_quote. All commitments require the exact sentence.`
+      `Task "${record.task_text}" has no source_quote. All tasks require the exact sentence.`
     );
   }
   if (!record.source_ref) {
     throw new Error(
-      `Commitment "${record.commitment_text}" has no source_ref. All commitments require a source reference.`
+      `Task "${record.task_text}" has no source_ref. All tasks require a source reference.`
     );
   }
+}
+
+/** @deprecated Use validateTaskRecord */
+export function validateCommitmentRecord(record: {
+  commitment_text?: string;
+  task_text?: string;
+  source_quote?: string;
+  source_ref?: unknown;
+}): void {
+  validateTaskRecord({
+    task_text: record.task_text ?? record.commitment_text ?? '',
+    source_quote: record.source_quote,
+    source_ref: record.source_ref,
+  });
 }

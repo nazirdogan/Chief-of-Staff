@@ -18,10 +18,17 @@ export const GET = withAuth(withRateLimit(60, '1 m', async (req: AuthenticatedRe
 export const POST = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRequest) => {
   try {
     const body = await req.json();
-    const { title } = body as { title?: string };
+    const { title, is_donna_initiated, trigger_source } = body as {
+      title?: string;
+      is_donna_initiated?: boolean;
+      trigger_source?: string;
+    };
 
     const supabase = createServiceClient();
-    const conversation = await createConversation(supabase, req.user.id, title);
+    const conversation = await createConversation(supabase, req.user.id, title, {
+      is_donna_initiated,
+      trigger_source,
+    });
 
     return NextResponse.json({ conversation }, { status: 201 });
   } catch (error) {

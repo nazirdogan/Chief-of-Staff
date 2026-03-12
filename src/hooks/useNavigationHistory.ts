@@ -13,7 +13,7 @@ export interface NavHistoryEntry {
 }
 
 const pathToLabel: Record<string, string> = {
-  '/dashboard': 'Today',
+  '/today': 'Today',
   '/inbox': 'Inbox',
   '/commitments': 'Commitments',
   '/people': 'People',
@@ -34,17 +34,14 @@ function labelForPath(path: string): string {
 
 export function useNavigationHistory() {
   const pathname = usePathname()
-  const [history, setHistory] = useState<NavHistoryEntry[]>([])
-
-  // Load from localStorage on mount
-  useEffect(() => {
+  const [history, setHistory] = useState<NavHistoryEntry[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) setHistory(JSON.parse(stored))
+      return stored ? (JSON.parse(stored) as NavHistoryEntry[]) : []
     } catch {
-      // ignore
+      return []
     }
-  }, [])
+  })
 
   // Record current page visit whenever pathname changes
   useEffect(() => {
@@ -54,16 +51,19 @@ export function useNavigationHistory() {
       label: labelForPath(pathname),
       visitedAt: Date.now(),
     }
-    setHistory((prev) => {
-      const filtered = prev.filter((e) => e.path !== pathname)
-      const next = [entry, ...filtered].slice(0, MAX_ENTRIES)
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-      } catch {
-        // ignore storage errors
-      }
-      return next
-    })
+    const id = setTimeout(() => {
+      setHistory((prev) => {
+        const filtered = prev.filter((e) => e.path !== pathname)
+        const next = [entry, ...filtered].slice(0, MAX_ENTRIES)
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+        } catch {
+          // ignore storage errors
+        }
+        return next
+      })
+    }, 0)
+    return () => clearTimeout(id)
   }, [pathname])
 
   return history

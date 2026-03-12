@@ -33,7 +33,7 @@ const quickActions = [
   { label: 'Prep me for my next meeting', icon: CalendarIcon },
   { label: 'What did I miss yesterday?', icon: MailIcon },
   { label: "Who's waiting on me?", icon: UsersIcon },
-  { label: 'What are my open commitments?', icon: CheckSquareIcon },
+  { label: 'What are my open tasks?', icon: CheckSquareIcon },
   { label: 'How was my week?', icon: BarChart2Icon },
 ];
 

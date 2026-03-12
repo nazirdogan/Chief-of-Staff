@@ -89,6 +89,9 @@ const envSchema = z.object({
   CALENDLY_CLIENT_ID: z.string().optional(),
   CALENDLY_CLIENT_SECRET: z.string().optional(),
 
+  // Perplexity (Web Search)
+  PERPLEXITY_API_KEY: z.string().optional(),
+
   // Email (Resend — chat feedback notifications)
   RESEND_API_KEY: z.string().optional(),
 

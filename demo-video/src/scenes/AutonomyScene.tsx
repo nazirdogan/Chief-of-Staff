@@ -35,7 +35,7 @@ export const AutonomyScene: React.FC = () => {
 
   // "Confirm" button gets highlighted/pressed
   const confirmHighlight = rel >= 90;
-  const confirmPressOpacity = interpolate(
+  const _confirmPressOpacity = interpolate(
     rel,
     [90, 95, 100],
     [0, 1, 0],

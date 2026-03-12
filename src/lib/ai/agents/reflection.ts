@@ -14,16 +14,19 @@ Return a JSON object with exactly these fields:
   "summary": "2-3 sentence executive summary of the week — tone should be direct, insightful, and action-oriented",
   "accomplishments": [{"description": "What was accomplished", "source_ref": {"provider": "...", "message_id": "...", "excerpt": "..."}}],
   "slipped_items": [{"description": "What slipped or was missed", "source_ref": {"provider": "...", "message_id": "...", "excerpt": "..."}}],
-  "relationship_highlights": [{"contact_name": "Name", "note": "Key interaction or status change"}],
+  "relationship_highlights": [{"contact_name": "Name", "note": "Key interaction or status change — e.g. 'Most interacted with this week (12 touchpoints)', 'Relationship score declined 15 points', 'New VIP contact established'"}],
   "patterns": [{"observation": "Observed pattern", "suggestion": "Actionable suggestion"}],
-  "recommendations": "1-2 sentences of strategic recommendations for next week"
+  "recommendations": "1-2 sentences of strategic recommendations for next week",
+  "strategic_recommendation": "One sentence: the single most impactful thing to change next week, based on all patterns observed. Be specific and actionable."
 }
 
 Rules:
-- accomplishments: commitments resolved, meetings attended, emails actioned, tasks completed
-- slipped_items: commitments that went overdue, emails left unanswered, meetings missed
-- relationship_highlights: new VIP interactions, contacts going cold, relationship score changes
-- patterns: recurring behaviours (e.g. "You tend to leave financial emails for 3+ days", "Your busiest day is Tuesday")
+- accomplishments: tasks resolved, meetings attended, emails actioned, tasks completed
+- slipped_items: tasks that went overdue, emails left unanswered, meetings missed
+- relationship_highlights: MUST include: (a) who you connected with most this week and how many touchpoints, (b) any VIP relationships that improved or declined, (c) contacts that went cold or were re-engaged. Use the relationship_scores and interaction data provided.
+- patterns: recurring behaviours (e.g. "You tend to leave financial emails for 3+ days", "Your busiest day is Tuesday", "Peak productivity between 9-11am")
+- strategic_recommendation: ONE sentence — the highest-leverage behavioural change or focus area for next week. Not generic advice. Based on THIS week's specific data.
+- The input includes task_stats (completed/total) and screen_time_by_category. Reference these numbers directly in the summary: "You completed X of Y tasks (Z%)" and "You spent Nh in Development, Mh in Communications"
 - Be specific with names, dates, and numbers — never be vague
 - Maximum 5 items per array
 - Respond ONLY with the JSON object`;
@@ -65,6 +68,7 @@ interface ReflectionData {
   relationship_highlights: Array<{ contact_name: string; note: string }>;
   patterns: Array<{ observation: string; suggestion?: string }>;
   recommendations: string;
+  strategic_recommendation?: string;
 }
 
 async function gatherPeriodData(
@@ -84,11 +88,11 @@ async function gatherPeriodData(
     .order('created_at', { ascending: false })
     .limit(100);
 
-  // Gather commitments
+  // Gather tasks
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: commitments } = await (supabase as any)
-    .from('commitments')
-    .select('commitment_text, recipient_name, status, implied_deadline, resolved_at, created_at')
+  const { data: tasks } = await (supabase as any)
+    .from('tasks')
+    .select('task_text, recipient_name, status, implied_deadline, resolved_at, created_at')
     .eq('user_id', userId)
     .gte('created_at', periodStart)
     .lte('created_at', periodEnd);
@@ -139,12 +143,61 @@ async function gatherPeriodData(
     .gte('created_at', periodStart)
     .lte('created_at', periodEnd);
 
+  // Compute task completion stats
+  const allTasks = (tasks ?? []) as Array<{ status: string }>;
+  const completedTasks = allTasks.filter(c => c.status === 'resolved').length;
+  const totalTasks = allTasks.length;
+  const taskStats = {
+    completed: completedTasks,
+    total: totalTasks,
+    completion_rate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+  };
+
+  // Gather screen time by category from activity_sessions (observer data)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: activitySessions } = await (supabase as any)
+    .from('activity_sessions')
+    .select('app_category, duration_seconds')
+    .eq('user_id', userId)
+    .gte('started_at', periodStart)
+    .lte('started_at', periodEnd);
+
+  const screenTimeByCategory: Record<string, number> = {};
+  for (const session of (activitySessions ?? []) as Array<{ app_category: string; duration_seconds: number | null }>) {
+    const cat = session.app_category || 'unknown';
+    const minutes = Math.round((session.duration_seconds ?? 0) / 60);
+    screenTimeByCategory[cat] = (screenTimeByCategory[cat] ?? 0) + minutes;
+  }
+
+  // Gather relationship scores for top contacts (by interaction count)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: topContacts } = await (supabase as any)
+    .from('contacts')
+    .select('name, email, is_vip, relationship_score, score_history, interaction_count_30d')
+    .eq('user_id', userId)
+    .order('interaction_count_30d', { ascending: false, nullsFirst: false })
+    .limit(15);
+
+  const relationshipScores = (topContacts ?? []).map((c: { name: string | null; email: string; is_vip: boolean; relationship_score: number | null; score_history: Array<{ score: number; recorded_at: string }> | null; interaction_count_30d: number }) => ({
+    name: c.name ?? c.email,
+    email: c.email,
+    is_vip: c.is_vip,
+    score: c.relationship_score,
+    score_trend: c.score_history && c.score_history.length >= 2
+      ? c.score_history[0].score - c.score_history[1].score
+      : 0,
+    interactions_30d: c.interaction_count_30d,
+  }));
+
   return JSON.stringify({
     period: { start: periodStart, end: periodEnd },
     briefing_items: briefingItems ?? [],
-    commitments: commitments ?? [],
+    tasks: tasks ?? [],
+    task_stats: taskStats,
     interactions: enrichedInteractions,
     vip_and_cold_contacts: contacts ?? [],
+    relationship_scores: relationshipScores,
+    screen_time_by_category: screenTimeByCategory,
     automated_actions: auditEntries ?? [],
   });
 }
@@ -187,18 +240,22 @@ export async function generateReflection(
     return full as Reflection;
   }
 
-  const periodData = await gatherPeriodData(
+  const periodDataStr = await gatherPeriodData(
     supabase,
     userId,
     periodStart.toISOString(),
     periodEnd.toISOString(),
   );
 
+  // Parse period data to extract pre-computed stats for DB storage
+  let periodDataParsed: Record<string, unknown> = {};
+  try { periodDataParsed = JSON.parse(periodDataStr); } catch { /* ignore */ }
+
   const prompt = type === 'weekly' ? WEEKLY_REFLECTION_PROMPT : MONTHLY_REFLECTION_PROMPT;
 
   const context = buildSafeAIContext(
     prompt,
-    [{ label: `${type}_activity_data`, content: periodData, source: 'reflection-agent' }],
+    [{ label: `${type}_activity_data`, content: periodDataStr, source: 'reflection-agent' }],
   );
 
   const response = await anthropic.messages.create({
@@ -243,6 +300,9 @@ export async function generateReflection(
       relationship_highlights: data.relationship_highlights,
       patterns: data.patterns,
       recommendations: data.recommendations,
+      task_stats: periodDataParsed.task_stats ?? null,
+      screen_time_by_category: periodDataParsed.screen_time_by_category ?? null,
+      strategic_recommendation: data.strategic_recommendation ?? null,
       generation_model: AI_MODELS.STANDARD,
       generation_ms: generationMs,
     })

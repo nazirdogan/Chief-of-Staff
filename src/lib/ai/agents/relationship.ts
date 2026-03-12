@@ -39,19 +39,45 @@ export interface RelationshipUpdate {
   newScore: number;
   isCold: boolean;
   coldFlaggedAt: string | null;
+  scoreHistory: Array<{ score: number; recorded_at: string }>;
+  trend: 'declining' | 'stable' | 'warming';
+}
+
+export type RelationshipTrend = 'declining' | 'stable' | 'warming';
+
+export function computeTrend(scoreHistory: Array<{ score: number; recorded_at: string }>, currentScore: number): RelationshipTrend {
+  if (scoreHistory.length < 2) return 'stable';
+  const prevScore = scoreHistory[0].score;
+  const diff = currentScore - prevScore;
+  if (diff <= -10) return 'declining';
+  if (diff >= 10) return 'warming';
+  return 'stable';
 }
 
 export function computeRelationshipUpdates(contacts: Contact[]): RelationshipUpdate[] {
+  const now = new Date().toISOString();
+
   return contacts.map(contact => {
     const newScore = calculateRelationshipScore(contact);
     const wasCold = contact.is_cold;
     const isCold = shouldFlagCold({ ...contact, relationship_score: newScore });
 
+    // Keep last 3 scores — prepend new, trim to 3
+    const prevHistory = contact.score_history ?? [];
+    const scoreHistory = [
+      { score: newScore, recorded_at: now },
+      ...prevHistory,
+    ].slice(0, 3);
+
+    const trend = computeTrend(prevHistory, newScore);
+
     return {
       contactId: contact.id,
       newScore,
       isCold,
-      coldFlaggedAt: isCold && !wasCold ? new Date().toISOString() : contact.cold_flagged_at,
+      coldFlaggedAt: isCold && !wasCold ? now : contact.cold_flagged_at,
+      scoreHistory,
+      trend,
     };
   });
 }

@@ -53,12 +53,25 @@ export async function getConversation(
 export async function createConversation(
   supabase: Client,
   userId: string,
-  title?: string
+  title?: string,
+  options?: {
+    is_donna_initiated?: boolean;
+    trigger_source?: string;
+  },
 ): Promise<ChatConversation> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('chat_conversations')
-    .insert({ user_id: userId, title: title ?? null })
+    .insert({
+      user_id: userId,
+      title: title ?? null,
+      ...(options?.is_donna_initiated !== undefined
+        ? { is_donna_initiated: options.is_donna_initiated }
+        : {}),
+      ...(options?.trigger_source !== undefined
+        ? { trigger_source: options.trigger_source }
+        : {}),
+    })
     .select()
     .single();
 
@@ -109,7 +122,7 @@ export async function updateConversation(
   supabase: Client,
   conversationId: string,
   userId: string,
-  updates: { title?: string; is_favorite?: boolean }
+  updates: { title?: string; is_favorite?: boolean; handled_at?: string | null }
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)

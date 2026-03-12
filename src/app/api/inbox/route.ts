@@ -76,7 +76,10 @@ export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRe
     const needsReply = url.searchParams.get('needs_reply') === 'true';
     const limit = parseInt(url.searchParams.get('limit') ?? '50', 10);
 
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
+
+    let query = db
       .from('inbox_items')
       .select('*')
       .eq('user_id', req.user.id)
@@ -97,9 +100,34 @@ export const GET = withAuth(withRateLimit(30, '1 m', async (req: AuthenticatedRe
     const { data, error } = await query;
     if (error) throw error;
 
+    const items = (data ?? []) as Array<Record<string, unknown>>;
+
+    // Enrich items with account_label from user_integrations
+    const integrationIds = [...new Set(
+      items.map((i) => i.integration_id).filter(Boolean) as string[]
+    )];
+
+    const labelMap = new Map<string, string>();
+    if (integrationIds.length > 0) {
+      const { data: integrationRows } = await db
+        .from('user_integrations')
+        .select('id, connection_alias, account_email')
+        .eq('user_id', req.user.id)
+        .in('id', integrationIds);
+
+      for (const row of (integrationRows ?? []) as Array<{ id: string; connection_alias: string | null; account_email: string | null }>) {
+        labelMap.set(row.id, row.connection_alias ?? row.account_email ?? '');
+      }
+    }
+
+    const enrichedItems = items.map((item) => ({
+      ...item,
+      account_label: item.integration_id ? (labelMap.get(item.integration_id as string) ?? null) : null,
+    }));
+
     return NextResponse.json({
-      items: data ?? [],
-      count: data?.length ?? 0,
+      items: enrichedItems,
+      count: enrichedItems.length,
     });
   } catch (err) {
     console.error('Failed to fetch inbox:', err);

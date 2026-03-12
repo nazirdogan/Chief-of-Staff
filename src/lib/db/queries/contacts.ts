@@ -94,7 +94,7 @@ export async function upsertContact(
       {
         ...contact,
         email: contact.email.toLowerCase(),
-        open_commitments_count: 0,
+        open_tasks_count: 0,
       },
       { onConflict: 'user_id,email' }
     )
@@ -124,6 +124,29 @@ export async function updateContact(
     .eq('id', contactId);
 
   if (error) throw error;
+}
+
+export async function getDecliningContacts(
+  supabase: Client,
+  userId: string
+): Promise<Contact[]> {
+  // Fetch all contacts with score history, then filter for declining trend in app code
+  // (JSONB array comparison is simpler in TypeScript than raw SQL)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('contacts')
+    .select('*')
+    .eq('user_id', userId)
+    .not('score_history', 'eq', '[]');
+
+  if (error) throw error;
+
+  const { computeTrend } = await import('@/lib/ai/agents/relationship');
+  return ((data ?? []) as Contact[]).filter(c => {
+    const history = c.score_history ?? [];
+    if (history.length < 2) return false;
+    return computeTrend(history.slice(1), history[0].score) === 'declining';
+  });
 }
 
 export async function getAllContactsForScoring(

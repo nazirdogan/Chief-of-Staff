@@ -70,7 +70,7 @@ async function runBackfillInBackground(userId: string, jobId: string): Promise<v
   const PHASES = [
     'email_backfill',
     'contact_graph',
-    'commitment_extraction',
+    'task_extraction',
     'calendar_backfill',
     'desktop_processing',
     'first_briefing',
@@ -147,7 +147,7 @@ async function runBackfillInBackground(userId: string, jobId: string): Promise<v
       if (existing) {
         await db.from('contacts').update({ interaction_count_30d: data.count, name: data.name || undefined, last_interaction_at: new Date().toISOString() }).eq('id', existing.id);
       } else {
-        await db.from('contacts').insert({ user_id: userId, email, name: data.name || null, interaction_count_30d: data.count, relationship_score: Math.min(data.count * 10, 100), is_vip: false, is_cold: false, open_commitments_count: 0, last_interaction_at: new Date().toISOString() });
+        await db.from('contacts').insert({ user_id: userId, email, name: data.name || null, interaction_count_30d: data.count, relationship_score: Math.min(data.count * 10, 100), is_vip: false, is_cold: false, open_tasks_count: 0, last_interaction_at: new Date().toISOString() });
       }
       contactsUpserted++;
     }
@@ -156,17 +156,17 @@ async function runBackfillInBackground(userId: string, jobId: string): Promise<v
     await updatePhase('contact_graph', 'failed');
   }
 
-  // Phase 3: Commitment Extraction
+  // Phase 3: Task Extraction
   try {
-    await updatePhase('commitment_extraction', 'running');
+    await updatePhase('task_extraction', 'running');
     const { data: integrations } = await db.from('user_integrations').select('provider').eq('user_id', userId).eq('status', 'connected');
     const connected = new Set((integrations ?? []).map((i: { provider: string }) => i.provider));
-    let commitmentsExtracted = 0;
+    let tasksExtracted = 0;
     let messagesScanned = 0;
     if (connected.has('gmail')) {
       try {
         const { fetchMessagesByDateRange, fetchMessageForProcessing, parseGmailMessage } = await import('@/lib/integrations/gmail');
-        const { extractCommitments } = await import('@/lib/ai/agents/commitment');
+        const { extractTasks } = await import('@/lib/ai/agents/task');
         const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const sentRefs = await fetchMessagesByDateRange(userId, { after: thirtyDaysAgo, labelIds: ['SENT'], maxTotal: 200 });
         const sentMessages = [];
@@ -183,15 +183,15 @@ async function runBackfillInBackground(userId: string, jobId: string): Promise<v
           sentMessages.push(...fetched.filter(Boolean));
         }
         if (sentMessages.length > 0) {
-          const result = await extractCommitments(userId, sentMessages as Parameters<typeof extractCommitments>[1]);
-          commitmentsExtracted = result.extracted;
+          const result = await extractTasks(userId, sentMessages as Parameters<typeof extractTasks>[1]);
+          tasksExtracted = result.extracted;
           messagesScanned = result.total;
         }
       } catch { /* partial failure */ }
     }
-    await updatePhase('commitment_extraction', 'completed', { commitments_extracted: commitmentsExtracted, messages_scanned: messagesScanned });
+    await updatePhase('task_extraction', 'completed', { tasks_extracted: tasksExtracted, messages_scanned: messagesScanned });
   } catch {
-    await updatePhase('commitment_extraction', 'failed');
+    await updatePhase('task_extraction', 'failed');
   }
 
   // Phase 4: Calendar Backfill

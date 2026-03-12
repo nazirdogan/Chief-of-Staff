@@ -143,15 +143,19 @@ ${context}`,
  * Fire-and-forget wrapper called at session close.
  * Reconstructs an ActivitySession from in-memory state, calls summariseSession,
  * and writes the result back to the database.
+ *
+ * For communication sessions (email, chat, slack), also runs a lightweight
+ * commitment extraction pass to flag promises made in real-time.
  */
 export async function summariseClosedSession(
   sessionId: string,
-  state: ActiveSessionState
+  state: ActiveSessionState,
+  userId?: string,
 ): Promise<void> {
   // Reconstruct a minimal ActivitySession from in-memory state
   const session: ActivitySession = {
     id: sessionId,
-    user_id: '',
+    user_id: userId ?? '',
     app_name: state.appName,
     app_category: state.appCategory as ActivitySession['app_category'],
     window_title: state.windowTitle,
@@ -176,6 +180,58 @@ export async function summariseClosedSession(
 
   const supabase = createServiceClient();
   await updateActivitySession(supabase, sessionId, { summary });
+
+  // Task extraction for communication sessions
+  if (userId && isCommunicationCategory(state.appCategory)) {
+    try {
+      await extractCommitmentsFromSession(userId, sessionId, state);
+    } catch (err) {
+      console.error('[session-summariser] Task extraction failed:', err instanceof Error ? err.message : 'unknown');
+    }
+  }
+}
+
+/** Check if an app category involves outbound communication */
+function isCommunicationCategory(category: string): boolean {
+  const communicationCategories = ['email', 'chat', 'slack', 'messaging', 'communication'];
+  return communicationCategories.includes(category.toLowerCase());
+}
+
+/** Extract tasks from communication session content */
+async function extractCommitmentsFromSession(
+  userId: string,
+  sessionId: string,
+  state: ActiveSessionState,
+): Promise<void> {
+  const pd = state.mergedParsedData as Record<string, unknown>;
+
+  // Build outbound message text from accumulated messages
+  const messages = Array.isArray(pd.messages) ? (pd.messages as unknown[]) : [];
+  const outboundText = messages
+    .map((m) => {
+      const msg = m as Record<string, unknown>;
+      return String(msg.text ?? msg.content ?? '');
+    })
+    .filter(t => t.length > 10)
+    .join('\n');
+
+  if (outboundText.length < 20) return;
+
+  const conversationPartner = pd.conversationPartner
+    ? String(pd.conversationPartner)
+    : (state.accumulatedPeople.size > 0 ? [...state.accumulatedPeople][0] : null);
+
+  const { extractTasksFromDesktopSession } = await import(
+    '@/lib/ai/agents/task'
+  );
+
+  await extractTasksFromDesktopSession(
+    userId,
+    sessionId,
+    state.appName,
+    conversationPartner,
+    outboundText,
+  );
 }
 
 /**

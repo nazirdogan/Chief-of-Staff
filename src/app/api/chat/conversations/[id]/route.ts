@@ -47,10 +47,18 @@ export const PATCH = withAuth(withRateLimit(30, '1 m', async (req: Authenticated
       );
     }
 
-    const body = await req.json() as { title?: string; is_favorite?: boolean };
-    const updates: { title?: string; is_favorite?: boolean } = {};
+    const body = await req.json() as {
+      title?: string;
+      is_favorite?: boolean;
+      handled_at?: string | null;
+    };
+    const updates: { title?: string; is_favorite?: boolean; handled_at?: string | null } = {};
     if (typeof body.title === 'string') updates.title = body.title.trim().slice(0, 200);
     if (typeof body.is_favorite === 'boolean') updates.is_favorite = body.is_favorite;
+    // handled_at: accept ISO string or null (marks donna-initiated chat as resolved)
+    if (body.handled_at !== undefined) {
+      updates.handled_at = typeof body.handled_at === 'string' ? body.handled_at : null;
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(

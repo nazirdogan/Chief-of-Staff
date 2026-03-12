@@ -33,7 +33,7 @@ const SECTION_EMPTY_MESSAGES: Partial<Record<SectionType, string>> = {
   action_required: 'Nothing requiring your action right now.',
   awaiting_reply: 'No pending replies to chase.',
   todays_schedule: 'Your calendar is clear today.',
-  commitment_queue: 'No outstanding commitments.',
+  commitment_queue: 'No outstanding tasks.',
   at_risk: 'All relationships in good standing.',
   priority_inbox: 'No other messages to review.',
 };
@@ -68,10 +68,15 @@ const SECTION_META: Record<SectionType, { label: string; description?: string; i
     description: 'Meetings and events for today',
     icon: Calendar,
   },
+  todays_meetings: {
+    label: "Today's Meetings",
+    description: 'Prep summaries for upcoming meetings',
+    icon: Users,
+  },
   // Legacy sections — kept for backward compatibility
   commitment_queue: {
-    label: 'Commitments',
-    description: 'Promises you made that need follow-up',
+    label: 'Tasks',
+    description: 'Promises and requests that need follow-up',
     icon: ListChecks,
   },
   vip_inbox: {
@@ -96,7 +101,7 @@ const SECTION_META: Record<SectionType, { label: string; description?: string; i
   },
   at_risk: {
     label: 'At Risk',
-    description: 'Relationships and commitments at risk',
+    description: 'Relationships and tasks at risk',
     icon: AlertTriangle,
   },
   priority_inbox: {
