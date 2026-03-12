@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegistration } from "@/components/shared/ServiceWorkerRegistration";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -56,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
@@ -64,9 +65,11 @@ export default function RootLayout({
         className={`${dmSans.variable} ${jetbrainsMono.variable} ${playfair.variable} antialiased`}
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
-        {children}
-        <Toaster />
-        <ServiceWorkerRegistration />
+        <ThemeProvider>
+          {children}
+          <Toaster />
+          <ServiceWorkerRegistration />
+        </ThemeProvider>
       </body>
     </html>
   );

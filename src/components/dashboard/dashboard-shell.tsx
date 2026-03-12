@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
@@ -40,23 +41,42 @@ const navItems = [
   { href: '/reflections', label: 'Reflections', icon: BookOpen },
 ];
 
-/* Donna brand tokens — The Editor */
-const t = {
-  bg: '#FAF9F6',         // parchment — main content background
-  deep: '#F1EDEA',       // linen — sidebar background
+/* Donna brand tokens — The Editor (light + dark) */
+const lightT = {
+  bg: '#FAF9F6',
+  deep: '#F1EDEA',
   surface: 'rgba(45,45,45,0.04)',
+  surfaceHover: 'rgba(45,45,45,0.05)',
   border: 'rgba(45,45,45,0.08)',
   borderHover: 'rgba(45,45,45,0.16)',
-  text: '#2D2D2D',       // charcoal
+  text: '#2D2D2D',
   textSecondary: 'rgba(45,45,45,0.8)',
-  textTertiary: 'rgba(141,153,174,0.85)',   // slate
+  textTertiary: 'rgba(141,153,174,0.85)',
   textQuaternary: 'rgba(141,153,174,0.5)',
   dawn: '#E8845C',
-  activeAccent: 'rgba(232,132,92,0.1)',
+  activeAccent: 'rgba(232,132,92,0.10)',
   activeBorder: 'rgba(232,132,92,0.25)',
+  contextMenuBg: '#FFFFFF',
 };
 
-function NavItem({ href, label, icon: Icon, pathname, onClick }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string; onClick?: () => void }) {
+const darkT = {
+  bg: '#0E1225',
+  deep: '#111728',
+  surface: 'rgba(251,247,244,0.05)',
+  surfaceHover: 'rgba(251,247,244,0.07)',
+  border: 'rgba(251,247,244,0.10)',
+  borderHover: 'rgba(251,247,244,0.18)',
+  text: '#FBF7F4',
+  textSecondary: 'rgba(251,247,244,0.85)',
+  textTertiary: 'rgba(155,175,196,0.85)',
+  textQuaternary: 'rgba(155,175,196,0.5)',
+  dawn: '#E8845C',
+  activeAccent: 'rgba(232,132,92,0.12)',
+  activeBorder: 'rgba(232,132,92,0.30)',
+  contextMenuBg: '#1B1F3A',
+};
+
+function NavItem({ href, label, icon: Icon, pathname, onClick, t }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string; onClick?: () => void; t: typeof lightT }) {
   const active = href === '/today' ? pathname === '/today' : pathname.startsWith(href);
   return (
     <Link
@@ -70,7 +90,7 @@ function NavItem({ href, label, icon: Icon, pathname, onClick }: { href: string;
       }}
       onMouseEnter={(e) => {
         if (!active) {
-          e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
+          e.currentTarget.style.background = t.surfaceHover;
           e.currentTarget.style.color = t.textSecondary;
         }
       }}
@@ -92,6 +112,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const t = mounted && resolvedTheme === 'dark' ? darkT : lightT;
 
   const conversations = useChatStore((s) => s.conversations);
   const loadConversations = useChatStore((s) => s.loadConversations);
@@ -371,6 +396,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   {...item}
                   pathname={pathname}
                   onClick={item.href === '/chat' ? startNewConversation : undefined}
+                  t={t}
                 />
               ))}
             </div>
@@ -412,7 +438,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                           }}
                           onMouseEnter={(e) => {
                             if (!active) {
-                              e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
+                              e.currentTarget.style.background = t.surfaceHover;
                               e.currentTarget.style.color = t.textSecondary;
                             }
                           }}
@@ -522,7 +548,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                             }}
                             onMouseEnter={(e) => {
                               if (!active) {
-                                e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
+                                e.currentTarget.style.background = t.surfaceHover;
                                 e.currentTarget.style.color = t.textTertiary;
                               }
                             }}
@@ -561,7 +587,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <p className="text-[11px]" style={{ color: t.textQuaternary }}>
                 <kbd
                   className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium"
-                  style={{ background: 'rgba(45,45,45,0.06)', color: t.textTertiary }}
+                  style={{ background: t.surface, color: t.textTertiary }}
                 >
                   ⌘K
                 </kbd>
@@ -591,7 +617,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               </Link>
             )}
 
-            <NavItem href="/settings" label="Settings" icon={Settings} pathname={pathname} />
+            <NavItem href="/settings" label="Settings" icon={Settings} pathname={pathname} t={t} />
 
             <button
               onClick={handleSignOut}
@@ -599,7 +625,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               style={{ color: t.textQuaternary }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = t.textSecondary;
-                e.currentTarget.style.background = 'rgba(45,45,45,0.05)';
+                e.currentTarget.style.background = t.surfaceHover;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = t.textQuaternary;
@@ -646,7 +672,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 top: contextMenu.y,
                 left: contextMenu.x,
                 zIndex: 9999,
-                background: '#FFFFFF',
+                background: t.contextMenuBg,
                 border: `1px solid ${t.border}`,
                 borderRadius: 10,
                 boxShadow: '0 8px 24px rgba(45,45,45,0.12), 0 2px 6px rgba(45,45,45,0.06)',

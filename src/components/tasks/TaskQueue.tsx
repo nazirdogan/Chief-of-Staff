@@ -7,14 +7,14 @@ import { TaskCard } from './TaskCard';
 import type { Task } from '@/lib/db/types';
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   dawn: '#E8845C',
   dawnSubtle: 'rgba(232,132,92,0.15)',
-  text: '#2D2D2D',
-  textTertiary: 'rgba(45,45,45,0.6)',
-  textQuaternary: 'rgba(45,45,45,0.5)',
+  text: 'var(--foreground)',
+  textTertiary: 'var(--foreground-tertiary)',
+  textQuaternary: 'var(--foreground-quaternary)',
 };
 
 export function TaskQueue() {

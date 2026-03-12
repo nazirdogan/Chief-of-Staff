@@ -46,17 +46,17 @@ interface RoutineOutputWithMeta {
 
 /* Donna brand tokens — The Editor */
 const c = {
-  surface: '#FFFFFF',
-  surfaceElevated: '#FFFFFF',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--card)',
+  surfaceElevated: 'var(--card)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   dawn: '#E8845C',
   dawnMuted: 'rgba(232,132,92,0.1)',
-  text: '#2D2D2D',
-  textSecondary: 'rgba(45,45,45,0.8)',
-  textTertiary: 'rgba(141,153,174,0.85)',
-  textMuted: 'rgba(141,153,174,0.6)',
-  textGhost: 'rgba(141,153,174,0.35)',
+  text: 'var(--foreground)',
+  textSecondary: 'var(--foreground-secondary)',
+  textTertiary: 'var(--foreground-tertiary)',
+  textMuted: 'var(--foreground-quaternary)',
+  textGhost: 'var(--foreground-quaternary)',
   sage: '#52B788',
   alert: '#D64B2A',
   dusk: '#457B9D',
@@ -558,7 +558,7 @@ export default function BriefingPage() {
                       className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 rounded px-2 py-0.5 text-[11px] font-medium"
                       style={{
                         color: checked ? c.sage : c.textMuted,
-                        background: checked ? 'rgba(82,183,136,0.08)' : 'rgba(45,45,45,0.05)',
+                        background: checked ? 'rgba(82,183,136,0.08)' : 'var(--surface)',
                       }}
                     >
                       {checked ? 'Done' : 'Complete'}

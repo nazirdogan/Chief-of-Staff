@@ -49,6 +49,12 @@
   /* Brand accent tokens */
   --color-dawn: var(--dawn);
   --color-dawn-foreground: var(--dawn-foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-tertiary: var(--foreground-tertiary);
+  --color-foreground-quaternary: var(--foreground-quaternary);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
 }
 
 :root {
@@ -112,6 +118,14 @@
   --sidebar-accent-foreground: #2D2D2D;
   --sidebar-border: rgba(45,45,45,0.08);
   --sidebar-ring: #E8845C;
+
+  /* Opacity variant tokens */
+  --foreground-secondary: rgba(45,45,45,0.80);
+  --foreground-tertiary: rgba(141,153,174,0.75);
+  --foreground-quaternary: rgba(141,153,174,0.45);
+  --surface: rgba(45,45,45,0.04);
+  --surface-hover: rgba(45,45,45,0.06);
+  --surface-active: rgba(45,45,45,0.09);
 }
 
 .dark {
@@ -148,6 +162,14 @@
   --sidebar-accent-foreground: #FBF7F4;
   --sidebar-border: rgba(251,247,244,0.10);
   --sidebar-ring: #E8845C;
+
+  /* Opacity variant tokens */
+  --foreground-secondary: rgba(251,247,244,0.85);
+  --foreground-tertiary: rgba(155,175,196,0.75);
+  --foreground-quaternary: rgba(155,175,196,0.45);
+  --surface: rgba(251,247,244,0.05);
+  --surface-hover: rgba(251,247,244,0.08);
+  --surface-active: rgba(251,247,244,0.11);
 }
 
 /* ─── Keyframe animations ─── */

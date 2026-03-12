@@ -23,18 +23,18 @@ import EmailDraftCard from './EmailDraftCard';
 // ── Color tokens (consistent with ChatMessage + EmailDraftCard) ───
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  surfaceElevated: 'rgba(45,45,45,0.06)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  surfaceElevated: 'var(--surface-hover)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   borderActive: 'rgba(232,132,92,0.35)',
   dawn: '#E8845C',
   dawnLight: '#F09D7A',
   dawnMuted: 'rgba(232,132,92,0.12)',
-  text: '#2D2D2D',
-  textSecondary: 'rgba(45,45,45,0.8)',
-  textMuted: 'rgba(45,45,45,0.5)',
-  textGhost: 'rgba(45,45,45,0.4)',
+  text: 'var(--foreground)',
+  textSecondary: 'var(--foreground-secondary)',
+  textMuted: 'var(--foreground-quaternary)',
+  textGhost: 'var(--foreground-quaternary)',
   critical: '#D64B2A',
   success: '#52B788',
   successMuted: 'rgba(82,183,136,0.10)',
@@ -289,7 +289,7 @@ function CalendarEventCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="rounded-lg overflow-hidden"
-      style={{ background: '#fff', border: `1px solid ${c.border}` }}
+      style={{ background: 'var(--card)', border: `1px solid ${c.border}` }}
     >
       <CardHeader
         icon={<Calendar size={13} strokeWidth={1.5} />}
@@ -393,7 +393,7 @@ function TaskCreatedCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="rounded-lg overflow-hidden"
-      style={{ background: '#fff', border: `1px solid ${c.border}` }}
+      style={{ background: 'var(--card)', border: `1px solid ${c.border}` }}
     >
       <CardHeader
         icon={<CheckCircle2 size={13} strokeWidth={1.5} />}
@@ -487,7 +487,7 @@ function MeetingPrepCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="rounded-lg overflow-hidden"
-      style={{ background: '#fff', border: `1px solid ${c.border}` }}
+      style={{ background: 'var(--card)', border: `1px solid ${c.border}` }}
     >
       <CardHeader
         icon={<FileText size={13} strokeWidth={1.5} />}
@@ -660,7 +660,7 @@ function WebSearchCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="rounded-lg overflow-hidden"
-      style={{ background: '#fff', border: `1px solid ${c.border}` }}
+      style={{ background: 'var(--card)', border: `1px solid ${c.border}` }}
     >
       <CardHeader
         icon={<Globe size={13} strokeWidth={1.5} />}

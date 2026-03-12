@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {
+  Sun,
   User,
   Shield,
   MessageCircle,
@@ -13,6 +14,12 @@ import {
 } from 'lucide-react';
 
 const settingsSections = [
+  {
+    href: '/settings/appearance',
+    label: 'Appearance',
+    description: 'Light mode, dark mode, or system.',
+    icon: Sun,
+  },
   {
     href: '/settings/general',
     label: 'General',

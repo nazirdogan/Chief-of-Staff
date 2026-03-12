@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createServiceClient } from '@/lib/db/client';
-import { env } from '@/lib/config';
+
+// Use process.env directly with defaults — avoids importing the full env validator
+// at module load time (which would fail during build if other required vars are missing).
+const GITHUB_OWNER = process.env.GITHUB_REPO_OWNER ?? 'imdonna';
+const GITHUB_REPO = process.env.GITHUB_REPO_NAME ?? 'donna';
 
 /**
  * GET /api/download/mac
@@ -14,8 +18,8 @@ import { env } from '@/lib/config';
  * download the app without needing an account first.
  */
 export async function GET(req: NextRequest) {
-  const owner = env.GITHUB_REPO_OWNER;
-  const repo = env.GITHUB_REPO_NAME;
+  const owner = GITHUB_OWNER;
+  const repo = GITHUB_REPO;
   const downloadUrl = `https://github.com/${owner}/${repo}/releases/latest/download/Donna.dmg`;
 
   // Log download event (fire-and-forget — don't block the redirect)

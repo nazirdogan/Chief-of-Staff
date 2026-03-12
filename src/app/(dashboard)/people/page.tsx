@@ -7,14 +7,14 @@ import { ContactCard } from '@/components/people/ContactCard';
 import type { Contact } from '@/lib/db/types';
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   dawn: '#E8845C',
   dawnMuted: 'rgba(232,132,92,0.15)',
-  text: '#2D2D2D',
-  textTertiary: 'rgba(45,45,45,0.6)',
-  textMuted: 'rgba(45,45,45,0.5)',
+  text: 'var(--foreground)',
+  textTertiary: 'var(--foreground-tertiary)',
+  textMuted: 'var(--foreground-quaternary)',
 };
 
 type Filter = 'all' | 'vip' | 'cold';

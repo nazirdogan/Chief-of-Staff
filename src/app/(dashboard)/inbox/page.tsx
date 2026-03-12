@@ -21,15 +21,15 @@ import { decodeEntities } from '@/lib/utils/decode-entities';
 import { ConfirmActionModal } from '@/components/shared/ConfirmActionModal';
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   dawn: '#E8845C',
   dawnMuted: 'rgba(232,132,92,0.15)',
-  text: '#2D2D2D',
-  textSecondary: 'rgba(45,45,45,0.8)',
-  textTertiary: 'rgba(45,45,45,0.6)',
-  textMuted: 'rgba(45,45,45,0.5)',
+  text: 'var(--foreground)',
+  textSecondary: 'var(--foreground-secondary)',
+  textTertiary: 'var(--foreground-tertiary)',
+  textMuted: 'var(--foreground-quaternary)',
   green: '#52B788',
   red: '#D64B2A',
   blue: '#4E7DAA',
@@ -474,7 +474,7 @@ function InboxPageInner() {
                   key={action.id}
                   style={{
                     borderRadius: 12, border: `1px solid ${c.border}`,
-                    background: '#FAFAFA', overflow: 'hidden',
+                    background: 'var(--card)', overflow: 'hidden',
                   }}
                 >
                   {/* Draft header */}
@@ -527,7 +527,7 @@ function InboxPageInner() {
                     {isExpanded && body && (
                       <div style={{
                         marginTop: 12, padding: '12px 14px', borderRadius: 8,
-                        background: 'rgba(45,45,45,0.03)', border: `1px solid ${c.border}`,
+                        background: 'var(--surface)', border: `1px solid ${c.border}`,
                         fontSize: 13, color: c.textSecondary, lineHeight: 1.6,
                         whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                       }}>
@@ -540,7 +540,7 @@ function InboxPageInner() {
                   <div style={{
                     display: 'flex', gap: 8, padding: '10px 16px',
                     borderTop: `1px solid ${c.border}`,
-                    background: 'rgba(45,45,45,0.02)',
+                    background: 'var(--surface)',
                   }}>
                     <button
                       onClick={() => setConfirmModal({ open: true, actionId: action.id, subject, body, to })}
@@ -617,7 +617,7 @@ function InboxPageInner() {
               style={{
                 padding: '14px 16px', borderRadius: 10,
                 border: `1px solid ${c.border}`,
-                background: item.is_read ? c.surface : 'rgba(255,255,255,0.06)',
+                background: item.is_read ? c.surface : 'var(--card)',
                 transition: 'border-color 0.15s',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = c.borderHover)}
@@ -736,7 +736,7 @@ function InboxPageInner() {
 
 export default function InboxPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 48, textAlign: 'center', color: 'rgba(45,45,45,0.4)', fontSize: 13 }}>Loading…</div>}>
+    <Suspense fallback={<div style={{ padding: 48, textAlign: 'center', color: 'var(--foreground-quaternary)', fontSize: 13 }}>Loading…</div>}>
       <InboxPageInner />
     </Suspense>
   );

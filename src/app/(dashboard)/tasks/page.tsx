@@ -4,8 +4,8 @@ import { CheckCircle2 } from 'lucide-react';
 import { TaskQueue } from '@/components/tasks/TaskQueue';
 
 const c = {
-  text: '#2D2D2D',
-  textTertiary: 'rgba(45,45,45,0.6)',
+  text: 'var(--foreground)',
+  textTertiary: 'var(--foreground-tertiary)',
   dawn: '#E8845C',
 };
 

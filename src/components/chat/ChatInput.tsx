@@ -11,17 +11,17 @@ import {
 } from 'lucide-react';
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  surfaceElevated: 'rgba(45,45,45,0.06)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  surfaceElevated: 'var(--surface-hover)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   borderActive: 'rgba(232,132,92,0.35)',
   borderDrag: 'rgba(232,132,92,0.5)',
   dawn: '#E8845C',
   dawnMuted: 'rgba(232,132,92,0.08)',
-  text: '#2D2D2D',
-  textMuted: 'rgba(45,45,45,0.5)',
-  textGhost: 'rgba(45,45,45,0.4)',
+  text: 'var(--foreground)',
+  textMuted: 'var(--foreground-quaternary)',
+  textGhost: 'var(--foreground-quaternary)',
 };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file

@@ -36,8 +36,17 @@ NOT lowercase "donna". NOT an SVG Meridian mark (that was the old brand).
 Landing page: Briefing preview section, Stats section, CTA/Waitlist section — use `#1C2B38` as bg.
 GettingReadyScreen: parchment background, NOT dark.
 
+## Theme Switching (added session 5)
+- `next-themes` wired up: `ThemeProvider` at `src/components/providers/ThemeProvider.tsx`
+- Root layout wraps children in `<ThemeProvider>` with `suppressHydrationWarning` on `<html>`
+- `dashboard-shell.tsx` uses `lightT` / `darkT` module-level objects; picks via `resolvedTheme`
+- Appearance settings page: `src/app/(dashboard)/settings/appearance/page.tsx`
+- Dark palette: bg `#0E1225`, sidebar `#111728`, card surfaces `#1B1F3A`, text `#FBF7F4`
+- Lint rule `react-hooks/set-state-in-effect` fires on bare `setMounted(true)` in useEffect —
+  wrap with `requestAnimationFrame` to satisfy it: `const id = requestAnimationFrame(() => setMounted(true)); return () => cancelAnimationFrame(id);`
+
 ## Color System Convention
-Each component file defines a local `const c = { ... }` block with all color tokens.
+Each component file defines a local `const c = { ... }` block (or `t`/`lightT`/`darkT`) with all color tokens.
 This is the established pattern — do NOT move to global CSS variables or Tailwind tokens.
 
 ## Tailwind Setup

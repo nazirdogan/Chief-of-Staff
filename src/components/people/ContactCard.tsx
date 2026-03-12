@@ -3,15 +3,15 @@
 import type { Contact } from '@/lib/db/types';
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   dawn: '#E8845C',
   dawnSubtle: 'rgba(232,132,92,0.15)',
-  text: '#2D2D2D',
-  textSecondary: 'rgba(45,45,45,0.8)',
-  textTertiary: 'rgba(45,45,45,0.6)',
-  textQuaternary: 'rgba(45,45,45,0.5)',
+  text: 'var(--foreground)',
+  textSecondary: 'var(--foreground-secondary)',
+  textTertiary: 'var(--foreground-tertiary)',
+  textQuaternary: 'var(--foreground-quaternary)',
   green: '#52B788',
   red: '#D64B2A',
   purple: '#6B21A8',
