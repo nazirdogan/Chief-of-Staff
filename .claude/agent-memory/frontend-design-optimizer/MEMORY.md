@@ -49,6 +49,19 @@ GettingReadyScreen: parchment background, NOT dark.
 Each component file defines a local `const c = { ... }` block (or `t`/`lightT`/`darkT`) with all color tokens.
 This is the established pattern — do NOT move to global CSS variables or Tailwind tokens.
 
+## Dark Mode CSS Variable System (session 6)
+To make dark mode work across all main dashboard pages, the following CSS variables were added to `globals.css`.
+See [dark-mode-variables.md](./dark-mode-variables.md) for the full migration guide.
+
+New tokens: `--foreground-secondary`, `--foreground-tertiary`, `--foreground-quaternary`,
+`--surface`, `--surface-hover`, `--surface-active` (in both `:root` and `.dark`).
+
+Files migrated in session 6: today, inbox, calendar, people, reflections, tasks pages + BriefingItem,
+ActionCard, ChatInput, TaskQueue, ContactCard components.
+
+Settings pages (general, integrations, notifications, chat, privacy, security, data, autonomy, billing)
+already used Tailwind semantic classes and required no changes.
+
 ## Tailwind Setup
 Tailwind v4 — NO `tailwind.config.ts`. All design tokens live in `src/app/globals.css`.
 `--background: #FAF9F6` (parchment), `--font-sans: var(--font-dm-sans)`, `--font-display: var(--font-playfair)`.
@@ -65,20 +78,15 @@ Tailwind v4 — NO `tailwind.config.ts`. All design tokens live in `src/app/glob
 9. `src/components/onboarding/desktop/GettingReadyScreen.tsx` — parchment bg, cleaned of grain/glows
 
 ## Routine Outputs on Today Page (added session 4)
-- API: `src/app/api/routines/today/route.ts` — GET, 30/min rate limit, deduplicates to most recent output per routine, joins `user_routines`
-- Dashboard: `RoutineOutputWithMeta` interface + `renderMarkdown` module-level fn + accordion section at bottom of page before `CitationDrawer`; uses `ChevronUp`/`ChevronDown`
-- Job runner: `daily_briefing` branch now also saves a `routine_output` via `generateRoutineOutput` in an inner non-fatal try/catch
+- API: `src/app/api/routines/today/route.ts` — GET, 30/min rate limit
+- Dashboard: accordion section using `ChevronUp`/`ChevronDown`, `renderMarkdown` fn
 
 ## Pre-existing lint failures (do not report as regressions)
 Files with lint errors that predate this project: `demo-video/`, `im-donna-film/`, `reflections/page.tsx`, billing routes, `PauseBanner.tsx`, `text-shimmer.tsx`. These are NOT caused by frontend-design work.
 
 ## Files NOT Yet Updated to The Editor Brand
-- `src/app/(dashboard)/reflections/page.tsx` — Cormorant/Inter still used
 - `src/app/download/page.tsx` — Cormorant/Inter still used
 - `src/app/(admin)/admin/page.tsx` — Cormorant/Inter still used
-- All `src/app/(dashboard)/inbox/`, `calendar/`, `commitments/`, `people/`, `heartbeat/`, `operations/` pages
-- All `src/app/(dashboard)/settings/` pages
-- All `src/components/briefing/`, `commitments/`, `people/`, `operations/`, `shared/` components
 
 ## Animation Utilities (globals.css)
 `animate-fade-in`, `animate-slide-up`, `animate-slide-in-right`, `animate-drawer-slide-up`, `.stagger-children`.

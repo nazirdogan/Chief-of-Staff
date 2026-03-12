@@ -8,19 +8,19 @@ import EmailDraftCard from './EmailDraftCard';
 import ActionCard, { type ActionType } from './ActionCard';
 
 const c = {
-  surface: 'rgba(45,45,45,0.04)',
-  surfaceElevated: 'rgba(45,45,45,0.06)',
-  border: 'rgba(45,45,45,0.08)',
-  borderHover: 'rgba(45,45,45,0.16)',
+  surface: 'var(--surface)',
+  surfaceElevated: 'var(--surface-hover)',
+  border: 'var(--border)',
+  borderHover: 'var(--border)',
   borderActive: 'rgba(232,132,92,0.35)',
   dawn: '#E8845C',
   dawnLight: '#F09D7A',
   dawnMuted: 'rgba(232,132,92,0.12)',
-  text: '#2D2D2D',
-  textSecondary: 'rgba(45,45,45,0.8)',
-  textTertiary: 'rgba(45,45,45,0.6)',
-  textMuted: 'rgba(45,45,45,0.5)',
-  textGhost: 'rgba(45,45,45,0.4)',
+  text: 'var(--foreground)',
+  textSecondary: 'var(--foreground-secondary)',
+  textTertiary: 'var(--foreground-tertiary)',
+  textMuted: 'var(--foreground-quaternary)',
+  textGhost: 'var(--foreground-quaternary)',
   critical: '#D64B2A',
   success: '#52B788',
   info: '#4E7DAA',
@@ -47,12 +47,12 @@ function renderMarkdown(text: string): string {
   html = html.replace(
     /```(\w*)\n?([\s\S]*?)```/g,
     (_match, _lang, code) =>
-      `<pre style="background:rgba(45,45,45,0.05);border:1px solid rgba(45,45,45,0.10);border-radius:8px;padding:12px 16px;overflow-x:auto;margin:8px 0;font-size:13px;line-height:1.5"><code>${code.trim()}</code></pre>`
+      `<pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;overflow-x:auto;margin:8px 0;font-size:13px;line-height:1.5"><code>${code.trim()}</code></pre>`
   );
 
   html = html.replace(
     /`([^`]+)`/g,
-    '<code style="background:rgba(45,45,45,0.07);padding:2px 6px;border-radius:4px;font-size:13px">$1</code>'
+    '<code style="background:var(--surface-hover);padding:2px 6px;border-radius:4px;font-size:13px">$1</code>'
   );
 
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -151,10 +151,10 @@ function FeedbackPopup({ rating, onClose, onSubmit }: FeedbackPopupProps) {
         style={{
           bottom: 'calc(100% + 8px)',
           left: 0,
-          background: '#fff',
+          background: 'var(--card)',
           border: `1px solid ${c.border}`,
           borderRadius: 12,
-          boxShadow: '0 8px 24px rgba(45,45,45,0.12), 0 2px 6px rgba(45,45,45,0.06)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.10)',
         }}
         onClick={(e) => e.stopPropagation()}
       >

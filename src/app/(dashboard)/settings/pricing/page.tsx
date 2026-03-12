@@ -5,8 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
 import { BackButton } from '@/components/shared/BackButton';
+
+interface FeatureItem {
+  label: string;
+  included: boolean;
+  note?: string;
+}
 
 interface PricingTier {
   id: string;
@@ -14,7 +20,7 @@ interface PricingTier {
   price: string;
   period?: string;
   description: string;
-  features: string[];
+  features: FeatureItem[];
   highlighted?: boolean;
   cta?: string;
 }
@@ -29,16 +35,36 @@ const TIER_RANK: Record<string, number> = {
 
 const TIERS: PricingTier[] = [
   {
+    id: 'free',
+    name: 'Free',
+    price: '$0',
+    description: 'Get started with Donna at no cost.',
+    features: [
+      { label: '5 messages per day', included: true },
+      { label: 'Daily briefing', included: true },
+      { label: 'Chat with Donna', included: true },
+      { label: 'Web search', included: false },
+      { label: 'Meeting prep', included: false },
+      { label: 'Proactive intelligence', included: false },
+      { label: 'Report generation', included: false },
+    ],
+  },
+  {
     id: 'plus',
     name: 'Plus',
     price: '$20',
     period: '/mo',
     description: 'The essentials to stay on top of your day.',
     features: [
-      'One briefing per day',
-      'One email account (Gmail or Outlook)',
-      'Core integrations (Calendar, Tasks)',
-      'Chat with Donna',
+      { label: 'One briefing per day', included: true },
+      { label: 'One email account (Gmail or Outlook)', included: true },
+      { label: 'Core integrations (Calendar, Tasks)', included: true },
+      { label: 'Chat with Donna', included: true },
+      { label: 'Web search', included: true, note: 'Basic' },
+      { label: 'Meeting prep', included: true, note: 'Quick brief' },
+      { label: 'Proactive intelligence', included: true },
+      { label: 'Report generation', included: true },
+      { label: 'Web deep research', included: false },
     ],
   },
   {
@@ -48,10 +74,13 @@ const TIERS: PricingTier[] = [
     period: '/mo',
     description: 'Full intelligence for power users.',
     features: [
-      'Unlimited daily briefings',
-      'All integrations (Gmail, Outlook, Slack, Notion)',
-      'Multiple email accounts',
-      'Priority support',
+      { label: 'Everything in Plus', included: true },
+      { label: 'Unlimited briefings', included: true },
+      { label: 'Multiple email accounts', included: true },
+      { label: 'All integrations (Gmail, Outlook, Slack, Notion)', included: true },
+      { label: 'Web deep research', included: true },
+      { label: 'Full meeting dossiers', included: true },
+      { label: 'Priority support', included: true },
     ],
     highlighted: true,
   },
@@ -61,12 +90,12 @@ const TIERS: PricingTier[] = [
     price: 'Custom',
     description: 'For teams that need full control.',
     features: [
-      'Everything in Pro',
-      'Team-wide deployment',
-      'Custom data region',
-      'SSO / SAML',
-      'Dedicated support',
-      'Custom integrations',
+      { label: 'Everything in Pro', included: true },
+      { label: 'Team-wide deployment', included: true },
+      { label: 'Custom data region', included: true },
+      { label: 'SSO / SAML', included: true },
+      { label: 'Dedicated support', included: true },
+      { label: 'Custom integrations', included: true },
     ],
     cta: 'Contact us',
   },
@@ -158,7 +187,7 @@ export default function PricingSettingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {TIERS.map((tier) => {
           const isCurrent = currentTier === tier.id;
           const isLoading = upgrading === tier.id;
@@ -183,6 +212,11 @@ export default function PricingSettingsPage() {
               {tier.highlighted && (
                 <Badge className="absolute -top-2.5 left-4">Most Popular</Badge>
               )}
+              {isCurrent && (
+                <Badge variant="outline" className="absolute -top-2.5 right-4">
+                  Current plan
+                </Badge>
+              )}
               <CardHeader>
                 <CardTitle className="text-lg">{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
@@ -194,11 +228,22 @@ export default function PricingSettingsPage() {
                 </p>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col">
-                <ul className="flex-1 space-y-2">
+                <ul className="flex-1 space-y-2.5">
                   {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      <span>{feature}</span>
+                    <li key={feature.label} className="flex items-start gap-2.5 text-sm">
+                      {feature.included ? (
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      ) : (
+                        <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
+                      )}
+                      <span className={feature.included ? '' : 'text-muted-foreground'}>
+                        {feature.label}
+                        {feature.note && (
+                          <span className="ml-1 text-xs text-muted-foreground">
+                            ({feature.note})
+                          </span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -208,11 +253,11 @@ export default function PricingSettingsPage() {
                     variant={isCurrent ? 'outline' : tier.highlighted && !isDowngrade ? 'default' : 'outline'}
                     size="sm"
                     className="w-full"
-                    disabled={isCurrent || isLoading}
-                    onClick={() => !isCurrent && handleUpgrade(tier.id)}
+                    disabled={isCurrent || isLoading || tier.id === 'free'}
+                    onClick={() => !isCurrent && tier.id !== 'free' && handleUpgrade(tier.id)}
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {buttonLabel}
+                    {tier.id === 'free' && !isCurrent ? 'Free forever' : buttonLabel}
                   </Button>
                 </div>
               </CardContent>
