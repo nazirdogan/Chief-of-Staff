@@ -60,6 +60,16 @@
   "plugins": {
     "shell": {
       "open": true
+    },
+    "updater": {
+      "pubkey": "RWSwuKOZRKYNGraW0y8HnRyIO6iERKuyso/UrmHI27U6WdyidKqlLwVk",
+      "endpoints": [
+        "https://github.com/nazirdogan/Chief-of-Staff/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installerArgs": [],
+        "installMode": "passive"
+      }
     }
   }
 }
