@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { BackButton } from '@/components/shared/BackButton';
 
 // Comprehensive list of macOS apps — sorted alphabetically.
 // Donna's desktop observer has access to everything visible on screen,
@@ -194,7 +193,6 @@ export default function PrivacySettingsPage() {
   if (loading) {
     return (
       <div>
-        <BackButton href="/settings" />
         <h1 className="text-2xl font-bold tracking-tight">Privacy Controls</h1>
         <div className="mt-4 flex items-center justify-center py-8">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -205,7 +203,6 @@ export default function PrivacySettingsPage() {
 
   return (
     <div className="space-y-6">
-      <BackButton href="/settings" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Privacy Controls</h1>
         <p className="mt-1 text-sm text-muted-foreground">

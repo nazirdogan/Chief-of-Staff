@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Loader2 } from 'lucide-react';
-import { BackButton } from '@/components/shared/BackButton';
 
 interface FeatureItem {
   label: string;
@@ -179,7 +178,6 @@ export default function PricingSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <BackButton href="/settings" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Pricing</h1>
         <p className="text-sm text-muted-foreground">

@@ -113,13 +113,24 @@ jobs:
           includeDebug: false
           args: --target universal-apple-darwin   # builds fat binary: Apple Silicon + Intel
 
-      # ── Rename DMG to stable filename ─────────────────────────────────────────
-      # Tauri produces Donna_0.1.0_universal.dmg — rename to Donna.dmg so the
-      # download URL never changes between releases.
-      - name: Rename DMG to stable filename
+      # ── Upload stable-named DMG to release ────────────────────────────────────
+      # Search the entire target tree so the path never breaks if Tauri changes
+      # its output directory between versions. Copies to Donna.dmg and uploads
+      # so /releases/latest/download/Donna.dmg is always stable.
+      - name: Upload stable-named DMG to release
         run: |
-          find src-tauri/target/release/bundle/dmg -name "*.dmg" \
-            -exec mv {} src-tauri/target/release/bundle/dmg/Donna.dmg \;
+          echo "=== All DMG files found in src-tauri/target ==="
+          find src-tauri/target -name "*.dmg" -not -path "*/debug/*" 2>/dev/null || echo "(none found)"
+          DMG=$(find src-tauri/target -name "*.dmg" -not -path "*/debug/*" | head -1)
+          if [ -z "$DMG" ]; then
+            echo "ERROR: No DMG file found in src-tauri/target"
+            exit 1
+          fi
+          echo "Using DMG: $DMG"
+          cp "$DMG" Donna.dmg
+          gh release upload ${{ steps.tag.outputs.value }} Donna.dmg --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── Optional: Windows build (uncomment when ready) ────────────────────────
   # build-windows:

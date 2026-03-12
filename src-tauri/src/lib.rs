@@ -5,6 +5,7 @@ use tauri::window::Color;
 use tauri_plugin_updater::UpdaterExt;
 
 mod desktop_observer;
+mod quick_chat;
 mod screen_ocr;
 mod tray;
 
@@ -18,6 +19,7 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(observer_state)
         .manage(paused_flag.clone())
         .invoke_handler(tauri::generate_handler![
@@ -30,6 +32,8 @@ pub fn run() {
             desktop_observer::stop_observing,
             desktop_observer::check_screen_recording,
             desktop_observer::request_screen_recording,
+            quick_chat::send_to_main_chat,
+            quick_chat::hide_quick_chat,
         ])
         .setup(move |app| {
             if cfg!(debug_assertions) {
@@ -42,6 +46,10 @@ pub fn run() {
 
             let window = app.get_webview_window("main").unwrap();
             window.set_background_color(Some(Color(0x1B, 0x1F, 0x3A, 0xFF))).ok();
+
+            if let Some(qw) = app.get_webview_window("quick-chat") {
+                qw.set_background_color(Some(Color(0x12, 0x12, 0x18, 0xFF))).ok();
+            }
 
             // Set up system tray — absorb errors; a missing tray is non-fatal
             if let Err(e) = tray::setup(app.handle(), paused_flag.clone()) {
@@ -83,6 +91,11 @@ pub fn run() {
                     Err(e) => log::warn!("[donna] Updater unavailable: {:?}", e),
                 }
             });
+
+            // Register global ⌥Space shortcut to toggle the quick-chat overlay
+            if let Err(e) = quick_chat::register_shortcut(app.handle()) {
+                log::error!("[donna] Failed to register global shortcut: {:?}", e);
+            }
 
             // Auto-start observer if accessibility permission is granted
             #[cfg(target_os = "macos")]

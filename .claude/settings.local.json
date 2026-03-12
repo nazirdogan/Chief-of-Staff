@@ -140,7 +140,10 @@
       "Bash(ls /Users/nazir/donna/src/components/commitments/ 2>/dev/null && ls /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/commitments/ 2>/dev/null)",
       "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/commitments/page.tsx)",
       "Bash(cat /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/commitments/loading.tsx)",
-      "Bash(sips -z 192 192 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/icon-192.png && sips -z 512 512 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/icon-512.png && sips -z 180 180 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/apple-touch-icon.png && sips -z 512 512 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/icon-512-maskable.png && echo \"All icons updated\")"
+      "Bash(sips -z 192 192 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/icon-192.png && sips -z 512 512 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/icon-512.png && sips -z 180 180 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/apple-touch-icon.png && sips -z 512 512 \"/Users/nazir/Downloads/donna-icon-standard-1024px.png\" --out /Users/nazir/donna/public/icons/icon-512-maskable.png && echo \"All icons updated\")",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/chat/)",
+      "Bash(ls -la /Users/nazir/donna/src/app/\\\\\\(dashboard\\\\\\)/chat/\\\\[id\\\\\\)/)",
+      "Bash(ls -la \"/Users/nazir/donna/src/app/\\(dashboard\\)/chat/[id]/\")"
     ]
   }
 }

@@ -282,6 +282,28 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Handle messages forwarded from the quick-chat overlay window (Tauri only).
+  // When the user types in the floating overlay and hits Enter, the Rust layer
+  // hides the overlay, shows this window, and emits `donna-quick-message` here.
+  // We navigate to /chat and send the message on their behalf.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) return;
+    let unlisten: (() => void) | null = null;
+    import('@tauri-apps/api/event').then(({ listen }) => {
+      listen<string>('donna-quick-message', ({ payload }) => {
+        const msg = (payload ?? '').trim();
+        if (!msg) return;
+        router.push('/chat');
+        // Small delay so the chat page mounts before we send
+        setTimeout(() => {
+          useChatStore.getState().startNewConversation();
+          useChatStore.getState().sendMessage(msg);
+        }, 120);
+      }).then((fn) => { unlisten = fn; }).catch(() => {});
+    }).catch(() => {});
+    return () => { unlisten?.(); };
+  }, [router]);
+
   // Check if a Tier 3 dialog is open — defer toast rendering
   useEffect(() => {
     const observer = new MutationObserver(() => {

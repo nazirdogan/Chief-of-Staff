@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import type { PendingActionType, UserAutonomySettings } from '@/lib/db/types';
-import { BackButton } from '@/components/shared/BackButton';
 
 interface ActionConfig {
   type: PendingActionType;
@@ -148,7 +147,6 @@ export default function AutonomySettingsPage() {
 
   return (
     <div>
-      <BackButton href="/settings" />
       <h1 className="text-2xl font-bold">Autonomy Settings</h1>
       <p className="mt-1 text-muted-foreground">
         Control how independently Donna acts on your behalf.

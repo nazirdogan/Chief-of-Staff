@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { BackButton } from '@/components/shared/BackButton';
 
 export default function GeneralSettingsPage() {
   const [fullName, setFullName] = useState('');
@@ -118,7 +117,6 @@ export default function GeneralSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <BackButton href="/settings" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">General</h1>
         <p className="text-sm text-muted-foreground">

@@ -2,7 +2,6 @@
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { BackButton } from '@/components/shared/BackButton';
 import { Check } from 'lucide-react';
 
 type ThemeOption = 'light' | 'dark' | 'system';
@@ -159,7 +158,6 @@ export default function AppearancePage() {
 
   return (
     <div className="p-6 max-w-2xl">
-      <BackButton />
 
       <div className="mt-4">
         <h1 className="text-xl font-semibold tracking-tight">Appearance</h1>

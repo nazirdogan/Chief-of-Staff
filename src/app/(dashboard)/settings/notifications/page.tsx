@@ -8,7 +8,6 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import { BackButton } from '@/components/shared/BackButton';
 import {
   NOTIFICATION_CATEGORIES,
   type NotificationCategory,
@@ -108,7 +107,6 @@ export default function NotificationSettingsPage() {
 
   return (
     <div>
-      <BackButton href="/settings" />
       <h1 className="text-2xl font-bold">Notification Settings</h1>
       <p className="mt-1 text-muted-foreground">
         Choose which proactive notifications Donna sends you.

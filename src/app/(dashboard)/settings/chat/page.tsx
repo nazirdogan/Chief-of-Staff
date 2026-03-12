@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { BackButton } from '@/components/shared/BackButton';
 
 const MAX_LENGTH = 2000;
 
@@ -85,7 +84,6 @@ export default function ChatSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <BackButton href="/settings" />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Chat</h1>
         <p className="text-sm text-muted-foreground">

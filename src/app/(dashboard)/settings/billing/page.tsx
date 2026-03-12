@@ -16,7 +16,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Loader2, CreditCard, Receipt, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { BackButton } from '@/components/shared/BackButton';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '');
 
@@ -274,7 +273,6 @@ export default function BillingPage() {
   if (!subscription) {
     return (
       <div className="space-y-6 p-6">
-        <BackButton href="/settings" />
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Billing</h1>
           <p className="mt-1 text-sm text-muted-foreground">No active subscription.</p>
@@ -294,7 +292,6 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <BackButton href="/settings" />
 
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Billing</h1>
