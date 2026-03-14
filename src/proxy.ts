@@ -18,7 +18,7 @@ function isDesktopClient(request: NextRequest): boolean {
   return ua.includes('DonnaDesktop');
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -118,6 +118,10 @@ export async function middleware(request: NextRequest) {
 
   const isOnboardingRoute = pathname === '/onboarding';
   const isGettingReadyRoute = pathname === '/getting-ready';
+  const isAuthCallbackRoute = pathname === '/auth-callback';
+
+  // Auth callback is a public client-side page — always allow through
+  if (isAuthCallbackRoute) return response;
 
   // Gate: dashboard, onboarding, and getting-ready are desktop-only
   if (!isDesktop && (isDashboardRoute || isOnboardingRoute || isGettingReadyRoute)) {

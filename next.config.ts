@@ -25,6 +25,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // 'standalone' is for Docker/self-hosted builds only — not needed on Vercel
   ...(process.env.DOCKER_BUILD === 'true' && { output: 'standalone' }),
+  turbopack: {
+    // Silence "multiple lockfiles" warning — this repo lives inside a parent
+    // directory that has its own package-lock.json.
+    root: __dirname,
+  },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
   },

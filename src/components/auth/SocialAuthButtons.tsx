@@ -45,7 +45,7 @@ export function SocialAuthButtons() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?next=/chat`,
+          redirectTo: `${window.location.origin}/auth-callback?next=/chat`,
         },
       });
 
