@@ -81,7 +81,11 @@ export async function middleware(request: NextRequest) {
   if (isWebsiteOnlyRoute) return response;
 
   // ── Auth routes: desktop-only ──
-  const isAuthRoute = pathname === '/login' || pathname === '/signup';
+  const isAuthRoute =
+    pathname === '/login' ||
+    pathname === '/signup' ||
+    pathname === '/forgot-password' ||
+    pathname === '/reset-password';
 
   if (isAuthRoute && !isDesktop) {
     // Web users cannot sign up or log in — redirect to download page

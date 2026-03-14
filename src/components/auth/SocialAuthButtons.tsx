@@ -46,12 +46,6 @@ export function SocialAuthButtons() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?next=/chat`,
-          ...(provider === 'google' && {
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'consent',
-            },
-          }),
         },
       });
 

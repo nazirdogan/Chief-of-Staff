@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
 import { SocialAuthButtons } from '@/components/auth/SocialAuthButtons';
@@ -21,14 +21,37 @@ const c = {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [totpCode, setTotpCode] = useState('');
   const [showTotp, setShowTotp] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get('error') === 'auth_callback_failed'
+      ? 'Sign in failed. Please try again.'
+      : null
+  );
+  const resetSuccess = searchParams.get('reset') === 'success';
   const [loading, setLoading] = useState(false);
 
   const supabase = getSupabaseBrowserClient();
+
+  // Safety net: if a session already exists (e.g. OAuth completed in the webview
+  // but the server redirect didn't propagate back correctly), redirect immediately.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace('/chat');
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+        router.replace('/chat');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router, supabase.auth]);
+
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -150,6 +173,21 @@ export default function LoginPage() {
         {!showTotp ? (
           <form onSubmit={handleLogin}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {resetSuccess && (
+                <div
+                  style={{
+                    borderRadius: '6px',
+                    background: 'rgba(5,150,105,0.07)',
+                    padding: '10px 12px',
+                    fontSize: '13px',
+                    color: '#059669',
+                    fontFamily: c.dmSans,
+                  }}
+                >
+                  Password updated. Sign in with your new password.
+                </div>
+              )}
+
               {error && (
                 <div
                   style={{
@@ -193,9 +231,17 @@ export default function LoginPage() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label htmlFor="password" style={{ color: c.charcoal, fontSize: '13px', fontWeight: 500, fontFamily: c.dmSans }}>
-                  Password
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label htmlFor="password" style={{ color: c.charcoal, fontSize: '13px', fontWeight: 500, fontFamily: c.dmSans }}>
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    style={{ fontSize: '12px', color: c.slate, fontFamily: c.dmSans, textDecoration: 'none' }}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <input
                   id="password"
                   type="password"

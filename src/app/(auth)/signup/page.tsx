@@ -25,7 +25,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const supabase = getSupabaseBrowserClient();
@@ -36,83 +35,35 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        },
+      // Create user server-side (email_confirm: true — no verification email needed)
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, fullName }),
       });
 
-      if (signUpError) {
-        setError(signUpError.message);
+      const body = await res.json();
+
+      if (!res.ok) {
+        setError(body.error || 'Failed to create account.');
         setLoading(false);
         return;
       }
 
-      setSuccess(true);
+      // Sign in immediately — no email verification step
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError) {
+        setError(signInError.message);
+        setLoading(false);
+        return;
+      }
+
+      window.location.href = '/onboarding';
     } catch {
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setLoading(false);
     }
-  }
-
-  if (success) {
-    return (
-      <div className="animate-slide-up" style={{ width: '100%', maxWidth: '380px' }}>
-        <div
-          style={{
-            background: c.white,
-            border: `1px solid ${c.border}`,
-            borderRadius: '10px',
-            padding: '40px 28px 32px',
-            textAlign: 'center',
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: c.playfair,
-              fontWeight: 700,
-              fontSize: '24px',
-              letterSpacing: '-0.01em',
-              color: c.charcoal,
-              margin: 0,
-              marginBottom: '12px',
-            }}
-          >
-            Check your email
-          </h1>
-          <p
-            style={{
-              fontFamily: c.dmSans,
-              fontSize: '14px',
-              lineHeight: 1.6,
-              color: c.slate,
-              margin: 0,
-              marginBottom: '24px',
-            }}
-          >
-            We&apos;ve sent a verification link to{' '}
-            <strong style={{ color: c.charcoal }}>{email}</strong>.
-            Click the link to verify your account and sign in.
-          </p>
-          <Link
-            href="/login"
-            style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              color: c.dawn,
-              fontFamily: c.dmSans,
-              textDecoration: 'none',
-            }}
-          >
-            Back to login
-          </Link>
-        </div>
-      </div>
-    );
   }
 
   return (

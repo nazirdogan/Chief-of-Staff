@@ -3,12 +3,11 @@
 import { useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
+import { startObserver } from '@/lib/desktop-observer/client';
 import { WelcomeStep } from './WelcomeStep';
 import { AccessibilityStep } from './AccessibilityStep';
 import { ScreenRecordingStep } from './ScreenRecordingStep';
 import { ConnectDataStep } from './ConnectDataStep';
-import { ShowMeYourWorldStep } from './ShowMeYourWorldStep';
-import { ConfirmVIPsStep } from './ConfirmVIPsStep';
 import { BriefingSetupStep } from './BriefingSetupStep';
 import { OnboardingCompleteStep } from './OnboardingCompleteStep';
 
@@ -17,8 +16,6 @@ const STEPS = [
   'accessibility',
   'screen-recording',
   'connect',
-  'observe',
-  'vips',
   'briefing',
   'complete',
 ] as const;
@@ -29,9 +26,7 @@ const STEP_META: Partial<Record<Step, { label: string; number: number }>> = {
   accessibility: { label: 'Permissions', number: 1 },
   'screen-recording': { label: 'Screen', number: 2 },
   connect: { label: 'Connect', number: 3 },
-  observe: { label: 'Observe', number: 4 },
-  vips: { label: 'People', number: 5 },
-  briefing: { label: 'Configure', number: 6 },
+  briefing: { label: 'Configure', number: 4 },
 };
 
 export function DesktopOnboardingFlow() {
@@ -41,7 +36,6 @@ export function DesktopOnboardingFlow() {
   const [error, setError] = useState<string | null>(null);
   const [transitioning, setTransitioning] = useState(false);
 
-  const vipContactsRef = useRef<Array<{ email: string; name: string }>>([]);
   const briefingSettingsRef = useRef<{
     briefingTime: string;
     timezone: string;
@@ -77,11 +71,10 @@ export function DesktopOnboardingFlow() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any;
       const settings = briefingSettingsRef.current;
-      const vips = vipContactsRef.current;
 
       await db.from('onboarding_data').insert({
         user_id: user.id,
-        vip_contacts: vips.map((c) => c.email),
+        vip_contacts: [],
         active_projects: [],
         weekly_priority: null,
         briefing_time: settings.briefingTime,
@@ -89,34 +82,6 @@ export function DesktopOnboardingFlow() {
         autonomy_level: settings.autonomyLevel,
         completed_at: new Date().toISOString(),
       });
-
-      for (const contact of vips) {
-        if (!contact.email.trim()) continue;
-        const email = contact.email.trim().toLowerCase();
-        const { data: existing } = await db
-          .from('contacts')
-          .select('id, relationship_score')
-          .eq('user_id', user.id)
-          .eq('email', email)
-          .single();
-
-        if (existing) {
-          await db.from('contacts').update({
-            is_vip: true,
-            name: contact.name.trim() || undefined,
-            relationship_score: Math.max(
-              (existing as { relationship_score: number | null }).relationship_score ?? 0, 80
-            ),
-          }).eq('id', (existing as { id: string }).id);
-        } else {
-          await db.from('contacts').insert({
-            user_id: user.id, email,
-            name: contact.name.trim() || null,
-            is_vip: true, relationship_score: 80,
-            interaction_count_30d: 0, open_tasks_count: 0, is_cold: false,
-          });
-        }
-      }
 
       const tierMap = { conservative: 3, balanced: 2, autonomous: 1 };
       await db.from('user_settings').upsert({
@@ -285,29 +250,18 @@ export function DesktopOnboardingFlow() {
             )}
             {step === 'screen-recording' && (
               <ScreenRecordingStep
-                onNext={() => goTo('connect')}
+                onNext={() => {
+                  // Start observer silently in background — Donna begins learning immediately
+                  startObserver().catch(() => {});
+                  goTo('connect');
+                }}
                 onBack={() => goTo('accessibility')}
               />
             )}
             {step === 'connect' && (
               <ConnectDataStep
-                onNext={() => goTo('observe')}
+                onNext={() => goTo('briefing')}
                 onBack={() => goTo('screen-recording')}
-              />
-            )}
-            {step === 'observe' && (
-              <ShowMeYourWorldStep
-                onNext={() => goTo('vips')}
-                onBack={() => goTo('connect')}
-              />
-            )}
-            {step === 'vips' && (
-              <ConfirmVIPsStep
-                onNext={(contacts) => {
-                  vipContactsRef.current = contacts;
-                  goTo('briefing');
-                }}
-                onBack={() => goTo('observe')}
               />
             )}
             {step === 'briefing' && (
@@ -316,7 +270,7 @@ export function DesktopOnboardingFlow() {
                   briefingSettingsRef.current = settings;
                   goTo('complete');
                 }}
-                onBack={() => goTo('vips')}
+                onBack={() => goTo('connect')}
               />
             )}
             {step === 'complete' && (

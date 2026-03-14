@@ -6,16 +6,10 @@ import { getSupabaseBrowserClient } from '@/lib/db/browser-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { IntegrationConnectStep } from './IntegrationConnectStep';
-import { VIPSetupStep } from './VIPSetupStep';
 import { ProjectSetupStep } from './ProjectSetupStep';
 import { TaskCalibrationStep } from './CommitmentCalibrationStep';
 
-interface VIPContact {
-  email: string;
-  name: string;
-}
-
-const STEP_LABELS = ['Connect Apps', 'VIP Contacts', 'Projects', 'Calibration'];
+const STEP_LABELS = ['Connect Apps', 'Projects', 'Calibration'];
 
 export function OnboardingFlow() {
   const router = useRouter();
@@ -24,7 +18,6 @@ export function OnboardingFlow() {
   const [error, setError] = useState<string | null>(null);
 
   const calibrationDecisionsRef = useRef<Record<string, boolean>>({});
-  const [vipContacts, setVipContacts] = useState<VIPContact[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
   const [weeklyPriority, setWeeklyPriority] = useState('');
 
@@ -47,55 +40,17 @@ export function OnboardingFlow() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const db = supabase as any;
 
-      // Save onboarding data
       const { error: insertError } = await db
         .from('onboarding_data')
         .insert({
           user_id: user.id,
-          vip_contacts: vipContacts.map((c) => c.email),
+          vip_contacts: [],
           active_projects: projects,
           weekly_priority: weeklyPriority || null,
           completed_at: new Date().toISOString(),
         });
 
       if (insertError) throw insertError;
-
-      // Upsert VIP contacts — create or update each contact with is_vip = true
-      for (const contact of vipContacts) {
-        if (!contact.email.trim()) continue;
-
-        const { data: existing } = await db
-          .from('contacts')
-          .select('id, relationship_score')
-          .eq('user_id', user.id)
-          .eq('email', contact.email.trim().toLowerCase())
-          .single();
-
-        if (existing) {
-          await db
-            .from('contacts')
-            .update({
-              is_vip: true,
-              name: contact.name.trim() || undefined,
-              relationship_score: Math.max(
-                (existing as { relationship_score: number | null }).relationship_score ?? 0,
-                80
-              ),
-            })
-            .eq('id', (existing as { id: string }).id);
-        } else {
-          await db.from('contacts').insert({
-            user_id: user.id,
-            email: contact.email.trim().toLowerCase(),
-            name: contact.name.trim() || null,
-            is_vip: true,
-            relationship_score: 80,
-            interaction_count_30d: 0,
-            open_tasks_count: 0,
-            is_cold: false,
-          });
-        }
-      }
 
       // Write task calibration decisions — trains the model
       for (const [taskId, confirmed] of Object.entries(decisions)) {
@@ -196,10 +151,11 @@ export function OnboardingFlow() {
           )}
 
           {step === 1 && (
-            <VIPSetupStep
-              initialContacts={vipContacts}
-              onNext={(contacts) => {
-                setVipContacts(contacts);
+            <ProjectSetupStep
+              initialData={{ projects, weeklyPriority }}
+              onNext={(data) => {
+                setProjects(data.projects);
+                setWeeklyPriority(data.weeklyPriority);
                 setStep(2);
               }}
               onBack={() => setStep(0)}
@@ -207,24 +163,12 @@ export function OnboardingFlow() {
           )}
 
           {step === 2 && (
-            <ProjectSetupStep
-              initialData={{ projects, weeklyPriority }}
-              onNext={(data) => {
-                setProjects(data.projects);
-                setWeeklyPriority(data.weeklyPriority);
-                setStep(3);
-              }}
-              onBack={() => setStep(1)}
-            />
-          )}
-
-          {step === 3 && (
             <TaskCalibrationStep
               onNext={(decisions) => {
                 calibrationDecisionsRef.current = decisions;
                 handleComplete(decisions);
               }}
-              onBack={() => setStep(2)}
+              onBack={() => setStep(1)}
             />
           )}
 

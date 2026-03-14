@@ -4,8 +4,8 @@ import { createServiceClient } from '@/lib/db/client';
 
 // Use process.env directly with defaults — avoids importing the full env validator
 // at module load time (which would fail during build if other required vars are missing).
-const GITHUB_OWNER = process.env.GITHUB_REPO_OWNER ?? 'imdonna';
-const GITHUB_REPO = process.env.GITHUB_REPO_NAME ?? 'donna';
+const GITHUB_OWNER = process.env.GITHUB_REPO_OWNER ?? 'nazirdogan';
+const GITHUB_REPO = process.env.GITHUB_REPO_NAME ?? 'Chief-of-Staff';
 
 /**
  * GET /api/download/mac
